@@ -1,0 +1,86 @@
+{
+	"nbteditor.ok": "Ok",
+	"nbteditor.cancel": "Cancel",
+	
+	"nbteditor.emptykey.title": "Unsupported Item!",
+	"nbteditor.emptykey.message": "The nbt editor doesn't support items with an empty string (\"\") as a key!",
+	"nbteditor.emptykey.yes": "Fix & Edit",
+	"nbteditor.emptykey.no": "Cancel",
+	
+	"nbteditor.noitem": "You must be holding an item to edit!",
+	"nbteditor.noitem_view": "You must be holding an item to view!",
+	"nbteditor.save": "Save Item",
+	"nbteditor.add": "§a+",
+	"nbteditor.remove": "§c-",
+	"nbteditor.copy": "Copy",
+	"nbteditor.cut": "Cut",
+	"nbteditor.paste": "Paste",
+	"nbteditor.rename": "Rename",
+	
+	"nbteditor.overwrite.title": "That name already exists!",
+	"nbteditor.overwrite.message": "Do you want to overwrite it?",
+	"nbteditor.overwrite.yes": "Overwrite",
+	"nbteditor.overwrite.no": "Cancel",
+	
+	"nbteditor.notsaved.title": "Item Not Saved!",
+	"nbteditor.notsaved.message": "You haven't saved the item. Save changes?",
+	"nbteditor.notsaved.yes": "Save",
+	"nbteditor.notsaved.no": "Discard Changes",
+	
+	"itemGroup.nbteditor.client_chest": "Client Chest",
+	"itemGroup.nbteditor.creative": "Creative Inventory",
+	"nbteditor.clientchest": "Nbt Editor >> Client Chest",
+	"nbteditor.storage_save_error": "§cUnable to save client storage!",
+	
+	"nbteditor.clearpage.title": "Are you sure?",
+	"nbteditor.clearpage.message": "This will permanently delete all 54 items in this page!",
+	"nbteditor.clearpage.yes": "Destory Items",
+	"nbteditor.clearpage.no": "Cancel",
+	
+	"nbteditor.items": "Nbt Editor >> ",
+	"nbteditor.nocontainer": "You must be holding an item that can contain other items!",
+	
+	"nbteditor.signature_added": "§aSignature added!",
+	"nbteditor.signature_removed": "§aSignature removed!",
+	"nbteditor.signature_edited": "§aSignature edited!",
+	"nbteditor.signature_default": "§3Default Signature! Use /sign edit <new signature>",
+	"nbteditor.signature_already_added": "§cThis item already has your signature!",
+	"nbteditor.signature_not_found": "§cThis item doesn't have your signature!",
+	"nbteditor.signature_arg_missing": "§cYou must supply the new signature! /sign edit <new signature>",
+	"nbteditor.signature_save_error": "§cThere was an error saving your signature!",
+	
+	"nbteditor.lore_edited": "§aLore edited!",
+	"nbteditor.nolore": "§cThere is no lore.",
+	
+	"nbteditor.get.item": "§aReceived: ",
+	
+	"nbteditor.flag.enchantments": "Enchantments",
+	"nbteditor.flag.attribute_modifiers": "Attribute Modifiers",
+	"nbteditor.flag.unbreakable": "Unbreakable",
+	"nbteditor.flag.can_destroy": "Can Destroy",
+	"nbteditor.flag.can_place_on": "Can Place On",
+	"nbteditor.flag.misc": "Misc",
+	"nbteditor.flag.dyed_color": "Dyed Armor Color",
+	"nbteditor.flag.all": "All",
+	
+	"nbteditor.addenchant": "§6§lCtrl + Click§r§6 apply!",
+	
+	"nbteditor.noskull": "You must be holding a player head to edit!",
+	"nbteditor.skull_not_loaded": "That head hasn't loaded any textures yet!",
+	"nbteditor.skull_edited": "§aHead unbound!",
+	
+	
+	"nbteditor.expected_space": "Expected a space",
+	"nbteditor.expected_colon": "Expected a colon (:)",
+	"nbteditor.invalid_arg": "Invalid argument",
+	"nbteditor.invalid_value": "Invalid value",
+	
+	
+	
+	"nbteditor.credits_1": "§6NBT Editor created by mega12345mega",
+	"nbteditor.credits_2": "§6I hope you enjoy! Don't mess with §otoo§r§6 many §c[Admin] §6ranks :D",
+	"nbteditor.credits_3": "",
+	"nbteditor.credits_4": "§c§lHeadDB§6 by UnlimitedNinjas",
+	"nbteditor.credits_5": "§6§n§ohttps://www.spigotmc.org/resources/free-headdb-head-menu.84967/",
+	"nbteditor.credits_6": "§7Ported to client sided fabric by mega12345mega"
+}
