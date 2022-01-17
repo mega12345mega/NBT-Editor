@@ -11,6 +11,7 @@ import java.util.List;
 import com.luneruniverse.minecraft.mod.nbteditor.InternalItems;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.EffectListArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.EnumArgumentType;
+import com.luneruniverse.minecraft.mod.nbteditor.util.ItemChest;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -20,6 +21,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.command.argument.ItemStackArgumentType;
@@ -39,6 +41,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.registry.Registry;
+import tsp.headdb.ported.Category;
 import tsp.headdb.ported.Head;
 import tsp.headdb.ported.HeadAPI;
 import tsp.headdb.ported.inventory.InventoryUtils;
@@ -89,6 +92,16 @@ public class GetCommand implements RegisterableCommand {
 		
 		private PotionType(Item item) {
 			this.item = item;
+		}
+	}
+	public enum HelpType {
+		NBTEDITOR("nbteditor.help.nbteditor"),
+		CLIENTCHEST("nbteditor.help.clientchest");
+		
+		private final String msgKey;
+		
+		private HelpType(String msgKey) {
+			this.msgKey = msgKey;
 		}
 	}
 	
@@ -173,6 +186,23 @@ public class GetCommand implements RegisterableCommand {
 								InventoryUtils.purchaseHead(head, 1, "", "");
 							return Command.SINGLE_SUCCESS;
 						})))
+						.then(literal("all").then(argument("category", EnumArgumentType.options(Category.class)).executes(context -> {
+							Category category = context.getArgument("category", Category.class);
+							ItemStack shulker = ShulkerBoxBlock.getItemStack(MainUtil.getDyeColor(category.getColor()));
+							shulker.setCustomName(Text.of(Formatting.RESET.toString() + category.getColor() + Formatting.BOLD + category.getName().toUpperCase()));
+							shulker.getOrCreateNbt().putByte("HideFlags", (byte) 32);
+							ItemChest.writeDatabase(shulker, HeadAPI.getHeads(category), Head::getItemStack);
+							getWithMessage(shulker);
+							return Command.SINGLE_SUCCESS;
+						})).then(literal("search").then(argument("query", StringArgumentType.greedyString()).executes(context -> {
+							String query = context.getArgument("query", String.class);
+							ItemStack shulker = new ItemStack(Items.BROWN_SHULKER_BOX);
+							shulker.setCustomName(Text.of(Formatting.RESET.toString() + Formatting.GOLD + Formatting.BOLD + "Search: " + query));
+							shulker.getOrCreateNbt().putByte("HideFlags", (byte) 32);
+							ItemChest.writeDatabase(shulker, HeadAPI.getHeadsByName(query), Head::getItemStack);
+							getWithMessage(shulker);
+							return Command.SINGLE_SUCCESS;
+						}))))
 						.then(literal("update").executes(context -> {
 							context.getSource().sendFeedback(Text.of(Formatting.GOLD + "Updating database ..."));
 							new Thread(() -> {
@@ -188,6 +218,13 @@ public class GetCommand implements RegisterableCommand {
 				}))
 				.then(literal("colorcodes").executes(context -> {
 					getWithMessage(InternalItems.COLOR_CODES.copy());
+					return Command.SINGLE_SUCCESS;
+				}))
+				.then(literal("help").then(argument("feature", EnumArgumentType.options(HelpType.class)).executes(context -> {
+					context.getSource().sendFeedback(MainUtil.getLongTranslatableText(context.getArgument("feature", HelpType.class).msgKey));
+					return Command.SINGLE_SUCCESS;
+				})).executes(context -> {
+					context.getSource().sendFeedback(MainUtil.getLongTranslatableText("nbteditor.help"));
 					return Command.SINGLE_SUCCESS;
 				}))
 				.then(literal("credits").executes(context -> {

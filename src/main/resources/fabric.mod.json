@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nbteditor",
-  "version": "1.0.0",
+  "version": "1.2.0",
 
   "name": "NBT Editor",
   "description": "Lets you edit items' nbt ingame, store items in a client side chest, open shulker boxes, chests, and barrels in your inventory, and more!",
@@ -10,6 +10,7 @@
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/nbt-editor",
+    "issues": "https://github.com/mega12345mega/NBT-Editor/issues",
     "sources": "https://github.com/mega12345mega/NBT-Editor"
   },
 
@@ -23,6 +24,9 @@
     ],
     "client": [
       "com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient"
+    ],
+    "modmenu": [
+      "com.luneruniverse.minecraft.mod.nbteditor.NBTEditorModMenuApi"
     ]
   },
   "mixins": [
@@ -34,7 +38,7 @@
   "depends": {
     "fabricloader": ">=0.11.3",
     "fabric": "*",
-    "minecraft": ">=1.18.0",
+    "minecraft": ">=1.17.0",
     "java": ">=16"
   },
   

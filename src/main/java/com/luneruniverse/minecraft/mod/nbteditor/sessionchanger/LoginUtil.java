@@ -1,18 +1,18 @@
 package com.luneruniverse.minecraft.mod.nbteditor.sessionchanger;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import com.mojang.authlib.Agent;
-import com.mojang.authlib.UserType;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 import com.mojang.util.UUIDTypeAdapter;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
-
-import java.util.Optional;
-import java.util.UUID;
 
 public class LoginUtil {
 

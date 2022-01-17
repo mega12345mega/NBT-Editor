@@ -2,7 +2,6 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -12,9 +11,8 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.google.common.collect.Lists;
-import com.luneruniverse.minecraft.mod.nbteditor.mixin.source.StringNbtWriterAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.StringNbtWriterQuoted;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -24,11 +22,11 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.argument.NbtElementArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.AbstractNbtList;
+import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtByte;
 import net.minecraft.nbt.NbtByteArray;
 import net.minecraft.nbt.NbtCompound;
@@ -42,11 +40,11 @@ import net.minecraft.nbt.NbtLong;
 import net.minecraft.nbt.NbtLongArray;
 import net.minecraft.nbt.NbtShort;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.nbt.visitor.StringNbtWriter;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.registry.Registry;
 
 public class NBTEditorScreen extends Screen {
@@ -78,7 +76,7 @@ public class NBTEditorScreen extends Screen {
 			AbstractNbtList<? extends NbtElement> nbt = (AbstractNbtList<T>) source;
 			List<NBTValue> output = new ArrayList<>();
 			for (int i = 0; i < nbt.size(); i++)
-				output.add(new NBTValue(screen, i + "", nbt.get(i)));
+				output.add(new NBTValue(screen, i + "", nbt.get(i), nbt));
 			return output;
 		}
 		@SuppressWarnings("unchecked")
@@ -94,8 +92,15 @@ public class NBTEditorScreen extends Screen {
 		@Override
 		public void setElement(NbtElement source, String key, NbtElement value) {
 			try {
-				((AbstractNbtList<T>) source).set(Integer.parseInt(key), (T) value);
-			} catch (NumberFormatException | UnsupportedOperationException e) {
+				AbstractNbtList<T> list = (AbstractNbtList<T>) source;
+				int index = Integer.parseInt(key);
+				if (list.size() == 1 && index == 0 && list instanceof NbtList) {
+					NbtList nonGenericList = (NbtList) list;
+					nonGenericList.remove(0);
+					nonGenericList.add(value);
+				} else if (list.getHeldType() == value.getType())
+					list.set(index, (T) value);
+			} catch (NumberFormatException e) {
 				e.printStackTrace();
 			}
 		}
@@ -117,7 +122,35 @@ public class NBTEditorScreen extends Screen {
 		@SuppressWarnings("unchecked")
 		@Override
 		public void pasteElement(NbtElement source, String key, NbtElement value) {
-			((AbstractNbtList<T>) source).add((T) value);
+			AbstractNbtList<T> list = (AbstractNbtList<T>) source;
+			if (list.getHeldType() == value.getType())
+				list.add((T) value);
+			else if (list.getHeldType() == NbtType.STRING)
+				list.add((T) NbtString.of(value.toString()));
+			else if (value instanceof AbstractNbtNumber) {
+				AbstractNbtNumber num = (AbstractNbtNumber) value;
+				
+				switch (list.getHeldType()) {
+					case NbtType.BYTE:
+						list.add((T) NbtByte.of(num.byteValue()));
+						break;
+					case NbtType.SHORT:
+						list.add((T) NbtShort.of(num.shortValue()));
+						break;
+					case NbtType.INT:
+						list.add((T) NbtInt.of(num.intValue()));
+						break;
+					case NbtType.LONG:
+						list.add((T) NbtLong.of(num.longValue()));
+						break;
+					case NbtType.FLOAT:
+						list.add((T) NbtFloat.of(num.floatValue()));
+						break;
+					case NbtType.DOUBLE:
+						list.add((T) NbtDouble.of(num.doubleValue()));
+						break;
+				}
+			}
 		}
 		@SuppressWarnings("unchecked")
 		@Override
@@ -353,33 +386,7 @@ public class NBTEditorScreen extends Screen {
 				}
 			}
 			private void save(NbtElement source, NbtElement nbt) {
-				((NbtString) source).value = (new StringNbtWriter() {
-							@SuppressWarnings({ "unchecked", "rawtypes" })
-							public void visitCompound(NbtCompound compound) {
-								StringBuilder result = ((StringNbtWriterAccessor) this).getResult();
-								
-								
-								result.append('{');
-								List<String> list = Lists.newArrayList((Iterable)compound.getKeys());
-								Collections.sort(list);
-								
-								String string;
-								for(Iterator var3 = list.iterator(); var3.hasNext(); result.append(escapeNameWithQuotes(string)).append(':').append((new StringNbtWriter()).apply(compound.get(string)))) {
-									string = (String)var3.next();
-									if (result.length() != 1) {
-										result.append(',');
-									}
-								}
-								
-								result.append('}');
-							}
-							private String escapeNameWithQuotes(String str) {
-								String output = escapeName(str);
-								if (output.startsWith("\""))
-									return output;
-								return "\"" + output + "\"";
-							}
-						}).apply(nbt);
+				((NbtString) source).value = new StringNbtWriterQuoted().apply(nbt);
 			}
 		});
 	}
@@ -456,14 +463,14 @@ public class NBTEditorScreen extends Screen {
 	private Hand hand;
 	
 	private boolean saved;
-	private TextFieldWidget name;
+	private NamedTextFieldWidget name;
 	private ButtonWidget saveBtn;
 	
-	private TextFieldWidget type;
-	private TextFieldWidget count;
+	private NamedTextFieldWidget type;
+	private NamedTextFieldWidget count;
 	
-	private TextFieldWidget path;
-	private TextFieldWidget value;
+	private NamedTextFieldWidget path;
+	private NamedTextFieldWidget value;
 	private List2D editor;
 	private Map<String, Integer> scrollPerFolder;
 	
@@ -512,7 +519,7 @@ public class NBTEditorScreen extends Screen {
 		this.client.keyboard.setRepeatEvents(true);
 		this.clearChildren();
 		
-		name = new TextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8, 100, 16, Text.of(""));
+		name = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8, 100, 16, Text.of("")).name(new TranslatableText("nbteditor.name"));
 		name.setMaxLength(1000);
 		name.setText(MainUtil.getItemNameSafely(item).getString());
 		name.setChangedListener(str -> {
@@ -549,12 +556,16 @@ public class NBTEditorScreen extends Screen {
 		
 		
 		
-		type = new TextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8 + 32, 208, 16, Text.of(""));
+		type = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8 + 32, 208, 16, Text.of("")).name(new TranslatableText("nbteditor.identifier"));
 		type.setMaxLength(1000);
 		type.setText(Registry.ITEM.getId(item.getItem()).toString());
 		type.setChangedListener(str -> {
-			if (!Registry.ITEM.containsId(new Identifier(str)))
+			try {
+				if (!Registry.ITEM.containsId(new Identifier(str)))
+					return;
+			} catch (InvalidIdentifierException e) {
 				return;
+			}
 			
 			NbtCompound fullData = new NbtCompound();
 			item.writeNbt(fullData);
@@ -567,7 +578,7 @@ public class NBTEditorScreen extends Screen {
 		});
 		this.addSelectableChild(type);
 		
-		count = new TextFieldWidget(textRenderer, 16, 16 + 8 + 32, 72, 16, Text.of(""));
+		count = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32, 72, 16, Text.of("")).name(new TranslatableText("nbteditor.count"));
 		count.setMaxLength(1000);
 		count.setText(item.getCount() + "");
 		count.setChangedListener(str -> {
@@ -588,8 +599,8 @@ public class NBTEditorScreen extends Screen {
 		});
 		this.addSelectableChild(count);
 		
-		path = new TextFieldWidget(textRenderer, 16, 16 + 8 + 32 + 16 + 8, 288, 16, Text.of("Path"));
-		path.setMaxLength(1000);
+		path = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + 16 + 8, 288, 16, Text.of("Path")).name(new TranslatableText("nbteditor.path"));
+		path.setMaxLength(10000);
 		path.setText(realPath.toString());
 		path.setChangedListener(str -> {
 			String[] parts = str.split("/");
@@ -608,8 +619,8 @@ public class NBTEditorScreen extends Screen {
 		});
 		this.addSelectableChild(path);
 		
-		value = new TextFieldWidget(textRenderer, 16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16, Text.of("Value"));
-		value.setMaxLength(1000);
+		value = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16, Text.of("Value")).name(new TranslatableText("nbteditor.value"));
+		value.setMaxLength(Integer.MAX_VALUE);
 		value.setText("");
 		value.setEditable(false);
 		value.setChangedListener(str -> {
@@ -620,6 +631,13 @@ public class NBTEditorScreen extends Screen {
 				});
 		});
 		this.addSelectableChild(value);
+		
+		// TODO
+//		this.addDrawableChild(new ButtonWidget(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, new TranslatableText("nbteditor.value_expand"), btn -> {
+//			if (selectedValue != null) {
+//				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), str -> value.setText(str)));
+//			}
+//		}));
 		
 		final int editorY = 16 + 8 + 32 + (16 + 8) * 3;
 		editor = new List2D(16, editorY, width - 16 * 2, height - editorY - 16 * 2 - 8, 4, 32, 32, 8)

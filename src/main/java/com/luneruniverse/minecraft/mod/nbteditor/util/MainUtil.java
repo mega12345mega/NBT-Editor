@@ -18,9 +18,14 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.ClickEvent.Action;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.DyeColor;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 
@@ -186,6 +191,64 @@ public class MainUtil {
             }
         }
         return item.getItem().getName(item);
+	}
+	
+	
+	public static TranslatableText getLongTranslatableText(String key) {
+		TranslatableText output = new TranslatableText(key + "_1");
+		for (int i = 2; true; i++) {
+			Text line = new TranslatableText(key + "_" + i);
+			String str = line.getString();
+			if (str.equals(key + "_" + i) || i > 50)
+				break;
+			if (str.startsWith("[LINK] ")) {
+				String url = str.substring("[LINK] ".length());
+				line = new LiteralText(url).styled(style -> style.withClickEvent(new ClickEvent(Action.OPEN_URL, url))
+						.withUnderline(true).withItalic(true).withColor(Formatting.GOLD));
+			}
+			output.append("\n").append(line);
+		}
+		return output;
+	}
+	
+	
+	public static DyeColor getDyeColor(Formatting color) {
+		switch (color) {
+			case AQUA:
+				return DyeColor.LIGHT_BLUE;
+			case BLACK:
+				return DyeColor.BLACK;
+			case BLUE:
+				return DyeColor.BLUE;
+			case DARK_AQUA:
+				return DyeColor.CYAN;
+			case DARK_BLUE:
+				return DyeColor.BLUE;
+			case DARK_GRAY:
+				return DyeColor.GRAY;
+			case DARK_GREEN:
+				return DyeColor.GREEN;
+			case DARK_PURPLE:
+				return DyeColor.PURPLE;
+			case DARK_RED:
+				return DyeColor.RED;
+			case GOLD:
+				return DyeColor.ORANGE;
+			case GRAY:
+				return DyeColor.LIGHT_GRAY;
+			case GREEN:
+				return DyeColor.LIME;
+			case LIGHT_PURPLE:
+				return DyeColor.PINK;
+			case RED:
+				return DyeColor.RED;
+			case WHITE:
+				return DyeColor.WHITE;
+			case YELLOW:
+				return DyeColor.YELLOW;
+			default:
+				return DyeColor.BROWN;
+		}
 	}
 	
 }

@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.argument.NbtElementArgumentType;
+import net.minecraft.nbt.AbstractNbtList;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Identifier;
 
@@ -37,13 +38,18 @@ public class NBTValue extends List2D.List2DValue {
 	private final NBTEditorScreen screen;
 	private final String key;
 	private NbtElement value;
+	private AbstractNbtList<?> parentList;
 	
 	private boolean selected;
 	
-	public NBTValue(NBTEditorScreen screen, String key, NbtElement value) {
+	public NBTValue(NBTEditorScreen screen, String key, NbtElement value, AbstractNbtList<?> parentList) {
 		this.screen = screen;
 		this.key = key;
 		this.value = value;
+		this.parentList = parentList;
+	}
+	public NBTValue(NBTEditorScreen screen, String key, NbtElement value) {
+		this(screen, key, value, null);
 	}
 	
 	@Override
@@ -83,24 +89,27 @@ public class NBTValue extends List2D.List2DValue {
 			Screen.drawTexture(matrices, 0, 0, 0, 0, 32, 32, 32, 32);
 		}
 		
-		if (selected) {
-			Screen.fill(matrices, -4, -4, 36, 0, 0xFFDF4949);
-			Screen.fill(matrices, -4, -4, 0, 36, 0xFFDF4949);
-			Screen.fill(matrices, -4, 32, 36, 36, 0xFFDF4949);
-			Screen.fill(matrices, 32, -4, 36, 36, 0xFFDF4949);
-		} else if (isHovering(mouseX, mouseY)) {
-			Screen.fill(matrices, -4, -4, 36, 0, 0xFF257789);
-			Screen.fill(matrices, -4, -4, 0, 36, 0xFF257789);
-			Screen.fill(matrices, -4, 32, 36, 36, 0xFF257789);
-			Screen.fill(matrices, 32, -4, 36, 36, 0xFF257789);
+		int color = -1;
+		if (parentList != null && parentList.getHeldType() != value.getType())
+			color = 0xFFFFAA33;
+		else if (selected)
+			color = 0xFFDF4949;
+		else if (isHovering(mouseX, mouseY))
+			color = 0xFF257789;
+		if (color != -1) {
+			Screen.fill(matrices, -4, -4, 36, 0, color);
+			Screen.fill(matrices, -4, -4, 0, 36, color);
+			Screen.fill(matrices, -4, 32, 36, 36, color);
+			Screen.fill(matrices, 32, -4, 36, 36, color);
 		}
 		
 		if (key == null)
 			return;
 		
 		matrices.push();
-		matrices.scale(0.5F, 0.5F, 0);
-		MainUtil.drawWrappingString(matrices, textRenderer, key, 16 * 2, 24 * 2, 64, -1, true, true);
+		matrices.scale((float) ConfigScreen.getKeyTextSize(), (float) ConfigScreen.getKeyTextSize(), 0);
+		double scale = 1 / ConfigScreen.getKeyTextSize();
+		MainUtil.drawWrappingString(matrices, textRenderer, key, (int) (16 * scale), (int) (24 * scale), (int) (32 * scale), -1, true, true);
 		matrices.pop();
 	}
 	

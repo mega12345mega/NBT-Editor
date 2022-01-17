@@ -8,9 +8,9 @@ import java.util.Map;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.CommandHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.sessionchanger.SessionChanger;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
@@ -118,6 +118,7 @@ public class NBTEditorClient implements ClientModInitializer {
 			e.printStackTrace();
 		}
 		new HeadRefreshThread().start();
+		ConfigScreen.loadSettings();
 		
 //		SessionChanger.getInstance().loginMicrosoftUser();
 		

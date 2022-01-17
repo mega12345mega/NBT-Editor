@@ -149,6 +149,10 @@ public final class HeadAPI {
         return database.getHeads();
     }
     
+    public static List<Category> getCategories() {
+    	return database.getCategories();
+    }
+    
     private static final File FAVORITES_FILE = new File(NBTEditorClient.SETTINGS_FOLDER, "headdb_favorites.txt");
     private static final List<Integer> FAVORITES = new ArrayList<>();
     
