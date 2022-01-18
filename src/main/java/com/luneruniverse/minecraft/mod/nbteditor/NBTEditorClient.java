@@ -120,8 +120,6 @@ public class NBTEditorClient implements ClientModInitializer {
 		new HeadRefreshThread().start();
 		ConfigScreen.loadSettings();
 		
-//		SessionChanger.getInstance().loginMicrosoftUser();
-		
 		try {
 			if (!SETTINGS_FOLDER.exists())
 				SETTINGS_FOLDER.mkdir();
