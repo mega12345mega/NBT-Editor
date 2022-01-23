@@ -5,7 +5,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.GetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -29,22 +28,25 @@ public class ClientContainerScreen extends GenericContainerScreen {
 	private static ItemStack SERVER_CURSOR;
 	
 	public static void updateServerInventory() {
-		MinecraftClient client = MinecraftClient.getInstance();
-		if (!(client.currentScreen instanceof ClientContainerScreen)) {
+		if (!(MainUtil.client.currentScreen instanceof ClientContainerScreen)) {
 			NBTEditor.LOGGER.warn("Attempted to update the server inventory when the client chest wasn't open!");
 			return;
 		}
 		
-		ClientContainerScreen screen = (ClientContainerScreen) client.currentScreen;
-		Inventory clientInv = client.player.getInventory();
+		ClientContainerScreen screen = (ClientContainerScreen) MainUtil.client.currentScreen;
+		Inventory clientInv = MainUtil.client.player.getInventory();
 		ItemStack clientCursor = screen.handler.getCursorStack();
 		
 		for (int i = 0; i < clientInv.size(); i++) {
 			ItemStack clientStack = clientInv.getStack(i);
 			if (!ItemStack.areEqual(clientStack, SERVER_INV.getStack(i))) {
+				if (i > 35) { // Armor
+					SERVER_INV.setStack(i, clientStack);
+					continue;
+				}
 				if (i == 40)
 					i = 45;
-				client.interactionManager.clickCreativeStack(clientStack, i < 9 ? i + 36 : i);
+				MainUtil.client.interactionManager.clickCreativeStack(clientStack, i < 9 ? i + 36 : i);
 				if (i != 45)
 					SERVER_INV.setStack(i, clientStack);
 			}

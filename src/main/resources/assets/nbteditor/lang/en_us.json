@@ -10,6 +10,7 @@
 	"nbteditor.noitem": "You must be holding an item to edit!",
 	"nbteditor.noitem_view": "You must be holding an item to view!",
 	"nbteditor.save": "Save Item",
+	"nbteditor.saving": "Saving ...",
 	"nbteditor.name": "Name",
 	"nbteditor.count": "Count",
 	"nbteditor.identifier": "Identifier",
@@ -69,7 +70,9 @@
 	"nbteditor.flag.dyed_color": "Dyed Armor Color",
 	"nbteditor.flag.all": "All",
 	
-	"nbteditor.addenchant": "§6§lCtrl + Click§r§6 apply!",
+	"nbteditor.addenchant": "§6§lCtrl + Click§r§6 to apply!",
+	"nbteditor.keybind_edit": "§6§lSpace§r§6 to edit!",
+	"nbteditor.keybind_container": "§6§lCtrl + Space§r§6 to open container!",
 	
 	"nbteditor.noskull": "You must be holding a player head to edit!",
 	"nbteditor.skull_not_loaded": "That head hasn't loaded any textures yet!",
@@ -84,6 +87,9 @@
 	"nbteditor.config.use_arabic_enchant_levels": "Use 1-10 instead of I-X",
 	"nbteditor.config.use_roman_enchant_levels": "Use I-X instead of 1-10",
 	"nbteditor.config.key_text_size": "Key scale: %d",
+	"nbteditor.config.keybinds": "Toggle showing keybind hints",
+	"nbteditor.config.hide_keybinds": "Hide keybinds",
+	"nbteditor.config.show_keybinds": "Show keybinds",
 	
 	
 	"nbteditor.expected_space": "Expected a space",

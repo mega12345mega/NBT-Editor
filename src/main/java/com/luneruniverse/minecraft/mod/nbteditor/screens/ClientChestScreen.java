@@ -5,10 +5,10 @@ import java.io.IOException;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -31,24 +31,14 @@ public class ClientChestScreen extends ClientContainerScreen {
 	public static int nextPageJumpTarget;
 	
 	public static void show() {
-		MinecraftClient client = MinecraftClient.getInstance();
-		if (client.currentScreen instanceof ClientChestScreen) {
-			ClientChestScreen screen = (ClientChestScreen) client.currentScreen;
+		if (MainUtil.client.currentScreen instanceof ClientChestScreen) {
+			ClientChestScreen screen = (ClientChestScreen) MainUtil.client.currentScreen;
 			((ClientChestHandler) screen.handler).fillPage();
 			screen.updatePageNavigation();
 		} else {
-			ClientPlayerEntity player = client.player;
-			ClientChestHandler handler = new ClientChestHandler(0, player.getInventory()) {
-				@Override
-				public void setCursorStack(ItemStack stack) {
-					MainUtil.client.player.playerScreenHandler.setCursorStack(stack);
-				}
-				@Override
-				public ItemStack getCursorStack() {
-					return MainUtil.client.player.playerScreenHandler.getCursorStack();
-				}
-			};
-			client.setScreen(new ClientChestScreen(handler, player.getInventory(), new TranslatableText("nbteditor.clientchest")));
+			ClientPlayerEntity player = MainUtil.client.player;
+			ClientChestHandler handler = new ClientChestHandler(0, player.getInventory());
+			MainUtil.client.setScreen(new ClientChestScreen(handler, player.getInventory(), new TranslatableText("nbteditor.clientchest")));
 		}
 	}
 	
@@ -196,6 +186,20 @@ public class ClientChestScreen extends ClientContainerScreen {
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
 			onClose();
+		
+		if (keyCode == GLFW.GLFW_KEY_SPACE) {
+			Slot hoveredSlot = this.focusedSlot;
+			if (hoveredSlot != null && hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty()) {
+				int slot = hoveredSlot.getIndex();
+				ItemReference ref = hoveredSlot.inventory == client.player.getInventory() ? new ItemReference(slot >= 36 ? slot - 36 : slot) : new ItemReference(PAGE, hoveredSlot.getIndex());
+				if (hasControlDown()) {
+					if (ItemsScreen.isContainer(hoveredSlot.getStack()))
+						ItemsScreen.show(ref);
+				} else
+					client.setScreen(new NBTEditorScreen(ref));
+				return true;
+			}
+		}
 		
 		return !this.pageField.keyPressed(keyCode, scanCode, modifiers) && !this.pageField.isActive()
 				? super.keyPressed(keyCode, scanCode, modifiers) : true;

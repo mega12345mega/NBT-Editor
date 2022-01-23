@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -14,7 +15,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
@@ -27,9 +27,8 @@ public class NBTCommand implements RegisterableCommand {
 			ClientPlayerEntity player = context.getSource().getPlayer();
 			Map.Entry<Hand, ItemStack> heldItem = MainUtil.getHeldItem(player);
 			Hand hand = heldItem.getKey();
-			ItemStack item = heldItem.getValue();
 			
-			MinecraftClient.getInstance().setScreen(new NBTEditorScreen(item, hand));
+			MainUtil.client.setScreen(new NBTEditorScreen(new ItemReference(hand)));
 			
 			return Command.SINGLE_SUCCESS;
 		}));

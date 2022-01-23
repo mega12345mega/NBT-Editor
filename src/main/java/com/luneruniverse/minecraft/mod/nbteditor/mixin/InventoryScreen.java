@@ -4,10 +4,15 @@ import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.luneruniverse.minecraft.mod.nbteditor.mixin.source.HandledScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -47,6 +52,19 @@ public class InventoryScreen {
 	public static void keyPressed(int keyCode, int scanCode, int modifiers, HandledScreen<?> source, CallbackInfoReturnable<Boolean> info) {
 		if (keyCode == GLFW.GLFW_KEY_LEFT_CONTROL || keyCode == GLFW.GLFW_KEY_RIGHT_CONTROL)
 			ctrlDown = true;
+		
+		if (keyCode == GLFW.GLFW_KEY_SPACE) {
+			Slot hoveredSlot = ((HandledScreenAccessor) source).getFocusedSlot();
+			if (hoveredSlot != null && hoveredSlot.inventory == MainUtil.client.player.getInventory() && hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty()) {
+				int slot = hoveredSlot.getIndex();
+				ItemReference ref = slot < 9 ? ItemReference.getArmorFromSlot(slot) : new ItemReference(slot == 45 ? 45 : (slot < 9 ? slot + 54 : (slot >= 36 ? slot - 36 : slot)));
+				if (Screen.hasControlDown()) {
+					if (ItemsScreen.isContainer(hoveredSlot.getStack()))
+						ItemsScreen.show(ref);
+				} else
+					MainUtil.client.setScreen(new NBTEditorScreen(ref));
+			}
+		}
 	}
 	public static void keyReleased(int keyCode, int scanCode, int modifiers, HandledScreen<?> source, CallbackInfoReturnable<Boolean> info) {
 		if (keyCode == GLFW.GLFW_KEY_LEFT_CONTROL || keyCode == GLFW.GLFW_KEY_RIGHT_CONTROL)

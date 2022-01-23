@@ -41,6 +41,7 @@ public class NBTValue extends List2D.List2DValue {
 	private AbstractNbtList<?> parentList;
 	
 	private boolean selected;
+	private boolean unsafe;
 	
 	public NBTValue(NBTEditorScreen screen, String key, NbtElement value, AbstractNbtList<?> parentList) {
 		this.screen = screen;
@@ -90,7 +91,7 @@ public class NBTValue extends List2D.List2DValue {
 		}
 		
 		int color = -1;
-		if (parentList != null && parentList.getHeldType() != value.getType())
+		if (unsafe && selected || parentList != null && parentList.getHeldType() != value.getType())
 			color = 0xFFFFAA33;
 		else if (selected)
 			color = 0xFFDF4949;
@@ -147,6 +148,17 @@ public class NBTValue extends List2D.List2DValue {
 	}
 	public String getValueText() {
 		return value.toString();
+	}
+	
+	public void setUnsafe(boolean unsafe) {
+		this.unsafe = unsafe;
+	}
+	/**
+	 * 
+	 * @return Returns if this value has been manually set as unsafe; doesn't take into account list types
+	 */
+	public boolean isUnsafe() {
+		return unsafe;
 	}
 	
 }

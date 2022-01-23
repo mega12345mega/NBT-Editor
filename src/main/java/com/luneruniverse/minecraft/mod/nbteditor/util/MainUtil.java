@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import com.google.gson.JsonParseException;
@@ -15,6 +16,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
@@ -22,6 +24,8 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.ClickEvent.Action;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.StringVisitable.StyledVisitor;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.DyeColor;
@@ -50,14 +54,24 @@ public class MainUtil {
 	}
 	
 	public static void saveItem(Hand hand, ItemStack item) {
-		client.player.setStackInHand(hand, item);
-		if (client.interactionManager.getCurrentGameMode().isCreative() && !item.isEmpty())
+		client.player.setStackInHand(hand, item.copy());
+		if (client.interactionManager.getCurrentGameMode().isCreative())
 			client.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(hand == Hand.OFF_HAND ? 45 : client.player.getInventory().selectedSlot + 36, item));
+	}
+	public static void saveItem(EquipmentSlot equipment, ItemStack item) {
+		if (equipment == EquipmentSlot.MAINHAND)
+			saveItem(Hand.MAIN_HAND, item);
+		else if (equipment == EquipmentSlot.OFFHAND)
+			saveItem(Hand.OFF_HAND, item);
+		else {
+			client.player.getInventory().armor.set(equipment.getEntitySlotId(), item.copy());
+			client.interactionManager.clickCreativeStack(item, 8 - equipment.getEntitySlotId());
+		}
 	}
 	
 	public static void saveItem(int slot, ItemStack item) {
-		client.interactionManager.clickCreativeStack(item, slot < 9 ? slot + 36 : slot);
 		client.player.getInventory().setStack(slot, item.copy());
+		client.interactionManager.clickCreativeStack(item, slot < 9 ? slot + 36 : slot);
 	}
 	public static void saveItemInvSlot(int slot, ItemStack item) {
 		saveItem(slot == 45 ? 45 : (slot >= 36 ? slot - 36 : slot), item);
@@ -130,7 +144,8 @@ public class MainUtil {
 							break;
 						}
 					}
-				}
+				} else
+					line = part;
 			} else
 				line += partAddition;
 			i++;
@@ -249,6 +264,39 @@ public class MainUtil {
 			default:
 				return DyeColor.BROWN;
 		}
+	}
+	
+	
+	public static Text substring(Text text, int start, int end) {
+		LiteralText output = new LiteralText("");
+		text.visit(new StyledVisitor<Boolean>() {
+			private int i;
+			@Override
+			public Optional<Boolean> accept(Style style, String str) {
+				if (i + str.length() <= start) {
+					i += str.length();
+					return Optional.empty();
+				}
+				if (i >= start) {
+					if (end >= 0 && i + str.length() > end)
+						return accept(style, str.substring(0, end - i));
+					output.append(new LiteralText(str).fillStyle(style));
+					i += str.length();
+					if (end >= 0 && i == end)
+						return Optional.of(true);
+					return Optional.empty();
+				} else {
+					str = str.substring(start - i);
+					i = start;
+					accept(style, str);
+					return Optional.empty();
+				}
+			}
+		}, Style.EMPTY);
+		return output;
+	}
+	public static Text substring(Text text, int start) {
+		return substring(text, start, -1);
 	}
 	
 }

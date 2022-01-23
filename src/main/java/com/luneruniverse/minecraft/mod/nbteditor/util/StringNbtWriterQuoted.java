@@ -44,7 +44,7 @@ public class StringNbtWriterQuoted extends StringNbtWriter {
 	
 	private String escapeNameWithQuotes(String str) {
 		String output = escapeName(str);
-		if (output.startsWith("\""))
+		if (output.startsWith("\"") || output.startsWith("\'"))
 			return output;
 		return "\"" + output + "\"";
 	}

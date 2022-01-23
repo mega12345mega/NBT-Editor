@@ -22,7 +22,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.command.argument.StatusEffectArgumentType;
@@ -49,8 +48,7 @@ import tsp.headdb.ported.inventory.InventoryUtils;
 public class GetCommand implements RegisterableCommand {
 	
 	public static void get(ItemStack item, boolean dropIfNoSpace) {
-		MinecraftClient client = MinecraftClient.getInstance();
-		PlayerInventory inv = client.player.getInventory();
+		PlayerInventory inv = MainUtil.client.player.getInventory();
 		item = item.copy();
 		
 		int slot = inv.getOccupiedSlotWithRoomForStack(item);
@@ -60,7 +58,7 @@ public class GetCommand implements RegisterableCommand {
 			if (dropIfNoSpace) {
 				if (item.getCount() > item.getMaxCount())
 					item.setCount(item.getMaxCount());
-				client.interactionManager.dropCreativeStack(item);
+				MainUtil.client.interactionManager.dropCreativeStack(item);
 			}
 		} else {
 			item.setCount(item.getCount() + inv.getStack(slot).getCount());
@@ -76,10 +74,9 @@ public class GetCommand implements RegisterableCommand {
 			}
 		}
 	}
-	@SuppressWarnings("resource")
 	public static void getWithMessage(ItemStack item) {
 		get(item, true);
-		MinecraftClient.getInstance().player.sendMessage(new TranslatableText("nbteditor.get.item").append(item.toHoverableText()), false);
+		MainUtil.client.player.sendMessage(new TranslatableText("nbteditor.get.item").append(item.toHoverableText()), false);
 	}
 	
 	

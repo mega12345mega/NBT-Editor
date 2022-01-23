@@ -13,7 +13,8 @@
     "NbtStringMixin",
     "StringNbtWriterAccessor",
     "CreativeInventoryScreenMixin",
-    "ItemStackMixin"
+    "ItemStackMixin",
+    "HandledScreenAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

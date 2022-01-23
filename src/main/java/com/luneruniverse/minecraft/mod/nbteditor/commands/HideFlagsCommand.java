@@ -14,7 +14,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
@@ -29,7 +28,7 @@ public class HideFlagsCommand implements RegisterableCommand {
 			Hand hand = heldItem.getKey();
 			ItemStack item = heldItem.getValue();
 			
-			MinecraftClient.getInstance().setScreen(new HideFlagsScreen(item, hand));
+			MainUtil.client.setScreen(new HideFlagsScreen(item, hand));
 			
 			return Command.SINGLE_SUCCESS;
 		}));

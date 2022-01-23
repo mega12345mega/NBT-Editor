@@ -10,7 +10,7 @@ public class SaveQueue {
 	private volatile boolean saving;
 	private volatile boolean queuedSave;
 	private volatile Thread saveThread;
-	private List<Runnable> onFinished;
+	private final List<Runnable> onFinished;
 	
 	public SaveQueue(String name, Runnable onSave) {
 		this.name = name;
@@ -43,6 +43,10 @@ public class SaveQueue {
 	}
 	public void save() {
 		save(null);
+	}
+	
+	public Runnable getOnSave() {
+		return onSave;
 	}
 	
 }

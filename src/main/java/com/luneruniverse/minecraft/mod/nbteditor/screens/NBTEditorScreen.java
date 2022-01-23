@@ -11,7 +11,9 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.luneruniverse.minecraft.mod.nbteditor.util.StringNbtWriterQuoted;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.StringReader;
@@ -42,7 +44,6 @@ import net.minecraft.nbt.NbtShort;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.registry.Registry;
@@ -458,9 +459,9 @@ public class NBTEditorScreen extends Screen {
 	private static NbtElement copiedValue;
 	
 	
+	private final ItemReference ref;
 	private ItemStack savedItem;
 	private ItemStack item;
-	private Hand hand;
 	
 	private boolean saved;
 	private NamedTextFieldWidget name;
@@ -480,12 +481,12 @@ public class NBTEditorScreen extends Screen {
 	private NbtElement nbt;
 	
 	@SuppressWarnings("serial")
-	public NBTEditorScreen(ItemStack item, Hand hand) {
+	public NBTEditorScreen(ItemReference ref) {
 		super(Text.of("NBT Editor"));
 		
-		this.savedItem = item.copy();
-		this.item = item.copy();
-		this.hand = hand;
+		this.ref = ref;
+		this.savedItem = ref.getItem().copy();
+		this.item = this.savedItem.copy();
 		
 		this.scrollPerFolder = new HashMap<>();
 		
@@ -620,24 +621,29 @@ public class NBTEditorScreen extends Screen {
 		this.addSelectableChild(path);
 		
 		value = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16, Text.of("Value")).name(new TranslatableText("nbteditor.value"));
+		value.setRenderTextProvider((str, index) -> {
+			return MainUtil.substring(NbtFormatter.formatElementSafe(value.getText()).getValue(), index, index + str.length()).asOrderedText();
+		});
 		value.setMaxLength(Integer.MAX_VALUE);
 		value.setText("");
 		value.setEditable(false);
 		value.setChangedListener(str -> {
-			if (selectedValue != null)
+			if (selectedValue != null) {
+				selectedValue.setUnsafe(!NbtFormatter.formatElementSafe(value.getText()).getKey());
+				if (selectedValue.isUnsafe())
+					return;
 				selectedValue.valueChanged(str, (nbt) -> {
 					gen.setElement(this.nbt, selectedValue.getKey(), nbt);
 					updateName();
 				});
+			}
 		});
 		this.addSelectableChild(value);
 		
-		// TODO
-//		this.addDrawableChild(new ButtonWidget(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, new TranslatableText("nbteditor.value_expand"), btn -> {
-//			if (selectedValue != null) {
-//				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), str -> value.setText(str)));
-//			}
-//		}));
+		this.addDrawableChild(new ButtonWidget(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, new TranslatableText("nbteditor.value_expand"), btn -> {
+			if (selectedValue != null)
+				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter::formatElementSafe, str -> value.setText(str)));
+		}));
 		
 		final int editorY = 16 + 8 + 32 + (16 + 8) * 3;
 		editor = new List2D(16, editorY, width - 16 * 2, height - editorY - 16 * 2 - 8, 4, 32, 32, 8)
@@ -728,16 +734,17 @@ public class NBTEditorScreen extends Screen {
 	
 	@Override
 	public void onClose() {
-		super.onClose();
-		
-		if (!saved)
+		if (saved)
+			ref.showParent();
+		else {
 			client.setScreen(new ConfirmScreen(value -> {
 				if (value)
 					save();
 				
-				client.setScreen(null);
+				ref.showParent();
 			}, new TranslatableText("nbteditor.notsaved.title"), new TranslatableText("nbteditor.notsaved.message"),
 					new TranslatableText("nbteditor.notsaved.yes"), new TranslatableText("nbteditor.notsaved.no")));
+		}
 	}
 	
 	@Override
@@ -790,12 +797,17 @@ public class NBTEditorScreen extends Screen {
 		this.count.tick();
 		this.path.tick();
 		this.value.tick();
+		
+		item.getOrCreateNbt(); // Make sure both items have NBT defined, so no NBT and empty NBT comes out equal
+		savedItem.getOrCreateNbt();
 		saved = ItemStack.areEqual(item, savedItem);
 	}
 	
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
+		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
 			onClose();
+			return true;
+		}
 		
 		return !this.name.keyPressed(keyCode, scanCode, modifiers) && !this.name.isActive() &&
 				!this.type.keyPressed(keyCode, scanCode, modifiers) && !this.type.isActive() &&
@@ -850,7 +862,10 @@ public class NBTEditorScreen extends Screen {
 	
 	private void save() {
 		savedItem = item.copy();
-		MainUtil.saveItem(hand, savedItem);
+		saveBtn.setMessage(new TranslatableText("nbteditor.saving"));
+		ref.saveItem(savedItem, () -> {
+			saveBtn.setMessage(new TranslatableText("nbteditor.save"));
+		});
 	}
 	private void add() {
 		gen.addElement(this, this.nbt, force -> {

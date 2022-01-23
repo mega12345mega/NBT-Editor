@@ -7,7 +7,6 @@ import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -34,7 +33,7 @@ public class StringInputScreen extends Screen {
 	public void show(String defaultValue) {
 		if (defaultValue != null)
 			this.defaultValue = defaultValue;
-		MinecraftClient.getInstance().setScreen(this);
+		MainUtil.client.setScreen(this);
 	}
 	public void show() {
 		show(null);

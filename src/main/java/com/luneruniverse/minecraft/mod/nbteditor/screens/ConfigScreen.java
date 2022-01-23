@@ -11,8 +11,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ScreenTexts;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
@@ -55,17 +55,20 @@ public class ConfigScreen extends GameOptionsScreen {
 	private static MaxEnchantLevelDisplay maxEnchantLevelDisplay;
 	private static boolean useArabicEnchantLevels;
 	private static double keyTextSize;
+	private static boolean hideKeybinds;
 	
 	public static void loadSettings() {
 		maxEnchantLevelDisplay = MaxEnchantLevelDisplay.NEVER;
 		useArabicEnchantLevels = false;
 		keyTextSize = 0.5;
+		hideKeybinds = false;
 		
 		try {
 			JsonObject settings = new Gson().fromJson(new String(Files.readAllBytes(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath())), JsonObject.class);
 			maxEnchantLevelDisplay = MaxEnchantLevelDisplay.valueOf(settings.get("maxEnchantLevelDisplay").getAsString());
 			useArabicEnchantLevels = settings.get("useArabicEnchantLevels").getAsBoolean();
 			keyTextSize = settings.get("keyTextSize").getAsDouble();
+			hideKeybinds = settings.get("hideKeybinds").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -78,6 +81,7 @@ public class ConfigScreen extends GameOptionsScreen {
 		settings.addProperty("maxEnchantLevelDisplay", maxEnchantLevelDisplay.name());
 		settings.addProperty("useArabicEnchantLevels", useArabicEnchantLevels);
 		settings.addProperty("keyTextSize", keyTextSize);
+		settings.addProperty("hideKeybinds", hideKeybinds);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -114,14 +118,16 @@ public class ConfigScreen extends GameOptionsScreen {
 	public static double getKeyTextSize() {
 		return keyTextSize;
 	}
+	public static boolean shouldHideKeybinds() {
+		return hideKeybinds;
+	}
 	
 	
 	
 	private ButtonListWidget list;
 	
-	@SuppressWarnings("resource")
 	public ConfigScreen(Screen parent) {
-		super(parent, MinecraftClient.getInstance().options, new TranslatableText("nbteditor.config"));
+		super(parent, MainUtil.client.options, new TranslatableText("nbteditor.config"));
 	}
 	
 	@Override
@@ -159,6 +165,15 @@ public class ConfigScreen extends GameOptionsScreen {
 								keyTextSize = Math.floor(value * 10) / 10 / 2 + 0.5;
 							}
 						};
+					}
+				},
+				new Option("nbteditor.config.keybinds") {
+					@Override
+					public ClickableWidget createButton(GameOptions options, int x, int y, int width) {
+						return new ButtonWidget(x, y, width, 20, hideKeybinds ? new TranslatableText("nbteditor.config.show_keybinds") : new TranslatableText("nbteditor.config.hide_keybinds"), btn -> {
+							hideKeybinds = !hideKeybinds;
+							btn.setMessage(hideKeybinds ? new TranslatableText("nbteditor.config.show_keybinds") : new TranslatableText("nbteditor.config.hide_keybinds"));
+						}, new SimpleTooltip(ConfigScreen.this, "nbteditor.config.keybinds"));
 					}
 				}
 			});

@@ -100,6 +100,10 @@ public class ItemChest {
 		setStack(slot, item.getItem());
 	}
 	
+	public ItemStack getStack(int slot) {
+		return inv.getStack(slot);
+	}
+	
 	private void save() {
 		NbtCompound nbt = item.getOrCreateNbt();
 		if (!nbt.contains("BlockEntityTag", NbtType.COMPOUND))

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.MinecraftClient;
@@ -102,7 +103,7 @@ public class List2D implements Drawable, Element, Selectable {
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		boolean hovering = isMouseOver(mouseX, mouseY);
 		
-		MinecraftClient client = MinecraftClient.getInstance();
+		MinecraftClient client = MainUtil.client;
 		RenderSystem.enableScissor((int) ((x - padding) * client.getWindow().getScaleFactor()), client.getWindow().getHeight() - (int) ((y + height + padding) * client.getWindow().getScaleFactor()), (int) ((width + padding * 2) * client.getWindow().getScaleFactor()), (int) ((height + padding * 2) * client.getWindow().getScaleFactor()));
 		for (Map.Entry<List2DValue, Point> element : elements.entrySet()) {
 			Point pos = element.getValue();
