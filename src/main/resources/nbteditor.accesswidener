@@ -1,0 +1,13 @@
+accessWidener v1 named
+
+accessible class net/minecraft/client/gui/screen/ingame/CreativeInventoryScreen$CreativeSlot
+accessible field net/minecraft/client/gui/screen/ingame/CreativeInventoryScreen$CreativeSlot slot Lnet/minecraft/screen/slot/Slot;
+
+accessible field net/minecraft/nbt/NbtTypes VALUES [Lnet/minecraft/nbt/NbtType;
+
+accessible field net/minecraft/client/gui/widget/TextFieldWidget text Ljava/lang/String;
+
+accessible field net/minecraft/nbt/NbtString value Ljava/lang/String;
+mutable field net/minecraft/nbt/NbtString value Ljava/lang/String;
+
+accessible method net/minecraft/client/gui/screen/Screen addDrawableChild (Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;
