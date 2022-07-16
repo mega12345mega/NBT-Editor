@@ -255,6 +255,14 @@ public class ClientChestScreen extends ClientContainerScreen {
 		if (lockRevertUsed && cursor != null && !cursor.isEmpty() && client.player.isCreative())
 			GetCommand.loseItem(cursor);
 	}
+	@Override
+	public boolean allowEnchantmentCombine(Slot slot) {
+		return !ConfigScreen.shouldLockSlots() || slot.inventory == MainUtil.client.player.getInventory();
+	}
+	@Override
+	public void onEnchantmentCombine(Slot slot) {
+		save();
+	}
 	
 	private void save() {
 		saved = false;

@@ -5,13 +5,16 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.GetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -128,6 +131,11 @@ public class ClientContainerScreen extends GenericContainerScreen {
 			beforeClickItem = slot.getStack().copy();
 		beforeClickCursor = this.handler.getCursorStack().copy();
 		
+		if (slot != null && allowEnchantmentCombine(slot) && Screen.hasControlDown() && tryCombineEnchantments(slot, actionType)) {
+			onEnchantmentCombine(slot);
+			return;
+		}
+		
 		super.onMouseClick(slot, slotId, button, actionType);
 	}
 	
@@ -139,6 +147,37 @@ public class ClientContainerScreen extends GenericContainerScreen {
 		if (!fullStack)
 			stack.setCount(1);
 		client.interactionManager.dropCreativeStack(stack);
+	}
+	
+	
+	
+	private boolean tryCombineEnchantments(Slot slot, SlotActionType actionType) {
+		if (actionType == SlotActionType.PICKUP && slot != null) {
+			ItemStack cursor = handler.getCursorStack();
+			ItemStack item = slot.getStack();
+			if (cursor == null || cursor.isEmpty() || item == null || item.isEmpty())
+				return false;
+			if (cursor.getItem() == Items.ENCHANTED_BOOK || item.getItem() == Items.ENCHANTED_BOOK) {
+				if (cursor.getItem() != Items.ENCHANTED_BOOK) { // Make sure the cursor is an enchanted book
+					ItemStack temp = cursor;
+					cursor = item;
+					item = temp;
+				}
+				
+				EnchantmentHelper.get(cursor).forEach(item::addEnchantment);
+				slot.setStack(item);
+				handler.setCursorStack(ItemStack.EMPTY);
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	public boolean allowEnchantmentCombine(Slot slot) {
+		return false;
+	}
+	public void onEnchantmentCombine(Slot slot) {
+		
 	}
 	
 }

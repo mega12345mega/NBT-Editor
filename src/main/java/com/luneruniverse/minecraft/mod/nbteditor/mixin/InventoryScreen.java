@@ -34,7 +34,7 @@ public class InventoryScreen {
 			if (cursor == null || cursor.isEmpty() || item == null || item.isEmpty())
 				return;
 			if (cursor.getItem() == Items.ENCHANTED_BOOK || item.getItem() == Items.ENCHANTED_BOOK) {
-				if (cursor.getItem() != Items.ENCHANTED_BOOK) { // Make the cursor always be an enchanted book
+				if (cursor.getItem() != Items.ENCHANTED_BOOK) { // Make sure the cursor is an enchanted book
 					ItemStack temp = cursor;
 					cursor = item;
 					item = temp;

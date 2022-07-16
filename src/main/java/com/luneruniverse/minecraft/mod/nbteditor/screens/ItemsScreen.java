@@ -88,7 +88,17 @@ public class ItemsScreen extends ClientContainerScreen {
 			return;
 		
 		super.onMouseClick(slot, slotId, button, actionType);
-		
+		save();
+	}
+	@Override
+	public boolean allowEnchantmentCombine(Slot slot) {
+		return slot.id != this.slot;
+	}
+	@Override
+	public void onEnchantmentCombine(Slot slot) {
+		save();
+	}
+	private void save() {
 		NbtCompound nbt = item.getOrCreateNbt();
 		if (!nbt.contains("BlockEntityTag", NbtType.COMPOUND))
 			nbt.put("BlockEntityTag", new NbtCompound());

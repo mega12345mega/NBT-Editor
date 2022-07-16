@@ -173,9 +173,8 @@ public class HeadDatabase {
                 } catch (IOException | JsonParseException ex) {
                 	NBTEditor.LOGGER.error("Failed to fetch heads for " + category.getName() + "! (OF)"); // OF = Original-Fallback, both failed
                 	NBTEditor.LOGGER.error(ex);
+                	return null;
                 }
-                
-                return null;
             }
 
             updated = System.nanoTime();
@@ -266,6 +265,7 @@ public class HeadDatabase {
 
         HEADS.clear();
         HEADS.putAll(heads);
+        HeadAPI.resolveFavorites();
         return true;
     }
 

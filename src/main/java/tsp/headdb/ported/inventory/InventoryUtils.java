@@ -83,7 +83,7 @@ public class InventoryUtils {
                     purchaseHead(head, 1, head.getCategory().getName(), head.getName());
                 }
                 if (e.getClickType() == ClickTypeMod.RIGHT) {
-                    HeadAPI.removeFavoriteHead(head.getId());
+                    HeadAPI.removeFavoriteHead(head.getValue());
                     openFavoritesMenu();
                     Utils.sendMessage("Removed &e" + head.getName() + " &7from favorites.");
                 }

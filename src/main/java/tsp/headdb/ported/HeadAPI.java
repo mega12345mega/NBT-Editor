@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -153,37 +156,37 @@ public final class HeadAPI {
     }
     
     private static final File FAVORITES_FILE = new File(NBTEditorClient.SETTINGS_FOLDER, "headdb_favorites.txt");
-    private static final List<Integer> FAVORITES = new ArrayList<>();
+    private static final List<String> FAVORITES = new ArrayList<>();
     
     /**
      * Add a {@link Head} to a players favorites
      *
-     * @param id The ID of the head
+     * @param texture The texture of the head
      */
-    public static void addFavoriteHead(int id) {
-    	if (FAVORITES.contains(id))
+    public static void addFavoriteHead(String texture) {
+    	if (FAVORITES.contains(texture))
     		return;
     	
-    	FAVORITES.add(id);
+    	FAVORITES.add(texture);
     	saveFavorites();
     }
 
     /**
      * Remove a {@link Head} from a players favorites
      *
-     * @param id The ID of the head
+     * @param texture The texture of the head
      */
-    public static void removeFavoriteHead(int id) {
-    	if (FAVORITES.remove((Integer) id))
+    public static void removeFavoriteHead(String texture) {
+    	if (FAVORITES.remove(texture))
     		saveFavorites();
     }
     
     public static void toggleFavoriteHead(Head head) {
-    	if (FAVORITES.contains(head.getId())) {
-    		removeFavoriteHead(head.getId());
+    	if (FAVORITES.contains(head.getValue())) {
+    		removeFavoriteHead(head.getValue());
     		Utils.sendMessage("Removed &e" + head.getName() + " &7from favorites.");
     	} else {
-    		addFavoriteHead(head.getId());
+    		addFavoriteHead(head.getValue());
     		Utils.sendMessage("Added &e" + head.getName() + " &7to favorites.");
     	}
     }
@@ -194,25 +197,44 @@ public final class HeadAPI {
     	if (!FAVORITES_FILE.exists())
     		return;
     	
-    	for (String line : new String(Files.readAllBytes(FAVORITES_FILE.toPath())).replace("\r", "").split("\n")) {
-    		if (line.isEmpty())
-    			continue;
+    	String heads = new String(Files.readAllBytes(FAVORITES_FILE.toPath())).replace("\r", "");
+    	if (heads.startsWith("v2\n")) {
     		
-    		try {
-    			FAVORITES.add(Integer.parseInt(line));
-    		} catch (NumberFormatException e) {
-    			e.printStackTrace();
-    		}
+    		JsonArray headsArray = new Gson().fromJson(heads.substring("v2\n".length()), JsonArray.class);
+    		for (JsonElement head : headsArray)
+    			FAVORITES.add(head.getAsString());
+    		
+    	} else {
+	    	
+    		for (String line : heads.split("\n")) {
+	    		if (line.isEmpty())
+	    			continue;
+	    		
+	    		try {
+	    			FAVORITES.add("LEGACY: " + Integer.parseInt(line));
+	    		} catch (NumberFormatException e) {
+	    			e.printStackTrace();
+	    		}
+	    	}
+    		
     	}
     }
+    public static void resolveFavorites() {
+    	List<String> legacyFavorites = FAVORITES.stream().filter(entry -> entry.startsWith("LEGACY: ")).toList();
+    	for (String legacyFavorite : legacyFavorites) {
+    		FAVORITES.remove(legacyFavorite);
+    		
+    		Head head = getHeadByID(Integer.parseInt(legacyFavorite.substring("LEGACY: ".length())));
+    		FAVORITES.add(head.getValue());
+    	}
+    	saveFavorites();
+    }
     private static void saveFavorites() {
-    	StringBuilder output = new StringBuilder();
-    	for (int line : FAVORITES)
-    		output.append(line).append('\n');
-    	if (!FAVORITES.isEmpty())
-    		output.deleteCharAt(output.length() - 1);
+    	JsonArray output = new JsonArray();
+    	for (String favorite : FAVORITES)
+    		output.add(favorite);
     	try {
-			Files.write(FAVORITES_FILE.toPath(), output.toString().getBytes());
+			Files.write(FAVORITES_FILE.toPath(), ("v2\n" + output.toString()).getBytes());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -226,9 +248,11 @@ public final class HeadAPI {
      */
     public static List<Head> getFavoriteHeads() {
         List<Head> heads = new ArrayList<>();
-        for (int id : FAVORITES) {
-            Head head = getHeadByID(id);
-            heads.add(head);
+        for (String favorite : FAVORITES) {
+        	if (favorite.startsWith("LEGACY: ")) // Legacy favorites should already be resolved
+        		continue;
+            
+            heads.add(getHeadByValue(favorite));
         }
         
         return heads;
