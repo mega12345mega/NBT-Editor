@@ -8,8 +8,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientContainerScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
@@ -21,8 +19,8 @@ public class SendPacketMixin {
 	
 	private static volatile boolean sendingSafe;
 	
-    @Inject(at = @At(value = "HEAD"), method = "sendImmediately", cancellable = true)
-    private void sendImmediately(Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> callback, CallbackInfo info) {
+    @Inject(at = @At(value = "HEAD"), method = "send(Lnet/minecraft/network/Packet;)V", cancellable = true)
+    private void send(Packet<?> packet, CallbackInfo info) {
     	if (sendingSafe)
         	return;
         
