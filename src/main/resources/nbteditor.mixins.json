@@ -15,7 +15,8 @@
     "StringNbtWriterAccessor",
     "CreativeInventoryScreenMixin",
     "ItemStackMixin",
-    "HandledScreenAccessor"
+    "HandledScreenAccessor",
+    "TextFieldWidgetMixin"
   ],
   "injectors": {
     "defaultRequire": 1

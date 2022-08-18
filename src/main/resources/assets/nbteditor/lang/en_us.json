@@ -3,7 +3,7 @@
 	"nbteditor.cancel": "Cancel",
 	
 	"nbteditor.emptykey.title": "Unsupported Item!",
-	"nbteditor.emptykey.message": "The nbt editor doesn't support items with an empty string (\"\") as a key!",
+	"nbteditor.emptykey.message": "This nbt editor doesn't support items with an empty string (\"\") as a key. Remove that key-value pair?",
 	"nbteditor.emptykey.yes": "Fix & Edit",
 	"nbteditor.emptykey.no": "Cancel",
 	
@@ -49,7 +49,7 @@
 	"nbteditor.clearpage.no": "Cancel",
 	
 	"nbteditor.items": "Nbt Editor >> ",
-	"nbteditor.nocontainer": "You must be holding an item that can contain other items!",
+	"nbteditor.nocontainer": "You must be holding a container with 27 slots!",
 	
 	"nbteditor.signature_added": "§aSignature added!",
 	"nbteditor.signature_removed": "§aSignature removed!",
@@ -68,6 +68,9 @@
 	"nbteditor.get.lost_item": "§cYou may have lost an item - ",
 	"nbteditor.get.lost_item.none": "§cThere are no lost items saved!",
 	
+	"nbteditor.hideflags": "Hide Flags",
+	"nbteditor.hideflags.enable_all": "§cHide Everything",
+	"nbteditor.hideflags.disable_all": "§aShow Everything",
 	"nbteditor.flag.enchantments": "Enchantments",
 	"nbteditor.flag.attribute_modifiers": "Attribute Modifiers",
 	"nbteditor.flag.unbreakable": "Unbreakable",
@@ -75,7 +78,6 @@
 	"nbteditor.flag.can_place_on": "Can Place On",
 	"nbteditor.flag.misc": "Misc",
 	"nbteditor.flag.dyed_color": "Dyed Armor Color",
-	"nbteditor.flag.all": "All",
 	
 	"nbteditor.addenchant": "§6§lCtrl + Click§r§6 to apply!",
 	"nbteditor.keybind_edit": "§6§lSpace§r§6 to edit!",
@@ -86,6 +88,21 @@
 	"nbteditor.skull_edited": "§aHead unbound!",
 	
 	"nbteditor.maxed": "§aEnchantments maxed!",
+	
+	"nbteditor.blockstates": "Block States",
+	"nbteditor.noblock": "You must be holding a block to edit!",
+	"nbteditor.noblockstates": "There are no block states for this block!",
+	
+	"nbteditor.attributes": "Attributes",
+	"nbteditor.attributes.attribute": "Attribute",
+	"nbteditor.attributes.operation": "Operation",
+	"nbteditor.attributes.amount": "Amount",
+	"nbteditor.attributes.slot": "Slot",
+	
+	"nbteditor.enchantments": "Enchantments",
+	"nbteditor.enchantments.enchantment": "Enchantment",
+	"nbteditor.enchantments.level": "Level",
+	"nbteditor.enchantments.tip": "You can Ctrl+Click enchanted books onto items in supported inventories.",
 	
 	"nbteditor.config": "NBT Editor Config",
 	"nbteditor.config.max_enchant_level": "Max E-Level",
@@ -116,6 +133,13 @@
 	"nbteditor.config.key_skizzers_desc": "The keys in the nbt editor don't display\nfor some users. If you are having this\nissue, enable this.\n\nThis is not a perfect fix, as scrolling\nthrough the key list will have some\nrendering issues.",
 	"nbteditor.config.use_skizzers": "Disabled",
 	"nbteditor.config.dont_use_skizzers": "Enabled",
+	"nbteditor.config.scroll_speed": "Scroll Speed: %d",
+	"nbteditor.config.scroll_speed_desc": "Increase/decrease the speed\nof scrolling in NBT Editor menus",
+	
+	
+	"nbteditor.configurable.list.move": "Move",
+	"nbteditor.configurable.list.duplicate": "Duplicate",
+	"nbteditor.configurable.list.remove": "Remove",
 	
 	
 	"nbteditor.expected_space": "Expected a space",
@@ -134,16 +158,13 @@
 	"nbteditor.help_4": "§6/chest: §7Open the client chest",
 	"nbteditor.help_5": "§6/open: §7Open the container you're holding. You can put shulker boxes inside shulker boxes!",
 	"nbteditor.help_6": "§6/get <item | potion | soup | skull | hdb | colorcodes | lostitem | help | credits> [<args>]: §7Get an item or information",
-	"nbteditor.help_7": "§6/lore <add | remove | set | clear | list> [<args>]: §7Edit lore",
-	"nbteditor.help_8": "§6/sign [<add | remove | edit <new signature>>]: §7Sign an item",
-	"nbteditor.help_9": "§6/hideflags: §7Configure hide flags",
-	"nbteditor.help_10": "§6/unbindskull: §7Remove a skull's link to the original owner",
-	"nbteditor.help_11": "§6/max [cursed] [all] [<level>]: §7Max an item's enchantments",
-	"nbteditor.help_12": "",
-	"nbteditor.help_13": "§7Help on a specific feature: /get help <nbteditor | clientchest>",
-	"nbteditor.help_14": "§7Report an issue:",
-	"nbteditor.help_15": "[LINK] https://github.com/mega12345mega/NBT-Editor/issues",
-	"nbteditor.help_16": "§7--------------------",
+	"nbteditor.help_7": "§6/sign [<add | remove | edit <new signature>>]: §7Sign an item",
+	"nbteditor.help_8": "§6/itemfactory <factory> [<args>]: §7Item utilities for enchantments, attributes, etc.",
+	"nbteditor.help_9": "",
+	"nbteditor.help_10": "§7Help on a specific feature: §b/get help <nbteditor | clientchest | itemfactories>",
+	"nbteditor.help_11": "§7Report an issue:",
+	"nbteditor.help_12": "[LINK] https://github.com/mega12345mega/NBT-Editor/issues",
+	"nbteditor.help_13": "§7--------------------",
 	
 	"nbteditor.help.nbteditor_1": "§7--------------------",
 	"nbteditor.help.nbteditor_2": "§6Help: /nbteditor, /nbt",
@@ -164,6 +185,18 @@
 	"nbteditor.help.clientchest_8": "§7Reloading reloads the page from the file.",
 	"nbteditor.help.clientchest_9": "§7Clear page deletes everything on that page, and is cannot be undone. There is a confirm dialog in case of a misclick.",
 	"nbteditor.help.clientchest_10": "§7--------------------",
+	
+	"nbteditor.help.itemfactories_1": "§7--------------------",
+	"nbteditor.help.itemfactories_2": "§6Help: /itemfactory <factory>",
+	"nbteditor.help.itemfactories_3": "§6Factories:",
+	"nbteditor.help.itemfactories_4": "§6attributes: §7Edit attribute modifiers",
+	"nbteditor.help.itemfactories_5": "§6blockstates: §7Edit block states",
+	"nbteditor.help.itemfactories_6": "§6enchantments: §7Edit enchantments",
+	"nbteditor.help.itemfactories_7": "§6hideflags: §7Configure hide flags",
+	"nbteditor.help.itemfactories_8": "§6lore <add | remove | set | clear | list> [<args>]: §7Edit lore",
+	"nbteditor.help.itemfactories_9": "§6max [cursed] [all] [<level>]: §7Max an item's enchantments",
+	"nbteditor.help.itemfactories_10": "§6unbindskull: §7Remove a skull's link to the original owner",
+	"nbteditor.help.itemfactories_11": "§7--------------------",
 	
 	"nbteditor.credits_1": "§6NBT Editor created by mega12345mega",
 	"nbteditor.credits_2": "§6I hope you enjoy! Don't mess with §otoo§r§6 many §c[Admin] §6ranks :D",
