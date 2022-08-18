@@ -37,13 +37,13 @@ public class ItemStackMixin {
 		// Checking slots in your hotbar vs item selection is difficult, so the lore is just disabled in non-inventory tabs
 		boolean creativeInv = MainUtil.client.currentScreen instanceof CreativeInventoryScreen &&
 				((CreativeInventoryScreen) MainUtil.client.currentScreen).getSelectedTab() == ItemGroup.INVENTORY.getIndex();
-		if (creativeInv && source.getItem() == Items.ENCHANTED_BOOK)
-			info.getReturnValue().add(Text.translatable("nbteditor.addenchant"));
 		
 		if (creativeInv || MainUtil.client.currentScreen instanceof ClientChestScreen || MainUtil.client.currentScreen instanceof ItemsScreen) {
 			info.getReturnValue().add(Text.translatable("nbteditor.keybind_edit"));
 			if (ItemsScreen.isContainer(source))
 				info.getReturnValue().add(Text.translatable("nbteditor.keybind_container"));
+			if (source.getItem() == Items.ENCHANTED_BOOK)
+				info.getReturnValue().add(Text.translatable("nbteditor.addenchant"));
 		}
 	}
 	

@@ -15,16 +15,17 @@ import net.minecraft.text.Text;
 
 public class StringInputScreen extends Screen {
 	
-	private final Screen screen;
+	private final Screen parent;
 	private final Consumer<String> valueConsumer;
 	private final Predicate<String> valueValidator;
 	private TextFieldWidget value;
+	private ButtonWidget ok;
 	private String defaultValue;
 	
 	public StringInputScreen(Screen screen, Consumer<String> valueConsumer, Predicate<String> valueValidator) {
 		super(Text.of("String Input"));
 		
-		this.screen = screen;
+		this.parent = screen;
 		this.valueConsumer = valueConsumer;
 		this.valueValidator = valueValidator;
 	}
@@ -40,8 +41,8 @@ public class StringInputScreen extends Screen {
 	
 	@Override
 	protected void init() {
+		parent.init(client, width, height);
 		this.clearChildren();
-		
 		
 		String prevValue = value == null ? (defaultValue == null ? "" : defaultValue) : value.getText();
 		value = new TextFieldWidget(List2D.List2DValue.textRenderer, width / 2 - 104, height / 2 - 20, 208, 16, Text.of(""));
@@ -50,24 +51,31 @@ public class StringInputScreen extends Screen {
 		this.addSelectableChild(value);
 		setInitialFocus(value);
 		
-		this.addDrawableChild(new ButtonWidget(width / 2 - 104, height / 2 + 4, 100, 20, Text.translatable("nbteditor.ok"), btn -> {
+		ok = this.addDrawableChild(new ButtonWidget(width / 2 - 104, height / 2 + 4, 100, 20, Text.translatable("nbteditor.ok"), btn -> {
 			if (valueValidator.test(value.getText())) {
-				client.setScreen(screen);
+				client.setScreen(parent);
 				valueConsumer.accept(value.getText());
 			}
 		}));
 		this.addDrawableChild(new ButtonWidget(width / 2 + 4, height / 2 + 4, 100, 20, Text.translatable("nbteditor.cancel"), btn -> {
-			client.setScreen(screen);
+			client.setScreen(parent);
 		}));
+		
+		value.setChangedListener(str -> ok.active = valueValidator.test(str));
+		ok.active = valueValidator.test(value.getText());
 	}
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		parent.render(matrices, -314, -314, delta);
+		
+		matrices.push();
+		matrices.translate(0, 0, 500);
 		super.renderBackground(matrices);
 		super.render(matrices, mouseX, mouseY, delta);
-		
 		value.render(matrices, mouseX, mouseY, delta);
 		MainUtil.renderLogo(matrices);
+		matrices.pop();
 	}
 	public void tick() {
 		value.tick();
@@ -82,7 +90,7 @@ public class StringInputScreen extends Screen {
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
 			close();
 		if (keyCode == GLFW.GLFW_KEY_ENTER) {
-			client.setScreen(screen);
+			client.setScreen(parent);
 			valueConsumer.accept(value.getText());
 			return true;
 		}
@@ -90,7 +98,7 @@ public class StringInputScreen extends Screen {
 		boolean output = !this.value.keyPressed(keyCode, scanCode, modifiers) && !this.value.isActive()
 				? super.keyPressed(keyCode, scanCode, modifiers) : true;
 		if (client.currentScreen != this)
-			client.setScreen(screen);
+			client.setScreen(parent);
 		return output;
 	}
 	

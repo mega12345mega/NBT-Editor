@@ -12,12 +12,11 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
 
 public class ClientChestCommand implements ClientCommand {
 	
 	@Override
-	public LiteralCommandNode<? extends CommandSource> register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess cmdReg) {
+	public LiteralCommandNode<FabricClientCommandSource> register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess cmdReg) {
 		return dispatcher.register(literal("clientchest").executes(context -> {
 			ClientChestScreen.show();
 			return Command.SINGLE_SUCCESS;

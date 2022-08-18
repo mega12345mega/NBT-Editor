@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -41,11 +42,17 @@ public class InventoryScreen {
 				}
 				
 				slotId = slot.id;
+				boolean armor = false;
 				if (source instanceof CreativeInventoryScreen && ((CreativeInventoryScreen) source).getSelectedTab() != ItemGroup.INVENTORY.getIndex())
 					slotId -= 9;
+				else if (slotId < 9)
+					armor = true;
 				
-				EnchantmentHelper.get(cursor).forEach(item::addEnchantment);
-				MainUtil.saveItemInvSlot(slotId, item);
+				EnchantmentHelper.set(EnchantmentHelper.get(cursor), item);
+				if (armor)
+					MainUtil.saveItem(EquipmentSlot.fromTypeIndex(EquipmentSlot.Type.ARMOR, 8 - slotId), item);
+				else
+					MainUtil.saveItemInvSlot(slotId, item);
 				source.getScreenHandler().setCursorStack(ItemStack.EMPTY);
 				
 				info.cancel();

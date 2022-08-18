@@ -61,6 +61,7 @@ public class ConfigScreen extends GameOptionsScreen {
 	private static boolean extendChatLimit;
 	private static boolean allowSingleQuotes;
 	private static boolean keySkizzers;
+	private static double scrollSpeed;
 	
 	public static void loadSettings() {
 		maxEnchantLevelDisplay = MaxEnchantLevelDisplay.NEVER;
@@ -70,6 +71,7 @@ public class ConfigScreen extends GameOptionsScreen {
 		extendChatLimit = false;
 		allowSingleQuotes = false;
 		keySkizzers = true;
+		scrollSpeed = 1;
 		
 		try {
 			JsonObject settings = new Gson().fromJson(new String(Files.readAllBytes(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath())), JsonObject.class);
@@ -81,6 +83,7 @@ public class ConfigScreen extends GameOptionsScreen {
 			extendChatLimit = settings.get("extendChatLimit").getAsBoolean();
 			allowSingleQuotes = settings.get("allowSingleQuotes").getAsBoolean();
 			keySkizzers = settings.get("keySkizzers").getAsBoolean();
+			scrollSpeed = settings.get("scrollSpeed").getAsDouble();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -98,6 +101,7 @@ public class ConfigScreen extends GameOptionsScreen {
 		settings.addProperty("extendChatLimit", extendChatLimit);
 		settings.addProperty("allowSingleQuotes", allowSingleQuotes);
 		settings.addProperty("keySkizzers", keySkizzers);
+		settings.addProperty("scrollSpeed", scrollSpeed);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -155,6 +159,9 @@ public class ConfigScreen extends GameOptionsScreen {
 	}
 	public static boolean useKeySkizzers() {
 		return keySkizzers;
+	}
+	public static double getScrollSpeed() {
+		return scrollSpeed;
 	}
 	
 	
@@ -216,22 +223,16 @@ public class ConfigScreen extends GameOptionsScreen {
 						(text, value) -> Text.translatable(value ? "nbteditor.config.use_skizzers" : "nbteditor.config.dont_use_skizzers"),
 						new LazyCyclingCallbacks<>(() -> List.of(false, true), Optional::of, null),
 						keySkizzers,
-						value -> keySkizzers = value)
+						value -> keySkizzers = value),
+				
+				new SimpleOption<>("nbteditor.config.scroll_speed",
+						SimpleTooltip.of("nbteditor.config.scroll_speed_desc"),
+						(text, value) -> Text.translatable("nbteditor.config.scroll_speed", scrollSpeed),
+						DoubleSliderCallbacks.INSTANCE,
+						(scrollSpeed - 0.5) / 1.5,
+						value -> scrollSpeed = Math.floor((value * 1.5 + 0.5) * 20) / 20)
 		});
 		
-		/*
-		this.list = new ButtonListWidget(this.client, this.width, this.height, 32, this.height - 32, 25);
-		this.list.addAll(new SimpleOption[] {
-				new SimpleOption("nbteditor.config.single_quotes") {
-					@Override
-					public ClickableWidget createButton(GameOptions options, int x, int y, int width) {
-						return new ButtonWidget(x, y, width, 20, allowSingleQuotes ? Text.translatable("nbteditor.config.disallow_single_quotes") : new TranslatableText("nbteditor.config.allow_single_quotes"), btn -> {
-							allowSingleQuotes = !allowSingleQuotes;
-							btn.setMessage(allowSingleQuotes ? new TranslatableText("nbteditor.config.disallow_single_quotes") : new TranslatableText("nbteditor.config.allow_single_quotes"));
-						}, new SimpleTooltip(ConfigScreen.this, "nbteditor.config.single_quotes"));
-					}
-				}
-			});*/
 		this.addSelectableChild(this.list);
 		this.addDrawableChild(
 				new ButtonWidget(this.width / 2 - 100, this.height - 27, 200, 20, ScreenTexts.DONE, (button) -> {

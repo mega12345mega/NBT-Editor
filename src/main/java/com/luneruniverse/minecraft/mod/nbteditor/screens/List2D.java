@@ -1,24 +1,16 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
-import java.awt.Point;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.mojang.blaze3d.systems.RenderSystem;
+import java.util.function.UnaryOperator;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.util.math.MatrixStack;
 
-public class List2D implements Drawable, Element, Selectable {
+public class List2D extends Panel<com.luneruniverse.minecraft.mod.nbteditor.screens.List2D.List2DValue> {
 	
 	public static abstract class List2DValue implements Drawable, Element {
 		
@@ -38,46 +30,37 @@ public class List2D implements Drawable, Element, Selectable {
 	
 	
 	
-	private int x;
-	private int y;
-	private int width;
-	private int height;
-	private int padding;
 	private int itemWidth;
 	private int itemHeight;
 	private int itemPadding;
-	private int scroll;
 	
-	private final Map<List2DValue, Point> elements;
+	private final List<PositionedPanelElement<List2DValue>> elements;
 	private Element finalEventHandler;
 	
-	public List2D(int x, int y, int width, int height, int padding, int itemWidth, int itemHeight, int itemPadding) {
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.padding = padding;
+	public List2D(int x, int y, int width, int height, int outerPadding, int itemWidth, int itemHeight, int itemPadding) {
+		super(x, y, width, height, outerPadding, true);
+		
 		this.itemWidth = itemWidth;
 		this.itemHeight = itemHeight;
 		this.itemPadding = itemPadding;
 		
-		this.elements = new LinkedHashMap<>();
+		this.elements = new ArrayList<>();
 	}
 	public List2D setFinalEventHandler(Element finalEventHandler) {
 		this.finalEventHandler = finalEventHandler;
 		return this;
 	}
 	public List2D addElement(List2DValue element) {
-		this.elements.put(element, genPoint(elements.size()));
+		this.elements.add(genPositioned(element, elements.size()));
 		return this;
 	}
 	public List2D removeElement(List2DValue element) {
-		if (this.elements.remove(element) != null) {
-			this.elements.replaceAll(new BiFunction<>() {
+		if (this.elements.removeIf(pos -> pos.element() == element)) {
+			this.elements.replaceAll(new UnaryOperator<>() {
 				private int i = 0;
 				@Override
-				public Point apply(List2DValue t, Point u) {
-					return genPoint(i++);
+				public PositionedPanelElement<List2DValue> apply(PositionedPanelElement<List2DValue> pos) {
+					return genPositioned(pos.element(), i++);
 				}
 			});
 		}
@@ -92,120 +75,52 @@ public class List2D implements Drawable, Element, Selectable {
 		return this;
 	}
 	public List<List2DValue> getElements() {
-		return new ArrayList<>(this.elements.keySet());
+		return this.elements.stream().map(PositionedPanelElement::element).toList();
 	}
-	private Point genPoint(int i) {
+	private PositionedPanelElement<List2DValue> genPositioned(List2DValue element, int i) {
 		int elementsPerRow = (width + itemPadding) / (itemWidth + itemPadding);
-		return new Point(i % elementsPerRow * (itemWidth + itemPadding) + x, i / elementsPerRow * (itemHeight + itemPadding) + y);
-	}
-	
-	@Override
-	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		boolean hovering = isMouseOver(mouseX, mouseY);
+		int x = i % elementsPerRow * (itemWidth + itemPadding);
+		int y = i / elementsPerRow * (itemHeight + itemPadding);
 		
-		MinecraftClient client = MainUtil.client;
-		boolean skizzer = ConfigScreen.useKeySkizzers();
-		if (skizzer)
-			RenderSystem.enableScissor((int) ((x - padding) * client.getWindow().getScaleFactor()), client.getWindow().getHeight() - (int) ((y + height + padding) * client.getWindow().getScaleFactor()), (int) ((width + padding * 2) * client.getWindow().getScaleFactor()), (int) ((height + padding * 2) * client.getWindow().getScaleFactor()));
-		for (Map.Entry<List2DValue, Point> element : elements.entrySet()) {
-			Point pos = element.getValue();
-			matrices.push();
-			matrices.translate(pos.x, pos.y + scroll, 0);
-			element.getKey().setInsideList(hovering);
-			element.getKey().render(matrices, mouseX - pos.x, mouseY - pos.y - scroll, delta);
-			matrices.pop();
-		}
-		if (skizzer)
-			RenderSystem.disableScissor();
+		return new PositionedPanelElement<>(element, x, y);
 	}
-	
 	@Override
-	public boolean isMouseOver(double mouseX, double mouseY) {
-		return mouseX >= x - padding && mouseX <= x + width + padding && mouseY >= y - padding && mouseY <= y + height + padding;
+	protected Iterable<PositionedPanelElement<List2DValue>> getPanelElements() {
+		return this.elements;
 	}
 	
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		boolean hovering = isMouseOver(mouseX, mouseY);
-		
-		boolean success = false;
-		for (Map.Entry<List2DValue, Point> element : new LinkedHashMap<>(this.elements).entrySet()) {
-			element.getKey().setInsideList(hovering);
-			if (element.getKey().mouseClicked(mouseX - element.getValue().x, mouseY - element.getValue().y - scroll, button))
-				success = true;
-		}
-		if (!success)
-			success = finalEventHandler.mouseClicked(mouseX - x, mouseY - y, button);
-		return success;
+		return super.mouseClicked(mouseX, mouseY, button) || finalEventHandler.mouseClicked(mouseX - x, mouseY - y, button);
 	}
 	@Override
 	public boolean mouseReleased(double mouseX, double mouseY, int button) {
-		boolean hovering = isMouseOver(mouseX, mouseY);
-		
-		boolean success = false;
-		for (Map.Entry<List2DValue, Point> element : this.elements.entrySet()) {
-			element.getKey().setInsideList(hovering);
-			if (element.getKey().mouseReleased(mouseX - element.getValue().x, mouseY - element.getValue().y - scroll, button))
-				success = true;
-		}
-		if (!success)
-			success = finalEventHandler.mouseReleased(mouseX - x, mouseY - y, button);
-		return success;
+		return super.mouseReleased(mouseX, mouseY, button) || finalEventHandler.mouseReleased(mouseX - x, mouseY - y, button);
 	}
+	
 	@Override
 	public void mouseMoved(double mouseX, double mouseY) {
-		boolean hovering = isMouseOver(mouseX, mouseY);
-		
-		for (Map.Entry<List2DValue, Point> element : this.elements.entrySet()) {
-			element.getKey().setInsideList(hovering);
-			element.getKey().mouseMoved(mouseX - element.getValue().x, mouseY - element.getValue().y - scroll);
-		}
+		super.mouseMoved(mouseX, mouseY);
+		finalEventHandler.mouseMoved(mouseX, mouseY);
 	}
 	@Override
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-		boolean hovering = isMouseOver(mouseX, mouseY);
-		
-		boolean success = false;
-		for (Map.Entry<List2DValue, Point> element : this.elements.entrySet()) {
-			element.getKey().setInsideList(hovering);
-			if (element.getKey().mouseDragged(mouseX - element.getValue().x, mouseY - element.getValue().y - scroll, button, deltaX, deltaY))
-				success = true;
-		}
-		if (!success)
-			success = finalEventHandler.mouseDragged(mouseX - x, mouseY - y, button, deltaX, deltaY);
-		return success;
+		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || finalEventHandler.mouseDragged(mouseX - x, mouseY - y, button, deltaX, deltaY);
 	}
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	protected void updateMousePos(double mouseX, double mouseY) {
 		boolean hovering = isMouseOver(mouseX, mouseY);
-		
-		boolean success = false;
-		for (Map.Entry<List2DValue, Point> element : this.elements.entrySet()) {
-			element.getKey().setInsideList(hovering);
-			if (element.getKey().mouseScrolled(mouseX - element.getValue().x, mouseY - element.getValue().y, amount))
-				success = true;
-		}
-		if (!success) {
-			int maxScroll = getMaxScroll();
-			if (amount < 0 && scroll > maxScroll) {
-				success = true;
-				scroll += amount * 5;
-				if (scroll < maxScroll)
-					scroll = maxScroll;
-			}
-			if (amount > 0 && scroll < 0) {
-				success = true;
-				scroll += amount * 5;
-				if (scroll > 0)
-					scroll = 0;
-			}
-		}
-		if (!success)
-			success = finalEventHandler.mouseScrolled(mouseX - x, mouseY - y, amount);
-		return success;
+		for (PositionedPanelElement<List2DValue> pos : this.elements)
+			pos.element().setInsideList(hovering);
 	}
-	public int getMaxScroll() {
-		return Math.min(0, elements.isEmpty() ? 0 : (y + height) - genPoint(elements.size() - 1).y - itemHeight);
+	
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+		return super.mouseScrolled(mouseX, mouseY, amount) || finalEventHandler.mouseScrolled(mouseX, mouseY, amount);
+	}
+	@Override
+	protected int getPanelElementHeight(List2DValue element) {
+		return itemHeight;
 	}
 	public void setScroll(int scroll) {
 		this.scroll = scroll;
@@ -216,26 +131,17 @@ public class List2D implements Drawable, Element, Selectable {
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		boolean success = false;
-		for (Map.Entry<List2DValue, Point> element : this.elements.entrySet()) {
-			if (element.getKey().keyPressed(keyCode, scanCode, modifiers))
-				success = true;
-		}
-		if (!success)
-			success = finalEventHandler.keyPressed(keyCode, scanCode, modifiers);
-		return success;
+		return super.keyPressed(keyCode, scanCode, modifiers) || finalEventHandler.keyPressed(keyCode, scanCode, modifiers);
 	}
 	@Override
 	public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-		boolean success = false;
-		for (Map.Entry<List2DValue, Point> element : this.elements.entrySet()) {
-			if (element.getKey().keyReleased(keyCode, scanCode, modifiers))
-				success = true;
-		}
-		if (!success)
-			success = finalEventHandler.keyReleased(keyCode, scanCode, modifiers);
-		return success;
+		return super.keyReleased(keyCode, scanCode, modifiers) || finalEventHandler.keyReleased(keyCode, scanCode, modifiers);
 	}
+	@Override
+	public boolean charTyped(char chr, int modifiers) {
+		return super.charTyped(chr, modifiers) || finalEventHandler.charTyped(chr, modifiers);
+	}
+	
 	
 	@Override
 	public void appendNarrations(NarrationMessageBuilder builder) {

@@ -164,7 +164,7 @@ public class ClientContainerScreen extends GenericContainerScreen {
 					item = temp;
 				}
 				
-				EnchantmentHelper.get(cursor).forEach(item::addEnchantment);
+				EnchantmentHelper.set(EnchantmentHelper.get(cursor), item);
 				slot.setStack(item);
 				handler.setCursorStack(ItemStack.EMPTY);
 				return true;

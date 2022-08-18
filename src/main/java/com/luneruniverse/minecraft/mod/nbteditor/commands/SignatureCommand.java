@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
@@ -19,7 +19,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.TextArgumentType;
 import net.minecraft.item.ItemStack;
@@ -48,10 +47,9 @@ public class SignatureCommand implements ClientCommand {
 	@Override
 	public LiteralCommandNode<FabricClientCommandSource> register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess cmdReg) {
 		Command<FabricClientCommandSource> addSignature = context -> {
-			ClientPlayerEntity player = context.getSource().getPlayer();
-			Map.Entry<Hand, ItemStack> heldItem = MainUtil.getHeldItem(player);
-			Hand hand = heldItem.getKey();
-			ItemStack item = heldItem.getValue();
+			ItemReference heldItem = MainUtil.getHeldItem();
+			Hand hand = heldItem.getHand();
+			ItemStack item = heldItem.getItem();
 			
 			Lore lore = new Lore(item);
 			if (lore.size() == 0 || !lore.getLine(-1).equals(signature))
@@ -71,10 +69,9 @@ public class SignatureCommand implements ClientCommand {
 				literal("signature").executes(addSignature)
 					.then(literal("add").executes(addSignature))
 					.then(literal("remove").executes(context -> {
-						ClientPlayerEntity player = context.getSource().getPlayer();
-						Map.Entry<Hand, ItemStack> heldItem = MainUtil.getHeldItem(player);
-						Hand hand = heldItem.getKey();
-						ItemStack item = heldItem.getValue();
+						ItemReference heldItem = MainUtil.getHeldItem();
+						Hand hand = heldItem.getHand();
+						ItemStack item = heldItem.getItem();
 						
 						Lore lore = new Lore(item);
 						if (lore.size() == 0 || !lore.getLine(-1).equals(signature)) {
@@ -103,10 +100,9 @@ public class SignatureCommand implements ClientCommand {
 							throw new SimpleCommandExceptionType(Text.translatable("nbteditor.signature_save_error")).create();
 						}
 						
-						ClientPlayerEntity player = context.getSource().getPlayer();
-						Map.Entry<Hand, ItemStack> heldItem = MainUtil.getHeldItem(player);
-						Hand hand = heldItem.getKey();
-						ItemStack item = heldItem.getValue();
+						ItemReference heldItem = MainUtil.getHeldItem();
+						Hand hand = heldItem.getHand();
+						ItemStack item = heldItem.getItem();
 						
 						Lore lore = new Lore(item);
 						if (lore.size() != 0 && lore.getLine(-1).equals(oldSignature)) {

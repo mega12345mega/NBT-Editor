@@ -15,14 +15,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.luneruniverse.minecraft.mod.nbteditor.util.StringNbtWriterQuoted;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.argument.NbtElementArgumentType;
@@ -47,7 +45,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.registry.Registry;
 
-public class NBTEditorScreen extends Screen {
+public class NBTEditorScreen extends ItemEditorScreen {
 	
 	public static interface MenuGenerator {
 		public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source);
@@ -451,20 +449,9 @@ public class NBTEditorScreen extends Screen {
 	
 	
 	
-	private static final int itemX = 16 + 32 + 8;
-	private static final int itemY = 16;
-	
 	private static String copiedKey;
 	private static NbtElement copiedValue;
 	
-	
-	private final ItemReference ref;
-	private ItemStack savedItem;
-	private ItemStack item;
-	
-	private boolean saved;
-	private NamedTextFieldWidget name;
-	private ButtonWidget saveBtn;
 	
 	private NamedTextFieldWidget type;
 	private NamedTextFieldWidget count;
@@ -481,11 +468,7 @@ public class NBTEditorScreen extends Screen {
 	
 	@SuppressWarnings("serial")
 	public NBTEditorScreen(ItemReference ref) {
-		super(Text.of("NBT Editor"));
-		
-		this.ref = ref;
-		this.savedItem = ref.getItem().copy();
-		this.item = this.savedItem.copy();
+		super(Text.of("NBT Editor"), ref);
 		
 		this.scrollPerFolder = new HashMap<>();
 		
@@ -498,7 +481,7 @@ public class NBTEditorScreen extends Screen {
 	}
 	
 	@Override
-	protected void init() {
+	protected void initEditor() {
 		if (realPath.isEmpty() && ((NbtCompound) this.nbt).contains("")) {
 			client.setScreen(new ConfirmScreen(value -> {
 				if (value) {
@@ -507,7 +490,7 @@ public class NBTEditorScreen extends Screen {
 					save();
 					client.setScreen(NBTEditorScreen.this);
 				} else
-					client.setScreen(null);
+					close();
 			}, Text.translatable("nbteditor.emptykey.title"), Text.translatable("nbteditor.emptykey.message"),
 					Text.translatable("nbteditor.emptykey.yes"), Text.translatable("nbteditor.emptykey.no")));
 			
@@ -515,13 +498,8 @@ public class NBTEditorScreen extends Screen {
 		}
 		
 		
-		super.init();
 		this.client.keyboard.setRepeatEvents(true);
-		this.clearChildren();
 		
-		name = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8, 100, 16, Text.of("")).name(Text.translatable("nbteditor.name"));
-		name.setMaxLength(Integer.MAX_VALUE);
-		name.setText(MainUtil.getItemNameSafely(item).getString());
 		name.setChangedListener(str -> {
 			if (str.equals(item.getItem().getName().getString()))
 				item.setCustomName(null);
@@ -530,11 +508,7 @@ public class NBTEditorScreen extends Screen {
 			
 			genEditor();
 		});
-		this.addSelectableChild(name);
 		
-		this.addDrawableChild(saveBtn = new ButtonWidget(16 + (32 + 8) * 2 + 100 + 8, 16 + 6, 100, 20, Text.translatable("nbteditor.save"), btn -> {
-			save();
-		}));
 		this.addDrawableChild(new ButtonWidget(16, height - 16 * 2, 20, 20, Text.translatable("nbteditor.add"), btn -> {
 			add();
 		}));
@@ -713,6 +687,10 @@ public class NBTEditorScreen extends Screen {
 		name.setSelectionStart(name.getText().length());
 		name.setSelectionEnd(name.getText().length());
 	}
+	@Override
+	protected boolean isNameEditable() {
+		return true;
+	}
 	
 	void selectNbt(NBTValue key, boolean isFolder) {
 		if (isFolder) {
@@ -733,74 +711,27 @@ public class NBTEditorScreen extends Screen {
 	}
 	
 	@Override
-	public void close() {
-		if (saved)
-			ref.showParent();
-		else {
-			client.setScreen(new ConfirmScreen(value -> {
-				if (value)
-					save();
-				
-				ref.showParent();
-			}, Text.translatable("nbteditor.notsaved.title"), Text.translatable("nbteditor.notsaved.message"),
-					Text.translatable("nbteditor.notsaved.yes"), Text.translatable("nbteditor.notsaved.no")));
-		}
-	}
-	
-	@Override
 	public void removed() {
 		this.client.keyboard.setRepeatEvents(false);
 	}
 	
 	@Override
-	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		saveBtn.active = !saved;
-		
-		super.renderBackground(matrices);
-		super.render(matrices, mouseX, mouseY, delta);
-		
-		MainUtil.renderLogo(matrices);
-		
-		drawItem(item, itemX, itemY, 2, 2);
-		name.render(matrices, mouseX, mouseY, delta);
+	public void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		type.render(matrices, mouseX, mouseY, delta);
 		count.render(matrices, mouseX, mouseY, delta);
 		path.render(matrices, mouseX, mouseY, delta);
 		value.render(matrices, mouseX, mouseY, delta);
 	}
 	
-	private void drawItem(ItemStack stack, int x, int y, float scaleX, float scaleY) {
-		x /= scaleX;
-		y /= scaleY;
-		
-		MatrixStack matrixStack = RenderSystem.getModelViewStack();
-		matrixStack.push();
-		matrixStack.translate(0.0D, 0.0D, 32.0D);
-		matrixStack.scale(scaleX, scaleY, 1);
-		RenderSystem.applyModelViewMatrix();
-		this.setZOffset(200);
-		this.itemRenderer.zOffset = 200.0F;
-		this.itemRenderer.renderInGuiWithOverrides(stack, x, y);
-		this.itemRenderer.renderGuiItemOverlay(this.textRenderer, stack, x, y, null);
-		this.setZOffset(0);
-		this.itemRenderer.zOffset = 0.0F;
-		matrixStack.pop();
-		RenderSystem.applyModelViewMatrix();
-	}
-	
 	
 	
 	@Override
 	public void tick() {
-		this.name.tick();
 		this.type.tick();
 		this.count.tick();
 		this.path.tick();
 		this.value.tick();
-		
-		item.getOrCreateNbt(); // Make sure both items have NBT defined, so no NBT and empty NBT comes out equal
-		savedItem.getOrCreateNbt();
-		saved = ItemStack.areEqual(item, savedItem);
+		checkSave();
 	}
 	
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
@@ -809,8 +740,7 @@ public class NBTEditorScreen extends Screen {
 			return true;
 		}
 		
-		return !this.name.keyPressed(keyCode, scanCode, modifiers) && !this.name.isActive() &&
-				!this.type.keyPressed(keyCode, scanCode, modifiers) && !this.type.isActive() &&
+		return !this.type.keyPressed(keyCode, scanCode, modifiers) && !this.type.isActive() &&
 				!this.count.keyPressed(keyCode, scanCode, modifiers) && !this.count.isActive() &&
 				!this.path.keyPressed(keyCode, scanCode, modifiers) && !this.path.isActive() &&
 				!this.value.keyPressed(keyCode, scanCode, modifiers) && !this.value.isActive()
@@ -830,8 +760,6 @@ public class NBTEditorScreen extends Screen {
 				cut();
 			else if (keyCode == GLFW.GLFW_KEY_V)
 				paste();
-			else if (keyCode == GLFW.GLFW_KEY_S)
-				save();
 			else if (keyCode == GLFW.GLFW_KEY_R)
 				rename();
 			else if (keyCode == GLFW.GLFW_KEY_N)
@@ -843,7 +771,6 @@ public class NBTEditorScreen extends Screen {
 	
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		this.name.mouseClicked(mouseX, mouseY, button);
 		this.type.mouseClicked(mouseX, mouseY, button);
 		this.count.mouseClicked(mouseX, mouseY, button);
 		this.path.mouseClicked(mouseX, mouseY, button);
@@ -866,19 +793,12 @@ public class NBTEditorScreen extends Screen {
 	}
 	
 	
-	private void save() {
-		savedItem = item.copy();
-		saveBtn.setMessage(Text.translatable("nbteditor.saving"));
-		ref.saveItem(savedItem, () -> {
-			saveBtn.setMessage(Text.translatable("nbteditor.save"));
-		});
-	}
 	private void add() {
 		gen.addElement(this, this.nbt, force -> {
 			if (force == null)
 				genEditor();
 			else {
-				client.setScreen(new ConfirmScreen(value -> {
+				client.setScreen(new FancyConfirmScreen(value -> {
 					if (value)
 						gen.addElement(NBTEditorScreen.this, this.nbt, success2 -> genEditor(), force);
 					
@@ -923,7 +843,7 @@ public class NBTEditorScreen extends Screen {
 				if (gen.renameElement(this.nbt, selectedKey, key, false))
 					genEditor();
 				else {
-					client.setScreen(new ConfirmScreen(value -> {
+					client.setScreen(new FancyConfirmScreen(value -> {
 						if (value) {
 							gen.renameElement(this.nbt, selectedKey, key, true);
 							genEditor();

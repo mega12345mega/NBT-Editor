@@ -101,7 +101,8 @@ public class GetCommand implements ClientCommand {
 	}
 	public enum HelpType {
 		NBTEDITOR("nbteditor.help.nbteditor"),
-		CLIENTCHEST("nbteditor.help.clientchest");
+		CLIENTCHEST("nbteditor.help.clientchest"),
+		ITEMFACTORIES("nbteditor.help.itemfactories");
 		
 		private final String msgKey;
 		

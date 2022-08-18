@@ -10,7 +10,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
 
-import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -161,7 +160,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 		
 		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 96, 83, 20, Text.translatable("nbteditor.clear_page"), btn -> {
 			navigationClicked = true;
-			client.setScreen(new ConfirmScreen(value -> {
+			client.setScreen(new FancyConfirmScreen(value -> {
 				if (value) {
 					this.handler.getInventory().clear();
 					save();

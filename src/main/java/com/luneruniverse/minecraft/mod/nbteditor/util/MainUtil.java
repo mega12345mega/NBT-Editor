@@ -2,7 +2,6 @@ package com.luneruniverse.minecraft.mod.nbteditor.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -14,7 +13,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -35,20 +34,20 @@ public class MainUtil {
 	
 	public static final MinecraftClient client = MinecraftClient.getInstance();
 	
-	public static Map.Entry<Hand, ItemStack> getHeldItem(ClientPlayerEntity player, Predicate<ItemStack> isAllowed, Text failText) throws CommandSyntaxException {
-		ItemStack item = player.getMainHandStack();
+	public static ItemReference getHeldItem(Predicate<ItemStack> isAllowed, Text failText) throws CommandSyntaxException {
+		ItemStack item = client.player.getMainHandStack();
 		Hand hand = Hand.MAIN_HAND;
 		if (item == null || item.isEmpty() || !isAllowed.test(item)) {
-			item = player.getOffHandStack();
+			item = client.player.getOffHandStack();
 			hand = Hand.OFF_HAND;
 		}
 		if (item == null || item.isEmpty() || !isAllowed.test(item))
 			throw new SimpleCommandExceptionType(failText).create();
 		
-		return Map.entry(hand, item);
+		return new ItemReference(hand);
 	}
-	public static Map.Entry<Hand, ItemStack> getHeldItem(ClientPlayerEntity player) throws CommandSyntaxException {
-		return getHeldItem(player, item -> true, Text.translatable("nbteditor.noitem"));
+	public static ItemReference getHeldItem() throws CommandSyntaxException {
+		return getHeldItem(item -> true, Text.translatable("nbteditor.noitem"));
 	}
 	
 	public static void saveItem(Hand hand, ItemStack item) {
@@ -87,6 +86,8 @@ public class MainUtil {
 	
 	
 	public static void drawWrappingString(MatrixStack matrices, TextRenderer renderer, String text, int x, int y, int maxWidth, int color, boolean centerHorizontal, boolean centerVertical) {
+		maxWidth = Math.max(maxWidth, renderer.getWidth("ww"));
+		
 		// Split into breaking spots
 		List<String> parts = new ArrayList<>();
 		List<Integer> spaces = new ArrayList<>();
@@ -295,6 +296,42 @@ public class MainUtil {
 	}
 	public static Text substring(Text text, int start) {
 		return substring(text, start, -1);
+	}
+	
+	
+	private static final int itemX = 16 + 32 + 8;
+	private static final int itemY = 16;
+	// First edited from HandledScreen#drawItem to NBTEdtiorScreen#drawItem to include the scale
+	// Then moved here with default arguments
+	public static void renderItem(ItemStack stack) {
+		// Args
+		int x = itemX;
+		int y = itemY;
+		int scaleX = 2;
+		int scaleY = 2;
+		
+		// Other variables
+		Screen screen = client.currentScreen;
+		ItemRenderer itemRenderer = client.getItemRenderer();
+		TextRenderer textRenderer = client.textRenderer;
+		
+		// Function
+		x /= scaleX;
+		y /= scaleY;
+		
+		MatrixStack matrixStack = RenderSystem.getModelViewStack();
+		matrixStack.push();
+		matrixStack.translate(0.0D, 0.0D, 32.0D);
+		matrixStack.scale(scaleX, scaleY, 1);
+		RenderSystem.applyModelViewMatrix();
+		screen.setZOffset(200);
+		itemRenderer.zOffset = 200.0F;
+		itemRenderer.renderInGuiWithOverrides(stack, x, y);
+		itemRenderer.renderGuiItemOverlay(textRenderer, stack, x, y, null);
+		screen.setZOffset(0);
+		itemRenderer.zOffset = 0.0F;
+		matrixStack.pop();
+		RenderSystem.applyModelViewMatrix();
 	}
 	
 }

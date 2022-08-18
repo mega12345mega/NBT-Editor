@@ -13,18 +13,11 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 
 public interface ClientCommand {
-	@SuppressWarnings("unchecked")
 	public default void registerAll(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess cmdReg) {
-		LiteralCommandNode<? extends CommandSource> node = register(dispatcher, cmdReg);
+		LiteralCommandNode<FabricClientCommandSource> node = register(dispatcher, cmdReg);
 		if (node == null)
 			return;
-		getAliases().forEach(alias -> {
-			try {
-				dispatcher.register(buildRedirect(alias, (LiteralCommandNode<FabricClientCommandSource>) node));
-			} catch (ClassCastException e) {
-				e.printStackTrace();
-			}
-		});
+		getAliases().forEach(alias -> dispatcher.register(buildRedirect(alias, node)));
 	}
 	
 	/**
@@ -55,7 +48,7 @@ public interface ClientCommand {
 		return builder;
 	}
 	
-	public LiteralCommandNode<? extends CommandSource> register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess cmdReg);
+	public LiteralCommandNode<FabricClientCommandSource> register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess cmdReg);
 	public default List<String> getAliases() {
 		return new ArrayList<>();
 	}

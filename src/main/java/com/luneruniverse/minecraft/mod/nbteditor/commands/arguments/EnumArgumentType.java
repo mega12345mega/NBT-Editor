@@ -38,7 +38,8 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T> {
 		StringBuilder value = new StringBuilder();
 		while (stringReader.canRead() && stringReader.peek() != ' ')
 			value.append(stringReader.read());
-		return Arrays.stream(options.getEnumConstants()).filter(option -> option.name().equalsIgnoreCase(value.toString())).findFirst().orElse(null);
+		return Arrays.stream(options.getEnumConstants()).filter(option -> option.name().equalsIgnoreCase(value.toString())).findFirst()
+				.orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(stringReader));
 	}
 
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
