@@ -10,6 +10,7 @@ import java.util.UUID;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -213,7 +214,7 @@ public final class HeadAPI {
 	    		try {
 	    			FAVORITES.add("LEGACY: " + Integer.parseInt(line));
 	    		} catch (NumberFormatException e) {
-	    			e.printStackTrace();
+	    			NBTEditor.LOGGER.error("Invalid legacy favorite", e);
 	    		}
 	    	}
     		
@@ -236,7 +237,7 @@ public final class HeadAPI {
     	try {
 			Files.write(FAVORITES_FILE.toPath(), ("v2\n" + output.toString()).getBytes());
 		} catch (IOException e) {
-			e.printStackTrace();
+			NBTEditor.LOGGER.error("Error while saving HeadDB favorites", e);
 		}
     }
 

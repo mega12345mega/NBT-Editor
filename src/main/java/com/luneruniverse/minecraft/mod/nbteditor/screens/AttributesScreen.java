@@ -6,7 +6,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigBar;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigHiddenDataNamed;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigList;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
@@ -17,8 +20,10 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 
 import net.fabricmc.fabric.api.util.NbtType;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.attribute.ClampedEntityAttribute;
 import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -27,22 +32,89 @@ import net.minecraft.util.registry.Registry;
 
 public class AttributesScreen extends ItemEditorScreen {
 	
+	private static class MaxButton extends ConfigButton {
+		
+		private static final Text MAX = Text.translatable("nbteditor.attributes.amount.max");
+		private static final Text MIN = Text.translatable("nbteditor.attributes.amount.min");
+		private static final Text INFINITY = Text.translatable("nbteditor.attributes.amount.infinity");
+		private static final Text NEG_INFINITY = Text.translatable("nbteditor.attributes.amount.negative_infinity");
+		private static final TooltipSupplier TOOLTIP = new SimpleTooltip("nbteditor.attributes.amount.autofill_keybinds");
+		
+		public MaxButton() {
+			super(100, getMaxMsg(), btn -> {
+				ConfigCategory attribute = (ConfigCategory) btn.getParent().getParent();
+				EntityAttribute type = ATTRIBUTES.get(getConfigAttribute(attribute).getValidValue());
+				
+				double max = Double.MAX_VALUE;
+				double min = Double.MIN_VALUE;
+				if (type instanceof ClampedEntityAttribute clamped) {
+					max = clamped.getMaxValue();
+					min = clamped.getMinValue();
+				}
+				
+				double value;
+				boolean shift = Screen.hasShiftDown();
+				boolean ctrl = Screen.hasControlDown();
+				if (!shift) {
+					if (!ctrl)
+						value = max;
+					else
+						value = min;
+				} else {
+					if (!ctrl)
+						value = Double.MAX_VALUE;
+					else
+						value = -Double.MAX_VALUE;
+				}
+				getConfigAmount(attribute).setValue(value);
+			}, TOOLTIP);
+		}
+		private static Text getMaxMsg() {
+			boolean shift = Screen.hasShiftDown();
+			boolean ctrl = Screen.hasControlDown();
+			if (!shift) {
+				if (!ctrl)
+					return MAX;
+				else
+					return MIN;
+			} else {
+				if (!ctrl)
+					return INFINITY;
+				else
+					return NEG_INFINITY;
+			}
+		}
+		
+		@Override
+		public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+			setMessage(getMaxMsg());
+			super.render(matrices, mouseX, mouseY, delta);
+		}
+		
+		@Override
+		public MaxButton clone(boolean defaults) {
+			return new MaxButton();
+		}
+		
+	}
+	
 	private static final Map<String, EntityAttribute> ATTRIBUTES;
-	private static final ConfigCategory ATTRIBUTE_ENTRY;
+	private static final ConfigHiddenDataNamed<ConfigCategory, UUID> ATTRIBUTE_ENTRY;
 	static {
 		ATTRIBUTES = Registry.ATTRIBUTE.getEntrySet().stream().map(attribute -> Map.entry(attribute.getKey().getValue().toString(), attribute.getValue()))
 				.sorted((a, b) -> a.getKey().compareToIgnoreCase(b.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
 		String firstAttribute = ATTRIBUTES.keySet().stream().findFirst().get();
 		
-		ATTRIBUTE_ENTRY = new ConfigCategory();
-		ATTRIBUTE_ENTRY.setConfigurable("attribute", new ConfigItem<>(Text.translatable("nbteditor.attributes.attribute"), new ConfigValueDropdown<>(
+		ConfigCategory visible = new ConfigCategory();
+		visible.setConfigurable("attribute", new ConfigItem<>(Text.translatable("nbteditor.attributes.attribute"), new ConfigValueDropdown<>(
 				firstAttribute, firstAttribute, new ArrayList<>(ATTRIBUTES.keySet()))));
-		ATTRIBUTE_ENTRY.setConfigurable("operation", new ConfigItem<>(Text.translatable("nbteditor.attributes.operation"), new ConfigValueDropdownEnum<>(
+		visible.setConfigurable("operation", new ConfigItem<>(Text.translatable("nbteditor.attributes.operation"), new ConfigValueDropdownEnum<>(
 				Operation.ADD, Operation.ADD, Operation.class)));
-		ATTRIBUTE_ENTRY.setConfigurable("amount", new ConfigItem<>(Text.translatable("nbteditor.attributes.amount"), new ConfigValueDouble(
-				0, 0, -Double.MAX_VALUE, Double.MAX_VALUE)));
-		ATTRIBUTE_ENTRY.setConfigurable("slot", new ConfigItem<>(Text.translatable("nbteditor.attributes.slot"), new ConfigValueDropdownEnum<>(
+		visible.setConfigurable("amount", new ConfigBar().setConfigurable("number", new ConfigItem<>(Text.translatable("nbteditor.attributes.amount"),
+				new ConfigValueDouble(0, 0, -Double.MAX_VALUE, Double.MAX_VALUE))).setConfigurable("autofill", new MaxButton()));
+		visible.setConfigurable("slot", new ConfigItem<>(Text.translatable("nbteditor.attributes.slot"), new ConfigValueDropdownEnum<>(
 				Slot.ALL, Slot.ALL, Slot.class)));
+		ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visible, UUID.randomUUID(), (uuid, defaults) -> UUID.randomUUID());
 	}
 	@SuppressWarnings("unchecked")
 	private static ConfigValueDropdown<String> getConfigAttribute(ConfigCategory attribute) {
@@ -54,7 +126,7 @@ public class AttributesScreen extends ItemEditorScreen {
 	}
 	@SuppressWarnings("unchecked")
 	private static ConfigValueDouble getConfigAmount(ConfigCategory attribute) {
-		return ((ConfigItem<ConfigValueDouble>) attribute.getConfigurable("amount")).getValue();
+		return ((ConfigItem<ConfigValueDouble>) ((ConfigBar) attribute.getConfigurable("amount")).getConfigurable("number")).getValue();
 	}
 	@SuppressWarnings("unchecked")
 	private static ConfigValueDropdown<Slot> getConfigSlot(ConfigCategory attribute) {
@@ -97,6 +169,7 @@ public class AttributesScreen extends ItemEditorScreen {
 	private final ConfigList attributes;
 	private ConfigPanel panel;
 	
+	@SuppressWarnings("unchecked")
 	public AttributesScreen(ItemReference ref) {
 		super(Text.of("Item Attributes"), ref);
 		
@@ -106,7 +179,8 @@ public class AttributesScreen extends ItemEditorScreen {
 		
 		for (NbtElement element : attributesNbt) {
 			NbtCompound attributeNbt = (NbtCompound) element;
-			ConfigCategory attribute = ATTRIBUTE_ENTRY.clone(true);
+			ConfigHiddenDataNamed<ConfigCategory, UUID> fullAttribute = ATTRIBUTE_ENTRY.clone(true);
+			ConfigCategory attribute = fullAttribute.getVisible();
 			
 			String attributeName = attributeNbt.getString("AttributeName");
 			if (!attributeName.contains(":"))
@@ -133,15 +207,21 @@ public class AttributesScreen extends ItemEditorScreen {
 			}
 			getConfigSlot(attribute).setValue(slot);
 			
-			this.attributes.addConfigurable(attribute);
+			if (!attributeNbt.containsUuid("UUID"))
+				continue;
+			fullAttribute.setData(attributeNbt.getUuid("UUID"));
+			
+			this.attributes.addConfigurable(fullAttribute);
 		}
 		
 		this.attributes.addValueListener(source -> {
 			attributesNbt.clear();
 			for (ConfigPath path : this.attributes.getConfigurables().values()) {
-				ConfigCategory attribute = (ConfigCategory) path;
+				ConfigHiddenDataNamed<ConfigCategory, UUID> fullAttribute =
+						(ConfigHiddenDataNamed<ConfigCategory, UUID>) path;
+				ConfigCategory attribute = fullAttribute.getVisible();
 				NbtCompound attributeNbt = new NbtCompound();
-				attributeNbt.putUuid("UUID", UUID.randomUUID());
+				attributeNbt.putUuid("UUID", fullAttribute.getData());
 				attributeNbt.putString("AttributeName", getConfigAttribute(attribute).getValidValue());
 				attributeNbt.putString("Name", attributeNbt.getString("AttributeName"));
 				attributeNbt.putInt("Operation", getConfigOperation(attribute).getValidValue().ordinal());
@@ -151,7 +231,10 @@ public class AttributesScreen extends ItemEditorScreen {
 					attributeNbt.putString("Slot", slot.name().toLowerCase());
 				attributesNbt.add(attributeNbt);
 			}
-			nbt.put("AttributeModifiers", attributesNbt);
+			if (attributesNbt.isEmpty())
+				nbt.remove("AttributeModifiers");
+			else
+				nbt.put("AttributeModifiers", attributesNbt);
 			checkSave();
 		});
 	}
@@ -162,30 +245,6 @@ public class AttributesScreen extends ItemEditorScreen {
 		if (panel != null)
 			newPanel.setScroll(panel.getScroll());
 		panel = newPanel;
-	}
-	
-	@Override
-	protected void checkSave() {
-		ItemStack item = this.item;
-		ItemStack savedItem = this.savedItem;
-		try {
-			// Compare the items without the UUIDs, as they are randomized every edit
-			this.item = removeAttributeUUIDs(item);
-			this.savedItem = removeAttributeUUIDs(savedItem);
-			super.checkSave();
-		} finally {
-			this.item = item;
-			this.savedItem = savedItem;
-		}
-	}
-	private ItemStack removeAttributeUUIDs(ItemStack item) {
-		item = item.copy();
-		if (!item.hasNbt())
-			return item;
-		NbtList attributes = item.getNbt().getList("AttributeModifiers", NbtType.COMPOUND);
-		for (NbtElement attribute : attributes)
-			((NbtCompound) attribute).remove("UUID");
-		return item;
 	}
 	
 }

@@ -17,7 +17,7 @@ public class ClientChestHandler extends GenericContainerScreenHandler {
 	}
 	
 	public void fillPage() {
-		ItemStack[] items = NBTEditorClient.getClientChestPage(ClientChestScreen.PAGE);
+		ItemStack[] items = NBTEditorClient.CLIENT_CHEST.getPage(ClientChestScreen.PAGE);
 		for (int i = 0; i < items.length; i++)
 			getSlot(i).setStack(items[i] == null ? ItemStack.EMPTY : items[i].copy());
 	}

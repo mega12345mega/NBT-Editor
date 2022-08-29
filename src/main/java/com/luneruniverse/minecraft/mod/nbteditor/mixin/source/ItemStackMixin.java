@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
@@ -40,7 +41,7 @@ public class ItemStackMixin {
 		
 		if (creativeInv || MainUtil.client.currentScreen instanceof ClientChestScreen || MainUtil.client.currentScreen instanceof ItemsScreen) {
 			info.getReturnValue().add(Text.translatable("nbteditor.keybind_edit"));
-			if (ItemsScreen.isContainer(source))
+			if (ContainerIO.isContainer(source))
 				info.getReturnValue().add(Text.translatable("nbteditor.keybind_container"));
 			if (source.getItem() == Items.ENCHANTED_BOOK)
 				info.getReturnValue().add(Text.translatable("nbteditor.addenchant"));

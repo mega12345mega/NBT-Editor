@@ -279,6 +279,10 @@ public class HeadDatabase {
         return getLastUpdate() >= refresh;
     }
 
+    public long getTimeUntilLastUpdateOld() {
+    	return refresh - getLastUpdate();
+    }
+
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }

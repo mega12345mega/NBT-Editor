@@ -4,8 +4,10 @@ import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.source.HandledScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
@@ -48,7 +50,7 @@ public class InventoryScreen {
 				else if (slotId < 9)
 					armor = true;
 				
-				EnchantmentHelper.set(EnchantmentHelper.get(cursor), item);
+				MainUtil.addEnchants(EnchantmentHelper.get(cursor), item);
 				if (armor)
 					MainUtil.saveItem(EquipmentSlot.fromTypeIndex(EquipmentSlot.Type.ARMOR, 8 - slotId), item);
 				else
@@ -67,13 +69,13 @@ public class InventoryScreen {
 		
 		if (keyCode == GLFW.GLFW_KEY_SPACE) {
 			Slot hoveredSlot = ((HandledScreenAccessor) source).getFocusedSlot();
-			if (hoveredSlot != null && hoveredSlot.inventory == MainUtil.client.player.getInventory() && hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty()) {
+			if (hoveredSlot != null && hoveredSlot.inventory == MainUtil.client.player.getInventory() && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
 				int slot = hoveredSlot.getIndex();
 				if (source instanceof CreativeInventoryScreen && ((CreativeInventoryScreen) source).getSelectedTab() != ItemGroup.INVENTORY.getIndex())
 					slot += 36;
 				ItemReference ref = slot < 9 ? ItemReference.getArmorFromSlot(slot) : new ItemReference(slot == 45 ? 45 : (slot < 9 ? slot + 54 : (slot >= 36 ? slot - 36 : slot)));
 				if (Screen.hasControlDown()) {
-					if (ItemsScreen.isContainer(hoveredSlot.getStack()))
+					if (hoveredSlot.getStack() != null && ContainerIO.isContainer(hoveredSlot.getStack()))
 						ItemsScreen.show(ref);
 				} else
 					MainUtil.client.setScreen(new NBTEditorScreen(ref));

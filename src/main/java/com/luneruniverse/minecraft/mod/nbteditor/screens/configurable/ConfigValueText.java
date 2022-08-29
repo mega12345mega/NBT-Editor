@@ -56,12 +56,17 @@ public class ConfigValueText extends NamedTextFieldWidget implements ConfigValue
 	}
 	@Override
 	public void setChangedListener(Consumer<String> changedListener) {
-		throw new UnsupportedOperationException("Use setValueListener instead!");
+		throw new UnsupportedOperationException("Use addValueListener instead!");
+	}
+	
+	@Override
+	public int getSpacingWidth() {
+		return this.width;
 	}
 	
 	@Override
 	public int getSpacingHeight() {
-		return 20;
+		return this.height;
 	}
 	
 	@Override

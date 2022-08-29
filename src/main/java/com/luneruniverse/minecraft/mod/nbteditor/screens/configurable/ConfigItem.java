@@ -26,6 +26,7 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 		
 		this.onChanged = new ArrayList<>();
 		value.addValueListener(source -> onChanged.forEach(listener -> listener.onValueChanged(source)));
+		value.setParent(this);
 	}
 	private ConfigItem(Text name, V value, List<ConfigValueListener<ConfigValue<?, ?>>> onChanged) {
 		this(name, value);
@@ -57,8 +58,18 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 	}
 	
 	@Override
+	public int getSpacingWidth() {
+		return valueOffsetX + value.getSpacingWidth();
+	}
+	
+	@Override
 	public int getSpacingHeight() {
 		return Math.max(20, value.getSpacingHeight());
+	}
+	
+	@Override
+	public int getRenderWidth() {
+		return valueOffsetX + value.getRenderWidth();
 	}
 	
 	@Override

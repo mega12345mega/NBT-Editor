@@ -114,6 +114,11 @@ public class ConfigValueDropdown<T> extends ButtonWidget implements ConfigValue<
 	}
 	
 	@Override
+	public int getSpacingWidth() {
+		return this.width;
+	}
+	
+	@Override
 	public int getSpacingHeight() {
 		return this.height;
 	}

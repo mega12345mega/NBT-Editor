@@ -36,6 +36,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.ClickEvent.Action;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -84,7 +85,8 @@ public class GetCommand implements ClientCommand {
 	public static void loseItem(ItemStack item) {
 		LOST_ITEM = item;
 		MainUtil.client.player.sendMessage(Text.translatable("nbteditor.get.lost_item").append(Text.literal("§6/get lostitem")
-				.styled(style -> style.withClickEvent(new ClickEvent(Action.RUN_COMMAND, "/get lostitem")))), false);
+				.styled(style -> style.withClickEvent(new ClickEvent(Action.RUN_COMMAND, "/get lostitem"))
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("nbteditor.get.lost_item.hover"))))), false);
 	}
 	
 	
@@ -211,10 +213,12 @@ public class GetCommand implements ClientCommand {
 						}))))
 						.then(literal("update").executes(context -> {
 							context.getSource().sendFeedback(Text.translatable("nbteditor.hdb.updating_database"));
-							new Thread(() -> {
+							Thread thread = new Thread(() -> {
 								HeadAPI.updateDatabase();
 								context.getSource().sendFeedback(Text.translatable("nbteditor.hdb.updated_database"));
-							}, "Manual Head Refresh").start();
+							}, "NBTEditor/Async/HeadRefresh/Manual");
+							thread.setDaemon(true);
+							thread.start();
 							return Command.SINGLE_SUCCESS;
 						}))
 						.executes(context -> {

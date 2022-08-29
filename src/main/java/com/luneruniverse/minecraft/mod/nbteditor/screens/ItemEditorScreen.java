@@ -24,8 +24,8 @@ public abstract class ItemEditorScreen extends Screen {
 	protected ItemEditorScreen(Text title, ItemReference ref) {
 		super(title);
 		this.ref = ref;
-		this.savedItem = ref.getItem().copy();
-		this.item = savedItem.copy();
+		this.savedItem = MainUtil.copyAirable(ref.getItem());
+		this.item = MainUtil.copyAirable(savedItem);
 		this.saved = true;
 	}
 	
@@ -89,7 +89,7 @@ public abstract class ItemEditorScreen extends Screen {
 		return name.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
 	}
 	
-	public void setSaved(boolean saved) {
+	protected void setSaved(boolean saved) {
 		this.saved = saved;
 		if (saveBtn != null)
 			saveBtn.active = !saved;
@@ -108,9 +108,7 @@ public abstract class ItemEditorScreen extends Screen {
 	protected void checkSave() {
 		item.getOrCreateNbt(); // Make sure both items have NBT defined, so no NBT and empty NBT comes out equal
 		savedItem.getOrCreateNbt();
-		boolean saved = ItemStack.areEqual(item, savedItem);
-		if (saved != this.saved)
-			setSaved(saved);
+		setSaved(ItemStack.areEqual(item, savedItem));
 	}
 	
 	@Override

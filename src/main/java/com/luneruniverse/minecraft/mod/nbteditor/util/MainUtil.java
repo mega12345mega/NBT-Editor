@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -10,14 +11,20 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
+import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.ClickEvent.Action;
@@ -29,6 +36,7 @@ import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 public class MainUtil {
 	
@@ -48,6 +56,13 @@ public class MainUtil {
 	}
 	public static ItemReference getHeldItem() throws CommandSyntaxException {
 		return getHeldItem(item -> true, Text.translatable("nbteditor.noitem"));
+	}
+	public static ItemReference getHeldItemAirable() {
+		try {
+			return getHeldItem();
+		} catch (CommandSyntaxException e) {
+			return new ItemReference(Hand.MAIN_HAND);
+		}
 	}
 	
 	public static void saveItem(Hand hand, ItemStack item) {
@@ -332,6 +347,23 @@ public class MainUtil {
 		itemRenderer.zOffset = 0.0F;
 		matrixStack.pop();
 		RenderSystem.applyModelViewMatrix();
+	}
+	
+	
+	public static void addEnchants(Map<Enchantment, Integer> enchants, ItemStack stack) {
+		String key = (stack.getItem() == Items.ENCHANTED_BOOK ? EnchantedBookItem.STORED_ENCHANTMENTS_KEY : "Enchantments");
+		NbtList enchantsNbt = stack.getOrCreateNbt().getList(key, NbtType.COMPOUND);
+		enchants.forEach((type, lvl) -> enchantsNbt.add(EnchantmentHelper.createNbt(Registry.ENCHANTMENT.getId(type), lvl)));
+		stack.getOrCreateNbt().put(key, enchantsNbt);
+	}
+	
+	
+	public static ItemStack copyAirable(ItemStack item) {
+		ItemStack output = new ItemStack(item.getItem(), item.getCount());
+		output.setBobbingAnimationTime(item.getBobbingAnimationTime());
+		if (item.getNbt() != null)
+			output.setNbt(item.getNbt().copy());
+		return output;
 	}
 	
 }

@@ -48,7 +48,7 @@ public class SendPacketMixin {
 	    			sendingSafe = true;
 	    			ClientContainerScreen.updateServerInventory();
 	    			sendingSafe = false;
-	    		}).start();
+	    		}, "NBTEditor/Async/ServerInventoryUpdater").start();
 	    	}
     	}
     }

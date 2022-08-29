@@ -131,12 +131,39 @@ public class ClientContainerScreen extends GenericContainerScreen {
 			beforeClickItem = slot.getStack().copy();
 		beforeClickCursor = this.handler.getCursorStack().copy();
 		
-		if (slot != null && allowEnchantmentCombine(slot) && Screen.hasControlDown() && tryCombineEnchantments(slot, actionType)) {
+		if (slot != null && allowEnchantmentCombine(slot) && Screen.hasControlDown() && tryCombineEnchantments(slot, actionType))
 			onEnchantmentCombine(slot);
-			return;
-		}
+		else
+			super.onMouseClick(slot, slotId, button, actionType);
 		
-		super.onMouseClick(slot, slotId, button, actionType);
+		ItemStack[] prev = getPrevInventory();
+		if (prev == null)
+			return;
+		
+		boolean changed = false;
+		boolean lockRevertUsed = false;
+		boolean locked = lockSlots();
+		ItemStack[] prevInv = getPrevInventory();
+		for (int i = 0; i < this.handler.getInventory().size(); i++) {
+			if (!ItemStack.areEqual(prevInv[i] == null ? ItemStack.EMPTY : prevInv[i], this.handler.getInventory().getStack(i))) {
+				if (locked) {
+					if (prevInv[i] == null || prevInv[i].isEmpty())
+						changed = true;
+					else {
+						this.handler.getInventory().setStack(i, prevInv[i]);
+						lockRevertUsed = true;
+					}
+				} else {
+					changed = true;
+					break;
+				}
+			}
+		}
+		if (changed)
+			onChange();
+		
+		if (lockRevertUsed && beforeClickCursor != null && !beforeClickCursor.isEmpty() && client.player.isCreative())
+			GetCommand.loseItem(beforeClickCursor);
 	}
 	
 	public void throwCursor() {
@@ -164,7 +191,7 @@ public class ClientContainerScreen extends GenericContainerScreen {
 					item = temp;
 				}
 				
-				EnchantmentHelper.set(EnchantmentHelper.get(cursor), item);
+				MainUtil.addEnchants(EnchantmentHelper.get(cursor), item);
 				slot.setStack(item);
 				handler.setCursorStack(ItemStack.EMPTY);
 				return true;
@@ -177,6 +204,17 @@ public class ClientContainerScreen extends GenericContainerScreen {
 		return false;
 	}
 	public void onEnchantmentCombine(Slot slot) {
+		
+	}
+	
+	
+	public boolean lockSlots() {
+		return false;
+	}
+	public ItemStack[] getPrevInventory() {
+		return null; // Doesn't support slot locking or onChange calls
+	}
+	public void onChange() {
 		
 	}
 	

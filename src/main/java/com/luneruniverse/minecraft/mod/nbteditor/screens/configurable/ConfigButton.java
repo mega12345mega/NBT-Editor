@@ -31,6 +31,11 @@ public class ConfigButton extends ButtonWidget implements ConfigPath {
 	
 	
 	@Override
+	public int getSpacingWidth() {
+		return this.width;
+	}
+	
+	@Override
 	public int getSpacingHeight() {
 		return this.height;
 	}

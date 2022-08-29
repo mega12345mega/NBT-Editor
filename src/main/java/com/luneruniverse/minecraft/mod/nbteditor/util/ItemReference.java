@@ -4,8 +4,11 @@ import java.io.IOException;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
 
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
@@ -92,15 +95,15 @@ public class ItemReference {
 		this.saveQueue = new SaveQueue("Client Chest", () -> {
 			ItemStack item = toSave; // Thread safe
 			
-			ItemStack[] items = NBTEditorClient.getClientChestPage(page);
+			ItemStack[] items = NBTEditorClient.CLIENT_CHEST.getPage(page);
 			items[slot] = item;
 			try {
-				NBTEditorClient.setClientChestPage(page, items);
+				NBTEditorClient.CLIENT_CHEST.setPage(page, items);
 				
 				if (MainUtil.client.currentScreen instanceof ClientChestScreen)
 					((ClientChestScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStack(item);
 			} catch (IOException e) {
-				e.printStackTrace();
+				NBTEditor.LOGGER.error("Error while saving client chest", e);
 				MainUtil.client.player.sendMessage(Text.translatable("nbteditor.storage_save_error"), false);
 			}
 		}, true);
@@ -117,9 +120,12 @@ public class ItemReference {
 		this.saveQueue = new SaveQueue("Container", () -> {
 			ItemStack item = toSave;
 			
-			ItemChest chest = new ItemChest(parent.getItem().copy());
-			chest.setStack(slot, item);
-			parent.toSave = chest.getItem();
+			ItemStack chest = parent.getItem().copy();
+			ItemStack[] contents = ContainerIO.read(chest);
+			contents[slot] = item;
+			ContainerIO.write(chest, contents);
+			
+			parent.toSave = chest;
 			parent.saveQueue.getOnSave().run();
 			
 			// The recursive nature causes parent containers to also write items to the screen, hence the check
@@ -171,15 +177,36 @@ public class ItemReference {
 		else if (isArmorReference())
 			return MainUtil.client.player.getEquippedStack(armorSlot);
 		else if (isClientChestReference())
-			return NBTEditorClient.getClientChestPage(page)[slot];
+			return NBTEditorClient.CLIENT_CHEST.getPage(page)[slot];
 		else if (isContainerReference())
-			return new ItemChest(parent.getItem()).getStack(slot);
+			return ContainerIO.read(parent.getItem())[slot];
 		else
 			throw new IllegalStateException("Invalid item reference");
 	}
 	public void saveItem(ItemStack toSave, Runnable onFinished) {
 		this.toSave = toSave.copy();
 		this.saveQueue.save(onFinished);
+	}
+	
+	public boolean isLocked() {
+		if (isHandReference() || isInventoryReference() || isArmorReference())
+			return false;
+		else if (isClientChestReference())
+			return ConfigScreen.shouldLockSlots();
+		else if (isContainerReference())
+			return parent.isLocked();
+		else
+			throw new IllegalStateException("Invalid item reference");
+	}
+	public boolean isLockable() {
+		if (isHandReference() || isInventoryReference() || isArmorReference())
+			return false;
+		else if (isClientChestReference())
+			return true;
+		else if (isContainerReference())
+			return parent.isLockable();
+		else
+			throw new IllegalStateException("Invalid item reference");
 	}
 	
 	public void showParent() {

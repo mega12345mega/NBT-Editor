@@ -1,4 +1,8 @@
 {
+	"nbteditor.outdated.title": "NBT Editor Outdated",
+	"nbteditor.outdated.desc": "A new update has been released!",
+	
+	
 	"nbteditor.ok": "Ok",
 	"nbteditor.cancel": "Cancel",
 	
@@ -9,6 +13,7 @@
 	
 	"nbteditor.noitem": "You must be holding an item to edit!",
 	"nbteditor.noitem_view": "You must be holding an item to view!",
+	"nbteditor.allitem": "§cYou must be holding an empty slot to edit a new item!",
 	"nbteditor.save": "Save Item",
 	"nbteditor.saving": "Saving ...",
 	"nbteditor.name": "Name",
@@ -34,10 +39,16 @@
 	"nbteditor.notsaved.yes": "Save",
 	"nbteditor.notsaved.no": "Discard Changes",
 	
+	"nbteditor.saving_air.title": "Data Loss!",
+	"nbteditor.saving_air.desc": "You are saving air, which loses its NBT data. Continue?",
+	"nbteditor.saving_air.yes": "Save",
+	"nbteditor.saving_air.no": "Cancel",
+	
 	"itemGroup.nbteditor.client_chest": "Client Chest",
 	"itemGroup.nbteditor.creative": "Creative Inventory",
 	"nbteditor.clientchest": "Nbt Editor >> Client Chest",
 	"nbteditor.storage_save_error": "§cUnable to save client storage!",
+	"nbteditor.clientchest.notloaded": "§cThe client chest hasn't finished loading! Does it have a lot of data?",
 	"nbteditor.lock_slots": "Lock Slots",
 	"nbteditor.unlock_slots": "Unlock Slots",
 	"nbteditor.reload_page": "Reload Page",
@@ -49,7 +60,7 @@
 	"nbteditor.clearpage.no": "Cancel",
 	
 	"nbteditor.items": "Nbt Editor >> ",
-	"nbteditor.nocontainer": "You must be holding a container with 27 slots!",
+	"nbteditor.nocontainer": "You must be holding a container!",
 	
 	"nbteditor.signature_added": "§aSignature added!",
 	"nbteditor.signature_removed": "§aSignature removed!",
@@ -66,6 +77,7 @@
 	
 	"nbteditor.get.item": "§aReceived: ",
 	"nbteditor.get.lost_item": "§cYou may have lost an item - ",
+	"nbteditor.get.lost_item.hover": "Click to execute",
 	"nbteditor.get.lost_item.none": "§cThere are no lost items saved!",
 	
 	"nbteditor.hideflags": "Hide Flags",
@@ -97,7 +109,14 @@
 	"nbteditor.attributes.attribute": "Attribute",
 	"nbteditor.attributes.operation": "Operation",
 	"nbteditor.attributes.amount": "Amount",
+	"nbteditor.attributes.amount.max": "Maximum",
+	"nbteditor.attributes.amount.min": "Minimum",
+	"nbteditor.attributes.amount.infinity": "Infinite",
+	"nbteditor.attributes.amount.negative_infinity": "-Infinite",
+	"nbteditor.attributes.amount.autofill_keybinds": "Hold shift for infinity\nHold ctrl for minimum",
 	"nbteditor.attributes.slot": "Slot",
+	"nbteditor.attributes.newuuids.success": "§aAttribute UUIDs randomized!",
+	"nbteditor.attributes.newuuids.none": "§cThere are no attributes on this item!",
 	
 	"nbteditor.enchantments": "Enchantments",
 	"nbteditor.enchantments.enchantment": "Enchantment",
@@ -135,6 +154,10 @@
 	"nbteditor.config.dont_use_skizzers": "Enabled",
 	"nbteditor.config.scroll_speed": "Scroll Speed: %d",
 	"nbteditor.config.scroll_speed_desc": "Increase/decrease the speed\nof scrolling in NBT Editor menus",
+	"nbteditor.config.air_editing": "Air Editing",
+	"nbteditor.config.air_editing_desc": "Allow working with air in the nbt editor menu\n\n§eThis is an experimental feature!\n§cKeep a backup of important items.",
+	"nbteditor.config.air_editing_enabled": "Enabled",
+	"nbteditor.config.air_editing_disabled": "Disabled",
 	
 	
 	"nbteditor.configurable.list.move": "Move",

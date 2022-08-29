@@ -57,6 +57,11 @@ public class ConfigValueBoolean extends ButtonWidget implements ConfigValue<Bool
 	}
 	
 	@Override
+	public int getSpacingWidth() {
+		return this.width;
+	}
+	
+	@Override
 	public int getSpacingHeight() {
 		return this.height;
 	}

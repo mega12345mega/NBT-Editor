@@ -16,7 +16,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-public class ConfigList extends ConfigGrouping<Integer, ConfigList> {
+public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 	
 	private static class ConfigListEntry implements ConfigPath {
 		
@@ -113,8 +113,18 @@ public class ConfigList extends ConfigGrouping<Integer, ConfigList> {
 		}
 		
 		@Override
+		public int getSpacingWidth() {
+			return indexTextOffset + value.getSpacingWidth();
+		}
+		
+		@Override
 		public int getSpacingHeight() {
 			return Math.max(20, value.getSpacingHeight());
+		}
+		
+		@Override
+		public int getRenderWidth() {
+			return indexTextOffset + value.getRenderWidth();
 		}
 		
 		@Override
@@ -286,7 +296,9 @@ public class ConfigList extends ConfigGrouping<Integer, ConfigList> {
 		if (key < 0 || key >= paths.size())
 			throw new ArrayIndexOutOfBoundsException(key);
 		
-		return super.setConfigurable(key, new ConfigListEntry(this, path, paths.size() - 1, indexed));
+		super.setConfigurable(key, new ConfigListEntry(this, path, paths.size() - 1, indexed));
+		path.setParent(this);
+		return this;
 	}
 	@Override
 	public ConfigPath getConfigurable(Integer key) {

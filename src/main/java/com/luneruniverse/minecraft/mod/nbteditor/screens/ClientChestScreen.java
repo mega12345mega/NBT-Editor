@@ -4,8 +4,9 @@ import java.io.IOException;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.commands.GetCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
@@ -30,6 +31,11 @@ public class ClientChestScreen extends ClientContainerScreen {
 	public static int nextPageJumpTarget;
 	
 	public static void show() {
+		if (!NBTEditorClient.CLIENT_CHEST.isLoaded()) {
+			MainUtil.client.player.sendMessage(Text.translatable("nbteditor.clientchest.notloaded"));
+			return;
+		}
+		
 		if (MainUtil.client.currentScreen instanceof ClientChestScreen) {
 			ClientChestScreen screen = (ClientChestScreen) MainUtil.client.currentScreen;
 			((ClientChestHandler) screen.handler).fillPage();
@@ -50,9 +56,9 @@ public class ClientChestScreen extends ClientContainerScreen {
 		for (int i = 0; i < this.handler.getInventory().size(); i++)
 			items[i] = this.handler.getInventory().getStack(i).copy();
 		try {
-			NBTEditorClient.setClientChestPage(page, items);
+			NBTEditorClient.CLIENT_CHEST.setPage(page, items);
 		} catch (IOException e) {
-			e.printStackTrace();
+			NBTEditor.LOGGER.error("Error while saving client chest", e);
 			this.client.player.sendMessage(Text.translatable("nbteditor.storage_save_error"), false);
 		}
 	}, true);
@@ -97,7 +103,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 				return output;
 			}
 		};
-		pageField.setMaxLength(1000);
+		pageField.setMaxLength((int) Math.ceil(Math.log10(NBTEditorClient.CLIENT_CHEST.getMaxPages() + 1)));
 		pageField.setText((PAGE + 1) + "");
 		pageField.setChangedListener(str -> {
 			if (str.isEmpty() || str.equals("0"))
@@ -112,7 +118,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 			
 			try {
 				int num = Integer.parseInt(str);
-				return num > 0 && num <= 100;
+				return num > 0 && num <= NBTEditorClient.CLIENT_CHEST.getMaxPages();
 			} catch (NumberFormatException e) {
 				return false;
 			}
@@ -140,21 +146,19 @@ public class ClientChestScreen extends ClientContainerScreen {
 			show();
 		}));
 		
-		ButtonWidget lockSlots;
-		this.addDrawableChild(lockSlots = new ButtonWidget(this.x - 87, this.y + 48, 83, 20, ConfigScreen.shouldLockSlots() ? Text.translatable("nbteditor.unlock_slots") : Text.translatable("nbteditor.lock_slots"), btn -> {
+		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 48, 83, 20, ConfigScreen.shouldLockSlots() ? Text.translatable("nbteditor.unlock_slots") : Text.translatable("nbteditor.lock_slots"), btn -> {
 			navigationClicked = true;
 			ConfigScreen.setLockSlots(!ConfigScreen.shouldLockSlots());
 			btn.setMessage(ConfigScreen.shouldLockSlots() ? Text.translatable("nbteditor.unlock_slots") : Text.translatable("nbteditor.lock_slots"));
-		}));
-		lockSlots.active = !ConfigScreen.shouldDisableLockSlotsButton();
+		})).active = !ConfigScreen.shouldDisableLockSlotsButton();
 		
 		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 72, 83, 20, Text.translatable("nbteditor.reload_page"), btn -> {
 			navigationClicked = true;
 			try {
-				NBTEditorClient.loadClientChestPage(PAGE);
+				NBTEditorClient.CLIENT_CHEST.loadSync(PAGE);
 				show();
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				NBTEditor.LOGGER.error("Error while reloading client chest", e);
 			}
 		}));
 		
@@ -175,7 +179,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 		updatePageNavigation();
 	}
 	public void updatePageNavigation() {
-		int[] jumps = NBTEditorClient.getClientChestJumpPages(PAGE);
+		int[] jumps = NBTEditorClient.CLIENT_CHEST.getNearestItems(PAGE);
 		prevPageJumpTarget = jumps[0] == -1 ? (PAGE == 0 ? -1 : 0) : jumps[0];
 		nextPageJumpTarget = jumps[1] == -1 ? (PAGE == 99 ? -1 : 99) : jumps[1];
 		
@@ -196,11 +200,11 @@ public class ClientChestScreen extends ClientContainerScreen {
 		
 		if (keyCode == GLFW.GLFW_KEY_SPACE) {
 			Slot hoveredSlot = this.focusedSlot;
-			if (hoveredSlot != null && hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty()) {
+			if (hoveredSlot != null && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
 				int slot = hoveredSlot.getIndex();
 				ItemReference ref = hoveredSlot.inventory == client.player.getInventory() ? new ItemReference(slot >= 36 ? slot - 36 : slot) : new ItemReference(PAGE, hoveredSlot.getIndex());
 				if (hasControlDown()) {
-					if (ItemsScreen.isContainer(hoveredSlot.getStack()))
+					if (hoveredSlot.getStack() != null && ContainerIO.isContainer(hoveredSlot.getStack()))
 						ItemsScreen.show(ref);
 				} else
 					client.setScreen(new NBTEditorScreen(ref));
@@ -225,34 +229,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 		if (navigationClicked)
 			return;
 		
-		ItemStack cursor = this.handler.getCursorStack();
-		
 		super.onMouseClick(slot, slotId, button, actionType);
-		
-		boolean shouldSave = false;
-		boolean lockRevertUsed = false;
-		boolean locked = ConfigScreen.shouldLockSlots();
-		ItemStack[] page = NBTEditorClient.getClientChestPage(PAGE);
-		for (int i = 0; i < this.handler.getInventory().size(); i++) {
-			if (!ItemStack.areEqual(page[i] == null ? ItemStack.EMPTY : page[i], this.handler.getInventory().getStack(i))) {
-				if (locked) {
-					if (page[i] == null || page[i].isEmpty())
-						shouldSave = true;
-					else {
-						this.handler.getInventory().setStack(i, page[i]);
-						lockRevertUsed = true;
-					}
-				} else {
-					shouldSave = true;
-					break;
-				}
-			}
-		}
-		if (shouldSave)
-			save();
-		
-		if (lockRevertUsed && cursor != null && !cursor.isEmpty() && client.player.isCreative())
-			GetCommand.loseItem(cursor);
 	}
 	@Override
 	public boolean allowEnchantmentCombine(Slot slot) {
@@ -260,6 +237,18 @@ public class ClientChestScreen extends ClientContainerScreen {
 	}
 	@Override
 	public void onEnchantmentCombine(Slot slot) {
+		save();
+	}
+	@Override
+	public boolean lockSlots() {
+		return ConfigScreen.shouldLockSlots();
+	}
+	@Override
+	public ItemStack[] getPrevInventory() {
+		return NBTEditorClient.CLIENT_CHEST.getPage(PAGE);
+	}
+	@Override
+	public void onChange() {
 		save();
 	}
 	

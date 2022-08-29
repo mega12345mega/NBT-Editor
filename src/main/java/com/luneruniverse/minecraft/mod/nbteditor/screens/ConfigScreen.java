@@ -62,6 +62,7 @@ public class ConfigScreen extends GameOptionsScreen {
 	private static boolean allowSingleQuotes;
 	private static boolean keySkizzers;
 	private static double scrollSpeed;
+	private static boolean airEditable;
 	
 	public static void loadSettings() {
 		maxEnchantLevelDisplay = MaxEnchantLevelDisplay.NEVER;
@@ -72,6 +73,7 @@ public class ConfigScreen extends GameOptionsScreen {
 		allowSingleQuotes = false;
 		keySkizzers = true;
 		scrollSpeed = 1;
+		airEditable = false;
 		
 		try {
 			JsonObject settings = new Gson().fromJson(new String(Files.readAllBytes(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath())), JsonObject.class);
@@ -84,11 +86,12 @@ public class ConfigScreen extends GameOptionsScreen {
 			allowSingleQuotes = settings.get("allowSingleQuotes").getAsBoolean();
 			keySkizzers = settings.get("keySkizzers").getAsBoolean();
 			scrollSpeed = settings.get("scrollSpeed").getAsDouble();
+			airEditable = settings.get("airEditable").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
 		} catch (Exception e) {
-			e.printStackTrace();
+			NBTEditor.LOGGER.error("Error while loading settings", e);
 		}
 	}
 	private static void saveSettings() {
@@ -102,11 +105,12 @@ public class ConfigScreen extends GameOptionsScreen {
 		settings.addProperty("allowSingleQuotes", allowSingleQuotes);
 		settings.addProperty("keySkizzers", keySkizzers);
 		settings.addProperty("scrollSpeed", scrollSpeed);
+		settings.addProperty("airEditable", airEditable);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
 		} catch (IOException e) {
-			e.printStackTrace();
+			NBTEditor.LOGGER.error("Error while saving settings", e);
 		}
 	}
 	
@@ -162,6 +166,9 @@ public class ConfigScreen extends GameOptionsScreen {
 	}
 	public static double getScrollSpeed() {
 		return scrollSpeed;
+	}
+	public static boolean isAirEditable() {
+		return airEditable;
 	}
 	
 	
@@ -230,7 +237,14 @@ public class ConfigScreen extends GameOptionsScreen {
 						(text, value) -> Text.translatable("nbteditor.config.scroll_speed", scrollSpeed),
 						DoubleSliderCallbacks.INSTANCE,
 						(scrollSpeed - 0.5) / 1.5,
-						value -> scrollSpeed = Math.floor((value * 1.5 + 0.5) * 20) / 20)
+						value -> scrollSpeed = Math.floor((value * 1.5 + 0.5) * 20) / 20),
+				
+				new SimpleOption<>("nbteditor.config.air_editing",
+						SimpleTooltip.of("nbteditor.config.air_editing_desc"),
+						(text, value) -> Text.translatable(value ? "nbteditor.config.air_editing_enabled" : "nbteditor.config.air_editing_disabled"),
+						new LazyCyclingCallbacks<>(() -> List.of(false, true), Optional::of, null),
+						airEditable,
+						value -> airEditable = value)
 		});
 		
 		this.addSelectableChild(this.list);

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
@@ -65,7 +67,7 @@ public class ItemChest {
 							try {
 								inv.setStack(containedItem.getByte("Slot"), ItemStack.fromNbt(containedItem));
 							} catch (Exception e) {
-								e.printStackTrace();
+								NBTEditor.LOGGER.error("Error while reading a container", e);
 							}
 						}
 					}
@@ -99,9 +101,20 @@ public class ItemChest {
 	public void setStack(int slot, ItemChest item) {
 		setStack(slot, item.getItem());
 	}
+	public void setAll(ItemStack[] items) {
+		for (int i = 0; i < items.length; i++)
+			inv.setStack(i, items[i]);
+		save();
+	}
 	
 	public ItemStack getStack(int slot) {
 		return inv.getStack(slot);
+	}
+	public ItemStack[] getAll() {
+		ItemStack[] output = new ItemStack[inv.size()];
+		for (int i = 0; i < output.length; i++)
+			output[i] = inv.getStack(i);
+		return output;
 	}
 	
 	private void save() {

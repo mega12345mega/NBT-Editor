@@ -16,7 +16,9 @@
     "CreativeInventoryScreenMixin",
     "ItemStackMixin",
     "HandledScreenAccessor",
-    "TextFieldWidgetMixin"
+    "TextFieldWidgetMixin",
+    "MinecraftClientMixin",
+    "BoatItemAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

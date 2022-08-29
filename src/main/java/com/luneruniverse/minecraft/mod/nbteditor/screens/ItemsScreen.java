@@ -2,20 +2,15 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.commands.GetCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.fabricmc.fabric.api.util.NbtType;
-import net.minecraft.block.BarrelBlock;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.ShulkerBoxBlock;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -24,22 +19,16 @@ import net.minecraft.util.Hand;
 
 public class ItemsScreen extends ClientContainerScreen {
 	
-	public static boolean isContainer(ItemStack item) {
-		return item.getItem() instanceof BlockItem && (
-				((BlockItem) item.getItem()).getBlock() instanceof ShulkerBoxBlock ||
-				((BlockItem) item.getItem()).getBlock() instanceof ChestBlock ||
-				((BlockItem) item.getItem()).getBlock() instanceof BarrelBlock
-			);
-	}
-	
-	
-	
 	private boolean saved;
 	private final Text unsavedTitle;
 	
 	private ItemReference ref;
 	private ItemStack item;
 	private int slot;
+	private int numSlots;
+	
+	private ItemStack[] prevInv;
+	private boolean navigationClicked;
 	
 	public ItemsScreen(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
 		super(handler, inventory, title);
@@ -52,25 +41,10 @@ public class ItemsScreen extends ClientContainerScreen {
 		this.item = ref.getItem().copy();
 		this.slot = ref.getHand() == Hand.MAIN_HAND ? ref.getHotbarSlot() + 36 + 27 - 9 : (ref.getHand() == Hand.OFF_HAND ? 40 : ref.getInvSlot() + 27);
 		
-		if (item.hasNbt()) {
-			NbtCompound nbt = item.getNbt();
-			if (nbt.contains("BlockEntityTag", NbtType.COMPOUND)) {
-				NbtCompound blockEntityTag = nbt.getCompound("BlockEntityTag");
-				if (blockEntityTag.contains("Items", NbtType.LIST)) {
-					NbtList items = blockEntityTag.getList("Items", NbtType.COMPOUND);
-					if (!items.isEmpty()) {
-						for (NbtElement containedItemElement : items) {
-							NbtCompound containedItem = (NbtCompound) containedItemElement;
-							try {
-								this.handler.getSlot(containedItem.getByte("Slot")).setStack(ItemStack.fromNbt(containedItem));
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					}
-				}
-			}
-		}
+		ItemStack[] contents = ContainerIO.read(item);
+		for (int i = 0; i < contents.length; i++)
+			this.handler.getSlot(i).setStack(contents[i] == null ? ItemStack.EMPTY : contents[i]);
+		this.numSlots = contents.length;
 		
 		return this;
 	}
@@ -81,67 +55,16 @@ public class ItemsScreen extends ClientContainerScreen {
 	}
 	
 	@Override
-	protected void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
-		if (slot != null && slot.id == this.slot)
-			return;
-		if (actionType == SlotActionType.SWAP && button == ref.getHotbarSlot())
-			return;
+	protected void init() {
+		super.init();
 		
-		super.onMouseClick(slot, slotId, button, actionType);
-		save();
-	}
-	@Override
-	public boolean allowEnchantmentCombine(Slot slot) {
-		return slot.id != this.slot;
-	}
-	@Override
-	public void onEnchantmentCombine(Slot slot) {
-		save();
-	}
-	private void save() {
-		NbtCompound nbt = item.getOrCreateNbt();
-		if (!nbt.contains("BlockEntityTag", NbtType.COMPOUND))
-			nbt.put("BlockEntityTag", new NbtCompound());
-		NbtCompound blockEntityTag = nbt.getCompound("BlockEntityTag");
-		NbtList items = blockEntityTag.getList("Items", NbtType.COMPOUND);
-		blockEntityTag.put("Items", items);
-		
-		items.clear();
-		for (int i = 0; i < this.handler.getInventory().size(); i++) {
-			ItemStack item = this.handler.getInventory().getStack(i);
-			if (item == null || item.isEmpty())
-				continue;
-			NbtCompound itemNbt = new NbtCompound();
-			itemNbt.putByte("Slot", (byte) i);
-			item.writeNbt(itemNbt);
-			items.add(itemNbt);
+		if (ref.isLockable()) {
+			this.addDrawableChild(new ButtonWidget(16, 64, 83, 20, ConfigScreen.shouldLockSlots() ? Text.translatable("nbteditor.unlock_slots") : Text.translatable("nbteditor.lock_slots"), btn -> {
+				navigationClicked = true;
+				ConfigScreen.setLockSlots(!ConfigScreen.shouldLockSlots());
+				btn.setMessage(ConfigScreen.shouldLockSlots() ? Text.translatable("nbteditor.unlock_slots") : Text.translatable("nbteditor.lock_slots"));
+			})).active = !ConfigScreen.shouldDisableLockSlotsButton();
 		}
-		
-		saved = false;
-		ref.saveItem(item, () -> {
-			saved = true;
-		});
-	}
-	
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (ref.keyPressed(keyCode, scanCode, modifiers))
-			return true;
-		
-		if (keyCode == GLFW.GLFW_KEY_SPACE) {
-			Slot hoveredSlot = this.focusedSlot;
-			if (hoveredSlot != null && hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty()) {
-				int slot = hoveredSlot.getIndex();
-				ItemReference ref = hoveredSlot.inventory == client.player.getInventory() ? new ItemReference(slot >= 36 ? slot - 36 : slot) : new ItemReference(this.ref, hoveredSlot.getIndex());
-				if (hasControlDown()) {
-					if (ItemsScreen.isContainer(hoveredSlot.getStack()))
-						ItemsScreen.show(ref);
-				} else
-					client.setScreen(new NBTEditorScreen(ref));
-				return true;
-			}
-		}
-		
-		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 	
 	@Override
@@ -157,12 +80,99 @@ public class ItemsScreen extends ClientContainerScreen {
 	}
 	
 	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		navigationClicked = false;
+		return super.mouseClicked(mouseX, mouseY, button);
+	}
+	
+	@Override
+	protected void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
+		if (navigationClicked)
+			return;
+		if (slot != null && slot.id == this.slot)
+			return;
+		if (actionType == SlotActionType.SWAP && button == ref.getHotbarSlot())
+			return;
+		if (slot != null && slot.id >= numSlots && slot.inventory == this.handler.getInventory() && (slot.getStack() == null || slot.getStack().isEmpty()))
+			return;
+		
+		prevInv = new ItemStack[this.handler.getInventory().size()];
+		for (int i = 0; i < prevInv.length; i++)
+			prevInv[i] = this.handler.getInventory().getStack(i).copy();
+		
+		super.onMouseClick(slot, slotId, button, actionType);
+	}
+	@Override
+	public boolean allowEnchantmentCombine(Slot slot) {
+		return slot.id != this.slot;
+	}
+	@Override
+	public void onEnchantmentCombine(Slot slot) {
+		save();
+	}
+	@Override
+	public boolean lockSlots() {
+		return ref.isLocked();
+	}
+	@Override
+	public ItemStack[] getPrevInventory() {
+		return prevInv;
+	}
+	@Override
+	public void onChange() {
+		save();
+	}
+	private void save() {
+		ItemStack[] contents = new ItemStack[this.handler.getInventory().size()];
+		for (int i = 0; i < contents.length; i++)
+			contents[i] = this.handler.getInventory().getStack(i);
+		ContainerIO.write(item, contents);
+		
+		saved = false;
+		ref.saveItem(item, () -> {
+			saved = true;
+		});
+	}
+	
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (ref.keyPressed(keyCode, scanCode, modifiers))
+			return true;
+		
+		if (keyCode == GLFW.GLFW_KEY_SPACE) {
+			Slot hoveredSlot = this.focusedSlot;
+			if (hoveredSlot != null && (hoveredSlot.id < numSlots || hoveredSlot.inventory != this.handler.getInventory()) && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
+				int slot = hoveredSlot.getIndex();
+				ItemReference ref = hoveredSlot.inventory == client.player.getInventory() ? new ItemReference(slot >= 36 ? slot - 36 : slot) : new ItemReference(this.ref, hoveredSlot.getIndex());
+				if (hasControlDown()) {
+					if (hoveredSlot.getStack() != null && ContainerIO.isContainer(hoveredSlot.getStack()))
+						ItemsScreen.show(ref);
+				} else
+					client.setScreen(new NBTEditorScreen(ref));
+				return true;
+			}
+		}
+		
+		return super.keyPressed(keyCode, scanCode, modifiers);
+	}
+	
+	@Override
 	public boolean shouldPause() {
 		return true;
 	}
 	
 	public ItemReference getReference() {
 		return ref;
+	}
+	
+	@Override
+	public void removed() {
+		for (int i = numSlots; i < 27; i++) { // Items that may get deleted
+			ItemStack item = this.handler.getInventory().getStack(i);
+			if (item != null && !item.isEmpty())
+				GetCommand.get(item, true);
+		}
+		
+		super.removed();
 	}
 	
 }

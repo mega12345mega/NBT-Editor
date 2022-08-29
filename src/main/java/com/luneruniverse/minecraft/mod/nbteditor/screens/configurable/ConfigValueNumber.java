@@ -86,15 +86,20 @@ public abstract class ConfigValueNumber<T extends Number, V extends ConfigValueN
 	}
 	@Override
 	public void setChangedListener(Consumer<String> changedListener) {
-		throw new UnsupportedOperationException("Use setValueListener instead!");
+		throw new UnsupportedOperationException("Use addValueListener instead!");
 	}
 	
 	protected abstract T parse(String value) throws NumberFormatException;
 	
 	
 	@Override
+	public int getSpacingWidth() {
+		return this.width;
+	}
+	
+	@Override
 	public int getSpacingHeight() {
-		return 20;
+		return this.height;
 	}
 	
 	@Override

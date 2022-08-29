@@ -20,7 +20,7 @@ public class InternalItems {
 					.getResource(new Identifier("nbteditor", "internalitems/" + name + ".nbt")).orElseThrow().getInputStream()));
 			return ItemStack.fromNbt(nbt);
 		} catch (IOException | NoSuchElementException e) {
-			e.printStackTrace();
+			NBTEditor.LOGGER.error("Error while loading internal item '" + name + "'", e);
 			return null;
 		}
 	}

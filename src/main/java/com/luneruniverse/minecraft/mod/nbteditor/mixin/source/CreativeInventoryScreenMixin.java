@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.InventoryScreen;
 
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -24,7 +25,7 @@ public class CreativeInventoryScreenMixin {
 			}
 			InventoryScreen.onMouseClick(slot, slotId, button, actionType, (HandledScreen<?>) (Object) this, info);
 		} catch (Exception e) {
-			e.printStackTrace();
+			NBTEditor.LOGGER.error("Error while handling slot click", e);
 		}
 	}
 	

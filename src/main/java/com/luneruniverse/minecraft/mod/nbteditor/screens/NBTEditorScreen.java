@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
@@ -25,6 +26,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.argument.NbtElementArgumentType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.AbstractNbtList;
 import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtByte;
@@ -99,7 +101,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 				} else if (list.getHeldType() == value.getType())
 					list.set(index, (T) value);
 			} catch (NumberFormatException e) {
-				e.printStackTrace();
+				NBTEditor.LOGGER.error("Error while modifying a list", e);
 			}
 		}
 		@SuppressWarnings("unchecked")
@@ -114,7 +116,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			try {
 				((AbstractNbtList<T>) source).remove(Integer.parseInt(key));
 			} catch (NumberFormatException e) {
-				e.printStackTrace();
+				NBTEditor.LOGGER.error("Error while modifying a list", e);
 			}
 		}
 		@SuppressWarnings("unchecked")
@@ -171,7 +173,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 				
 				return true;
 			} catch (NumberFormatException e) {
-				e.printStackTrace();
+				NBTEditor.LOGGER.error("Error while modifying a list", e);
 				return true;
 			}
 		}
@@ -540,22 +542,27 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			} catch (InvalidIdentifierException e) {
 				return;
 			}
+			boolean airEditable = ConfigScreen.isAirEditable();
+			if (!airEditable && Registry.ITEM.get(new Identifier(str)) == Items.AIR)
+				return;
 			
 			NbtCompound fullData = new NbtCompound();
 			item.writeNbt(fullData);
 			fullData.putString("id", str);
+			if (airEditable)
+				fullData.putInt("Count", Integer.parseInt(count.getText()));
 			ItemStack editedItem = ItemStack.fromNbt(fullData);
 			if (editedItem == ItemStack.EMPTY)
 				return;
 			
 			item = editedItem;
-			updateName();
+			genEditor();
 		});
 		this.addSelectableChild(type);
 		
 		count = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32, 72, 16, Text.of("")).name(Text.translatable("nbteditor.count"));
 		count.setMaxLength(Integer.MAX_VALUE);
-		count.setText(item.getCount() + "");
+		count.setText((ConfigScreen.isAirEditable() ? Math.max(1, item.getCount()) : item.getCount()) + "");
 		count.setChangedListener(str -> {
 			if (str.isEmpty())
 				return;
@@ -732,6 +739,21 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		this.path.tick();
 		this.value.tick();
 		checkSave();
+	}
+	@Override
+	protected void save() {
+		if (!item.isEmpty() || item.getNbt() == null || item.getNbt().isEmpty()) {
+			super.save();
+			return;
+		}
+		
+		MainUtil.client.setScreen(new FancyConfirmScreen(value -> {
+			if (value)
+				super.save();
+			
+			MainUtil.client.setScreen(NBTEditorScreen.this);
+		}, Text.translatable("nbteditor.saving_air.title"), Text.translatable("nbteditor.saving_air.desc"),
+				Text.translatable("nbteditor.saving_air.yes"), Text.translatable("nbteditor.saving_air.no")));
 	}
 	
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {

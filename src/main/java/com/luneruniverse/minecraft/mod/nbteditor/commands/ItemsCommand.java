@@ -5,6 +5,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 import java.util.Arrays;
 import java.util.List;
 
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
@@ -20,7 +21,7 @@ public class ItemsCommand implements ClientCommand {
 	@Override
 	public LiteralCommandNode<FabricClientCommandSource> register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess cmdReg) {
 		return dispatcher.register(literal("items").executes(context -> {
-			ItemsScreen.show(MainUtil.getHeldItem(ItemsScreen::isContainer, Text.translatable("nbteditor.nocontainer")));
+			ItemsScreen.show(MainUtil.getHeldItem(ContainerIO::isContainer, Text.translatable("nbteditor.nocontainer")));
 			return Command.SINGLE_SUCCESS;
 		}));
 	}

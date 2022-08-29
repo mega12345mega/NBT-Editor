@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
@@ -36,7 +37,7 @@ public class SignatureCommand implements ClientCommand {
 			try {
 				signature = Text.Serializer.fromJson(new String(Files.readAllBytes(SIGNATURE_FILE.toPath())));
 			} catch (IOException e) {
-				e.printStackTrace();
+				NBTEditor.LOGGER.error("Error while loading signature", e);
 				signature = Text.translatable("nbteditor.signature_load_error");
 			}
 		}
@@ -96,7 +97,7 @@ public class SignatureCommand implements ClientCommand {
 						try {
 							Files.write(SIGNATURE_FILE.toPath(), Text.Serializer.toJson(signature).getBytes());
 						} catch (IOException e) {
-							e.printStackTrace();
+							NBTEditor.LOGGER.error("Error while saving signature", e);
 							throw new SimpleCommandExceptionType(Text.translatable("nbteditor.signature_save_error")).create();
 						}
 						

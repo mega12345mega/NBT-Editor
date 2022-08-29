@@ -1,20 +1,21 @@
-package tsp.headdb.ported;
+package com.luneruniverse.minecraft.mod.nbteditor.async;
+
+import tsp.headdb.ported.HeadAPI;
 
 public class HeadRefreshThread extends Thread {
 	
 	public HeadRefreshThread() {
-		super("Auto Head Refresh");
+		super("NBTEditor/Async/HeadRefresh/Auto");
 		setDaemon(true);
 	}
 	
 	@Override
 	public void run() {
 		while (true) {
-			if (HeadAPI.getDatabase().isLastUpdateOld())
-				HeadAPI.updateDatabase();
+			HeadAPI.updateDatabase();
 			
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(HeadAPI.getDatabase().getTimeUntilLastUpdateOld() * 1000);
 			} catch (InterruptedException e) {
 				return;
 			}
