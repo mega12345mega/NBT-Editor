@@ -5,11 +5,11 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.Validate;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.text.Text;
 
 public class LocalHead extends Head {
 
@@ -25,10 +25,10 @@ public class LocalHead extends Head {
         Validate.notNull(uuid, "uuid must not be null!");
         
         ItemStack item = new ItemStack(Items.PLAYER_HEAD);
-        item.setCustomName(Text.of(Utils.colorize("&e" + name)));
+        item.setCustomName(TextInst.of(Utils.colorize("&e" + name)));
         item.getOrCreateNbt().putString("SkullOwner", name);
         Lore lore = new Lore(item);
-        lore.addLine(Text.of(Utils.colorize("&7UUID: " + uuid.toString())));
+        lore.addLine(TextInst.of(Utils.colorize("&7UUID: " + uuid.toString())));
         
         return item;
     }

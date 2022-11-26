@@ -1,26 +1,28 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
-
-import com.luneruniverse.minecraft.mod.nbteditor.commands.SubCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.BlockStatesScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.BlockItem;
-import net.minecraft.text.Text;
 
-public class BlockStatesCommand implements SubCommand {
+public class BlockStatesCommand extends ClientCommand {
 	
 	@Override
-	public LiteralArgumentBuilder<FabricClientCommandSource> register(LiteralArgumentBuilder<FabricClientCommandSource> parent, CommandRegistryAccess cmdReg) {
-		return parent.then(literal("blockstates").executes(context -> {
-			MainUtil.client.setScreen(new BlockStatesScreen(MainUtil.getHeldItem(item -> item.getItem() instanceof BlockItem, Text.translatable("nbteditor.noblock"))));
+	public String getName() {
+		return "blockstates";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+		builder.executes(context -> {
+			MainUtil.client.setScreen(new BlockStatesScreen(MainUtil.getHeldItem(item -> item.getItem() instanceof BlockItem, TextInst.translatable("nbteditor.no_hand.no_item.block"))));
 			return Command.SINGLE_SUCCESS;
-		}));
+		});
 	}
 	
 }

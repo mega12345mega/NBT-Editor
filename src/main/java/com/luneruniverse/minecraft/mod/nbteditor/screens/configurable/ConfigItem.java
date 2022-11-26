@@ -3,9 +3,11 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.luneruniverse.minecraft.mod.nbteditor.screens.SimpleTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.widget.ButtonWidget.TooltipSupplier;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
@@ -17,6 +19,8 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 	private final int valueOffsetY;
 	
 	private final List<ConfigValueListener<ConfigValue<?, ?>>> onChanged;
+	
+	private TooltipSupplier tooltip;
 	
 	public ConfigItem(Text name, V value) {
 		this.name = name;
@@ -37,6 +41,15 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 		return value;
 	}
 	
+	public ConfigItem<V> setTooltip(TooltipSupplier tooltip) {
+		this.tooltip = tooltip;
+		return this;
+	}
+	public ConfigItem<V> setTooltip(String... keys) {
+		setTooltip(new SimpleTooltip(keys));
+		return this;
+	}
+	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		DrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, name, 0, (getSpacingHeight() - MainUtil.client.textRenderer.fontHeight) / 2, 0xFFFFFFFF);
@@ -45,6 +58,9 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 		matrices.translate(valueOffsetX, valueOffsetY, 0);
 		value.render(matrices, mouseX - valueOffsetX, mouseY - valueOffsetY, delta);
 		matrices.pop();
+		
+		if (tooltip != null && mouseX >= 0 && mouseX <= valueOffsetX && isMouseOver(mouseX, mouseY))
+			tooltip.onTooltip(null, matrices, mouseX, mouseY);
 	}
 	
 	@Override
@@ -79,7 +95,9 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 	
 	@Override
 	public ConfigItem<V> clone(boolean defaults) {
-		return new ConfigItem<>(name, value.clone(defaults), onChanged);
+		ConfigItem<V> output = new ConfigItem<>(name, value.clone(defaults), onChanged);
+		output.tooltip = tooltip;
+		return output;
 	}
 	
 	

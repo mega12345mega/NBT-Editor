@@ -123,8 +123,8 @@ public abstract class ConfigGroupingVertical<K, T extends ConfigGroupingVertical
 		int yOffset = getNameHeight();
 		
 		for (ConfigPath path : new ArrayList<>(paths.values())) {
-			if (path.mouseDragged(mouseX - PADDING * 2, mouseY - yOffset, button, deltaX, deltaY))
-				return true;
+			// Buttons return true by default, causing problems with returning early
+			path.mouseDragged(mouseX - PADDING * 2, mouseY - yOffset, button, deltaX, deltaY);
 			yOffset += path.getSpacingHeight() + PADDING;
 		}
 		return false;

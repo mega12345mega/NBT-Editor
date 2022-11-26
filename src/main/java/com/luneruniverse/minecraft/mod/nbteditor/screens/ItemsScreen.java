@@ -2,8 +2,9 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.commands.GetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -34,7 +35,7 @@ public class ItemsScreen extends ClientContainerScreen {
 		super(handler, inventory, title);
 		
 		this.saved = true;
-		this.unsavedTitle = title.copy().append("*");
+		this.unsavedTitle = MultiVersionMisc.copyText(title).append("*");
 	}
 	private ItemsScreen build(ItemReference ref) {
 		this.ref = ref;
@@ -50,7 +51,7 @@ public class ItemsScreen extends ClientContainerScreen {
 	}
 	public static void show(ItemReference ref) {
 		PlayerInventory inv = MainUtil.client.player.getInventory();
-		MainUtil.client.setScreen(new ItemsScreen(new ItemsHandler(0, inv), inv, Text.translatable("nbteditor.items")
+		MainUtil.client.setScreen(new ItemsScreen(new ItemsHandler(0, inv), inv, TextInst.translatable("nbteditor.container.title")
 				.append(ref.getItem().getName())).build(ref));
 	}
 	
@@ -59,11 +60,11 @@ public class ItemsScreen extends ClientContainerScreen {
 		super.init();
 		
 		if (ref.isLockable()) {
-			this.addDrawableChild(new ButtonWidget(16, 64, 83, 20, ConfigScreen.shouldLockSlots() ? Text.translatable("nbteditor.unlock_slots") : Text.translatable("nbteditor.lock_slots"), btn -> {
+			this.addDrawableChild(new ButtonWidget(16, 64, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
 				navigationClicked = true;
-				ConfigScreen.setLockSlots(!ConfigScreen.shouldLockSlots());
-				btn.setMessage(ConfigScreen.shouldLockSlots() ? Text.translatable("nbteditor.unlock_slots") : Text.translatable("nbteditor.lock_slots"));
-			})).active = !ConfigScreen.shouldDisableLockSlotsButton();
+				ConfigScreen.setLockSlots(!ConfigScreen.isLockSlots());
+				btn.setMessage(ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"));
+			})).active = !ConfigScreen.isLockSlotsRequired();
 		}
 	}
 	
@@ -169,7 +170,7 @@ public class ItemsScreen extends ClientContainerScreen {
 		for (int i = numSlots; i < 27; i++) { // Items that may get deleted
 			ItemStack item = this.handler.getInventory().getStack(i);
 			if (item != null && !item.isEmpty())
-				GetCommand.get(item, true);
+				MainUtil.get(item, true);
 		}
 		
 		super.removed();

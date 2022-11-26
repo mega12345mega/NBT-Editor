@@ -12,10 +12,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.text.Text;
 import tsp.headdb.ported.inventory.InventoryUtils;
 
 /**
@@ -71,7 +71,7 @@ public final class HeadAPI {
     
     public static boolean checkUpdated() {
     	if (HeadAPI.getDatabase().isLastUpdateOld()) {
-			MainUtil.client.player.sendMessage(Text.translatable("nbteditor.hdb.unloaded_database"), false);
+			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.hdb.unloaded_database"), false);
 			return false;
     	}
     	

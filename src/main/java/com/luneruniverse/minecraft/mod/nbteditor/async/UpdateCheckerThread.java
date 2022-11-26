@@ -9,12 +9,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.toast.SystemToast;
-import net.minecraft.text.Text;
 
 public class UpdateCheckerThread extends Thread {
 	
@@ -38,7 +39,7 @@ public class UpdateCheckerThread extends Thread {
 	
 	@Override
 	public void run() {
-		if (URL == null)
+		if (URL == null || !ConfigScreen.isCheckUpdates())
 			return;
 		
 		try {
@@ -61,9 +62,9 @@ public class UpdateCheckerThread extends Thread {
 				NBTEditor.LOGGER.warn("Unable to check for updates! Is the game version invalid?");
 			else if (versionCompare(highestVersion, VERSION) > 0) {
 				NBTEditor.LOGGER.warn("NBT Editor is outdated!");
-				MainUtil.client.getToastManager().add(new SystemToast(SystemToast.Type.PERIODIC_NOTIFICATION,
-						Text.translatable("nbteditor.outdated.title"),
-						Text.translatable("nbteditor.outdated.desc")));
+				MainUtil.client.getToastManager().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT,
+						TextInst.translatable("nbteditor.outdated.title"),
+						TextInst.translatable("nbteditor.outdated.desc")));
 			} else
 				NBTEditor.LOGGER.info("NBT Editor is fully updated!");
 		} catch (Exception e) {

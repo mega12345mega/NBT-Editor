@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
-import net.minecraft.text.Text;
 
 public class ConfigValueText extends NamedTextFieldWidget implements ConfigValue<String, ConfigValueText> {
 	
@@ -15,9 +14,9 @@ public class ConfigValueText extends NamedTextFieldWidget implements ConfigValue
 	private final List<ConfigValueListener<ConfigValueText>> onChanged;
 	
 	public ConfigValueText(String value, String defaultValue) {
-		super(MainUtil.client.textRenderer, 0, 0, 200, 20, Text.of(value == null ? "" : value));
+		super(MainUtil.client.textRenderer, 0, 0, 200, 20, TextInst.of(value == null ? "" : value));
 		setMaxLength(Integer.MAX_VALUE);
-		name(Text.of(defaultValue));
+		name(TextInst.of(defaultValue));
 		setText(value == null ? "" : value);
 		
 		this.defaultValue = defaultValue;

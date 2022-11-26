@@ -3,6 +3,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.util;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -16,16 +18,15 @@ import net.minecraft.nbt.NbtLong;
 import net.minecraft.nbt.NbtLongArray;
 import net.minecraft.nbt.NbtType;
 import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class NbtFormatter {
 	
-	private static final SimpleCommandExceptionType TRAILING_DATA = new SimpleCommandExceptionType(Text.translatable("argument.nbt.trailing"));
-	private static final SimpleCommandExceptionType EXPECTED_KEY = new SimpleCommandExceptionType(Text.translatable("argument.nbt.expected.key"));
-	private static final SimpleCommandExceptionType EXPECTED_VALUE = new SimpleCommandExceptionType(Text.translatable("argument.nbt.expected.value"));
-	private static final DynamicCommandExceptionType ARRAY_INVALID = new DynamicCommandExceptionType(type -> Text.translatable("argument.nbt.array.invalid", type));
+	private static final SimpleCommandExceptionType TRAILING_DATA = new SimpleCommandExceptionType(TextInst.translatable("argument.nbt.trailing"));
+	private static final SimpleCommandExceptionType EXPECTED_KEY = new SimpleCommandExceptionType(TextInst.translatable("argument.nbt.expected.key"));
+	private static final SimpleCommandExceptionType EXPECTED_VALUE = new SimpleCommandExceptionType(TextInst.translatable("argument.nbt.expected.value"));
+	private static final DynamicCommandExceptionType ARRAY_INVALID = new DynamicCommandExceptionType(type -> TextInst.translatable("argument.nbt.array.invalid", type));
     private static final Pattern DOUBLE_PATTERN_IMPLICIT = Pattern.compile("[-+]?(?:[0-9]+[.]|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?", 2);
     private static final Pattern DOUBLE_PATTERN = Pattern.compile("[-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?d", 2);
     private static final Pattern FLOAT_PATTERN = Pattern.compile("[-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?f", 2);
@@ -48,7 +49,7 @@ public class NbtFormatter {
 		
 		// Format
 		NbtFormatter formatter = new NbtFormatter(reader);
-		MutableText output = formatter.parseElement();
+		EditableText output = formatter.parseElement();
 		output.append(formatter.skipWhitespace());
 		if (reader.canRead())
 			throw TRAILING_DATA.createWithContext(reader);
@@ -62,7 +63,7 @@ public class NbtFormatter {
 		try {
 			return Map.entry(true, formatElement(str));
 		} catch (Throwable e) {
-			return Map.entry(false, Text.literal(str).formatted(Formatting.RED));
+			return Map.entry(false, TextInst.literal(str).formatted(Formatting.RED));
 		}
 	}
 	
@@ -73,11 +74,11 @@ public class NbtFormatter {
 		this.reader = reader;
 	}
 	
-	private MutableText skipWhitespace() {
+	private EditableText skipWhitespace() {
 		StringBuilder output = new StringBuilder();
 		while (reader.canRead() && Character.isWhitespace(reader.peek()))
 			output.append(reader.read());
-		return Text.literal(output.toString());
+		return TextInst.literal(output.toString());
 	}
 	
 	private String readStringUntil(char terminator) throws CommandSyntaxException {
@@ -119,8 +120,8 @@ public class NbtFormatter {
 		return reader.readUnquotedString();
 	}
 	
-	private MutableText readString(Formatting color) throws CommandSyntaxException {
-		MutableText output = Text.literal("");
+	private EditableText readString(Formatting color) throws CommandSyntaxException {
+		EditableText output = TextInst.literal("");
 		output.append(this.skipWhitespace());
         if (!this.reader.canRead()) {
             throw EXPECTED_KEY.createWithContext(this.reader);
@@ -128,12 +129,12 @@ public class NbtFormatter {
         String str = this.readString();
         if (str.isEmpty())
         	return null;
-        output.append(Text.literal(str).formatted(color));
+        output.append(TextInst.literal(str).formatted(color));
         return output;
 	}
 	
-	private MutableText readQuotedString() throws CommandSyntaxException {
-		MutableText output = Text.literal("");
+	private EditableText readQuotedString() throws CommandSyntaxException {
+		EditableText output = TextInst.literal("");
 		if (!reader.canRead()) {
 			return output;
 		}
@@ -142,26 +143,26 @@ public class NbtFormatter {
 			throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedStartOfQuote().createWithContext(reader);
 		}
 		reader.skip();
-		output.append(Text.literal(this.readStringUntil(next)));
+		output.append(TextInst.literal(this.readStringUntil(next)));
 		return output;
 	}
 	
-	private Map.Entry<Boolean, MutableText> readComma() {
-		MutableText output = Text.literal("");
+	private Map.Entry<Boolean, EditableText> readComma() {
+		EditableText output = TextInst.literal("");
 		output.append(this.skipWhitespace());
 		if (this.reader.canRead() && this.reader.peek() == ',') {
-			output.append(Text.literal(this.reader.read() + ""));
+			output.append(TextInst.literal(this.reader.read() + ""));
 			output.append(this.skipWhitespace());
 			return Map.entry(true, output);
 		} else
 			return Map.entry(false, output);
 	}
 	
-	private MutableText readArray(NbtType<?> arrayTypeReader, NbtType<?> typeReader) throws CommandSyntaxException {
-		MutableText output = Text.literal("");
+	private EditableText readArray(NbtType<?> arrayTypeReader, NbtType<?> typeReader) throws CommandSyntaxException {
+		EditableText output = TextInst.literal("");
 		while (this.reader.peek() != ']') {
 			output.append(this.parseElement());
-			Map.Entry<Boolean, MutableText> comma = this.readComma();
+			Map.Entry<Boolean, EditableText> comma = this.readComma();
 			output.append(comma.getValue());
 			if (!comma.getKey())
 				break;
@@ -173,8 +174,8 @@ public class NbtFormatter {
 		return output;
 	}
 	
-	private MutableText parseElement() throws CommandSyntaxException {
-		MutableText output = Text.literal("");
+	private EditableText parseElement() throws CommandSyntaxException {
+		EditableText output = TextInst.literal("");
 		output.append(skipWhitespace());
 		if (!this.reader.canRead()) {
 			throw EXPECTED_VALUE.createWithContext(this.reader);
@@ -190,13 +191,13 @@ public class NbtFormatter {
 		return output;
 	}
 	
-	private MutableText parseCompound() throws CommandSyntaxException {
-		MutableText output = Text.literal("");
+	private EditableText parseCompound() throws CommandSyntaxException {
+		EditableText output = TextInst.literal("");
 		output.append(this.expect('{'));
 		this.reader.skipWhitespace();
 		while (this.reader.canRead() && this.reader.peek() != '}') {
 			int i = this.reader.getCursor();
-			MutableText string = this.readString(NAME_COLOR);
+			EditableText string = this.readString(NAME_COLOR);
 			if (string == null) {
 				this.reader.setCursor(i);
 				throw EXPECTED_KEY.createWithContext(this.reader);
@@ -204,7 +205,7 @@ public class NbtFormatter {
 			output.append(string);
 			output.append(this.expect(':'));
 			output.append(this.parseElement());
-			Map.Entry<Boolean, MutableText> comma = this.readComma();
+			Map.Entry<Boolean, EditableText> comma = this.readComma();
 			output.append(comma.getValue());
 			if (!comma.getKey())
 				break;
@@ -216,7 +217,7 @@ public class NbtFormatter {
 		return output;
 	}
 	
-	private MutableText parseArray() throws CommandSyntaxException {
+	private EditableText parseArray() throws CommandSyntaxException {
 		if (this.reader.canRead(3) && !StringReader.isQuotedStringStart(this.reader.peek(1))
 				&& this.reader.peek(2) == ';') {
 			return this.parseElementPrimitiveArray();
@@ -224,13 +225,13 @@ public class NbtFormatter {
 		return this.parseList();
 	}
 	
-	private MutableText parseElementPrimitiveArray() throws CommandSyntaxException {
-		MutableText output = Text.literal("");
+	private EditableText parseElementPrimitiveArray() throws CommandSyntaxException {
+		EditableText output = TextInst.literal("");
 		output.append(this.expect('['));
 		int i = this.reader.getCursor();
 		char c = this.reader.read();
-		output.append(Text.literal(c + "").formatted(TYPE_SUFFIX_COLOR));
-		output.append(Text.literal(this.reader.read() + ""));
+		output.append(TextInst.literal(c + "").formatted(TYPE_SUFFIX_COLOR));
+		output.append(TextInst.literal(this.reader.read() + ""));
 		output.append(this.skipWhitespace());
 		if (!this.reader.canRead()) {
 			throw EXPECTED_VALUE.createWithContext(this.reader);
@@ -251,17 +252,17 @@ public class NbtFormatter {
 		throw ARRAY_INVALID.createWithContext(this.reader, String.valueOf(c));
 	}
 	
-	private MutableText parseList() throws CommandSyntaxException {
-		MutableText output = Text.literal("");
+	private EditableText parseList() throws CommandSyntaxException {
+		EditableText output = TextInst.literal("");
 		output.append(this.expect('['));
 		output.append(this.skipWhitespace());
 		if (!this.reader.canRead()) {
 			throw EXPECTED_VALUE.createWithContext(this.reader);
 		}
 		while (this.reader.peek() != ']') {
-			MutableText nbtElement = this.parseElement();
+			EditableText nbtElement = this.parseElement();
 			output.append(nbtElement);
-			Map.Entry<Boolean, MutableText> comma = this.readComma();
+			Map.Entry<Boolean, EditableText> comma = this.readComma();
 			output.append(comma.getValue());
 			if (!comma.getKey())
 				break;
@@ -273,15 +274,15 @@ public class NbtFormatter {
 		return output;
 	}
 	
-	private MutableText parseElementPrimitive() throws CommandSyntaxException {
-		MutableText output = Text.literal("");
+	private EditableText parseElementPrimitive() throws CommandSyntaxException {
+		EditableText output = TextInst.literal("");
 		output.append(this.skipWhitespace());
 		int i = this.reader.getCursor();
 		char quote = this.reader.peek();
 		if (StringReader.isQuotedStringStart(quote)) {
-			output.append(Text.literal(quote + "").formatted(STRING_COLOR))
+			output.append(TextInst.literal(quote + "").formatted(STRING_COLOR))
 					.append(this.readQuotedString().formatted(STRING_COLOR))
-					.append(Text.literal(quote + "").formatted(STRING_COLOR));
+					.append(TextInst.literal(quote + "").formatted(STRING_COLOR));
 			return output;
 		}
 		String string = this.reader.readUnquotedString();
@@ -292,11 +293,11 @@ public class NbtFormatter {
 		return this.parsePrimitive(string);
 	}
 	
-	private MutableText parsePrimitive(String input) {
+	private EditableText parsePrimitive(String input) {
 		try {
-			MutableText numberInput = input.isEmpty() ? Text.literal("") :
-				Text.literal(input.substring(0, input.length() - 1)).formatted(NUMBER_COLOR)
-					.append(Text.literal(input.substring(input.length() - 1)).formatted(TYPE_SUFFIX_COLOR));
+			EditableText numberInput = input.isEmpty() ? TextInst.literal("") :
+				TextInst.literal(input.substring(0, input.length() - 1)).formatted(NUMBER_COLOR)
+					.append(TextInst.literal(input.substring(input.length() - 1)).formatted(TYPE_SUFFIX_COLOR));
 			if (FLOAT_PATTERN.matcher(input).matches()) {
 				return numberInput;
 			}
@@ -310,31 +311,31 @@ public class NbtFormatter {
 				return numberInput;
 			}
 			if (INT_PATTERN.matcher(input).matches()) {
-				return Text.literal(input).formatted(NUMBER_COLOR);
+				return TextInst.literal(input).formatted(NUMBER_COLOR);
 			}
 			if (DOUBLE_PATTERN.matcher(input).matches()) {
 				return numberInput;
 			}
 			if (DOUBLE_PATTERN_IMPLICIT.matcher(input).matches()) {
-				return Text.literal(input).formatted(NUMBER_COLOR);
+				return TextInst.literal(input).formatted(NUMBER_COLOR);
 			}
 			if ("true".equalsIgnoreCase(input)) {
-				return Text.literal(input).formatted(NUMBER_COLOR);
+				return TextInst.literal(input).formatted(NUMBER_COLOR);
 			}
 			if ("false".equalsIgnoreCase(input)) {
-				return Text.literal(input).formatted(NUMBER_COLOR);
+				return TextInst.literal(input).formatted(NUMBER_COLOR);
 			}
 		} catch (NumberFormatException numberFormatException) {
 			// empty catch block
 		}
-		return Text.literal(input).formatted(STRING_COLOR);
+		return TextInst.literal(input).formatted(STRING_COLOR);
 	}
 	
-	private MutableText expect(char c) throws CommandSyntaxException {
-		MutableText output = Text.literal("");
+	private EditableText expect(char c) throws CommandSyntaxException {
+		EditableText output = TextInst.literal("");
 		output.append(skipWhitespace());
 		this.reader.expect(c);
-		output.append(Text.literal(c + ""));
+		output.append(TextInst.literal(c + ""));
 		return output;
 	}
 	

@@ -1,7 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
-import com.luneruniverse.minecraft.mod.nbteditor.commands.GetCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -111,13 +111,24 @@ public class ClientContainerScreen extends GenericContainerScreen {
 		this.drawTexture(matrices, i, j + this.handler.getRows() * 18 + 17, 0, 126, this.backgroundWidth, 96);
 	}
 	
-	@Override
-	public void close() {
+	public final boolean isPauseScreen() { // 1.18
+		return shouldPause();
+	}
+	public boolean shouldPause() { // 1.19
+		return false;
+	}
+	
+	public final void onClose() { // 1.18
+		close();
+	}
+	public void close() { // 1.19
 		ItemStack cursor = this.handler.getCursorStack();
 		if (dropCursorOnClose && cursor != null && !cursor.isEmpty())
-			GetCommand.get(cursor, true);
+			MainUtil.get(cursor, true);
 		
-		super.close();
+		// super.close();
+		client.player.closeHandledScreen();
+		client.setScreen(null);
 	}
 	
 	
@@ -163,7 +174,7 @@ public class ClientContainerScreen extends GenericContainerScreen {
 			onChange();
 		
 		if (lockRevertUsed && beforeClickCursor != null && !beforeClickCursor.isEmpty() && client.player.isCreative())
-			GetCommand.loseItem(beforeClickCursor);
+			GetLostItemCommand.loseItem(beforeClickCursor);
 	}
 	
 	public void throwCursor() {

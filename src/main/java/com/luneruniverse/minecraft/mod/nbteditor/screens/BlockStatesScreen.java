@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
@@ -15,7 +16,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.BlockItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
-import net.minecraft.text.Text;
 
 public class BlockStatesScreen extends ItemEditorScreen {
 	
@@ -24,11 +24,11 @@ public class BlockStatesScreen extends ItemEditorScreen {
 	private ConfigPanel panel;
 	
 	public BlockStatesScreen(ItemReference ref) {
-		super(Text.of("Block States"), ref);
+		super(TextInst.of("Block States"), ref);
 		
 		BlockState defaultState = ((BlockItem) item.getItem()).getBlock().getDefaultState();
 		this.hasBlockStates = !defaultState.getProperties().isEmpty();
-		this.blockStates = new ConfigCategory(this.hasBlockStates ? Text.translatable("nbteditor.blockstates") : null);
+		this.blockStates = new ConfigCategory(this.hasBlockStates ? TextInst.translatable("nbteditor.block_states") : null);
 		
 		NbtCompound nbt = item.getOrCreateNbt();
 		NbtCompound blockStatesNbt = nbt.getCompound("BlockStateTag");
@@ -41,7 +41,7 @@ public class BlockStatesScreen extends ItemEditorScreen {
 			if (!options.contains(thisState))
 				thisState = "unset";
 			
-			blockStates.setConfigurable(property.getName(), new ConfigItem<>(Text.literal(property.getName()),
+			blockStates.setConfigurable(property.getName(), new ConfigItem<>(TextInst.literal(property.getName()),
 				new ConfigValueDropdown<>(thisState, defaultState.get(property).toString(), options)
 				.addValueListener(dropdown -> {
 					String value = dropdown.getValidValue();
@@ -68,7 +68,7 @@ public class BlockStatesScreen extends ItemEditorScreen {
 	@Override
 	public void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		if (!hasBlockStates)
-			drawTextWithShadow(matrices, textRenderer, Text.translatable("nbteditor.noblockstates"), 16, 64, -1);
+			drawTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.block_states.none"), 16, 64, -1);
 	}
 	
 }

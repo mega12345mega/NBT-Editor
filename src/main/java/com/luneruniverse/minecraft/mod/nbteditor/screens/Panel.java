@@ -71,8 +71,8 @@ public abstract class Panel<T extends Drawable & Element> implements Drawable, E
 		if (dragging && dragStartX != -1)
 			globalMouseDragged(mouseX, mouseY, mouseX - dragStartX, mouseY - dragStartY);
 		
-		boolean skizzer = shouldSkizzer();
-		if (skizzer) {
+		boolean scissor = shouldScissor();
+		if (scissor) {
 			double scale = MainUtil.client.getWindow().getScaleFactor();
 			RenderSystem.enableScissor((int) (getPaddedX() * scale), MainUtil.client.getWindow().getHeight() - (int) ((getPaddedY() + getPaddedHeight()) * scale), (int) (getPaddedWidth() * scale), (int) (getPaddedHeight() * scale));
 		}
@@ -86,7 +86,7 @@ public abstract class Panel<T extends Drawable & Element> implements Drawable, E
 			matrices.pop();
 		}
 		
-		if (skizzer)
+		if (scissor)
 			RenderSystem.disableScissor();
 		
 		double maxScroll = -Math.min(scroll - height, getMaxScroll() - height);
@@ -132,8 +132,8 @@ public abstract class Panel<T extends Drawable & Element> implements Drawable, E
 		getPanelElements().forEach(output::add);
 		return output;
 	}
-	protected boolean shouldSkizzer() {
-		return ConfigScreen.useKeySkizzers();
+	protected boolean shouldScissor() {
+		return !ConfigScreen.isMacScrollPatch();
 	}
 	protected boolean continueEvents() {
 		return true;

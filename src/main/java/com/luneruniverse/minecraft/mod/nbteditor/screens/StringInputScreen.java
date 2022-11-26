@@ -5,15 +5,16 @@ import java.util.function.Predicate;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 
-public class StringInputScreen extends Screen {
+public class StringInputScreen extends MultiVersionScreen {
 	
 	private final Screen parent;
 	private final Consumer<String> valueConsumer;
@@ -23,7 +24,7 @@ public class StringInputScreen extends Screen {
 	private String defaultValue;
 	
 	public StringInputScreen(Screen screen, Consumer<String> valueConsumer, Predicate<String> valueValidator) {
-		super(Text.of("String Input"));
+		super(TextInst.of("String Input"));
 		
 		this.parent = screen;
 		this.valueConsumer = valueConsumer;
@@ -45,19 +46,19 @@ public class StringInputScreen extends Screen {
 		this.clearChildren();
 		
 		String prevValue = value == null ? (defaultValue == null ? "" : defaultValue) : value.getText();
-		value = new TextFieldWidget(List2D.List2DValue.textRenderer, width / 2 - 104, height / 2 - 20, 208, 16, Text.of(""));
+		value = new TextFieldWidget(List2D.List2DValue.textRenderer, width / 2 - 104, height / 2 - 20, 208, 16, TextInst.of(""));
 		value.setMaxLength(Integer.MAX_VALUE);
 		value.setText(prevValue);
 		this.addSelectableChild(value);
 		setInitialFocus(value);
 		
-		ok = this.addDrawableChild(new ButtonWidget(width / 2 - 104, height / 2 + 4, 100, 20, Text.translatable("nbteditor.ok"), btn -> {
+		ok = this.addDrawableChild(new ButtonWidget(width / 2 - 104, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.ok"), btn -> {
 			if (valueValidator.test(value.getText())) {
 				client.setScreen(parent);
 				valueConsumer.accept(value.getText());
 			}
 		}));
-		this.addDrawableChild(new ButtonWidget(width / 2 + 4, height / 2 + 4, 100, 20, Text.translatable("nbteditor.cancel"), btn -> {
+		this.addDrawableChild(new ButtonWidget(width / 2 + 4, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.cancel"), btn -> {
 			client.setScreen(parent);
 		}));
 		

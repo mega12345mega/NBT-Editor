@@ -4,35 +4,41 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.text.Text;
-
-public abstract class ConfigValueNumber<T extends Number, V extends ConfigValueNumber<T, V>> extends NamedTextFieldWidget implements ConfigValue<T, V> {
+public class ConfigValueNumber<T extends Number> extends NamedTextFieldWidget implements ConfigValue<T, ConfigValueNumber<T>> {
 	
-	protected interface Constructor<T extends Number, V extends ConfigValueNumber<T, V>> {
-		V newInstance(T value, T defaultValue, T min, T max);
+	public static ConfigValueNumber<Integer> forInt(int value, int defaultValue, int min, int max) {
+		return new ConfigValueNumber<>(value, defaultValue, min, max, Integer::parseInt, null);
+	}
+	public static ConfigValueNumber<Double> forDouble(double value, double defaultValue, double min, double max) {
+		return new ConfigValueNumber<>(value, defaultValue, min, max, Double::parseDouble, null);
+	}
+	
+	
+	private interface Parser<T extends Number> {
+		T parse(String value) throws NumberFormatException;
 	}
 	
 	private final T defaultValue;
 	private final T min;
 	private final T max;
-	private final Constructor<T, V> cloneImpl;
+	private final Parser<T> parser;
 	
-	protected final List<ConfigValueListener<V>> onChanged;
+	private final List<ConfigValueListener<ConfigValueNumber<T>>> onChanged;
 	
-	@SuppressWarnings("unchecked")
-	protected ConfigValueNumber(T value, T defaultValue, T min, T max, Constructor<T, V> cloneImpl) {
-		super(MainUtil.client.textRenderer, 0, 0, 200, 20, Text.of(value + ""));
+	private ConfigValueNumber(T value, T defaultValue, T min, T max, Parser<T> parser, List<ConfigValueListener<ConfigValueNumber<T>>> onChanged) {
+		super(MainUtil.client.textRenderer, 0, 0, 200, 20, TextInst.of(value + ""));
 		setMaxLength(Integer.MAX_VALUE);
-		name(Text.of(defaultValue + ""));
+		name(TextInst.of(defaultValue + ""));
 		setText(value + "");
 		setTextPredicate(str -> {
 			if (str.isEmpty() || str.equals("-") || str.equals("+"))
 				return true;
 			try {
-				parse(str);
+				parser.parse(str);
 				return true;
 			} catch (NumberFormatException e) {
 				return false;
@@ -42,14 +48,16 @@ public abstract class ConfigValueNumber<T extends Number, V extends ConfigValueN
 		this.defaultValue = defaultValue;
 		this.min = min;
 		this.max = max;
-		this.cloneImpl = cloneImpl;
+		this.parser = parser;
 		this.onChanged = new ArrayList<>();
+		if (onChanged != null)
+			this.onChanged.addAll(onChanged);
 		
 		super.setChangedListener(str -> {
 			boolean valid = isValueValid();
 			setValid(valid);
 			if (valid)
-				onChanged.forEach(listener -> listener.onValueChanged((V) this));
+				this.onChanged.forEach(listener -> listener.onValueChanged(this));
 		});
 	}
 	
@@ -65,7 +73,7 @@ public abstract class ConfigValueNumber<T extends Number, V extends ConfigValueN
 	@Override
 	public T getValue() {
 		try {
-			return parse(getText());
+			return parser.parse(getText());
 		} catch (NumberFormatException e) {
 			setValue(defaultValue);
 			return defaultValue;
@@ -78,18 +86,15 @@ public abstract class ConfigValueNumber<T extends Number, V extends ConfigValueN
 		T value = getValue();
 		return min.doubleValue() <= value.doubleValue() && value.doubleValue() <= max.doubleValue();
 	}
-	@SuppressWarnings("unchecked")
 	@Override
-	public V addValueListener(ConfigValueListener<V> listener) {
+	public ConfigValueNumber<T> addValueListener(ConfigValueListener<ConfigValueNumber<T>> listener) {
 		onChanged.add(listener);
-		return (V) this;
+		return this;
 	}
 	@Override
 	public void setChangedListener(Consumer<String> changedListener) {
 		throw new UnsupportedOperationException("Use addValueListener instead!");
 	}
-	
-	protected abstract T parse(String value) throws NumberFormatException;
 	
 	
 	@Override
@@ -103,10 +108,8 @@ public abstract class ConfigValueNumber<T extends Number, V extends ConfigValueN
 	}
 	
 	@Override
-	public V clone(boolean defaults) {
-		V output = cloneImpl.newInstance(defaults ? defaultValue : getValue(), defaultValue, min, max);
-		output.onChanged.addAll(onChanged);
-		return output;
+	public ConfigValueNumber<T> clone(boolean defaults) {
+		return new ConfigValueNumber<>(defaults ? defaultValue : getValue(), defaultValue, min, max, parser, onChanged);
 	}
 	
 }

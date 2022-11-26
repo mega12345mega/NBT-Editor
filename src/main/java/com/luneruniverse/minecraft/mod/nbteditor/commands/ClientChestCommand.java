@@ -1,31 +1,30 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
-
-import java.util.Arrays;
 import java.util.List;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-
-public class ClientChestCommand implements ClientCommand {
+public class ClientChestCommand extends ClientCommand {
 	
 	@Override
-	public LiteralCommandNode<FabricClientCommandSource> register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess cmdReg) {
-		return dispatcher.register(literal("clientchest").executes(context -> {
-			ClientChestScreen.show();
-			return Command.SINGLE_SUCCESS;
-		}));
+	public String getName() {
+		return "clientchest";
 	}
 	
 	@Override
 	public List<String> getAliases() {
-		return Arrays.asList("chest", "storage");
+		return List.of("chest", "storage");
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+		builder.executes(context -> {
+			ClientChestScreen.show();
+			return Command.SINGLE_SUCCESS;
+		});
 	}
 	
 }

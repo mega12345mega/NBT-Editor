@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.luneruniverse.minecraft.mod.nbteditor.commands.GetCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientContainerScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
@@ -15,7 +15,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.Text;
 import tsp.headdb.ported.Category;
 import tsp.headdb.ported.Head;
 import tsp.headdb.ported.HeadAPI;
@@ -138,7 +137,7 @@ public class InventoryUtils {
     }
 
     public static void openDatabase() {
-    	ClientContainerScreen screen = new ClientContainerScreen(ClientContainerScreen.createGenericScreenHandler(6), MainUtil.client.player.getInventory(), Text.of(Utils.colorize("&c&lHeadDB &8(" + HeadAPI.getHeads().size() + ")"))) {
+    	ClientContainerScreen screen = new ClientContainerScreen(ClientContainerScreen.createGenericScreenHandler(6), MainUtil.client.player.getInventory(), TextInst.of(Utils.colorize("&c&lHeadDB &8(" + HeadAPI.getHeads().size() + ")"))) {
     		@Override
     		protected void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
     			if (slot == null)
@@ -180,10 +179,10 @@ public class InventoryUtils {
 
         for (Category category : Category.getValues()) {
             ItemStack item = getUIItem(category.getName(), category.getItem());
-            item.setCustomName(Text.of(Utils.colorize(category.getColor() + "&l" + category.getTranslatedName().toUpperCase())));
+            item.setCustomName(TextInst.of(Utils.colorize(category.getColor() + "&l" + category.getTranslatedName().toUpperCase())));
             Lore lore = new Lore(item);
             lore.clearLore();
-            lore.addLine(Text.of(Utils.colorize("&e" + Text.translatable("nbteditor.hdb.head_count", HeadAPI.getHeads(category).size()).getString())));
+            lore.addLine(TextInst.of(Utils.colorize("&e" + TextInst.translatable("nbteditor.hdb.head_count", HeadAPI.getHeads(category).size()).getString())));
             inventory.setStack(getUILocation(category.getName(), category.getLocation()), item);
         }
 
@@ -234,12 +233,12 @@ public class InventoryUtils {
     }
 
     private static ItemStack buildButton(ItemStack item, String name, String... lore) {
-        item.setCustomName(Text.of(Utils.colorize(name)));
+        item.setCustomName(TextInst.of(Utils.colorize(name)));
         
         Lore list = new Lore(item);
         list.clearLore();
         for (String line : lore) {
-            list.addLine(Text.of(Utils.colorize(line)));
+            list.addLine(TextInst.of(Utils.colorize(line)));
         }
         
         return item;
@@ -249,7 +248,7 @@ public class InventoryUtils {
     public static void purchaseHead(Head head, int amount, String category, String description) {
         ItemStack item = head.getItemStack();
         item.setCount(amount);
-        GetCommand.getWithMessage(item);
+        MainUtil.getWithMessage(item);
     }
 
 }

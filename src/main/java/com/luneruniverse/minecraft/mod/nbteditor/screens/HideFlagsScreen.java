@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem;
@@ -7,19 +9,18 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPane
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueBoolean;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 
-import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 
 public class HideFlagsScreen extends ItemEditorScreen {
 	
 	private enum Flag {
-		ENCHANTMENTS(Text.translatable("nbteditor.flag.enchantments"), 1),
-		ATTRIBUTE_MODIFIERS(Text.translatable("nbteditor.flag.attribute_modifiers"), 2),
-		UNBREAKABLE(Text.translatable("nbteditor.flag.unbreakable"), 4),
-		CAN_DESTORY(Text.translatable("nbteditor.flag.can_destroy"), 8),
-		CAN_PLACE_ON(Text.translatable("nbteditor.flag.can_place_on"), 16),
-		MISC(Text.translatable("nbteditor.flag.misc"), 32),
-		DYED_COLOR(Text.translatable("nbteditor.flag.dyed_color"), 64);
+		ENCHANTMENTS(TextInst.translatable("nbteditor.hide_flags.enchantments"), 1),
+		ATTRIBUTE_MODIFIERS(TextInst.translatable("nbteditor.hide_flags.attribute_modifiers"), 2),
+		UNBREAKABLE(TextInst.translatable("nbteditor.hide_flags.unbreakable"), 4),
+		CAN_DESTORY(TextInst.translatable("nbteditor.hide_flags.can_destroy"), 8),
+		CAN_PLACE_ON(TextInst.translatable("nbteditor.hide_flags.can_place_on"), 16),
+		MISC(TextInst.translatable("nbteditor.hide_flags.misc"), 32),
+		DYED_COLOR(TextInst.translatable("nbteditor.hide_flags.dyed_color"), 64);
 		
 		private final Text text;
 		private final int code;
@@ -48,11 +49,11 @@ public class HideFlagsScreen extends ItemEditorScreen {
 	
 	@SuppressWarnings("unchecked")
 	public HideFlagsScreen(ItemReference ref) {
-		super(Text.of("Hide Flags"), ref);
+		super(TextInst.of("Hide Flags"), ref);
 		
-		config = new ConfigCategory(Text.translatable("nbteditor.hideflags"));
-		config.setConfigurable("disable_all", new ConfigButton(100, Text.translatable("nbteditor.hideflags.disable_all"), btn -> setCode(0)));
-		config.setConfigurable("enable_all", new ConfigButton(100, Text.translatable("nbteditor.hideflags.enable_all"), btn -> setCode(127)));
+		config = new ConfigCategory(TextInst.translatable("nbteditor.hide_flags"));
+		config.setConfigurable("disable_all", new ConfigButton(100, TextInst.translatable("nbteditor.hide_flags.show_all"), btn -> setCode(0)));
+		config.setConfigurable("enable_all", new ConfigButton(100, TextInst.translatable("nbteditor.hide_flags.hide_all"), btn -> setCode(127)));
 		
 		int code = item.getOrCreateNbt().getInt("HideFlags");
 		for (Flag flag : Flag.values())

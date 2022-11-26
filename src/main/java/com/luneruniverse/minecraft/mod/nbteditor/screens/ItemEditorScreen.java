@@ -2,16 +2,17 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
-public abstract class ItemEditorScreen extends Screen {
+public abstract class ItemEditorScreen extends MultiVersionScreen {
 	
 	protected final ItemReference ref;
 	protected ItemStack item;
@@ -36,7 +37,7 @@ public abstract class ItemEditorScreen extends Screen {
 	
 	@Override
 	protected final void init() {
-		name = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8, 100, 16, Text.of("")) {
+		name = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8, 100, 16, TextInst.of("")) {
 			@Override
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				if (isNameEditable())
@@ -44,13 +45,13 @@ public abstract class ItemEditorScreen extends Screen {
 				else
 					return false;
 			}
-		}.name(Text.translatable("nbteditor.name"));
+		}.name(TextInst.translatable("nbteditor.editor.name"));
 		name.setMaxLength(Integer.MAX_VALUE);
 		name.setText(MainUtil.getItemNameSafely(item).getString());
 		name.setEditable(isNameEditable());
 		addDrawableChild(name);
 		
-		saveBtn = addDrawableChild(new ButtonWidget(16 + (32 + 8) * 2 + 100 + 8, 16 + 6, 100, 20, Text.translatable("nbteditor.save"), btn -> {
+		saveBtn = addDrawableChild(new ButtonWidget(16 + (32 + 8) * 2 + 100 + 8, 16 + 6, 100, 20, TextInst.translatable("nbteditor.editor.save"), btn -> {
 			save();
 		}));
 		saveBtn.active = !saved;
@@ -99,10 +100,10 @@ public abstract class ItemEditorScreen extends Screen {
 	}
 	protected void save() {
 		savedItem = item.copy();
-		saveBtn.setMessage(Text.translatable("nbteditor.saving"));
+		saveBtn.setMessage(TextInst.translatable("nbteditor.editor.saving"));
 		setSaved(true);
 		ref.saveItem(savedItem, () -> {
-			saveBtn.setMessage(Text.translatable("nbteditor.save"));
+			saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
 		});
 	}
 	protected void checkSave() {
@@ -121,8 +122,8 @@ public abstract class ItemEditorScreen extends Screen {
 					save();
 				
 				ref.showParent();
-			}, Text.translatable("nbteditor.notsaved.title"), Text.translatable("nbteditor.notsaved.message"),
-					Text.translatable("nbteditor.notsaved.yes"), Text.translatable("nbteditor.notsaved.no")));
+			}, TextInst.translatable("nbteditor.editor.unsaved.title"), TextInst.translatable("nbteditor.editor.unsaved.desc"),
+					TextInst.translatable("nbteditor.editor.unsaved.yes"), TextInst.translatable("nbteditor.editor.unsaved.no")));
 		}
 	}
 	

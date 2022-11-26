@@ -18,7 +18,8 @@
     "HandledScreenAccessor",
     "TextFieldWidgetMixin",
     "MinecraftClientMixin",
-    "BoatItemAccessor"
+    "StringNbtReaderMixin",
+    "TextSerializerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

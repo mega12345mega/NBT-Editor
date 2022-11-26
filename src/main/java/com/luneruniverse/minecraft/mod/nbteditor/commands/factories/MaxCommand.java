@@ -1,9 +1,11 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.argument;
+import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
-import com.luneruniverse.minecraft.mod.nbteditor.commands.SubCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
@@ -12,22 +14,24 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
-public class MaxCommand implements SubCommand {
+public class MaxCommand extends ClientCommand {
 	
 	@Override
-	public LiteralArgumentBuilder<FabricClientCommandSource> register(LiteralArgumentBuilder<FabricClientCommandSource> parent, CommandRegistryAccess cmdReg) {
-		return parent.then(literal("max")
+	public String getName() {
+		return "max";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+		builder
 				.then(literal("cursed")
 						.then(literal("all")
 							.then(argument("level", IntegerArgumentType.integer(1, 32767)).executes(context -> max(context, context.getArgument("level", Integer.class), true, true)))
@@ -38,8 +42,7 @@ public class MaxCommand implements SubCommand {
 						.then(argument("level", IntegerArgumentType.integer(1, 32767)).executes(context -> max(context, context.getArgument("level", Integer.class), true, false)))
 						.executes(context -> max(context, -1, true, false)))
 				.then(argument("level", IntegerArgumentType.integer(1, 32767)).executes(context -> max(context, context.getArgument("level", Integer.class), false, false)))
-				.executes(context -> max(context, -1, false, false)
-			));
+				.executes(context -> max(context, -1, false, false));
 	}
 	private int max(CommandContext<FabricClientCommandSource> context, int enchantLevel, boolean allEnchants, boolean cursed) throws CommandSyntaxException {
 		ItemReference heldItem = MainUtil.getHeldItem();
@@ -58,7 +61,7 @@ public class MaxCommand implements SubCommand {
 		item.setSubNbt(ItemStack.ENCHANTMENTS_KEY, enchants);
 		
 		MainUtil.saveItem(hand, item);
-		context.getSource().sendFeedback(Text.translatable("nbteditor.maxed"));
+		context.getSource().sendFeedback(TextInst.translatable("nbteditor.maxed"));
 		
 		return Command.SINGLE_SUCCESS;
 	}

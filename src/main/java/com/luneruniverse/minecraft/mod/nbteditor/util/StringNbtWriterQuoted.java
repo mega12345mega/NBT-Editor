@@ -16,7 +16,7 @@ public class StringNbtWriterQuoted extends StringNbtWriter {
 	
 	@Override
 	public void visitString(NbtString element) {
-		((StringNbtWriterAccessor) this).getResult().append(ConfigScreen.shouldAllowSingleQuotes() ? NbtString.escape(element.asString()) : escape(element.asString()));
+		((StringNbtWriterAccessor) this).getResult().append(ConfigScreen.isSingleQuotesAllowed() ? NbtString.escape(element.asString()) : escape(element.asString()));
 	}
 	
     @Override
@@ -59,7 +59,7 @@ public class StringNbtWriterQuoted extends StringNbtWriter {
 	protected static String escapeName(String str) {
 		String superEsc = StringNbtWriter.escapeName(str);
 		
-		if (ConfigScreen.shouldAllowSingleQuotes() || superEsc.equals(str))
+		if (ConfigScreen.isSingleQuotesAllowed() || superEsc.equals(str))
 			return superEsc;
 		else
 			return escape(str);

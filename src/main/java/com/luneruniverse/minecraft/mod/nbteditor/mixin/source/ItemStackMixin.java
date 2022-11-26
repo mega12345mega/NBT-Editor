@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
@@ -32,7 +33,7 @@ public class ItemStackMixin {
 	private void getTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info) {
 		ItemStack source = (ItemStack) (Object) this;
 		
-		if (ConfigScreen.shouldHideKeybinds())
+		if (ConfigScreen.isKeybindsHidden())
 			return;
 		
 		// Checking slots in your hotbar vs item selection is difficult, so the lore is just disabled in non-inventory tabs
@@ -40,11 +41,11 @@ public class ItemStackMixin {
 				((CreativeInventoryScreen) MainUtil.client.currentScreen).getSelectedTab() == ItemGroup.INVENTORY.getIndex();
 		
 		if (creativeInv || MainUtil.client.currentScreen instanceof ClientChestScreen || MainUtil.client.currentScreen instanceof ItemsScreen) {
-			info.getReturnValue().add(Text.translatable("nbteditor.keybind_edit"));
+			info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.edit"));
 			if (ContainerIO.isContainer(source))
-				info.getReturnValue().add(Text.translatable("nbteditor.keybind_container"));
+				info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.container"));
 			if (source.getItem() == Items.ENCHANTED_BOOK)
-				info.getReturnValue().add(Text.translatable("nbteditor.addenchant"));
+				info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.enchant"));
 		}
 	}
 	
@@ -55,17 +56,7 @@ public class ItemStackMixin {
 		for (int i = 0; i < enchantments.size(); ++i) {
 			NbtCompound nbtCompound = enchantments.getCompound(i);
 			Registry.ENCHANTMENT.getOrEmpty(EnchantmentHelper.getIdFromNbt(nbtCompound))
-					.ifPresent(e -> {
-						int level = EnchantmentHelper.getLevelFromNbt(nbtCompound);
-						Text text = ConfigScreen.getEnchantName(e, level);
-						if (ConfigScreen.getMaxEnchantLevelDisplay().shouldShowMax(level, e.getMaxLevel())) {
-							text = text.copy().append("/").append(
-									ConfigScreen.isUseArabicEnchantLevels() ?
-											Text.of("" + e.getMaxLevel()) :
-											Text.translatable("enchantment.level." + e.getMaxLevel()));
-						}
-						tooltip.add(text);
-					});
+					.ifPresent(e -> tooltip.add(ConfigScreen.getEnchantNameWithMax(e, EnchantmentHelper.getLevelFromNbt(nbtCompound))));
 		}
 	}
 }

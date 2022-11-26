@@ -1,30 +1,32 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
-
-import com.luneruniverse.minecraft.mod.nbteditor.commands.SubCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.util.NbtType;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 
-public class UnbindSkullCommand implements SubCommand {
+public class UnbindSkullCommand extends ClientCommand {
 	
 	@Override
-	public LiteralArgumentBuilder<FabricClientCommandSource> register(LiteralArgumentBuilder<FabricClientCommandSource> parent, CommandRegistryAccess cmdReg) {
-		return parent.then(literal("unbindskull").executes(context -> {
-			ItemReference heldItem = MainUtil.getHeldItem(item -> item.getItem() == Items.PLAYER_HEAD, Text.translatable("nbteditor.noskull"));
+	public String getName() {
+		return "unbindskull";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+		builder.executes(context -> {
+			ItemReference heldItem = MainUtil.getHeldItem(item -> item.getItem() == Items.PLAYER_HEAD, TextInst.translatable("nbteditor.no_hand.no_item.skull"));
 			Hand hand = heldItem.getHand();
 			ItemStack item = heldItem.getItem();
 			
@@ -35,14 +37,14 @@ public class UnbindSkullCommand implements SubCommand {
 				String name = owner.getString("Name");
 				owner.putString("Name", "Unbound Player");
 				if (!item.hasCustomName())
-					item.setCustomName(Text.literal(name).formatted(Formatting.YELLOW));
+					item.setCustomName(TextInst.literal(name).formatted(Formatting.YELLOW));
 			} else
-				throw new SimpleCommandExceptionType(Text.translatable("nbteditor.skull_not_loaded")).create();
+				throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.unbind_skull.no_textures")).create();
 			
 			MainUtil.saveItem(hand, item);
-			context.getSource().sendFeedback(Text.translatable("nbteditor.skull_edited"));
+			context.getSource().sendFeedback(TextInst.translatable("nbteditor.unbind_skull.unbound"));
 			return Command.SINGLE_SUCCESS;
-		}));
+		});
 	}
 	
 }

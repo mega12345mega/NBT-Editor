@@ -7,6 +7,8 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
@@ -14,7 +16,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 
 public class ItemReference {
@@ -104,7 +105,7 @@ public class ItemReference {
 					((ClientChestScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStack(item);
 			} catch (IOException e) {
 				NBTEditor.LOGGER.error("Error while saving client chest", e);
-				MainUtil.client.player.sendMessage(Text.translatable("nbteditor.storage_save_error"), false);
+				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
 			}
 		}, true);
 	}
@@ -192,7 +193,7 @@ public class ItemReference {
 		if (isHandReference() || isInventoryReference() || isArmorReference())
 			return false;
 		else if (isClientChestReference())
-			return ConfigScreen.shouldLockSlots();
+			return ConfigScreen.isLockSlots();
 		else if (isContainerReference())
 			return parent.isLocked();
 		else
@@ -224,7 +225,7 @@ public class ItemReference {
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
 			MainUtil.client.setScreen(null);
-		else if (MainUtil.client.options.inventoryKey.matchesKey(keyCode, scanCode))
+		else if (MultiVersionMisc.getInventoryKey(MainUtil.client.options).matchesKey(keyCode, scanCode))
 			showParent();
 		else
 			return false;

@@ -16,7 +16,7 @@ public class ConfigValueBoolean extends ButtonWidget implements ConfigValue<Bool
 	private final List<ConfigValueListener<ConfigValueBoolean>> onChanged;
 	
 	public ConfigValueBoolean(boolean value, boolean defaultValue, int width, Text on, Text off, TooltipSupplier tooltipSupplier) {
-		super(0, 0, width, 20, value ? on : off, btn -> ((ConfigValueBoolean) btn).setValue(!((ConfigValueBoolean) btn).getValue()));
+		super(0, 0, width, 20, value ? on : off, btn -> ((ConfigValueBoolean) btn).setValue(!((ConfigValueBoolean) btn).getValue()), tooltipSupplier);
 		this.on = on;
 		this.off = off;
 		this.value = value;

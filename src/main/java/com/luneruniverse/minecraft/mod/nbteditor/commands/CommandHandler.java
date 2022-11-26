@@ -1,20 +1,50 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands;
 
-import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.FactoryCommand;
+import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.FactoryCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 public class CommandHandler {
 	
 	public static void registerCommands() {
-		ClientCommandRegistrationCallback.EVENT.register((dispatcher, cmdReg) -> {
-			new NBTCommand().registerAll(dispatcher, cmdReg);
-			new ClientChestCommand().registerAll(dispatcher, cmdReg);
-			new ItemsCommand().registerAll(dispatcher, cmdReg);
-			new SignatureCommand().registerAll(dispatcher, cmdReg);
-			new GetCommand().registerAll(dispatcher, cmdReg);
-			new FactoryCommand().registerAll(dispatcher, cmdReg);
+		MultiVersionMisc.registerCommands(dispatcher -> {
+			for (ClientCommand cmd : COMMANDS.values())
+				cmd.registerAll(dispatcher::register);
+			
+			for (String shortcut : ConfigScreen.getShortcuts()) {
+				List<String> path = Arrays.asList(shortcut.split(" "));
+				if (path.size() <= 1)
+					continue;
+				ClientCommand cmd = COMMANDS.get(path.get(0));
+				if (cmd == null)
+					continue;
+				cmd = cmd.getShortcut(path, 1);
+				if (cmd != null) {
+					LiteralArgumentBuilder<FabricClientCommandSource> builder = literal(path.get(path.size() - 1));
+					cmd.register(builder);
+					dispatcher.register(builder);
+				}
+			}
 		});
 	}
+	
+	public static final Map<String, ClientCommand> COMMANDS = Stream.of(
+			new NBTCommand(),
+			new ClientChestCommand(),
+			new ItemsCommand(),
+			new GetCommand(),
+			new FactoryCommand())
+			.collect(Collectors.toUnmodifiableMap(ClientCommand::getName, cmd -> cmd));
 	
 }

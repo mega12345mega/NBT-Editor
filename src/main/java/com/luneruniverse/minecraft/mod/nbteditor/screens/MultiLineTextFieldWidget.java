@@ -10,6 +10,8 @@ import java.util.function.Function;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -22,7 +24,6 @@ import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.StringVisitable.StyledVisitor;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -82,8 +83,11 @@ public class MultiLineTextFieldWidget implements Drawable, Element, Selectable {
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		Screen.fill(matrices, x, y, x + width, y + height, 0x55000000);
 		
-		MinecraftClient client = MainUtil.client;
-		RenderSystem.enableScissor((int) (x * client.getWindow().getScaleFactor()), client.getWindow().getHeight() - (int) ((y + height) * client.getWindow().getScaleFactor()), (int) (width * client.getWindow().getScaleFactor()), (int) (height * client.getWindow().getScaleFactor()));
+		boolean scissor = !ConfigScreen.isMacScrollPatch();
+		if (scissor) {
+			MinecraftClient client = MainUtil.client;
+			RenderSystem.enableScissor((int) (x * client.getWindow().getScaleFactor()), client.getWindow().getHeight() - (int) ((y + height) * client.getWindow().getScaleFactor()), (int) (width * client.getWindow().getScaleFactor()), (int) (height * client.getWindow().getScaleFactor()));
+		}
 		matrices.push();
 		matrices.translate(0, scroll, 0);
 		
@@ -121,7 +125,8 @@ public class MultiLineTextFieldWidget implements Drawable, Element, Selectable {
 		}
 		
 		matrices.pop();
-		RenderSystem.disableScissor();
+		if (scissor)
+			RenderSystem.disableScissor();
 	}
 	
 	public void tick() {
@@ -149,7 +154,7 @@ public class MultiLineTextFieldWidget implements Drawable, Element, Selectable {
 			
 			formatter.apply(this.text).visit(new StyledVisitor<Boolean>() {
 				private int i = 0;
-				private MutableText line = Text.literal("");
+				private EditableText line = TextInst.literal("");
 				
 				@Override
 				public Optional<Boolean> accept(Style style, String str) {
@@ -159,14 +164,14 @@ public class MultiLineTextFieldWidget implements Drawable, Element, Selectable {
 					int targetLength = lines.get(i).length();
 					int currentLength = line.getString().length();
 					if (currentLength + str.length() >= targetLength) {
-						line.append(Text.literal(str.substring(0, targetLength - currentLength)).fillStyle(style));
+						line.append(TextInst.literal(str.substring(0, targetLength - currentLength)).fillStyle(style));
 						formattedLines.add(line);
-						line = Text.literal("");
+						line = TextInst.literal("");
 						i++;
 						if (currentLength + str.length() > targetLength)
 							accept(style, str.substring(targetLength - currentLength));
 					} else
-						line.append(Text.literal(str).fillStyle(style));
+						line.append(TextInst.literal(str).fillStyle(style));
 					return Optional.empty();
 				}
 			}, Style.EMPTY);

@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigBar;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
@@ -14,9 +16,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigList;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDouble;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueNumber;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 
 import net.fabricmc.fabric.api.util.NbtType;
@@ -34,10 +36,10 @@ public class AttributesScreen extends ItemEditorScreen {
 	
 	private static class MaxButton extends ConfigButton {
 		
-		private static final Text MAX = Text.translatable("nbteditor.attributes.amount.max");
-		private static final Text MIN = Text.translatable("nbteditor.attributes.amount.min");
-		private static final Text INFINITY = Text.translatable("nbteditor.attributes.amount.infinity");
-		private static final Text NEG_INFINITY = Text.translatable("nbteditor.attributes.amount.negative_infinity");
+		private static final Text MAX = TextInst.translatable("nbteditor.attributes.amount.max");
+		private static final Text MIN = TextInst.translatable("nbteditor.attributes.amount.min");
+		private static final Text INFINITY = TextInst.translatable("nbteditor.attributes.amount.infinity");
+		private static final Text NEG_INFINITY = TextInst.translatable("nbteditor.attributes.amount.negative_infinity");
 		private static final TooltipSupplier TOOLTIP = new SimpleTooltip("nbteditor.attributes.amount.autofill_keybinds");
 		
 		public MaxButton() {
@@ -101,18 +103,18 @@ public class AttributesScreen extends ItemEditorScreen {
 	private static final Map<String, EntityAttribute> ATTRIBUTES;
 	private static final ConfigHiddenDataNamed<ConfigCategory, UUID> ATTRIBUTE_ENTRY;
 	static {
-		ATTRIBUTES = Registry.ATTRIBUTE.getEntrySet().stream().map(attribute -> Map.entry(attribute.getKey().getValue().toString(), attribute.getValue()))
+		ATTRIBUTES = MultiVersionMisc.getEntrySet(Registry.ATTRIBUTE).stream().map(attribute -> Map.entry(attribute.getKey().getValue().toString(), attribute.getValue()))
 				.sorted((a, b) -> a.getKey().compareToIgnoreCase(b.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
 		String firstAttribute = ATTRIBUTES.keySet().stream().findFirst().get();
 		
 		ConfigCategory visible = new ConfigCategory();
-		visible.setConfigurable("attribute", new ConfigItem<>(Text.translatable("nbteditor.attributes.attribute"), new ConfigValueDropdown<>(
+		visible.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), new ConfigValueDropdown<>(
 				firstAttribute, firstAttribute, new ArrayList<>(ATTRIBUTES.keySet()))));
-		visible.setConfigurable("operation", new ConfigItem<>(Text.translatable("nbteditor.attributes.operation"), new ConfigValueDropdownEnum<>(
+		visible.setConfigurable("operation", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.operation"), new ConfigValueDropdownEnum<>(
 				Operation.ADD, Operation.ADD, Operation.class)));
-		visible.setConfigurable("amount", new ConfigBar().setConfigurable("number", new ConfigItem<>(Text.translatable("nbteditor.attributes.amount"),
-				new ConfigValueDouble(0, 0, -Double.MAX_VALUE, Double.MAX_VALUE))).setConfigurable("autofill", new MaxButton()));
-		visible.setConfigurable("slot", new ConfigItem<>(Text.translatable("nbteditor.attributes.slot"), new ConfigValueDropdownEnum<>(
+		visible.setConfigurable("amount", new ConfigBar().setConfigurable("number", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.amount"),
+				ConfigValueNumber.forDouble(0, 0, -Double.MAX_VALUE, Double.MAX_VALUE))).setConfigurable("autofill", new MaxButton()));
+		visible.setConfigurable("slot", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.slot"), new ConfigValueDropdownEnum<>(
 				Slot.ALL, Slot.ALL, Slot.class)));
 		ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visible, UUID.randomUUID(), (uuid, defaults) -> UUID.randomUUID());
 	}
@@ -125,8 +127,8 @@ public class AttributesScreen extends ItemEditorScreen {
 		return ((ConfigItem<ConfigValueDropdown<Operation>>) attribute.getConfigurable("operation")).getValue();
 	}
 	@SuppressWarnings("unchecked")
-	private static ConfigValueDouble getConfigAmount(ConfigCategory attribute) {
-		return ((ConfigItem<ConfigValueDouble>) ((ConfigBar) attribute.getConfigurable("amount")).getConfigurable("number")).getValue();
+	private static ConfigValueNumber<Double> getConfigAmount(ConfigCategory attribute) {
+		return ((ConfigItem<ConfigValueNumber<Double>>) ((ConfigBar) attribute.getConfigurable("amount")).getConfigurable("number")).getValue();
 	}
 	@SuppressWarnings("unchecked")
 	private static ConfigValueDropdown<Slot> getConfigSlot(ConfigCategory attribute) {
@@ -171,11 +173,11 @@ public class AttributesScreen extends ItemEditorScreen {
 	
 	@SuppressWarnings("unchecked")
 	public AttributesScreen(ItemReference ref) {
-		super(Text.of("Item Attributes"), ref);
+		super(TextInst.of("Item Attributes"), ref);
 		
 		NbtCompound nbt = item.getOrCreateNbt();
 		NbtList attributesNbt = nbt.getList("AttributeModifiers", NbtType.COMPOUND);
-		this.attributes = new ConfigList(Text.translatable("nbteditor.attributes"), false, ATTRIBUTE_ENTRY);
+		this.attributes = new ConfigList(TextInst.translatable("nbteditor.attributes"), false, ATTRIBUTE_ENTRY);
 		
 		for (NbtElement element : attributesNbt) {
 			NbtCompound attributeNbt = (NbtCompound) element;

@@ -3,6 +3,8 @@ package tsp.headdb.ported;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -29,7 +31,7 @@ public enum Category {
     
     Category(String name, String translatedName, Formatting color, int location) {
         this.name = name;
-    	this.translatedName = Text.translatable(translatedName);
+    	this.translatedName = TextInst.translatable(translatedName);
         this.color = color;
         this.location = location;
     }

@@ -7,15 +7,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
-import com.luneruniverse.minecraft.mod.nbteditor.util.StringNbtWriterQuoted;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -24,374 +24,18 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.command.argument.NbtElementArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.AbstractNbtList;
-import net.minecraft.nbt.AbstractNbtNumber;
-import net.minecraft.nbt.NbtByte;
-import net.minecraft.nbt.NbtByteArray;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtFloat;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.nbt.NbtIntArray;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtLong;
-import net.minecraft.nbt.NbtLongArray;
-import net.minecraft.nbt.NbtShort;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.text.Text;
+import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.registry.Registry;
 
 public class NBTEditorScreen extends ItemEditorScreen {
 	
-	public static interface MenuGenerator {
-		public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source);
-		public NbtElement getElement(NbtElement source, String key);
-		public default boolean hasEmptyKey(NBTEditorScreen screen, NbtElement source) {
-			List<NBTValue> elements = getElements(screen, source);
-			if (elements == null)
-				return false;
-			return elements.stream().anyMatch(value -> value.getKey().isEmpty());
-		}
-		public void setElement(NbtElement source, String key, NbtElement value);
-		public void addElement(NBTEditorScreen screen, NbtElement source, Consumer<String> requestOverwrite, String force);
-		public void removeElement(NbtElement source, String key);
-		public void pasteElement(NbtElement source, String key, NbtElement value);
-		public boolean renameElement(NbtElement source, String key, String newKey, boolean force);
-	}
-	public static class ListMenuGenerator<T extends NbtElement, L extends AbstractNbtList<? extends NbtElement>> implements MenuGenerator {
-		private final T defaultValue;
-		public ListMenuGenerator(T defaultValue) {
-			this.defaultValue = defaultValue;
-		}
-		
-		@SuppressWarnings("unchecked")
-		@Override
-		public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source) {
-			AbstractNbtList<? extends NbtElement> nbt = (AbstractNbtList<T>) source;
-			List<NBTValue> output = new ArrayList<>();
-			for (int i = 0; i < nbt.size(); i++)
-				output.add(new NBTValue(screen, i + "", nbt.get(i), nbt));
-			return output;
-		}
-		@SuppressWarnings("unchecked")
-		@Override
-		public NbtElement getElement(NbtElement source, String key) {
-			try {
-				return ((AbstractNbtList<T>) source).get(Integer.parseInt(key));
-			} catch (NumberFormatException e) {
-				return null;
-			}
-		}
-		@SuppressWarnings("unchecked")
-		@Override
-		public void setElement(NbtElement source, String key, NbtElement value) {
-			try {
-				AbstractNbtList<T> list = (AbstractNbtList<T>) source;
-				int index = Integer.parseInt(key);
-				if (list.size() == 1 && index == 0 && list instanceof NbtList) {
-					NbtList nonGenericList = (NbtList) list;
-					nonGenericList.remove(0);
-					nonGenericList.add(value);
-				} else if (list.getHeldType() == value.getType())
-					list.set(index, (T) value);
-			} catch (NumberFormatException e) {
-				NBTEditor.LOGGER.error("Error while modifying a list", e);
-			}
-		}
-		@SuppressWarnings("unchecked")
-		@Override
-		public void addElement(NBTEditorScreen screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
-			((AbstractNbtList<T>) source).add((T) defaultValue.copy());
-			requestOverwrite.accept(null);
-		}
-		@SuppressWarnings("unchecked")
-		@Override
-		public void removeElement(NbtElement source, String key) {
-			try {
-				((AbstractNbtList<T>) source).remove(Integer.parseInt(key));
-			} catch (NumberFormatException e) {
-				NBTEditor.LOGGER.error("Error while modifying a list", e);
-			}
-		}
-		@SuppressWarnings("unchecked")
-		@Override
-		public void pasteElement(NbtElement source, String key, NbtElement value) {
-			AbstractNbtList<T> list = (AbstractNbtList<T>) source;
-			if (list.getHeldType() == value.getType())
-				list.add((T) value);
-			else if (list.getHeldType() == NbtType.STRING)
-				list.add((T) NbtString.of(value.toString()));
-			else if (value instanceof AbstractNbtNumber) {
-				AbstractNbtNumber num = (AbstractNbtNumber) value;
-				
-				switch (list.getHeldType()) {
-					case NbtType.BYTE:
-						list.add((T) NbtByte.of(num.byteValue()));
-						break;
-					case NbtType.SHORT:
-						list.add((T) NbtShort.of(num.shortValue()));
-						break;
-					case NbtType.INT:
-						list.add((T) NbtInt.of(num.intValue()));
-						break;
-					case NbtType.LONG:
-						list.add((T) NbtLong.of(num.longValue()));
-						break;
-					case NbtType.FLOAT:
-						list.add((T) NbtFloat.of(num.floatValue()));
-						break;
-					case NbtType.DOUBLE:
-						list.add((T) NbtDouble.of(num.doubleValue()));
-						break;
-				}
-			}
-		}
-		@SuppressWarnings("unchecked")
-		@Override
-		public boolean renameElement(NbtElement source, String key, String newKey, boolean force) {
-			AbstractNbtList<T> list = (AbstractNbtList<T>) source;
-			try {
-				NbtElement value = getElement(source, key);
-				int keyInt = Integer.parseInt(key);
-				int newKeyInt = Integer.parseInt(newKey);
-				if (newKeyInt < 0)
-					throw new NumberFormatException(newKeyInt + " is less than 0!");
-				
-				if (newKeyInt >= list.size()) {
-					list.remove(keyInt);
-					list.add((T) value);
-				} else {
-					list.remove(keyInt);
-					list.add(newKeyInt, (T) value);
-				}
-				
-				return true;
-			} catch (NumberFormatException e) {
-				NBTEditor.LOGGER.error("Error while modifying a list", e);
-				return true;
-			}
-		}
-	}
-	public static final Map<Integer, MenuGenerator> menuGenerators;
-	public static final Map<Integer, MenuGenerator> listMenuGenerators;
-	static {
-		menuGenerators = new HashMap<>();
-		menuGenerators.put(NbtType.COMPOUND, new MenuGenerator() {
-			@Override
-			public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source) {
-				NbtCompound nbt = (NbtCompound) source;
-				return nbt.getKeys().stream().map(key -> new NBTValue(screen, key, nbt.get(key))).collect(Collectors.toList());
-			}
-			@Override
-			public NbtElement getElement(NbtElement source, String key) {
-				return ((NbtCompound) source).get(key);
-			}
-			@Override
-			public void setElement(NbtElement source, String key, NbtElement value) {
-				((NbtCompound) source).put(key, value);
-			}
-			@Override
-			public void addElement(NBTEditorScreen screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
-				Consumer<String> main = key -> {
-					NbtCompound nbt = (NbtCompound) source;
-					if (nbt.contains(key) && force == null)
-						requestOverwrite.accept(key);
-					else {
-						nbt.put(key, NbtInt.of(0));
-						requestOverwrite.accept(null);
-					}
-				};
-				if (force == null)
-					screen.getKey(main);
-				else
-					main.accept(force);
-			}
-			@Override
-			public void removeElement(NbtElement source, String key) {
-				((NbtCompound) source).remove(key);
-			}
-			@Override
-			public void pasteElement(NbtElement source, String key, NbtElement value) {
-				NbtCompound nbt = (NbtCompound) source;
-				if (nbt.contains(key)) {
-					if (nbt.contains(key + " - Copy")) {
-						int i = 2;
-						while (nbt.contains(key + " - Copy (" + i + ")"))
-							i++;
-						key += " - Copy (" + i + ")";
-					} else
-						key += " - Copy";
-				}
-				nbt.put(key, value);
-			}
-			@Override
-			public boolean renameElement(NbtElement source, String key, String newKey, boolean force) {
-				NbtCompound nbt = (NbtCompound) source;
-				if (nbt.contains(newKey) && !force)
-					return false;
-				NbtElement value = nbt.get(key);
-				nbt.remove(key);
-				nbt.put(newKey, value);
-				return true;
-			}
-		});
-		
-		listMenuGenerators = new HashMap<>();
-		
-		listMenuGenerators.put(NbtType.BYTE, new ListMenuGenerator<NbtByte, NbtByteArray>(NbtByte.of((byte) 0)));
-		listMenuGenerators.put(NbtType.INT, new ListMenuGenerator<NbtInt, NbtIntArray>(NbtInt.of(0)));
-		listMenuGenerators.put(NbtType.LONG, new ListMenuGenerator<NbtLong, NbtLongArray>(NbtLong.of(0L)));
-		
-		listMenuGenerators.put(NbtType.BYTE_ARRAY, new ListMenuGenerator<NbtByteArray, NbtList>(new NbtByteArray(new byte[0])));
-		listMenuGenerators.put(NbtType.COMPOUND, new ListMenuGenerator<NbtCompound, NbtList>(new NbtCompound()));
-		listMenuGenerators.put(NbtType.DOUBLE, new ListMenuGenerator<NbtDouble, NbtList>(NbtDouble.of(0)));
-		listMenuGenerators.put(NbtType.FLOAT, new ListMenuGenerator<NbtFloat, NbtList>(NbtFloat.of(0)));
-		listMenuGenerators.put(NbtType.INT_ARRAY, new ListMenuGenerator<NbtIntArray, NbtList>(new NbtIntArray(new int[0])));
-		listMenuGenerators.put(NbtType.LIST, new ListMenuGenerator<NbtList, NbtList>(new NbtList()));
-		listMenuGenerators.put(NbtType.LONG_ARRAY, new ListMenuGenerator<NbtLongArray, NbtList>(new NbtLongArray(new long[0])));
-		listMenuGenerators.put(NbtType.SHORT, new ListMenuGenerator<NbtShort, NbtList>(NbtShort.of((short) 0)));
-		listMenuGenerators.put(NbtType.STRING, new ListMenuGenerator<NbtString, NbtList>(NbtString.of("")));
-		
-		listMenuGenerators.put(0, listMenuGenerators.get(NbtType.INT));
-		
-		MenuGenerator listMenuGeneratorSwitch = new MenuGenerator() {
-			@Override
-			public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source) {
-				return getRealGen(source).getElements(screen, source);
-			}
-			@Override
-			public NbtElement getElement(NbtElement source, String key) {
-				return getRealGen(source).getElement(source, key);
-			}
-			@Override
-			public void setElement(NbtElement source, String key, NbtElement value) {
-				getRealGen(source).setElement(source, key, value);
-			}
-			@Override
-			public void addElement(NBTEditorScreen screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
-				getRealGen(source).addElement(screen, source, requestOverwrite, force);
-			}
-			@Override
-			public void removeElement(NbtElement source, String key) {
-				getRealGen(source).removeElement(source, key);
-			}
-			@Override
-			public void pasteElement(NbtElement source, String key, NbtElement value) {
-				getRealGen(source).pasteElement(source, key, value);
-			}
-			@Override
-			public boolean renameElement(NbtElement source, String key, String newKey, boolean force) {
-				return getRealGen(source).renameElement(source, key, newKey, force);
-			}
-			@SuppressWarnings("unchecked")
-			private MenuGenerator getRealGen(NbtElement source) {
-				return listMenuGenerators.get((int) ((AbstractNbtList<? extends NbtElement>) source).getHeldType());
-			}
-		};
-		menuGenerators.put(NbtType.LIST, listMenuGeneratorSwitch);
-		menuGenerators.put(NbtType.BYTE_ARRAY, listMenuGeneratorSwitch);
-		menuGenerators.put(NbtType.INT_ARRAY, listMenuGeneratorSwitch);
-		menuGenerators.put(NbtType.LONG_ARRAY, listMenuGeneratorSwitch);
-		
-		menuGenerators.put(NbtType.STRING, new MenuGenerator() {
-			@Override
-			public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source) {
-				NbtElement nbt = getRealNbt(source);
-				if (nbt == null)
-					return null;
-				MenuGenerator gen = menuGenerators.get((int) nbt.getType());
-				if (gen == null || gen == this)
-					return null;
-				return gen.getElements(screen, nbt);
-			}
-			@Override
-			public NbtElement getElement(NbtElement source, String key) {
-				NbtElement nbt = getRealNbt(source);
-				if (nbt == null)
-					return null;
-				MenuGenerator gen = menuGenerators.get((int) nbt.getType());
-				if (gen == null || gen == this)
-					return null;
-				return gen.getElement(nbt, key);
-			}
-			@Override
-			public void setElement(NbtElement source, String key, NbtElement value) {
-				NbtElement nbt = getRealNbt(source);
-				if (nbt == null)
-					return;
-				MenuGenerator gen = menuGenerators.get((int) nbt.getType());
-				if (gen == null || gen == this)
-					return;
-				gen.setElement(nbt, key, value);
-				save(source, nbt);
-			}
-			@Override
-			public void addElement(NBTEditorScreen screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
-				NbtElement nbt = getRealNbt(source);
-				if (nbt == null)
-					return;
-				MenuGenerator gen = menuGenerators.get((int) nbt.getType());
-				if (gen == null || gen == this)
-					return;
-				gen.addElement(screen, nbt, force2 -> {
-					if (force2 == null)
-						save(source, nbt);
-					requestOverwrite.accept(force2);
-				}, force);
-			}
-			@Override
-			public void removeElement(NbtElement source, String key) {
-				NbtElement nbt = getRealNbt(source);
-				if (nbt == null)
-					return;
-				MenuGenerator gen = menuGenerators.get((int) nbt.getType());
-				if (gen == null || gen == this)
-					return;
-				gen.removeElement(nbt, key);
-				save(source, nbt);
-			}
-			@Override
-			public void pasteElement(NbtElement source, String key, NbtElement value) {
-				NbtElement nbt = getRealNbt(source);
-				if (nbt == null)
-					return;
-				MenuGenerator gen = menuGenerators.get((int) nbt.getType());
-				if (gen == null || gen == this)
-					return;
-				gen.pasteElement(nbt, key, value);
-				save(source, nbt);
-			}
-			public boolean renameElement(NbtElement source, String key, String newKey, boolean force) {
-				NbtElement nbt = getRealNbt(source);
-				if (nbt == null)
-					return true;
-				MenuGenerator gen = menuGenerators.get((int) nbt.getType());
-				if (gen == null || gen == this)
-					return true;
-				boolean output = gen.renameElement(nbt, key, newKey, force);
-				save(source, nbt);
-				return output;
-			}
-			private NbtElement getRealNbt(NbtElement str) {
-				try {
-					return NbtElementArgumentType.nbtElement().parse(new StringReader(((NbtString) str).asString()));
-				} catch (CommandSyntaxException e) {
-					return null;
-				}
-			}
-			private void save(NbtElement source, NbtElement nbt) {
-				((NbtString) source).value = new StringNbtWriterQuoted().apply(nbt);
-			}
-		});
-	}
-	
-	public MenuGenerator gen = new MenuGenerator() {
+	private class RecursiveMenuGenerator implements MenuGenerator {
 		@Override
 		public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source) {
 			return currentGen.getElements(screen, source);
@@ -429,12 +73,11 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			recursiveUpdate(source);
 			return output;
 		}
-		
 		private void recursiveUpdate(NbtElement source) {
 			List<NbtElement> path = new ArrayList<>();
 			NbtElement lastPart = item.getOrCreateNbt();
 			for (String part : realPath) {
-				MenuGenerator gen = menuGenerators.get((int) lastPart.getType());
+				MenuGenerator gen = MenuGenerator.TYPES.get((int) lastPart.getType());
 				if (gen == null)
 					return;
 				path.add(lastPart = gen.getElement(lastPart, part));
@@ -442,13 +85,11 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			lastPart = source;
 			for (int i = path.size() - 2; i >= 0; i--) {
 				NbtElement part = path.get(i);
-				menuGenerators.get((int) part.getType()).setElement(part, realPath.get(i + 1), lastPart);
+				MenuGenerator.TYPES.get((int) part.getType()).setElement(part, realPath.get(i + 1), lastPart);
 				lastPart = part;
 			}
 		}
-	};
-	
-	
+	}
 	
 	
 	private static String copiedKey;
@@ -466,11 +107,12 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	private List<String> realPath;
 	private NBTValue selectedValue;
 	private MenuGenerator currentGen;
+	private final MenuGenerator gen;
 	private NbtElement nbt;
 	
 	@SuppressWarnings("serial")
 	public NBTEditorScreen(ItemReference ref) {
-		super(Text.of("NBT Editor"), ref);
+		super(TextInst.of("NBT Editor"), ref);
 		
 		this.scrollPerFolder = new HashMap<>();
 		
@@ -479,6 +121,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 				return String.join("/", this);
 			}
 		};
+		this.gen = new RecursiveMenuGenerator();
 		this.nbt = item.getOrCreateNbt();
 	}
 	
@@ -493,8 +136,8 @@ public class NBTEditorScreen extends ItemEditorScreen {
 					client.setScreen(NBTEditorScreen.this);
 				} else
 					close();
-			}, Text.translatable("nbteditor.emptykey.title"), Text.translatable("nbteditor.emptykey.message"),
-					Text.translatable("nbteditor.emptykey.yes"), Text.translatable("nbteditor.emptykey.no")));
+			}, TextInst.translatable("nbteditor.nbt.empty_key.title"), TextInst.translatable("nbteditor.nbt.empty_key.desc"),
+					TextInst.translatable("nbteditor.nbt.empty_key.yes"), TextInst.translatable("nbteditor.nbt.empty_key.no")));
 			
 			return;
 		}
@@ -506,33 +149,33 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			if (str.equals(item.getItem().getName().getString()))
 				item.setCustomName(null);
 			else
-				item.setCustomName(Text.of(str));
+				item.setCustomName(TextInst.of(str));
 			
 			genEditor();
 		});
 		
-		this.addDrawableChild(new ButtonWidget(16, height - 16 * 2, 20, 20, Text.translatable("nbteditor.add"), btn -> {
+		this.addDrawableChild(new ButtonWidget(16, height - 16 * 2, 20, 20, TextInst.translatable("nbteditor.nbt.add"), btn -> {
 			add();
 		}));
-		this.addDrawableChild(new ButtonWidget(16 + 16 + 8, height - 16 * 2, 20, 20, Text.translatable("nbteditor.remove"), btn -> {
+		this.addDrawableChild(new ButtonWidget(16 + 16 + 8, height - 16 * 2, 20, 20, TextInst.translatable("nbteditor.nbt.remove"), btn -> {
 			remove();
 		}));
-		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2, height - 16 * 2, 48, 20, Text.translatable("nbteditor.copy"), btn -> {
+		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.copy"), btn -> {
 			copy();
 		}));
-		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2 + (48 + 4), height - 16 * 2, 48, 20, Text.translatable("nbteditor.cut"), btn -> {
+		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2 + (48 + 4), height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.cut"), btn -> {
 			cut();
 		}));
-		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2 + (48 + 4) * 2, height - 16 * 2, 48, 20, Text.translatable("nbteditor.paste"), btn -> {
+		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2 + (48 + 4) * 2, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.paste"), btn -> {
 			paste();
 		}));
-		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2 + (48 + 4) * 3, height - 16 * 2, 48, 20, Text.translatable("nbteditor.rename"), btn -> {
+		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2 + (48 + 4) * 3, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.rename"), btn -> {
 			rename();
 		}));
 		
 		
 		
-		type = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8 + 32, 208, 16, Text.of("")).name(Text.translatable("nbteditor.identifier"));
+		type = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8 + 32, 208, 16, TextInst.of("")).name(TextInst.translatable("nbteditor.nbt.identifier"));
 		type.setMaxLength(Integer.MAX_VALUE);
 		type.setText(Registry.ITEM.getId(item.getItem()).toString());
 		type.setChangedListener(str -> {
@@ -560,7 +203,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		});
 		this.addSelectableChild(type);
 		
-		count = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32, 72, 16, Text.of("")).name(Text.translatable("nbteditor.count"));
+		count = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32, 72, 16, TextInst.of("")).name(TextInst.translatable("nbteditor.nbt.count"));
 		count.setMaxLength(Integer.MAX_VALUE);
 		count.setText((ConfigScreen.isAirEditable() ? Math.max(1, item.getCount()) : item.getCount()) + "");
 		count.setChangedListener(str -> {
@@ -581,14 +224,14 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		});
 		this.addSelectableChild(count);
 		
-		path = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + 16 + 8, 288, 16, Text.translatable("nbteditor.path")).name(Text.translatable("nbteditor.path"));
+		path = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + 16 + 8, 288, 16, TextInst.translatable("nbteditor.nbt.path")).name(TextInst.translatable("nbteditor.nbt.path"));
 		path.setMaxLength(Integer.MAX_VALUE);
 		path.setText(realPath.toString());
 		path.setChangedListener(str -> {
 			String[] parts = str.split("/");
 			NbtElement nbt = item.getOrCreateNbt();
 			for (String part : parts) {
-				MenuGenerator gen = menuGenerators.get((int) nbt.getType());
+				MenuGenerator gen = MenuGenerator.TYPES.get((int) nbt.getType());
 				if (gen == null)
 					return;
 				nbt = gen.getElement(nbt, part);
@@ -601,7 +244,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		});
 		this.addSelectableChild(path);
 		
-		value = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16, Text.translatable("nbteditor.value")).name(Text.translatable("nbteditor.value"));
+		value = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16, TextInst.translatable("nbteditor.nbt.value")).name(TextInst.translatable("nbteditor.nbt.value"));
 		value.setRenderTextProvider((str, index) -> {
 			return MainUtil.substring(NbtFormatter.formatElementSafe(value.getText()).getValue(), index, index + str.length()).asOrderedText();
 		});
@@ -621,8 +264,30 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		});
 		this.addSelectableChild(value);
 		
-		this.addDrawableChild(new ButtonWidget(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, Text.translatable("nbteditor.value_expand"), btn -> {
-			if (selectedValue != null)
+		this.addDrawableChild(new ButtonWidget(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, TextInst.translatable("nbteditor.nbt.value_expand"), btn -> {
+			if (selectedValue == null)
+				client.setScreen(new TextAreaScreen(this, nbt.asString(), NbtFormatter::formatElementSafe, str -> {
+					try {
+						NbtElement newNbt = new StringNbtReader(new StringReader(str)).parseElement();
+						if (realPath.isEmpty()) {
+							if (newNbt instanceof NbtCompound)
+								nbt = newNbt;
+							else {
+								nbt = new NbtCompound();
+								((NbtCompound) nbt).put("value", newNbt);
+							}
+							item.setNbt((NbtCompound) nbt);
+						} else {
+							String lastPathPart = realPath.remove(realPath.size() - 1);
+							genEditor();
+							gen.setElement(nbt, lastPathPart, newNbt);
+							realPath.add(lastPathPart);
+						}
+					} catch (CommandSyntaxException e) {
+						NBTEditor.LOGGER.error("Error parsing nbt from Expand", e);
+					}
+				}));
+			else
 				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter::formatElementSafe, str -> value.setText(str)));
 		}));
 		
@@ -650,7 +315,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		editor.clearElements();
 		
 		this.nbt = item.getOrCreateNbt();
-		this.currentGen = menuGenerators.get(NbtType.COMPOUND);
+		this.currentGen = MenuGenerator.TYPES.get(NbtType.COMPOUND);
 		Iterator<String> keys = realPath.iterator();
 		boolean removing = false;
 		NbtElement value = null;
@@ -661,7 +326,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 				keys.remove();
 				continue;
 			}
-			if ((value = this.currentGen.getElement(this.nbt, key)) != null && (generator = menuGenerators.get((int) value.getType())) != null) {
+			if ((value = this.currentGen.getElement(this.nbt, key)) != null && (generator = MenuGenerator.TYPES.get((int) value.getType())) != null) {
 				this.nbt = value;
 				this.currentGen = generator;
 			}
@@ -691,8 +356,6 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	}
 	private void updateName() {
 		name.text = MainUtil.getItemNameSafely(item).getString();
-		name.setSelectionStart(name.getText().length());
-		name.setSelectionEnd(name.getText().length());
 	}
 	@Override
 	protected boolean isNameEditable() {
@@ -752,8 +415,8 @@ public class NBTEditorScreen extends ItemEditorScreen {
 				super.save();
 			
 			MainUtil.client.setScreen(NBTEditorScreen.this);
-		}, Text.translatable("nbteditor.saving_air.title"), Text.translatable("nbteditor.saving_air.desc"),
-				Text.translatable("nbteditor.saving_air.yes"), Text.translatable("nbteditor.saving_air.no")));
+		}, TextInst.translatable("nbteditor.nbt.saving_air.title"), TextInst.translatable("nbteditor.nbt.saving_air.desc"),
+				TextInst.translatable("nbteditor.nbt.saving_air.yes"), TextInst.translatable("nbteditor.nbt.saving_air.no")));
 	}
 	
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
@@ -825,8 +488,8 @@ public class NBTEditorScreen extends ItemEditorScreen {
 						gen.addElement(NBTEditorScreen.this, this.nbt, success2 -> genEditor(), force);
 					
 					client.setScreen(NBTEditorScreen.this);
-				}, Text.translatable("nbteditor.overwrite.title"), Text.translatable("nbteditor.overwrite.message"),
-						Text.translatable("nbteditor.overwrite.yes"), Text.translatable("nbteditor.overwrite.no")));
+				}, TextInst.translatable("nbteditor.nbt.overwrite.title"), TextInst.translatable("nbteditor.nbt.overwrite.desc"),
+						TextInst.translatable("nbteditor.nbt.overwrite.yes"), TextInst.translatable("nbteditor.nbt.overwrite.no")));
 			}
 		}, null);
 	}
@@ -872,8 +535,8 @@ public class NBTEditorScreen extends ItemEditorScreen {
 						}
 						
 						client.setScreen(NBTEditorScreen.this);
-					}, Text.translatable("nbteditor.overwrite.title"), Text.translatable("nbteditor.overwrite.message"),
-							Text.translatable("nbteditor.overwrite.yes"), Text.translatable("nbteditor.overwrite.no")));
+					}, TextInst.translatable("nbteditor.nbt.overwrite.title"), TextInst.translatable("nbteditor.nbt.overwrite.desc"),
+							TextInst.translatable("nbteditor.nbt.overwrite.yes"), TextInst.translatable("nbteditor.nbt.overwrite.no")));
 				}
 			});
 		}

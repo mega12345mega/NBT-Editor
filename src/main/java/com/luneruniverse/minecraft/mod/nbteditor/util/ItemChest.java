@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.inventory.SimpleInventory;
@@ -13,7 +14,6 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
 
 public class ItemChest {
 	
@@ -32,7 +32,7 @@ public class ItemChest {
 				
 				ItemStack section = new ItemStack(Items.SHULKER_BOX);
 				path.add(i + "");
-				section.setCustomName(Text.of(Text.translatable("nbteditor.hdb.section").getString() + ": " + String.join(".", path)));
+				section.setCustomName(TextInst.of(TextInst.translatable("nbteditor.hdb.section").getString() + ": " + String.join(".", path)));
 				writeDatabase(section, data.subList(i * sectionSize, Math.min(data.size(), (i + 1) * sectionSize)), stackGenerator, path);
 				path.remove(path.size() - 1);
 				chest.addStack(section);

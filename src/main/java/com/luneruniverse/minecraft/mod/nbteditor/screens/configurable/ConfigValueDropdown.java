@@ -3,12 +3,12 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 
 public class ConfigValueDropdown<T> extends ButtonWidget implements ConfigValue<T, ConfigValueDropdown<T>> {
 	
@@ -21,7 +21,7 @@ public class ConfigValueDropdown<T> extends ButtonWidget implements ConfigValue<
 	
 	@SuppressWarnings("unchecked")
 	public ConfigValueDropdown(T value, T defaultValue, List<T> allValues) {
-		super(0, 0, getMaxWidth(allValues) + MainUtil.client.textRenderer.fontHeight * 2, 20, Text.of(value.toString()),
+		super(0, 0, getMaxWidth(allValues) + MainUtil.client.textRenderer.fontHeight * 2, 20, TextInst.of(value.toString()),
 				btn -> ((ConfigValueDropdown<T>) btn).open = !((ConfigValueDropdown<T>) btn).open);
 		
 		this.value = value;
@@ -53,10 +53,14 @@ public class ConfigValueDropdown<T> extends ButtonWidget implements ConfigValue<
 				int color = -1;
 				if (xHover && mouseY >= y && mouseY < y + this.height)
 					color = 0xFF257789;
-				drawCenteredText(matrices, MainUtil.client.textRenderer, Text.of(option.toString()),
+				drawCenteredText(matrices, MainUtil.client.textRenderer, TextInst.of(option.toString()),
 						this.x + this.width / 2, y + (this.height - MainUtil.client.textRenderer.fontHeight) / 2, color);
+				if (color != -1 && option instanceof ConfigTooltipSupplier) // Hovering
+					((ConfigTooltipSupplier) option).render(matrices, mouseX, mouseY);
 			}
 		}
+		if (isHovered() && value instanceof ConfigTooltipSupplier)
+			((ConfigTooltipSupplier) value).render(matrices, mouseX, mouseY);
 	}
 	
 	@Override
@@ -96,7 +100,7 @@ public class ConfigValueDropdown<T> extends ButtonWidget implements ConfigValue<
 	@Override
 	public void setValue(T value) {
 		this.value = value;
-		setMessage(Text.of(value.toString()));
+		setMessage(TextInst.of(value.toString()));
 		onChanged.forEach(listener -> listener.onValueChanged(this));
 	}
 	@Override

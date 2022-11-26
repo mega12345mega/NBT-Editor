@@ -192,7 +192,7 @@ public class HeadDatabase {
      * @param category The category of the heads
      * @return List of heads for that category
      * @throws IOException error
-     * @throws ParseException error
+     * @throws JsonParseException error
      */
     protected List<Head> gather(String url, Category category) throws IOException, JsonParseException {
         long start = System.currentTimeMillis();

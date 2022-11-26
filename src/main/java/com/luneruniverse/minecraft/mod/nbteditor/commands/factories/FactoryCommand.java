@@ -1,27 +1,32 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import java.util.List;
 
-import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.commands.SubCommand;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommandGroup;
 
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-
-public class FactoryCommand implements ClientCommand {
+public class FactoryCommand extends ClientCommandGroup {
 	
-	@Override
-	public LiteralCommandNode<FabricClientCommandSource> register(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess cmdReg) {
-		return dispatcher.register(SubCommand.registerAll(literal("itemfactory"), cmdReg,
-				new AttributesCommand(),
+	public FactoryCommand() {
+		super(List.of(new AttributesCommand(),
 				new BlockStatesCommand(),
 				new EnchantmentsCommand(),
 				new HideFlagsCommand(),
 				new LoreCommand(),
 				new MaxCommand(),
-				new UnbindSkullCommand()));
+				new NameCommand(),
+				new SignatureCommand(),
+				new UnbindSkullCommand(),
+				new UnstackableCommand()));
+	}
+	
+	@Override
+	public String getName() {
+		return "itemfactory";
+	}
+	
+	@Override
+	public boolean allowShortcuts() {
+		return true;
 	}
 	
 }

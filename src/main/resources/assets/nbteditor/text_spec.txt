@@ -1,0 +1,25 @@
+Text format specifications:
+
+Escape chars:
+\&
+\[
+\}
+\\
+
+Color and format codes:
+&a, &k, &r, etc.
+- § also supported
+- reset format when changing color as per motd
+
+Click events:
+[open_url | run_command | suggest_command | change_page | copy_to_clipboard]{<unformatted value>}(<affected text>)
+
+Hover events:
+[show_text]{<text formatted value>}(<affected text>)
+[show_item]{<optional slot id; default selected hotbar slot, else air>}(<affected text>)
+[show_entity]{<optional uuid; default entity looking at, else self>}(<affected text>)
+
+Example:
+Red text followed by clickable and hoverable green text followed by gold text
+
+&cRed text [run_command]{/say clicked!}([show_text]{&6Try me!}(&aGreen text)) &6Gold Text

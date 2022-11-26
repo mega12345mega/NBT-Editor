@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -20,7 +21,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -56,7 +56,7 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 	
 	private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:blindness duration:1 showparticles:false", "minecraft:jump_boost");
 	public static final DynamicCommandExceptionType INVALID_EFFECT_EXCEPTION = new DynamicCommandExceptionType((id) -> {
-		return Text.translatable("effect.effectNotFound", new Object[]{id});
+		return TextInst.translatable("effect.effectNotFound", new Object[]{id});
 	});
 
 	public static EffectListArgumentType effectList() {
@@ -80,7 +80,7 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 				break;
 			}
 			if (stringReader.read() != ' ')
-				throw new SimpleCommandExceptionType(Text.translatable("nbteditor.expected_space")).createWithContext(stringReader);
+				throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.effect_list_arg_type.expected.space")).createWithContext(stringReader);
 			
 			StatusEffectInstance effect = new StatusEffectInstance(type, 5 * 20);
 			
@@ -90,9 +90,9 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 					arg.append(stringReader.read());
 				Arg key = Arrays.stream(Arg.values()).filter(test -> test.name.equalsIgnoreCase(arg.toString())).findFirst().orElse(null);
 				if (key == null)
-					throw new SimpleCommandExceptionType(Text.translatable("nbteditor.invalid_arg")).createWithContext(stringReader);
+					throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.effect_list_arg_type.invalid.arg")).createWithContext(stringReader);
 				if (!stringReader.canRead())
-					throw new SimpleCommandExceptionType(Text.translatable("nbteditor.expected_colon")).createWithContext(stringReader);
+					throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.effect_list_arg_type.expected.colon")).createWithContext(stringReader);
 				
 				stringReader.read(); // Colon
 				
@@ -103,7 +103,7 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 				try {
 					effect = key.apply.apply(effect, value.toString());
 				} catch (Exception e) {
-					throw new SimpleCommandExceptionType(Text.translatable("nbteditor.invalid_value")).createWithContext(stringReader);
+					throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.effect_list_arg_type.invalid.value")).createWithContext(stringReader);
 				}
 				
 				if (stringReader.canRead())
@@ -143,7 +143,7 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 				}
 			}
 		}
-		return CommandSource.suggestIdentifiers((Iterable<Identifier>)Registry.STATUS_EFFECT.getIds(), builder);
+		return CommandSource.suggestIdentifiers(Registry.STATUS_EFFECT.getIds(), builder);
 	}
 
 	public Collection<String> getExamples() {

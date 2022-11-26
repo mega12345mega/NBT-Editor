@@ -7,6 +7,8 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
@@ -32,7 +34,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 	
 	public static void show() {
 		if (!NBTEditorClient.CLIENT_CHEST.isLoaded()) {
-			MainUtil.client.player.sendMessage(Text.translatable("nbteditor.clientchest.notloaded"));
+			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.not_ready"), false);
 			return;
 		}
 		
@@ -43,7 +45,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 		} else {
 			ClientPlayerEntity player = MainUtil.client.player;
 			ClientChestHandler handler = new ClientChestHandler(0, player.getInventory());
-			MainUtil.client.setScreen(new ClientChestScreen(handler, player.getInventory(), Text.translatable("nbteditor.clientchest")));
+			MainUtil.client.setScreen(new ClientChestScreen(handler, player.getInventory(), TextInst.translatable("nbteditor.client_chest")));
 		}
 	}
 	
@@ -59,7 +61,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 			NBTEditorClient.CLIENT_CHEST.setPage(page, items);
 		} catch (IOException e) {
 			NBTEditor.LOGGER.error("Error while saving client chest", e);
-			this.client.player.sendMessage(Text.translatable("nbteditor.storage_save_error"), false);
+			this.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
 		}
 	}, true);
 	private boolean saved;
@@ -76,7 +78,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 		super(handler, inventory, title);
 		this.dropCursorOnClose = false;
 		this.saved = true;
-		this.unsavedTitle = title.copy().append("*");
+		this.unsavedTitle = MultiVersionMisc.copyText(title).append("*");
 	}
 	
 	@Override
@@ -85,16 +87,16 @@ public class ClientChestScreen extends ClientContainerScreen {
 		super.init();
 		x += 87 / 2;
 		
-		this.addDrawableChild(new CreativeTab(this, new ItemStack(Items.BRICKS).setCustomName(Text.translatable("itemGroup.nbteditor.creative")), () -> client.setScreen(new CreativeInventoryScreen(client.player))));
+		this.addDrawableChild(new CreativeTab(this, new ItemStack(Items.BRICKS).setCustomName(TextInst.translatable("itemGroup.nbteditor.creative")), () -> client.setScreen(new CreativeInventoryScreen(client.player))));
 		
-		this.addDrawableChild(prevPage = new ButtonWidget(this.x - 87, this.y, 20, 20, Text.of("<"), btn -> {
+		this.addDrawableChild(prevPage = new ButtonWidget(this.x - 87, this.y, 20, 20, TextInst.of("<"), btn -> {
 			navigationClicked = true;
 			PAGE--;
 			pageField.setText((PAGE + 1) + "");
 			show();
 		}));
 		
-		pageField = new TextFieldWidget(textRenderer, this.x - 63, this.y + 2, 35, 16, Text.of("")) {
+		pageField = new TextFieldWidget(textRenderer, this.x - 63, this.y + 2, 35, 16, TextInst.of("")) {
 			@Override
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				boolean output = super.mouseClicked(mouseX, mouseY, button);
@@ -125,34 +127,34 @@ public class ClientChestScreen extends ClientContainerScreen {
 		});
 		this.addSelectableChild(pageField);
 		
-		this.addDrawableChild(nextPage = new ButtonWidget(this.x - 24, this.y, 20, 20, Text.of(">"), btn -> {
+		this.addDrawableChild(nextPage = new ButtonWidget(this.x - 24, this.y, 20, 20, TextInst.of(">"), btn -> {
 			navigationClicked = true;
 			PAGE++;
 			pageField.setText((PAGE + 1) + "");
 			show();
 		}));
 		
-		this.addDrawableChild(prevPageJump = new ButtonWidget(this.x - 87, this.y + 24, 39, 20, Text.of("<<"), btn -> {
+		this.addDrawableChild(prevPageJump = new ButtonWidget(this.x - 87, this.y + 24, 39, 20, TextInst.of("<<"), btn -> {
 			navigationClicked = true;
 			PAGE = prevPageJumpTarget;
 			pageField.setText((PAGE + 1) + "");
 			show();
 		}));
 		
-		this.addDrawableChild(nextPageJump = new ButtonWidget(this.x - 43, this.y + 24, 39, 20, Text.of(">>"), btn -> {
+		this.addDrawableChild(nextPageJump = new ButtonWidget(this.x - 43, this.y + 24, 39, 20, TextInst.of(">>"), btn -> {
 			navigationClicked = true;
 			PAGE = nextPageJumpTarget;
 			pageField.setText((PAGE + 1) + "");
 			show();
 		}));
 		
-		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 48, 83, 20, ConfigScreen.shouldLockSlots() ? Text.translatable("nbteditor.unlock_slots") : Text.translatable("nbteditor.lock_slots"), btn -> {
+		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 48, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
 			navigationClicked = true;
-			ConfigScreen.setLockSlots(!ConfigScreen.shouldLockSlots());
-			btn.setMessage(ConfigScreen.shouldLockSlots() ? Text.translatable("nbteditor.unlock_slots") : Text.translatable("nbteditor.lock_slots"));
-		})).active = !ConfigScreen.shouldDisableLockSlotsButton();
+			ConfigScreen.setLockSlots(!ConfigScreen.isLockSlots());
+			btn.setMessage(ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"));
+		})).active = !ConfigScreen.isLockSlotsRequired();
 		
-		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 72, 83, 20, Text.translatable("nbteditor.reload_page"), btn -> {
+		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 72, 83, 20, TextInst.translatable("nbteditor.client_chest.reload_page"), btn -> {
 			navigationClicked = true;
 			try {
 				NBTEditorClient.CLIENT_CHEST.loadSync(PAGE);
@@ -162,7 +164,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 			}
 		}));
 		
-		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 96, 83, 20, Text.translatable("nbteditor.clear_page"), btn -> {
+		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 96, 83, 20, TextInst.translatable("nbteditor.client_chest.clear_page"), btn -> {
 			navigationClicked = true;
 			client.setScreen(new FancyConfirmScreen(value -> {
 				if (value) {
@@ -171,8 +173,8 @@ public class ClientChestScreen extends ClientContainerScreen {
 				}
 				
 				client.setScreen(ClientChestScreen.this);
-			}, Text.translatable("nbteditor.clearpage.title"), Text.translatable("nbteditor.clearpage.message"),
-					Text.translatable("nbteditor.clearpage.yes"), Text.translatable("nbteditor.clearpage.no")));
+			}, TextInst.translatable("nbteditor.client_chest.clear_page.title"), TextInst.translatable("nbteditor.client_chest.clear_page.desc"),
+					TextInst.translatable("nbteditor.client_chest.clear_page.yes"), TextInst.translatable("nbteditor.client_chest.clear_page.no")));
 		}));
 		
 		
@@ -233,7 +235,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 	}
 	@Override
 	public boolean allowEnchantmentCombine(Slot slot) {
-		return !ConfigScreen.shouldLockSlots() || slot.inventory == MainUtil.client.player.getInventory();
+		return !ConfigScreen.isLockSlots() || slot.inventory == MainUtil.client.player.getInventory();
 	}
 	@Override
 	public void onEnchantmentCombine(Slot slot) {
@@ -241,7 +243,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 	}
 	@Override
 	public boolean lockSlots() {
-		return ConfigScreen.shouldLockSlots();
+		return ConfigScreen.isLockSlots();
 	}
 	@Override
 	public ItemStack[] getPrevInventory() {

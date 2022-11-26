@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import java.util.function.Consumer;
 
+import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.StringReader;
@@ -122,7 +123,7 @@ public class NBTValue extends List2D.List2DValue {
 				return true;
 			}
 			
-			NBTEditorScreen.MenuGenerator menuGen = NBTEditorScreen.menuGenerators.get((int) value.getType());
+			MenuGenerator menuGen = MenuGenerator.TYPES.get((int) value.getType());
 			screen.selectNbt(this, selected && menuGen != null && !menuGen.hasEmptyKey(screen, value));
 			selected = !selected;
 			return selected;

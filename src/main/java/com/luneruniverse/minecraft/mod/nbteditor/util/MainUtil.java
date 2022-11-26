@@ -7,7 +7,11 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import com.google.gson.JsonParseException;
+import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
@@ -20,6 +24,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -55,7 +60,7 @@ public class MainUtil {
 		return new ItemReference(hand);
 	}
 	public static ItemReference getHeldItem() throws CommandSyntaxException {
-		return getHeldItem(item -> true, Text.translatable("nbteditor.noitem"));
+		return getHeldItem(item -> true, TextInst.translatable("nbteditor.no_hand.no_item.to_edit"));
 	}
 	public static ItemReference getHeldItemAirable() {
 		try {
@@ -87,6 +92,38 @@ public class MainUtil {
 	}
 	public static void saveItemInvSlot(int slot, ItemStack item) {
 		saveItem(slot == 45 ? 45 : (slot >= 36 ? slot - 36 : slot), item);
+	}
+	
+	public static void get(ItemStack item, boolean dropIfNoSpace) {
+		PlayerInventory inv = client.player.getInventory();
+		item = item.copy();
+		
+		int slot = inv.getOccupiedSlotWithRoomForStack(item);
+		if (slot == -1)
+			slot = inv.getEmptySlot();
+		if (slot == -1) {
+			if (dropIfNoSpace) {
+				if (item.getCount() > item.getMaxCount())
+					item.setCount(item.getMaxCount());
+				client.interactionManager.dropCreativeStack(item);
+			}
+		} else {
+			item.setCount(item.getCount() + inv.getStack(slot).getCount());
+			int overflow = 0;
+			if (item.getCount() > item.getMaxCount()) {
+				overflow = item.getCount() - item.getMaxCount();
+				item.setCount(item.getMaxCount());
+			}
+			saveItem(slot, item);
+			if (overflow != 0) {
+				item.setCount(overflow);
+				get(item, false);
+			}
+		}
+	}
+	public static void getWithMessage(ItemStack item) {
+		get(item, true);
+		client.player.sendMessage(TextInst.translatable("nbteditor.get.item").append(item.toHoverableText()), false);
 	}
 	
 	
@@ -173,9 +210,9 @@ public class MainUtil {
 			line = lines.get(i);
 			int offsetY = i * renderer.fontHeight + (centerVertical ? -renderer.fontHeight * lines.size() / 2 : 0);
 			if (centerHorizontal)
-				Screen.drawCenteredTextWithShadow(matrices, renderer, Text.of(line).asOrderedText(), x, y + offsetY, color);
+				Screen.drawCenteredTextWithShadow(matrices, renderer, TextInst.of(line).asOrderedText(), x, y + offsetY, color);
 			else
-				Screen.drawTextWithShadow(matrices, renderer, Text.of(line), x, y + offsetY, color);
+				Screen.drawTextWithShadow(matrices, renderer, TextInst.of(line), x, y + offsetY, color);
 		}
 	}
 	
@@ -223,17 +260,21 @@ public class MainUtil {
 	}
 	
 	
-	public static MutableText getLongTranslatableText(String key) {
-		MutableText output = Text.translatable(key + "_1");
+	public static EditableText getLongTranslatableText(String key) {
+		EditableText output = TextInst.translatable(key + "_1");
 		for (int i = 2; true; i++) {
-			Text line = Text.translatable(key + "_" + i);
+			Text line = TextInst.translatable(key + "_" + i);
 			String str = line.getString();
 			if (str.equals(key + "_" + i) || i > 50)
 				break;
 			if (str.startsWith("[LINK] ")) {
 				String url = str.substring("[LINK] ".length());
-				line = Text.literal(url).styled(style -> style.withClickEvent(new ClickEvent(Action.OPEN_URL, url))
+				line = TextInst.literal(url).styled(style -> style.withClickEvent(new ClickEvent(Action.OPEN_URL, url))
 						.withUnderline(true).withItalic(true).withColor(Formatting.GOLD));
+			}
+			if (str.startsWith("[FORMAT] ")) {
+				String toFormat = str.substring("[FORMAT] ".length());
+				line = parseFormattedText(toFormat);
 			}
 			output.append("\n").append(line);
 		}
@@ -282,7 +323,7 @@ public class MainUtil {
 	
 	
 	public static Text substring(Text text, int start, int end) {
-		MutableText output = Text.literal("");
+		EditableText output = TextInst.literal("");
 		text.visit(new StyledVisitor<Boolean>() {
 			private int i;
 			@Override
@@ -294,7 +335,7 @@ public class MainUtil {
 				if (i >= start) {
 					if (end >= 0 && i + str.length() > end)
 						return accept(style, str.substring(0, end - i));
-					output.append(Text.literal(str).fillStyle(style));
+					output.append(TextInst.literal(str).fillStyle(style));
 					i += str.length();
 					if (end >= 0 && i == end)
 						return Optional.of(true);
@@ -364,6 +405,15 @@ public class MainUtil {
 		if (item.getNbt() != null)
 			output.setNbt(item.getNbt().copy());
 		return output;
+	}
+	
+	
+	public static Text parseFormattedText(String text) {
+		try {
+			return FancyTextArgumentType.fancyText(false).parse(new StringReader(text));
+		} catch (CommandSyntaxException e) {
+			return TextInst.literal(text);
+		}
 	}
 	
 }

@@ -4,13 +4,16 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 
-public class TextAreaScreen extends Screen {
+public class TextAreaScreen extends MultiVersionScreen {
 	
 	private final Screen parent;
 	private String text;
@@ -20,7 +23,7 @@ public class TextAreaScreen extends Screen {
 	private MultiLineTextFieldWidget textArea;
 	
 	public TextAreaScreen(Screen parent, String text, Function<String, Map.Entry<Boolean, Text>> formatter, Consumer<String> onDone) {
-		super(Text.of("Text Area"));
+		super(TextInst.of("Text Area"));
 		this.parent = parent;
 		this.text = text;
 		this.formatter = formatter;

@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -27,7 +29,7 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			
 			private final Text msg;
 			private ListContextMenuAction(String msg) {
-				this.msg = Text.translatable(msg);
+				this.msg = TextInst.translatable(msg);
 			}
 		}
 		
@@ -59,12 +61,12 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 		public void setIndex(int index) {
 			this.index = index;
 			if (indexed) {
-				this.indexText = Text.literal("(#" + (index + 1) + ") ");
+				this.indexText = TextInst.literal("(#" + (index + 1) + ") ");
 				this.indexTextOffset = named ? 0 : MainUtil.client.textRenderer.getWidth(this.indexText);
 				if (named)
 					((ConfigPathNamed) value).setNamePrefix(this.indexText);
 			} else {
-				this.indexText = Text.of("");
+				this.indexText = TextInst.of("");
 				this.indexTextOffset = 0;
 			}
 		}
@@ -96,7 +98,7 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 					color = 0xFF257789;
 				Text msg = action.msg;
 				if (action == ListContextMenuAction.REMOVE)
-					msg = msg.copy().formatted(color == -1 ? Formatting.RED : Formatting.GOLD);
+					msg = MultiVersionMisc.copyText(msg).formatted(color == -1 ? Formatting.RED : Formatting.GOLD);
 				DrawableHelper.drawCenteredText(matrices, MainUtil.client.textRenderer, msg, contextMenuX + 25, y + 2, color);
 				y += MainUtil.client.textRenderer.fontHeight + 2;
 			}
@@ -277,7 +279,7 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 		this.indexed = indexed;
 		
 		super.setSorter((a, b) -> a - b);
-		super.setConfigurable(-1, new ConfigButton(20, Text.of("+"), btn -> {
+		super.setConfigurable(-1, new ConfigButton(20, TextInst.of("+"), btn -> {
 			addConfigurable(defaultEntry.clone(true));
 			onChanged.forEach(listener -> listener.onValueChanged(null));
 		}));

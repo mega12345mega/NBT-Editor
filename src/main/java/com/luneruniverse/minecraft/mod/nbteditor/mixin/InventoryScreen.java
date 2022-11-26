@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.source.HandledScreenAccessor;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
@@ -24,7 +25,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.Text;
 
 public class InventoryScreen {
 	public static void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType, HandledScreen<?> source, CallbackInfo info) {
@@ -89,6 +89,6 @@ public class InventoryScreen {
 	
 	
 	public static void init(CreativeInventoryScreen source, CallbackInfo info) {
-		source.addDrawableChild(new CreativeTab(source, new ItemStack(Items.ENDER_CHEST).setCustomName(Text.translatable("itemGroup.nbteditor.client_chest")), ClientChestScreen::show));
+		source.addDrawableChild(new CreativeTab(source, new ItemStack(Items.ENDER_CHEST).setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest")), ClientChestScreen::show));
 	}
 }

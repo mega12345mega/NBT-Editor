@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientContainerScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
@@ -43,7 +44,7 @@ public class PagedPane extends ClientContainerScreen {
      * @param pageSize The page size. inventory rows - 2
      */
     public PagedPane(int pageSize, int rows, String title) {
-    	super(createGenericScreenHandler(rows), MainUtil.client.player.getInventory(), Text.of(MainUtil.colorize(title)));
+    	super(createGenericScreenHandler(rows), MainUtil.client.player.getInventory(), TextInst.of(MainUtil.colorize(title)));
         this.pageSize = pageSize;
         pages.put(0, new Page(pageSize));
     }
@@ -279,7 +280,7 @@ public class PagedPane extends ClientContainerScreen {
     }
 
     protected ItemStack setMeta(ItemStack itemStack, String name, String... lore) {
-        itemStack.setCustomName(Text.of(Utils.colorize(name)));
+        itemStack.setCustomName(TextInst.of(Utils.colorize(name)));
         Lore loreObj = new Lore(itemStack);
         loreObj.setAllLines(Arrays.stream(lore).map(MainUtil::colorize).map(Text::of).collect(Collectors.toList()));
         return itemStack;

@@ -12,8 +12,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.server.command.ServerCommandSource;
 
 public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T> {
 	
@@ -21,11 +19,6 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T> {
 	
 	public static <T extends Enum<T>> EnumArgumentType<T> options(Class<T> options) {
 		return new EnumArgumentType<>(options);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static Collection<StatusEffectInstance> getStatusEffectInstance(CommandContext<ServerCommandSource> context, String name) {
-		return context.getArgument(name, Collection.class);
 	}
 	
 	private final Class<T> options;
