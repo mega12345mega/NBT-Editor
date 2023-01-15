@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -39,13 +40,20 @@ public class CreativeTab implements Element, Drawable, Selectable {
 		int x = 10;
 		int y = screen.height - 32;
 		
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShader(GameRenderer::getPositionTexProgram); // getPositionTexShader <= 1.19.2
 		RenderSystem.setShaderTexture(0, tabs);
-		screen.drawTexture(matrices, x, y, j, k, 28, 32);
+		screen.drawTexture(matrices, x, y, j, k, switch (Version.get()) {
+			case v1_19_3 -> 26;
+			case v1_19, v1_18 -> 28;
+		}, 32);
 		itemRenderer.zOffset = 100.0F;
 		
-		itemRenderer.renderInGuiWithOverrides(item, x + 6, y + 9);
-		itemRenderer.renderGuiItemOverlay(textRenderer, item, x + 6, y + 9);
+		int xOffset = switch (Version.get()) {
+			case v1_19_3 -> 5;
+			case v1_19, v1_18 -> 6;
+		};
+		itemRenderer.renderInGuiWithOverrides(item, x + xOffset, y + 9);
+		itemRenderer.renderGuiItemOverlay(textRenderer, item, x + xOffset, y + 9);
 		itemRenderer.zOffset = 0.0F;
 		
 		if (isHoveringOverTab(x, y, mouseX, mouseY))

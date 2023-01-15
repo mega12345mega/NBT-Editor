@@ -7,7 +7,6 @@ import java.util.function.Function;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -57,10 +56,10 @@ public class ItemChest {
 		
 		if (item.hasNbt()) {
 			NbtCompound nbt = item.getNbt();
-			if (nbt.contains("BlockEntityTag", NbtType.COMPOUND)) {
+			if (nbt.contains("BlockEntityTag", NbtElement.COMPOUND_TYPE)) {
 				NbtCompound blockEntityTag = nbt.getCompound("BlockEntityTag");
-				if (blockEntityTag.contains("Items", NbtType.LIST)) {
-					NbtList items = blockEntityTag.getList("Items", NbtType.COMPOUND);
+				if (blockEntityTag.contains("Items", NbtElement.LIST_TYPE)) {
+					NbtList items = blockEntityTag.getList("Items", NbtElement.COMPOUND_TYPE);
 					if (!items.isEmpty()) {
 						for (NbtElement containedItemElement : items) {
 							NbtCompound containedItem = (NbtCompound) containedItemElement;
@@ -119,10 +118,10 @@ public class ItemChest {
 	
 	private void save() {
 		NbtCompound nbt = item.getOrCreateNbt();
-		if (!nbt.contains("BlockEntityTag", NbtType.COMPOUND))
+		if (!nbt.contains("BlockEntityTag", NbtElement.COMPOUND_TYPE))
 			nbt.put("BlockEntityTag", new NbtCompound());
 		NbtCompound blockEntityTag = nbt.getCompound("BlockEntityTag");
-		NbtList items = blockEntityTag.getList("Items", NbtType.COMPOUND);
+		NbtList items = blockEntityTag.getList("Items", NbtElement.COMPOUND_TYPE);
 		blockEntityTag.put("Items", items);
 		
 		items.clear();

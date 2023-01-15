@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.EnumArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -21,7 +22,6 @@ import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
-import net.minecraft.util.registry.Registry;
 
 public class NBTCommand extends ClientCommand {
 	
@@ -40,7 +40,7 @@ public class NBTCommand extends ClientCommand {
 			this.export = export;
 		}
 		public void export(ItemStack item) {
-			String output = export.apply(Registry.ITEM.getId(item.getItem()).toString() +
+			String output = export.apply(MultiVersionRegistry.ITEM.getId(item.getItem()).toString() +
 					(item.getNbt() == null ? "" : item.getNbt().asString()) + " " + item.getCount());
 			if (output != null) {
 				MainUtil.client.keyboard.setClipboard(output);

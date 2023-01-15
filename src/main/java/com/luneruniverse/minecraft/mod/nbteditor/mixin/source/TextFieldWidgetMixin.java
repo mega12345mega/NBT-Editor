@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NamedTextFieldWidget;
 
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -24,6 +25,6 @@ public class TextFieldWidgetMixin {
 	private VertexConsumer vertex(BufferBuilder buffer, double x, double y, double z) {
 		if (NamedTextFieldWidget.matrix == null)
 			return buffer.vertex(x, y, z);
-		return buffer.vertex(NamedTextFieldWidget.matrix, (float) x, (float) y, (float) z);
+		return MultiVersionMisc.vertex(buffer, NamedTextFieldWidget.matrix, (float) x, (float) y, (float) z);
 	}
 }

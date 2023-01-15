@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem;
@@ -22,14 +22,13 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.Items;
-import net.minecraft.util.registry.Registry;
 
 public class EnchantmentsScreen extends ItemEditorScreen {
 	
 	private static final Map<String, Enchantment> ENCHANTMENTS;
 	private static final ConfigCategory ENCHANTMENT_ENTRY;
 	static {
-		ENCHANTMENTS = MultiVersionMisc.getEntrySet(Registry.ENCHANTMENT).stream().map(enchant -> Map.entry(enchant.getKey().getValue().toString(), enchant.getValue()))
+		ENCHANTMENTS = MultiVersionRegistry.ENCHANTMENT.getEntrySet().stream().map(enchant -> Map.entry(enchant.getKey().toString(), enchant.getValue()))
 				.sorted((a, b) -> a.getKey().compareToIgnoreCase(b.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
 		String firstEnchant = ENCHANTMENTS.keySet().stream().findFirst().get();
 		
@@ -58,7 +57,7 @@ public class EnchantmentsScreen extends ItemEditorScreen {
 		
 		EnchantmentHelper.get(item).forEach((type, lvl) -> {
 			ConfigCategory enchant = ENCHANTMENT_ENTRY.clone(true);
-			getConfigEnchantment(enchant).setValue(Registry.ENCHANTMENT.getId(type).toString());
+			getConfigEnchantment(enchant).setValue(MultiVersionRegistry.ENCHANTMENT.getId(type).toString());
 			getConfigLevel(enchant).setValue(lvl);
 			config.addConfigurable(enchant);
 		});

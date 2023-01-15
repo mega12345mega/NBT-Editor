@@ -29,7 +29,7 @@ public abstract class ConfigGroupingHorizontal<K, T extends ConfigGroupingHorizo
 		
 		for (ConfigPath path : new ArrayList<>(paths.values())) {
 			matrices.push();
-			matrices.translate(xOffset, 0, 0);
+			matrices.translate(xOffset, 0.0, 0.0);
 			path.render(matrices, mouseX - xOffset, mouseY, delta);
 			matrices.pop();
 			

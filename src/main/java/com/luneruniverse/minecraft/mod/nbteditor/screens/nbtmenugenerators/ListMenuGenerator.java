@@ -8,7 +8,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTValue;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.nbt.AbstractNbtList;
 import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtByte;
@@ -88,28 +87,28 @@ public class ListMenuGenerator<T extends NbtElement, L extends AbstractNbtList<?
 		AbstractNbtList<T> list = (AbstractNbtList<T>) source;
 		if (list.getHeldType() == value.getType())
 			list.add((T) value);
-		else if (list.getHeldType() == NbtType.STRING)
+		else if (list.getHeldType() == NbtElement.STRING_TYPE)
 			list.add((T) NbtString.of(value.toString()));
 		else if (value instanceof AbstractNbtNumber) {
 			AbstractNbtNumber num = (AbstractNbtNumber) value;
 			
 			switch (list.getHeldType()) {
-				case NbtType.BYTE:
+				case NbtElement.BYTE_TYPE:
 					list.add((T) NbtByte.of(num.byteValue()));
 					break;
-				case NbtType.SHORT:
+				case NbtElement.SHORT_TYPE:
 					list.add((T) NbtShort.of(num.shortValue()));
 					break;
-				case NbtType.INT:
+				case NbtElement.INT_TYPE:
 					list.add((T) NbtInt.of(num.intValue()));
 					break;
-				case NbtType.LONG:
+				case NbtElement.LONG_TYPE:
 					list.add((T) NbtLong.of(num.longValue()));
 					break;
-				case NbtType.FLOAT:
+				case NbtElement.FLOAT_TYPE:
 					list.add((T) NbtFloat.of(num.floatValue()));
 					break;
-				case NbtType.DOUBLE:
+				case NbtElement.DOUBLE_TYPE:
 					list.add((T) NbtDouble.of(num.doubleValue()));
 					break;
 			}

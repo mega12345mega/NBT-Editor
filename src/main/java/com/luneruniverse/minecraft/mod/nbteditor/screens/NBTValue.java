@@ -8,7 +8,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.argument.NbtElementArgumentType;
@@ -59,31 +58,31 @@ public class NBTValue extends List2D.List2DValue {
 		Identifier icon = null;
 		if (key == null)
 			icon = BACK;
-		else if (value.getType() == NbtType.BYTE)
+		else if (value.getType() == NbtElement.BYTE_TYPE)
 			icon = BYTE;
-		else if (value.getType() == NbtType.SHORT)
+		else if (value.getType() == NbtElement.SHORT_TYPE)
 			icon = SHORT;
-		else if (value.getType() == NbtType.INT)
+		else if (value.getType() == NbtElement.INT_TYPE)
 			icon = INT;
-		else if (value.getType() == NbtType.LONG)
+		else if (value.getType() == NbtElement.LONG_TYPE)
 			icon = LONG;
-		else if (value.getType() == NbtType.FLOAT)
+		else if (value.getType() == NbtElement.FLOAT_TYPE)
 			icon = FLOAT;
-		else if (value.getType() == NbtType.DOUBLE)
+		else if (value.getType() == NbtElement.DOUBLE_TYPE)
 			icon = DOUBLE;
-		else if (value.getType() == NbtType.NUMBER)
+		else if (value.getType() == NbtElement.NUMBER_TYPE)
 			icon = NUMBER;
-		else if (value.getType() == NbtType.STRING)
+		else if (value.getType() == NbtElement.STRING_TYPE)
 			icon = STRING;
-		else if (value.getType() == NbtType.LIST)
+		else if (value.getType() == NbtElement.LIST_TYPE)
 			icon = LIST;
-		else if (value.getType() == NbtType.BYTE_ARRAY)
+		else if (value.getType() == NbtElement.BYTE_ARRAY_TYPE)
 			icon = BYTE_ARRAY;
-		else if (value.getType() == NbtType.INT_ARRAY)
+		else if (value.getType() == NbtElement.INT_ARRAY_TYPE)
 			icon = INT_ARRAY;
-		else if (value.getType() == NbtType.LONG_ARRAY)
+		else if (value.getType() == NbtElement.LONG_ARRAY_TYPE)
 			icon = LONG_ARRAY;
-		else if (value.getType() == NbtType.COMPOUND)
+		else if (value.getType() == NbtElement.COMPOUND_TYPE)
 			icon = COMPOUND;
 		if (icon != null) {
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -123,7 +122,7 @@ public class NBTValue extends List2D.List2DValue {
 				return true;
 			}
 			
-			MenuGenerator menuGen = MenuGenerator.TYPES.get((int) value.getType());
+			MenuGenerator menuGen = MenuGenerator.TYPES.get(value.getType());
 			screen.selectNbt(this, selected && menuGen != null && !menuGen.hasEmptyKey(screen, value));
 			selected = !selected;
 			return selected;

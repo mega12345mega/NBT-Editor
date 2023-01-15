@@ -78,7 +78,7 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			else {
 				DrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, indexText, 0, (getSpacingHeight() - MainUtil.client.textRenderer.fontHeight) / 2, -1);
 				matrices.push();
-				matrices.translate(indexTextOffset, 0, 0);
+				matrices.translate(indexTextOffset, 0.0, 0.0);
 				value.render(matrices, mouseX - indexTextOffset, mouseY, delta);
 				matrices.pop();
 			}
@@ -363,7 +363,7 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 		for (ConfigPath path : paths.values()) {
 			if (path instanceof ConfigListEntry entry) {
 				matrices.push();
-				matrices.translate(PADDING * 2, yOffset, 0);
+				matrices.translate(PADDING * 2, yOffset, 0.0);
 				entry.renderContextMenu(matrices, mouseX - PADDING * 2, mouseY - yOffset, delta);
 				matrices.pop();
 			}

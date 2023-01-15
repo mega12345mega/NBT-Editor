@@ -4,6 +4,7 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
@@ -20,7 +21,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class MaxCommand extends ClientCommand {
 	
@@ -50,7 +50,7 @@ public class MaxCommand extends ClientCommand {
 		ItemStack item = heldItem.getItem();
 		
 		NbtList enchants = item.getEnchantments();
-		Registry.ENCHANTMENT.forEach(enchant -> {
+		MultiVersionRegistry.ENCHANTMENT.forEach(enchant -> {
 			if ((allEnchants || enchant.isAcceptableItem(item)) && (cursed || !enchant.isCursed())) {
 				Identifier id = EnchantmentHelper.getEnchantmentId(enchant);
 				String idStr = id.toString();

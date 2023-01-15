@@ -29,20 +29,28 @@ public class Reflection {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T> T newInstance(String clazz, Class<?>[] parameters, Object... args) {
+	public static <T> T newInstance(Class<?> clazz, Class<?>[] parameters, Object... args) {
 		try {
-			return (T) getClass(clazz).getConstructor(parameters).newInstance(args);
+			return (T) clazz.getConstructor(parameters).newInstance(args);
 		} catch (Exception e) {
 			throw new RuntimeException("Error creating new instance of class", e);
 		}
 	}
+	public static <T> T newInstance(String clazz, Class<?>[] parameters, Object... args) {
+		return newInstance(getClass(clazz), parameters, args);
+	}
 	
+	static String getFieldName(Class<?> clazz, String field, String descriptor) {
+		synchronized (mappings) {
+			return mappings.mapFieldName("intermediary",
+					mappings.unmapClassName("intermediary", clazz.getName()), field, descriptor);
+		}
+	}
 	@SuppressWarnings("unchecked")
 	public static <T, C> T getField(Class<C> clazz, C obj, String field, String descriptor) {
 		try {
 			synchronized (mappings) {
-				String runtimeField = mappings.mapFieldName("intermediary",
-						mappings.unmapClassName("intermediary", clazz.getName()), field, descriptor);
+				String runtimeField = getFieldName(clazz, field, descriptor);
 				return (T) clazz.getField(runtimeField).get(obj);
 			}
 		} catch (Exception e) {
@@ -63,7 +71,7 @@ public class Reflection {
 		public <T> T invoke(Object obj, Object... args) {
 			try {
 				return (T) method.invoke(obj, args);
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				throw new RuntimeException("Error invoking method", e);
 			}
 		}

@@ -67,6 +67,9 @@
 	"nbteditor.client_chest.clear_page.yes": "Destroy Items",
 	"nbteditor.client_chest.clear_page.no": "Cancel",
 	
+	"nbteditor.book.edit": "Edit Attributes",
+	"nbteditor.book.convert": "Make Writable",
+	
 	"nbteditor.container.title": "Nbt Editor >> ",
 	
 	"nbteditor.sign.added": "§aSignature added!",
@@ -180,8 +183,12 @@
 	"nbteditor.config.json_text.no": "Disabled",
 	"nbteditor.config.check_updates": "Check Updates",
 	"nbteditor.config.check_updates.desc": "Whether or not NBT Editor updates\nshould be checked at game startup.\nUse this to disable the notification.",
-	"nbteditor.config.check_updates.yes": "Enabled",
-	"nbteditor.config.check_updates.no": "Disabled",
+	"nbteditor.config.check_updates.minor": "Main Updates",
+	"nbteditor.config.check_updates.minor.desc": "Check for large updates,\nincluding many new features",
+	"nbteditor.config.check_updates.patch": "Small Updates",
+	"nbteditor.config.check_updates.patch.desc": "Check for small updates,\nincluding bug fixes and single features",
+	"nbteditor.config.check_updates.none": "No Updates",
+	"nbteditor.config.check_updates.none.desc": "Don't check for any updates",
 	
 	
 	"nbteditor.configurable.list.move": "Move",

@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTValue;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.nbt.AbstractNbtList;
 import net.minecraft.nbt.NbtByte;
 import net.minecraft.nbt.NbtByteArray;
@@ -26,25 +25,25 @@ import net.minecraft.nbt.NbtString;
 
 public class ListMenuGeneratorSwitch implements MenuGenerator {
 	
-	private static final Map<Integer, MenuGenerator> listMenuGenerators;
+	private static final Map<Byte, MenuGenerator> listMenuGenerators;
 	static {
 		listMenuGenerators = new HashMap<>();
 		
-		listMenuGenerators.put(NbtType.BYTE, new ListMenuGenerator<NbtByte, NbtByteArray>(NbtByte.of((byte) 0)));
-		listMenuGenerators.put(NbtType.INT, new ListMenuGenerator<NbtInt, NbtIntArray>(NbtInt.of(0)));
-		listMenuGenerators.put(NbtType.LONG, new ListMenuGenerator<NbtLong, NbtLongArray>(NbtLong.of(0L)));
+		listMenuGenerators.put(NbtElement.BYTE_TYPE, new ListMenuGenerator<NbtByte, NbtByteArray>(NbtByte.of((byte) 0)));
+		listMenuGenerators.put(NbtElement.INT_TYPE, new ListMenuGenerator<NbtInt, NbtIntArray>(NbtInt.of(0)));
+		listMenuGenerators.put(NbtElement.LONG_TYPE, new ListMenuGenerator<NbtLong, NbtLongArray>(NbtLong.of(0L)));
 		
-		listMenuGenerators.put(NbtType.BYTE_ARRAY, new ListMenuGenerator<NbtByteArray, NbtList>(new NbtByteArray(new byte[0])));
-		listMenuGenerators.put(NbtType.COMPOUND, new ListMenuGenerator<NbtCompound, NbtList>(new NbtCompound()));
-		listMenuGenerators.put(NbtType.DOUBLE, new ListMenuGenerator<NbtDouble, NbtList>(NbtDouble.of(0)));
-		listMenuGenerators.put(NbtType.FLOAT, new ListMenuGenerator<NbtFloat, NbtList>(NbtFloat.of(0)));
-		listMenuGenerators.put(NbtType.INT_ARRAY, new ListMenuGenerator<NbtIntArray, NbtList>(new NbtIntArray(new int[0])));
-		listMenuGenerators.put(NbtType.LIST, new ListMenuGenerator<NbtList, NbtList>(new NbtList()));
-		listMenuGenerators.put(NbtType.LONG_ARRAY, new ListMenuGenerator<NbtLongArray, NbtList>(new NbtLongArray(new long[0])));
-		listMenuGenerators.put(NbtType.SHORT, new ListMenuGenerator<NbtShort, NbtList>(NbtShort.of((short) 0)));
-		listMenuGenerators.put(NbtType.STRING, new ListMenuGenerator<NbtString, NbtList>(NbtString.of("")));
+		listMenuGenerators.put(NbtElement.BYTE_ARRAY_TYPE, new ListMenuGenerator<NbtByteArray, NbtList>(new NbtByteArray(new byte[0])));
+		listMenuGenerators.put(NbtElement.COMPOUND_TYPE, new ListMenuGenerator<NbtCompound, NbtList>(new NbtCompound()));
+		listMenuGenerators.put(NbtElement.DOUBLE_TYPE, new ListMenuGenerator<NbtDouble, NbtList>(NbtDouble.of(0)));
+		listMenuGenerators.put(NbtElement.FLOAT_TYPE, new ListMenuGenerator<NbtFloat, NbtList>(NbtFloat.of(0)));
+		listMenuGenerators.put(NbtElement.INT_ARRAY_TYPE, new ListMenuGenerator<NbtIntArray, NbtList>(new NbtIntArray(new int[0])));
+		listMenuGenerators.put(NbtElement.LIST_TYPE, new ListMenuGenerator<NbtList, NbtList>(new NbtList()));
+		listMenuGenerators.put(NbtElement.LONG_ARRAY_TYPE, new ListMenuGenerator<NbtLongArray, NbtList>(new NbtLongArray(new long[0])));
+		listMenuGenerators.put(NbtElement.SHORT_TYPE, new ListMenuGenerator<NbtShort, NbtList>(NbtShort.of((short) 0)));
+		listMenuGenerators.put(NbtElement.STRING_TYPE, new ListMenuGenerator<NbtString, NbtList>(NbtString.of("")));
 		
-		listMenuGenerators.put(0, listMenuGenerators.get(NbtType.INT));
+		listMenuGenerators.put((byte) 0, listMenuGenerators.get(NbtElement.INT_TYPE));
 	}
 	
 	@Override
@@ -84,7 +83,7 @@ public class ListMenuGeneratorSwitch implements MenuGenerator {
 	
 	@SuppressWarnings("unchecked")
 	private MenuGenerator getRealGen(NbtElement source) {
-		return listMenuGenerators.get((int) ((AbstractNbtList<? extends NbtElement>) source).getHeldType());
+		return listMenuGenerators.get(((AbstractNbtList<? extends NbtElement>) source).getHeldType());
 	}
 	
 }

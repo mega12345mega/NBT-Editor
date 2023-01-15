@@ -13,7 +13,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -31,7 +30,7 @@ public class AttributesCommand extends ClientCommand {
 		builder.then(literal("newuuids").executes(context -> {
 			ItemReference ref = MainUtil.getHeldItem();
 			ItemStack item = ref.getItem();
-			NbtList attributes = item.getOrCreateNbt().getList("AttributeModifiers", NbtType.COMPOUND);
+			NbtList attributes = item.getOrCreateNbt().getList("AttributeModifiers", NbtElement.COMPOUND_TYPE);
 			if (attributes.isEmpty())
 				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.attributes.new_uuids.no_attributes"), false);
 			else {

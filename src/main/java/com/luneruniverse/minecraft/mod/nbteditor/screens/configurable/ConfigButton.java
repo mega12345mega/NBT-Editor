@@ -1,9 +1,11 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
-import net.minecraft.client.gui.widget.ButtonWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ExtendableButtonWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+
 import net.minecraft.text.Text;
 
-public class ConfigButton extends ButtonWidget implements ConfigPath {
+public class ConfigButton extends ExtendableButtonWidget implements ConfigPath {
 	
 	@FunctionalInterface
 	public interface PressAction {
@@ -11,13 +13,15 @@ public class ConfigButton extends ButtonWidget implements ConfigPath {
 	}
 	
 	private final PressAction onPress;
+	private final MultiVersionTooltip tooltip;
 	
-	public ConfigButton(int width, Text message, PressAction onPress, TooltipSupplier tooltipSupplier) {
-		super(0, 0, width, 20, message, btn -> onPress.onPress((ConfigButton) btn), tooltipSupplier);
+	public ConfigButton(int width, Text message, PressAction onPress, MultiVersionTooltip tooltip) {
+		super(0, 0, width, 20, message, btn -> onPress.onPress((ConfigButton) btn), tooltip);
 		this.onPress = onPress;
+		this.tooltip = tooltip;
 	}
 	public ConfigButton(int width, Text message, PressAction onPress) {
-		this(width, message, onPress, EMPTY);
+		this(width, message, onPress, MultiVersionTooltip.EMPTY);
 	}
 	
 	@Override
@@ -42,7 +46,7 @@ public class ConfigButton extends ButtonWidget implements ConfigPath {
 	
 	@Override
 	public ConfigButton clone(boolean defaults) {
-		return new ConfigButton(this.width, this.getMessage(), onPress, this.tooltipSupplier);
+		return new ConfigButton(this.width, this.getMessage(), onPress, tooltip);
 	}
 	
 	

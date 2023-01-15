@@ -3,14 +3,14 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ExtendableButtonWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 
-public class ConfigValueDropdown<T> extends ButtonWidget implements ConfigValue<T, ConfigValueDropdown<T>> {
+public class ConfigValueDropdown<T> extends ExtendableButtonWidget implements ConfigValue<T, ConfigValueDropdown<T>> {
 	
 	protected T value;
 	protected boolean open;
@@ -56,11 +56,11 @@ public class ConfigValueDropdown<T> extends ButtonWidget implements ConfigValue<
 				drawCenteredText(matrices, MainUtil.client.textRenderer, TextInst.of(option.toString()),
 						this.x + this.width / 2, y + (this.height - MainUtil.client.textRenderer.fontHeight) / 2, color);
 				if (color != -1 && option instanceof ConfigTooltipSupplier) // Hovering
-					((ConfigTooltipSupplier) option).render(matrices, mouseX, mouseY);
+					((ConfigTooltipSupplier) option).getTooltip().render(matrices, mouseX, mouseY);
 			}
 		}
 		if (isHovered() && value instanceof ConfigTooltipSupplier)
-			((ConfigTooltipSupplier) value).render(matrices, mouseX, mouseY);
+			((ConfigTooltipSupplier) value).getTooltip().render(matrices, mouseX, mouseY);
 	}
 	
 	@Override

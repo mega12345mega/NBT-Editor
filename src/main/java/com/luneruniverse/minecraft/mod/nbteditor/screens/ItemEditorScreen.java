@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
@@ -51,7 +52,7 @@ public abstract class ItemEditorScreen extends MultiVersionScreen {
 		name.setEditable(isNameEditable());
 		addDrawableChild(name);
 		
-		saveBtn = addDrawableChild(new ButtonWidget(16 + (32 + 8) * 2 + 100 + 8, 16 + 6, 100, 20, TextInst.translatable("nbteditor.editor.save"), btn -> {
+		saveBtn = addDrawableChild(MultiVersionMisc.newButton(16 + (32 + 8) * 2 + 100 + 8, 16 + 6, 100, 20, TextInst.translatable("nbteditor.editor.save"), btn -> {
 			save();
 		}));
 		saveBtn.active = !saved;

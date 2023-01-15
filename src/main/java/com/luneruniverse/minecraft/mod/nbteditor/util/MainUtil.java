@@ -9,13 +9,13 @@ import java.util.function.Predicate;
 import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -26,9 +26,11 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.EnchantedBookItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.ClickEvent;
@@ -41,7 +43,6 @@ import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class MainUtil {
 	
@@ -393,8 +394,8 @@ public class MainUtil {
 	
 	public static void addEnchants(Map<Enchantment, Integer> enchants, ItemStack stack) {
 		String key = (stack.getItem() == Items.ENCHANTED_BOOK ? EnchantedBookItem.STORED_ENCHANTMENTS_KEY : "Enchantments");
-		NbtList enchantsNbt = stack.getOrCreateNbt().getList(key, NbtType.COMPOUND);
-		enchants.forEach((type, lvl) -> enchantsNbt.add(EnchantmentHelper.createNbt(Registry.ENCHANTMENT.getId(type), lvl)));
+		NbtList enchantsNbt = stack.getOrCreateNbt().getList(key, NbtElement.COMPOUND_TYPE);
+		enchants.forEach((type, lvl) -> enchantsNbt.add(EnchantmentHelper.createNbt(MultiVersionRegistry.ENCHANTMENT.getId(type), lvl)));
 		stack.getOrCreateNbt().put(key, enchantsNbt);
 	}
 	
@@ -414,6 +415,18 @@ public class MainUtil {
 		} catch (CommandSyntaxException e) {
 			return TextInst.literal(text);
 		}
+	}
+	
+	
+	public static ItemStack setType(Item type, ItemStack item, int count) {
+		NbtCompound fullData = new NbtCompound();
+		item.writeNbt(fullData);
+		fullData.putString("id", MultiVersionRegistry.ITEM.getId(type).toString());
+		fullData.putInt("Count", count);
+		return ItemStack.fromNbt(fullData);
+	}
+	public static ItemStack setType(Item type, ItemStack item) {
+		return setType(type, item, item.getCount());
 	}
 	
 }

@@ -11,6 +11,8 @@ import java.util.function.Consumer;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
@@ -19,10 +21,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -31,7 +31,6 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
-import net.minecraft.util.registry.Registry;
 
 public class NBTEditorScreen extends ItemEditorScreen {
 	
@@ -77,7 +76,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			List<NbtElement> path = new ArrayList<>();
 			NbtElement lastPart = item.getOrCreateNbt();
 			for (String part : realPath) {
-				MenuGenerator gen = MenuGenerator.TYPES.get((int) lastPart.getType());
+				MenuGenerator gen = MenuGenerator.TYPES.get(lastPart.getType());
 				if (gen == null)
 					return;
 				path.add(lastPart = gen.getElement(lastPart, part));
@@ -85,7 +84,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			lastPart = source;
 			for (int i = path.size() - 2; i >= 0; i--) {
 				NbtElement part = path.get(i);
-				MenuGenerator.TYPES.get((int) part.getType()).setElement(part, realPath.get(i + 1), lastPart);
+				MenuGenerator.TYPES.get(part.getType()).setElement(part, realPath.get(i + 1), lastPart);
 				lastPart = part;
 			}
 		}
@@ -143,7 +142,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		}
 		
 		
-		this.client.keyboard.setRepeatEvents(true);
+		MultiVersionMisc.setKeyboardRepeatEvents(true);
 		
 		name.setChangedListener(str -> {
 			if (str.equals(item.getItem().getName().getString()))
@@ -154,22 +153,22 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			genEditor();
 		});
 		
-		this.addDrawableChild(new ButtonWidget(16, height - 16 * 2, 20, 20, TextInst.translatable("nbteditor.nbt.add"), btn -> {
+		this.addDrawableChild(MultiVersionMisc.newButton(16, height - 16 * 2, 20, 20, TextInst.translatable("nbteditor.nbt.add"), btn -> {
 			add();
 		}));
-		this.addDrawableChild(new ButtonWidget(16 + 16 + 8, height - 16 * 2, 20, 20, TextInst.translatable("nbteditor.nbt.remove"), btn -> {
+		this.addDrawableChild(MultiVersionMisc.newButton(16 + 16 + 8, height - 16 * 2, 20, 20, TextInst.translatable("nbteditor.nbt.remove"), btn -> {
 			remove();
 		}));
-		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.copy"), btn -> {
+		this.addDrawableChild(MultiVersionMisc.newButton(16 + (16 + 8) * 2, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.copy"), btn -> {
 			copy();
 		}));
-		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2 + (48 + 4), height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.cut"), btn -> {
+		this.addDrawableChild(MultiVersionMisc.newButton(16 + (16 + 8) * 2 + (48 + 4), height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.cut"), btn -> {
 			cut();
 		}));
-		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2 + (48 + 4) * 2, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.paste"), btn -> {
+		this.addDrawableChild(MultiVersionMisc.newButton(16 + (16 + 8) * 2 + (48 + 4) * 2, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.paste"), btn -> {
 			paste();
 		}));
-		this.addDrawableChild(new ButtonWidget(16 + (16 + 8) * 2 + (48 + 4) * 3, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.rename"), btn -> {
+		this.addDrawableChild(MultiVersionMisc.newButton(16 + (16 + 8) * 2 + (48 + 4) * 3, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.rename"), btn -> {
 			rename();
 		}));
 		
@@ -177,24 +176,19 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		
 		type = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8 + 32, 208, 16, TextInst.of("")).name(TextInst.translatable("nbteditor.nbt.identifier"));
 		type.setMaxLength(Integer.MAX_VALUE);
-		type.setText(Registry.ITEM.getId(item.getItem()).toString());
+		type.setText(MultiVersionRegistry.ITEM.getId(item.getItem()).toString());
 		type.setChangedListener(str -> {
 			try {
-				if (!Registry.ITEM.containsId(new Identifier(str)))
+				if (!MultiVersionRegistry.ITEM.containsId(new Identifier(str)))
 					return;
 			} catch (InvalidIdentifierException e) {
 				return;
 			}
 			boolean airEditable = ConfigScreen.isAirEditable();
-			if (!airEditable && Registry.ITEM.get(new Identifier(str)) == Items.AIR)
+			if (!airEditable && MultiVersionRegistry.ITEM.get(new Identifier(str)) == Items.AIR)
 				return;
 			
-			NbtCompound fullData = new NbtCompound();
-			item.writeNbt(fullData);
-			fullData.putString("id", str);
-			if (airEditable)
-				fullData.putInt("Count", Integer.parseInt(count.getText()));
-			ItemStack editedItem = ItemStack.fromNbt(fullData);
+			ItemStack editedItem = MainUtil.setType(MultiVersionRegistry.ITEM.get(new Identifier(str)), item, Integer.parseInt(count.getText()));
 			if (editedItem == ItemStack.EMPTY)
 				return;
 			
@@ -231,7 +225,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			String[] parts = str.split("/");
 			NbtElement nbt = item.getOrCreateNbt();
 			for (String part : parts) {
-				MenuGenerator gen = MenuGenerator.TYPES.get((int) nbt.getType());
+				MenuGenerator gen = MenuGenerator.TYPES.get(nbt.getType());
 				if (gen == null)
 					return;
 				nbt = gen.getElement(nbt, part);
@@ -264,7 +258,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		});
 		this.addSelectableChild(value);
 		
-		this.addDrawableChild(new ButtonWidget(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, TextInst.translatable("nbteditor.nbt.value_expand"), btn -> {
+		this.addDrawableChild(MultiVersionMisc.newButton(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, TextInst.translatable("nbteditor.nbt.value_expand"), btn -> {
 			if (selectedValue == null)
 				client.setScreen(new TextAreaScreen(this, nbt.asString(), NbtFormatter::formatElementSafe, str -> {
 					try {
@@ -315,7 +309,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		editor.clearElements();
 		
 		this.nbt = item.getOrCreateNbt();
-		this.currentGen = MenuGenerator.TYPES.get(NbtType.COMPOUND);
+		this.currentGen = MenuGenerator.TYPES.get(NbtElement.COMPOUND_TYPE);
 		Iterator<String> keys = realPath.iterator();
 		boolean removing = false;
 		NbtElement value = null;
@@ -326,7 +320,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 				keys.remove();
 				continue;
 			}
-			if ((value = this.currentGen.getElement(this.nbt, key)) != null && (generator = MenuGenerator.TYPES.get((int) value.getType())) != null) {
+			if ((value = this.currentGen.getElement(this.nbt, key)) != null && (generator = MenuGenerator.TYPES.get(value.getType())) != null) {
 				this.nbt = value;
 				this.currentGen = generator;
 			}
@@ -382,7 +376,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	
 	@Override
 	public void removed() {
-		this.client.keyboard.setRepeatEvents(false);
+		MultiVersionMisc.setKeyboardRepeatEvents(false);
 	}
 	
 	@Override

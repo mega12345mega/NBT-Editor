@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.source.HandledScreenAccessor;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -20,7 +21,6 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
@@ -45,7 +45,7 @@ public class InventoryScreen {
 				
 				slotId = slot.id;
 				boolean armor = false;
-				if (source instanceof CreativeInventoryScreen && ((CreativeInventoryScreen) source).getSelectedTab() != ItemGroup.INVENTORY.getIndex())
+				if (source instanceof CreativeInventoryScreen && !MultiVersionMisc.isCreativeInventoryTabSelected())
 					slotId -= 9;
 				else if (slotId < 9)
 					armor = true;
@@ -71,7 +71,7 @@ public class InventoryScreen {
 			Slot hoveredSlot = ((HandledScreenAccessor) source).getFocusedSlot();
 			if (hoveredSlot != null && hoveredSlot.inventory == MainUtil.client.player.getInventory() && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
 				int slot = hoveredSlot.getIndex();
-				if (source instanceof CreativeInventoryScreen && ((CreativeInventoryScreen) source).getSelectedTab() != ItemGroup.INVENTORY.getIndex())
+				if (source instanceof CreativeInventoryScreen && !MultiVersionMisc.isCreativeInventoryTabSelected())
 					slot += 36;
 				ItemReference ref = slot < 9 ? ItemReference.getArmorFromSlot(slot) : new ItemReference(slot == 45 ? 45 : (slot < 9 ? slot + 54 : (slot >= 36 ? slot - 36 : slot)));
 				if (Screen.hasControlDown()) {

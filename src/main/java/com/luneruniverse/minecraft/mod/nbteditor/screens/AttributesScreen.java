@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigBar;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton;
@@ -21,7 +22,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueNumber;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.attribute.ClampedEntityAttribute;
@@ -30,7 +30,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
-import net.minecraft.util.registry.Registry;
 
 public class AttributesScreen extends ItemEditorScreen {
 	
@@ -40,7 +39,7 @@ public class AttributesScreen extends ItemEditorScreen {
 		private static final Text MIN = TextInst.translatable("nbteditor.attributes.amount.min");
 		private static final Text INFINITY = TextInst.translatable("nbteditor.attributes.amount.infinity");
 		private static final Text NEG_INFINITY = TextInst.translatable("nbteditor.attributes.amount.negative_infinity");
-		private static final TooltipSupplier TOOLTIP = new SimpleTooltip("nbteditor.attributes.amount.autofill_keybinds");
+		private static final MultiVersionTooltip TOOLTIP = new MultiVersionTooltip("nbteditor.attributes.amount.autofill_keybinds");
 		
 		public MaxButton() {
 			super(100, getMaxMsg(), btn -> {
@@ -103,7 +102,7 @@ public class AttributesScreen extends ItemEditorScreen {
 	private static final Map<String, EntityAttribute> ATTRIBUTES;
 	private static final ConfigHiddenDataNamed<ConfigCategory, UUID> ATTRIBUTE_ENTRY;
 	static {
-		ATTRIBUTES = MultiVersionMisc.getEntrySet(Registry.ATTRIBUTE).stream().map(attribute -> Map.entry(attribute.getKey().getValue().toString(), attribute.getValue()))
+		ATTRIBUTES = MultiVersionRegistry.ATTRIBUTE.getEntrySet().stream().map(attribute -> Map.entry(attribute.getKey().toString(), attribute.getValue()))
 				.sorted((a, b) -> a.getKey().compareToIgnoreCase(b.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
 		String firstAttribute = ATTRIBUTES.keySet().stream().findFirst().get();
 		
@@ -176,7 +175,7 @@ public class AttributesScreen extends ItemEditorScreen {
 		super(TextInst.of("Item Attributes"), ref);
 		
 		NbtCompound nbt = item.getOrCreateNbt();
-		NbtList attributesNbt = nbt.getList("AttributeModifiers", NbtType.COMPOUND);
+		NbtList attributesNbt = nbt.getList("AttributeModifiers", NbtElement.COMPOUND_TYPE);
 		this.attributes = new ConfigList(TextInst.translatable("nbteditor.attributes"), false, ATTRIBUTE_ENTRY);
 		
 		for (NbtElement element : attributesNbt) {

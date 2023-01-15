@@ -8,23 +8,22 @@ import java.util.function.Consumer;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTValue;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.nbt.NbtElement;
 
 public interface MenuGenerator {
-	public static Map<Integer, MenuGenerator> TYPES = getGenerators();
-	static Map<Integer, MenuGenerator> getGenerators() {
-		Map<Integer, MenuGenerator> output = new HashMap<>();
+	public static Map<Byte, MenuGenerator> TYPES = getGenerators();
+	static Map<Byte, MenuGenerator> getGenerators() {
+		Map<Byte, MenuGenerator> output = new HashMap<>();
 		
-		output.put(NbtType.COMPOUND, new CompoundMenuGenerator());
+		output.put(NbtElement.COMPOUND_TYPE, new CompoundMenuGenerator());
 		
 		MenuGenerator listMenuGeneratorSwitch = new ListMenuGeneratorSwitch();
-		output.put(NbtType.LIST, listMenuGeneratorSwitch);
-		output.put(NbtType.BYTE_ARRAY, listMenuGeneratorSwitch);
-		output.put(NbtType.INT_ARRAY, listMenuGeneratorSwitch);
-		output.put(NbtType.LONG_ARRAY, listMenuGeneratorSwitch);
+		output.put(NbtElement.LIST_TYPE, listMenuGeneratorSwitch);
+		output.put(NbtElement.BYTE_ARRAY_TYPE, listMenuGeneratorSwitch);
+		output.put(NbtElement.INT_ARRAY_TYPE, listMenuGeneratorSwitch);
+		output.put(NbtElement.LONG_ARRAY_TYPE, listMenuGeneratorSwitch);
 		
-		output.put(NbtType.STRING, new StringMenuGenerator());
+		output.put(NbtElement.STRING_TYPE, new StringMenuGenerator());
 		
 		return output;
 	}

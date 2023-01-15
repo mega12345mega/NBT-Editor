@@ -1,8 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 
 public class EntityIO extends ContainerIO {
@@ -15,13 +15,13 @@ public class EntityIO extends ContainerIO {
 	public ItemStack[] readItems(ItemStack container) {
 		ItemStack[] output = new ItemStack[6];
 		
-		NbtList armor = container.getOrCreateSubNbt("EntityTag").getList("ArmorItems", NbtType.COMPOUND);
+		NbtList armor = container.getOrCreateSubNbt("EntityTag").getList("ArmorItems", NbtElement.COMPOUND_TYPE);
 		if (armor.size() == 4) {
 			for (int i = 0; i < 4; i++)
 				output[i] = ItemStack.fromNbt(armor.getCompound(3 - i));
 		}
 		
-		NbtList hands = container.getSubNbt("EntityTag").getList("HandItems", NbtType.COMPOUND);
+		NbtList hands = container.getSubNbt("EntityTag").getList("HandItems", NbtElement.COMPOUND_TYPE);
 		if (hands.size() == 2) {
 			for (int i = 0; i < 2; i++)
 				output[i + 4] = ItemStack.fromNbt(hands.getCompound(i));

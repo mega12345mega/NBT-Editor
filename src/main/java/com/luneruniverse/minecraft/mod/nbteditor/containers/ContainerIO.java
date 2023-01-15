@@ -3,13 +3,14 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
-import net.minecraft.util.registry.Registry;
 
 public abstract class ContainerIO {
 	
@@ -29,7 +30,7 @@ public abstract class ContainerIO {
 		CONTAINERS = new HashMap<>();
 		
 		// Main containers
-		for (Item shulkerBox : Registry.ITEM) {
+		for (Item shulkerBox : MultiVersionRegistry.ITEM) {
 			if (shulkerBox instanceof BlockItem block && block.getBlock() instanceof ShulkerBoxBlock)
 				CONTAINERS.put(shulkerBox, CHEST);
 		}
@@ -39,7 +40,7 @@ public abstract class ContainerIO {
 		
 		// Other containers
 		CONTAINERS.put(Items.ARMOR_STAND, ENTITY);
-		for (Item spawnEgg : Registry.ITEM) {
+		for (Item spawnEgg : MultiVersionRegistry.ITEM) {
 			if (spawnEgg instanceof SpawnEggItem)
 				CONTAINERS.put(spawnEgg, ENTITY);
 		}

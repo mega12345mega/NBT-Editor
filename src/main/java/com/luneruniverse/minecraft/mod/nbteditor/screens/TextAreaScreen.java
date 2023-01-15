@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -35,16 +36,16 @@ public class TextAreaScreen extends MultiVersionScreen {
 	
 	@Override
 	protected void init() {
-		client.keyboard.setRepeatEvents(true);
+		MultiVersionMisc.setKeyboardRepeatEvents(true);
 		
 		ButtonWidget done;
-		this.addDrawableChild(done = new ButtonWidget(20, 20, Math.min(200, width / 2 - 25), 20, ScreenTexts.DONE, btn -> {
+		this.addDrawableChild(done = MultiVersionMisc.newButton(20, 20, Math.min(200, width / 2 - 25), 20, ScreenTexts.DONE, btn -> {
 			onDone.accept(text);
 			close();
 		}));
 		if (width - (done.getWidth() * 2 + 50) < 100) // When the end of the second button is near the end of the text field, it looks bad
 			done.setWidth(done.getWidth() * 2 / 3);
-		this.addDrawableChild(new ButtonWidget(done.x + done.getWidth() + 10, 20, done.getWidth(), 20, ScreenTexts.CANCEL, btn -> close()));
+		this.addDrawableChild(MultiVersionMisc.newButton(done.x + done.getWidth() + 10, 20, done.getWidth(), 20, ScreenTexts.CANCEL, btn -> close()));
 		
 		this.addDrawableChild(textArea = new MultiLineTextFieldWidget(20, 50, width - 40, height - 70, text, formatter == null ? null : str -> {
 			Map.Entry<Boolean, Text> formattedText = formatter.apply(str);
@@ -73,7 +74,7 @@ public class TextAreaScreen extends MultiVersionScreen {
 	
 	@Override
 	public void removed() {
-		client.keyboard.setRepeatEvents(false);
+		MultiVersionMisc.setKeyboardRepeatEvents(false);
 	}
 	
 }

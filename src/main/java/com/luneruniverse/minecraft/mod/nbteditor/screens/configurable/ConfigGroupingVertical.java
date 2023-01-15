@@ -41,7 +41,7 @@ public abstract class ConfigGroupingVertical<K, T extends ConfigGroupingVertical
 			yOffset -= path.getSpacingHeight() + PADDING;
 			
 			matrices.push();
-			matrices.translate(PADDING * 2, yOffset, 0);
+			matrices.translate(PADDING * 2, yOffset, 0.0);
 			path.render(matrices, mouseX - PADDING * 2, mouseY - yOffset, delta);
 			matrices.pop();
 		}

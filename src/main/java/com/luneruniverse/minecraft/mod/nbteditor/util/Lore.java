@@ -3,9 +3,9 @@ package com.luneruniverse.minecraft.mod.nbteditor.util;
 import java.util.Collection;
 import java.util.List;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.text.Text;
@@ -17,10 +17,10 @@ public class Lore {
 	public Lore(ItemStack item) {
 		
 		NbtCompound nbt = item.getOrCreateNbt();
-		if (!nbt.contains("display", NbtType.COMPOUND))
+		if (!nbt.contains("display", NbtElement.COMPOUND_TYPE))
 			nbt.put("display", new NbtCompound());
 		NbtCompound display = nbt.getCompound("display");
-		this.lore = display.getList("Lore", NbtType.STRING);
+		this.lore = display.getList("Lore", NbtElement.STRING_TYPE);
 		display.put("Lore", this.lore);
 		
 	}

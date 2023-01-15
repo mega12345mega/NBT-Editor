@@ -15,10 +15,12 @@ import org.apache.commons.lang3.SystemUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton;
@@ -32,7 +34,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
@@ -51,7 +52,7 @@ public class ConfigScreen extends Screen {
 		private final BiFunction<Integer, Integer, Boolean> showMax;
 		
 		private EnchantLevelMax(String key, BiFunction<Integer, Integer, Boolean> showMax) {
-			label = TextInst.translatable(key);
+			this.label = TextInst.translatable(key);
 			this.showMax = showMax;
 		}
 		
@@ -67,11 +68,34 @@ public class ConfigScreen extends Screen {
 			return label.getString();
 		}
 		@Override
-		public List<Text> getTooltip() {
+		public MultiVersionTooltip getTooltip() {
 			List<Text> output = new ArrayList<>();
 			for (int lvl = 1; lvl <= 3; lvl++)
 				output.add(getEnchantNameWithMax(Enchantments.FIRE_ASPECT, lvl, this));
-			return output;
+			return new MultiVersionTooltip(output);
+		}
+	}
+	
+	public enum CheckUpdatesLevel implements ConfigTooltipSupplier {
+		MINOR("nbteditor.config.check_updates.minor"),
+		PATCH("nbteditor.config.check_updates.patch"),
+		NONE("nbteditor.config.check_updates.none");
+		
+		private final Text label;
+		private final Text desc;
+		
+		private CheckUpdatesLevel(String key) {
+			this.label = TextInst.translatable(key);
+			this.desc = TextInst.translatable(key + ".desc");
+		}
+		
+		@Override
+		public String toString() {
+			return label.getString();
+		}
+		@Override
+		public MultiVersionTooltip getTooltip() {
+			return new MultiVersionTooltip(desc);
 		}
 	}
 	
@@ -87,7 +111,7 @@ public class ConfigScreen extends Screen {
 	private static boolean airEditable;
 	private static boolean jsonText;
 	private static List<String> shortcuts;
-	private static boolean checkUpdates;
+	private static CheckUpdatesLevel checkUpdates;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -101,7 +125,7 @@ public class ConfigScreen extends Screen {
 		airEditable = false;
 		jsonText = false;
 		shortcuts = new ArrayList<>();
-		checkUpdates = true;
+		checkUpdates = CheckUpdatesLevel.MINOR;
 		
 		try {
 			// Many config options use the old names
@@ -120,7 +144,10 @@ public class ConfigScreen extends Screen {
 			jsonText = settings.get("jsonText").getAsBoolean();
 			shortcuts = StreamSupport.stream(settings.get("shortcuts").getAsJsonArray().spliterator(), false)
 					.map(cmd -> cmd.getAsString()).collect(Collectors.toList());
-			checkUpdates = settings.get("checkUpdates").getAsBoolean();
+			JsonPrimitive checkUpdatesLegacy = settings.get("checkUpdates").getAsJsonPrimitive();
+			checkUpdates = checkUpdatesLegacy.isBoolean() ?
+					(checkUpdatesLegacy.getAsBoolean() ? CheckUpdatesLevel.MINOR : CheckUpdatesLevel.NONE)
+					: CheckUpdatesLevel.valueOf(checkUpdatesLegacy.getAsString());
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -142,7 +169,7 @@ public class ConfigScreen extends Screen {
 		settings.addProperty("airEditable", airEditable);
 		settings.addProperty("jsonText", jsonText);
 		settings.add("shortcuts", shortcuts.stream().collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
-		settings.addProperty("checkUpdates", checkUpdates);
+		settings.addProperty("checkUpdates", checkUpdates.name());
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -194,7 +221,7 @@ public class ConfigScreen extends Screen {
 	public static List<String> getShortcuts() {
 		return shortcuts;
 	}
-	public static boolean isCheckUpdates() {
+	public static CheckUpdatesLevel getCheckUpdates() {
 		return checkUpdates;
 	}
 	
@@ -242,14 +269,14 @@ public class ConfigScreen extends Screen {
 		this.parent = parent;
 		this.config = new ConfigCategory(TextInst.translatable("nbteditor.config"));
 		this.config.setConfigurable("shortcuts", new ConfigButton(100, TextInst.translatable("nbteditor.config.shortcuts"),
-				btn -> client.setScreen(new ShortcutsScreen(this)), new SimpleTooltip("nbteditor.config.shortcuts.desc")));
+				btn -> client.setScreen(new ShortcutsScreen(this)), new MultiVersionTooltip("nbteditor.config.shortcuts.desc")));
 		this.config.setConfigurable("maxEnchantLevelDisplay", new ConfigItem<>(TextInst.translatable("nbteditor.config.enchant_level_max"),
 				new ConfigValueDropdownEnum<>(enchantLevelMax, EnchantLevelMax.NEVER, EnchantLevelMax.class)
 				.addValueListener(value -> enchantLevelMax = value.getValidValue()))
 				.setTooltip("nbteditor.config.enchant_level_max.desc"));
 		this.config.setConfigurable("useArabicEnchantLevels", new ConfigItem<>(TextInst.translatable("nbteditor.config.enchant_number_type"),
 				new ConfigValueBoolean(enchantNumberTypeArabic, false, 100, TextInst.translatable("nbteditor.config.enchant_number_type.arabic"),
-				TextInst.translatable("nbteditor.config.enchant_number_type.roman"), new SimpleTooltip(TextInst.translatable("nbteditor.config.enchant_number_type.desc2")))
+				TextInst.translatable("nbteditor.config.enchant_number_type.roman"), new MultiVersionTooltip(TextInst.translatable("nbteditor.config.enchant_number_type.desc2")))
 				.addValueListener(value -> enchantNumberTypeArabic = value.getValidValue()))
 				.setTooltip("nbteditor.config.enchant_number_type.desc"));
 		this.config.setConfigurable("keyTextSize", new ConfigItem<>(TextInst.translatable("nbteditor.config.key_text_size"),
@@ -258,7 +285,7 @@ public class ConfigScreen extends Screen {
 				.setTooltip("nbteditor.config.key_text_size.desc"));
 		this.config.setConfigurable("hideKeybinds", new ConfigItem<>(TextInst.translatable("nbteditor.config.keybinds"),
 				new ConfigValueBoolean(keybindsHidden, false, 100, TextInst.translatable("nbteditor.config.keybinds.hidden"), TextInst.translatable("nbteditor.config.keybinds.shown"),
-				new SimpleTooltip("nbteditor.keybind.edit", "nbteditor.keybind.container", "nbteditor.keybind.enchant"))
+				new MultiVersionTooltip("nbteditor.keybind.edit", "nbteditor.keybind.container", "nbteditor.keybind.enchant"))
 				.addValueListener(value -> keybindsHidden = value.getValidValue()))
 				.setTooltip("nbteditor.config.keybinds.desc"));
 		this.config.setConfigurable("extendChatLimit", new ConfigItem<>(TextInst.translatable("nbteditor.config.chat_limit"),
@@ -267,7 +294,7 @@ public class ConfigScreen extends Screen {
 				.setTooltip("nbteditor.config.chat_limit.desc"));
 		this.config.setConfigurable("allowSingleQuotes", new ConfigItem<>(TextInst.translatable("nbteditor.config.single_quotes"),
 				new ConfigValueBoolean(singleQuotesAllowed, false, 100, TextInst.translatable("nbteditor.config.single_quotes.allowed"),
-				TextInst.translatable("nbteditor.config.single_quotes.not_allowed"), new SimpleTooltip("nbteditor.config.single_quotes.example"))
+				TextInst.translatable("nbteditor.config.single_quotes.not_allowed"), new MultiVersionTooltip("nbteditor.config.single_quotes.example"))
 				.addValueListener(value -> singleQuotesAllowed = value.getValidValue()))
 				.setTooltip("nbteditor.config.single_quotes.desc"));
 		this.config.setConfigurable("macScrollPatch", new ConfigItem<>(TextInst.translatable("nbteditor.config.mac_scroll_patch" + (SystemUtils.IS_OS_MAC ? ".on_mac" : "")),
@@ -287,7 +314,7 @@ public class ConfigScreen extends Screen {
 				.addValueListener(value -> jsonText = value.getValidValue()))
 				.setTooltip("nbteditor.config.json_text.desc"));
 		this.config.setConfigurable("checkUpdates", new ConfigItem<>(TextInst.translatable("nbteditor.config.check_updates"),
-				new ConfigValueBoolean(checkUpdates, true, 100, TextInst.translatable("nbteditor.config.check_updates.yes"), TextInst.translatable("nbteditor.config.check_updates.no"))
+				new ConfigValueDropdownEnum<>(checkUpdates, CheckUpdatesLevel.MINOR, CheckUpdatesLevel.class)
 				.addValueListener(value -> checkUpdates = value.getValidValue()))
 				.setTooltip("nbteditor.config.check_updates.desc"));
 	}
@@ -306,7 +333,7 @@ public class ConfigScreen extends Screen {
 			newPanel.setScroll(panel.getScroll());
 		panel = newPanel;
 		
-		this.addDrawableChild(new ButtonWidget(this.width - 134, this.height - 36, 100, 20, ScreenTexts.DONE, btn -> close()));
+		this.addDrawableChild(MultiVersionMisc.newButton(this.width - 134, this.height - 36, 100, 20, ScreenTexts.DONE, btn -> close()));
 	}
 	
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {

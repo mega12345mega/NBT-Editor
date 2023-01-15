@@ -9,6 +9,7 @@ import java.util.List;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.EffectListArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.EnumArgumentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
@@ -21,7 +22,6 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
-import net.minecraft.util.registry.Registry;
 
 public class GetPotionCommand extends ClientCommand {
 	
@@ -51,7 +51,7 @@ public class GetPotionCommand extends ClientCommand {
 			if (!effects.isEmpty()) {
 				StatusEffectInstance effect = effects.get(0);
 				List<Potion> potions = new ArrayList<>();
-				Registry.POTION.forEach(potions::add);
+				MultiVersionRegistry.POTION.forEach(potions::add);
 				Potion potion = potions.stream().filter(testPotion -> !testPotion.getEffects().isEmpty() && testPotion.getEffects().get(0).getEffectType() == effect.getEffectType()).findFirst().orElse(null);
 				if (potion != null) {
 					int color = potion.getEffects().get(0).getEffectType().getColor();

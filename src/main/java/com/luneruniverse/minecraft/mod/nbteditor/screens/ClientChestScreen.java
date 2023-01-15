@@ -13,7 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
 
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -87,9 +87,9 @@ public class ClientChestScreen extends ClientContainerScreen {
 		super.init();
 		x += 87 / 2;
 		
-		this.addDrawableChild(new CreativeTab(this, new ItemStack(Items.BRICKS).setCustomName(TextInst.translatable("itemGroup.nbteditor.creative")), () -> client.setScreen(new CreativeInventoryScreen(client.player))));
+		this.addDrawableChild(new CreativeTab(this, new ItemStack(Items.BRICKS).setCustomName(TextInst.translatable("itemGroup.nbteditor.creative")), () -> client.setScreen(new InventoryScreen(client.player))));
 		
-		this.addDrawableChild(prevPage = new ButtonWidget(this.x - 87, this.y, 20, 20, TextInst.of("<"), btn -> {
+		this.addDrawableChild(prevPage = MultiVersionMisc.newButton(this.x - 87, this.y, 20, 20, TextInst.of("<"), btn -> {
 			navigationClicked = true;
 			PAGE--;
 			pageField.setText((PAGE + 1) + "");
@@ -127,34 +127,34 @@ public class ClientChestScreen extends ClientContainerScreen {
 		});
 		this.addSelectableChild(pageField);
 		
-		this.addDrawableChild(nextPage = new ButtonWidget(this.x - 24, this.y, 20, 20, TextInst.of(">"), btn -> {
+		this.addDrawableChild(nextPage = MultiVersionMisc.newButton(this.x - 24, this.y, 20, 20, TextInst.of(">"), btn -> {
 			navigationClicked = true;
 			PAGE++;
 			pageField.setText((PAGE + 1) + "");
 			show();
 		}));
 		
-		this.addDrawableChild(prevPageJump = new ButtonWidget(this.x - 87, this.y + 24, 39, 20, TextInst.of("<<"), btn -> {
+		this.addDrawableChild(prevPageJump = MultiVersionMisc.newButton(this.x - 87, this.y + 24, 39, 20, TextInst.of("<<"), btn -> {
 			navigationClicked = true;
 			PAGE = prevPageJumpTarget;
 			pageField.setText((PAGE + 1) + "");
 			show();
 		}));
 		
-		this.addDrawableChild(nextPageJump = new ButtonWidget(this.x - 43, this.y + 24, 39, 20, TextInst.of(">>"), btn -> {
+		this.addDrawableChild(nextPageJump = MultiVersionMisc.newButton(this.x - 43, this.y + 24, 39, 20, TextInst.of(">>"), btn -> {
 			navigationClicked = true;
 			PAGE = nextPageJumpTarget;
 			pageField.setText((PAGE + 1) + "");
 			show();
 		}));
 		
-		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 48, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
+		this.addDrawableChild(MultiVersionMisc.newButton(this.x - 87, this.y + 48, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
 			navigationClicked = true;
 			ConfigScreen.setLockSlots(!ConfigScreen.isLockSlots());
 			btn.setMessage(ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"));
 		})).active = !ConfigScreen.isLockSlotsRequired();
 		
-		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 72, 83, 20, TextInst.translatable("nbteditor.client_chest.reload_page"), btn -> {
+		this.addDrawableChild(MultiVersionMisc.newButton(this.x - 87, this.y + 72, 83, 20, TextInst.translatable("nbteditor.client_chest.reload_page"), btn -> {
 			navigationClicked = true;
 			try {
 				NBTEditorClient.CLIENT_CHEST.loadSync(PAGE);
@@ -164,7 +164,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 			}
 		}));
 		
-		this.addDrawableChild(new ButtonWidget(this.x - 87, this.y + 96, 83, 20, TextInst.translatable("nbteditor.client_chest.clear_page"), btn -> {
+		this.addDrawableChild(MultiVersionMisc.newButton(this.x - 87, this.y + 96, 83, 20, TextInst.translatable("nbteditor.client_chest.clear_page"), btn -> {
 			navigationClicked = true;
 			client.setScreen(new FancyConfirmScreen(value -> {
 				if (value) {
@@ -221,7 +221,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		navigationClicked = false;
-		this.client.keyboard.setRepeatEvents(this.pageField.mouseClicked(mouseX, mouseY, button));
+		MultiVersionMisc.setKeyboardRepeatEvents(this.pageField.mouseClicked(mouseX, mouseY, button));
 		super.mouseClicked(mouseX, mouseY, button);
 		return true;
 	}
@@ -281,7 +281,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 	
 	@Override
 	public void removed() {
-		this.client.keyboard.setRepeatEvents(false);
+		MultiVersionMisc.setKeyboardRepeatEvents(false);
 	}
 	
 }

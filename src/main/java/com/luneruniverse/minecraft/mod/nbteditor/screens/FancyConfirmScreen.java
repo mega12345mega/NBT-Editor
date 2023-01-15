@@ -32,7 +32,7 @@ public class FancyConfirmScreen extends ConfirmScreen {
 		parent.render(matrices, -314, -314, delta);
 		
 		matrices.push();
-		matrices.translate(0, 0, 500);
+		matrices.translate(0.0, 0.0, 500.0);
 		super.render(matrices, mouseX, mouseY, delta);
 		MainUtil.renderLogo(matrices);
 		matrices.pop();

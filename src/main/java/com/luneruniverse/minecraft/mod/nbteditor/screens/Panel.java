@@ -81,7 +81,7 @@ public abstract class Panel<T extends Drawable & Element> implements Drawable, E
 			T element = pos.element();
 			
 			matrices.push();
-			matrices.translate(pos.x() + x, pos.y() + y + scroll, 0);
+			matrices.translate(pos.x() + x, pos.y() + y + scroll, 0.0);
 			element.render(matrices, mouseX - pos.x() - x, mouseY - pos.y() - y - scroll, delta);
 			matrices.pop();
 		}

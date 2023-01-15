@@ -3,30 +3,34 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.gui.widget.ButtonWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ExtendableButtonWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+
 import net.minecraft.text.Text;
 
-public class ConfigValueBoolean extends ButtonWidget implements ConfigValue<Boolean, ConfigValueBoolean> {
+public class ConfigValueBoolean extends ExtendableButtonWidget implements ConfigValue<Boolean, ConfigValueBoolean> {
 	
 	private final Text on;
 	private final Text off;
 	private final boolean defaultValue;
 	private boolean value;
+	private MultiVersionTooltip tooltip;
 	
 	private final List<ConfigValueListener<ConfigValueBoolean>> onChanged;
 	
-	public ConfigValueBoolean(boolean value, boolean defaultValue, int width, Text on, Text off, TooltipSupplier tooltipSupplier) {
-		super(0, 0, width, 20, value ? on : off, btn -> ((ConfigValueBoolean) btn).setValue(!((ConfigValueBoolean) btn).getValue()), tooltipSupplier);
+	public ConfigValueBoolean(boolean value, boolean defaultValue, int width, Text on, Text off, MultiVersionTooltip tooltip) {
+		super(0, 0, width, 20, value ? on : off, btn -> ((ConfigValueBoolean) btn).setValue(!((ConfigValueBoolean) btn).getValue()), tooltip);
 		this.on = on;
 		this.off = off;
 		this.value = value;
 		this.defaultValue = defaultValue;
+		this.tooltip = tooltip;
 		this.onChanged = new ArrayList<>();
 	}
 	public ConfigValueBoolean(boolean value, boolean defaultValue, int width, Text on, Text off) {
-		this(value, defaultValue, width, on, off, EMPTY);
+		this(value, defaultValue, width, on, off, MultiVersionTooltip.EMPTY);
 	}
-	private ConfigValueBoolean(boolean value, boolean defaultValue, int width, Text on, Text off, TooltipSupplier tooltipSupplier, List<ConfigValueListener<ConfigValueBoolean>> onChanged) {
+	private ConfigValueBoolean(boolean value, boolean defaultValue, int width, Text on, Text off, MultiVersionTooltip tooltipSupplier, List<ConfigValueListener<ConfigValueBoolean>> onChanged) {
 		this(value, defaultValue, width, on, off, tooltipSupplier);
 		this.onChanged.addAll(onChanged);
 	}
@@ -68,7 +72,7 @@ public class ConfigValueBoolean extends ButtonWidget implements ConfigValue<Bool
 	
 	@Override
 	public ConfigValueBoolean clone(boolean defaults) {
-		return new ConfigValueBoolean(value, defaultValue, width, on, off, tooltipSupplier, onChanged);
+		return new ConfigValueBoolean(value, defaultValue, width, on, off, tooltip, onChanged);
 	}
 	
 }

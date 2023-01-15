@@ -89,7 +89,7 @@ public class MultiLineTextFieldWidget implements Drawable, Element, Selectable {
 			RenderSystem.enableScissor((int) (x * client.getWindow().getScaleFactor()), client.getWindow().getHeight() - (int) ((y + height) * client.getWindow().getScaleFactor()), (int) (width * client.getWindow().getScaleFactor()), (int) (height * client.getWindow().getScaleFactor()));
 		}
 		matrices.push();
-		matrices.translate(0, scroll, 0);
+		matrices.translate(0.0, scroll, 0.0);
 		
 		int yOffset = y;
 		if (formatter == null) {

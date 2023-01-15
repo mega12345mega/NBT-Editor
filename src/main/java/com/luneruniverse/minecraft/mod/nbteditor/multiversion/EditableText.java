@@ -120,7 +120,11 @@ public class EditableText implements Text {
 	// Other
 	@Override
 	public boolean equals(Object obj) {
-		return value.equals(obj);
+		try {
+			return (boolean) Object.class.getMethod("equals", Object.class).invoke(value, obj);
+		} catch (Exception e) {
+			throw new RuntimeException("Error invoking equals method", e);
+		}
 	}
 	
 }

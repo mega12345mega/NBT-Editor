@@ -9,23 +9,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
-import net.minecraft.util.registry.Registry;
 
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
@@ -37,8 +36,7 @@ public class ItemStackMixin {
 			return;
 		
 		// Checking slots in your hotbar vs item selection is difficult, so the lore is just disabled in non-inventory tabs
-		boolean creativeInv = MainUtil.client.currentScreen instanceof CreativeInventoryScreen &&
-				((CreativeInventoryScreen) MainUtil.client.currentScreen).getSelectedTab() == ItemGroup.INVENTORY.getIndex();
+		boolean creativeInv = MultiVersionMisc.isCreativeInventoryTabSelected();
 		
 		if (creativeInv || MainUtil.client.currentScreen instanceof ClientChestScreen || MainUtil.client.currentScreen instanceof ItemsScreen) {
 			info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.edit"));
@@ -55,7 +53,7 @@ public class ItemStackMixin {
 		
 		for (int i = 0; i < enchantments.size(); ++i) {
 			NbtCompound nbtCompound = enchantments.getCompound(i);
-			Registry.ENCHANTMENT.getOrEmpty(EnchantmentHelper.getIdFromNbt(nbtCompound))
+			MultiVersionRegistry.ENCHANTMENT.getOrEmpty(EnchantmentHelper.getIdFromNbt(nbtCompound))
 					.ifPresent(e -> tooltip.add(ConfigScreen.getEnchantNameWithMax(e, EnchantmentHelper.getLevelFromNbt(nbtCompound))));
 		}
 	}

@@ -28,9 +28,9 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
-import net.minecraft.util.registry.DynamicRegistryManager;
 
 /**
  * Manages client-sided commands and provides some related helper methods.
@@ -114,7 +114,11 @@ public final class ClientCommandManager {
 		final CommandDispatcher<FabricClientCommandSource> dispatcher = new CommandDispatcher<>();
 		ClientCommandInternals.setActiveDispatcher(dispatcher);
 		Object registryAccess = switch (Version.get()) {
-			case v1_19 -> Reflection.newInstance("net.minecraft.class_7157", new Class[] {DynamicRegistryManager.class}, lastGamePacket.registryManager());
+			case v1_19_3 -> CommandRegistryAccess.of(MainUtil.client.getNetworkHandler().getRegistryManager(),
+					MainUtil.client.getNetworkHandler().getEnabledFeatures());
+			case v1_19 -> Reflection.newInstance("net.minecraft.class_7157",
+					new Class[] {Reflection.getClass("net.minecraft.class_5455")}, // DynamicRegistryManager.class
+					lastGamePacket.registryManager());
 			case v1_18 -> null;
 		};
 		ClientCommandRegistrationCallback.EVENT.invoker().register(dispatcher, registryAccess);

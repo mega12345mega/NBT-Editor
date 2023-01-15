@@ -23,7 +23,7 @@ public class StringMenuGenerator implements MenuGenerator {
 		NbtElement nbt = getRealNbt(source);
 		if (nbt == null)
 			return null;
-		MenuGenerator gen = MenuGenerator.TYPES.get((int) nbt.getType());
+		MenuGenerator gen = MenuGenerator.TYPES.get(nbt.getType());
 		if (gen == null || gen == this)
 			return null;
 		return gen.getElements(screen, nbt);
@@ -34,7 +34,7 @@ public class StringMenuGenerator implements MenuGenerator {
 		NbtElement nbt = getRealNbt(source);
 		if (nbt == null)
 			return null;
-		MenuGenerator gen = MenuGenerator.TYPES.get((int) nbt.getType());
+		MenuGenerator gen = MenuGenerator.TYPES.get(nbt.getType());
 		if (gen == null || gen == this)
 			return null;
 		return gen.getElement(nbt, key);
@@ -45,7 +45,7 @@ public class StringMenuGenerator implements MenuGenerator {
 		NbtElement nbt = getRealNbt(source);
 		if (nbt == null)
 			return;
-		MenuGenerator gen = MenuGenerator.TYPES.get((int) nbt.getType());
+		MenuGenerator gen = MenuGenerator.TYPES.get(nbt.getType());
 		if (gen == null || gen == this)
 			return;
 		gen.setElement(nbt, key, value);
@@ -57,7 +57,7 @@ public class StringMenuGenerator implements MenuGenerator {
 		NbtElement nbt = getRealNbt(source);
 		if (nbt == null)
 			return;
-		MenuGenerator gen = MenuGenerator.TYPES.get((int) nbt.getType());
+		MenuGenerator gen = MenuGenerator.TYPES.get(nbt.getType());
 		if (gen == null || gen == this)
 			return;
 		gen.addElement(screen, nbt, force2 -> {
@@ -72,7 +72,7 @@ public class StringMenuGenerator implements MenuGenerator {
 		NbtElement nbt = getRealNbt(source);
 		if (nbt == null)
 			return;
-		MenuGenerator gen = MenuGenerator.TYPES.get((int) nbt.getType());
+		MenuGenerator gen = MenuGenerator.TYPES.get(nbt.getType());
 		if (gen == null || gen == this)
 			return;
 		gen.removeElement(nbt, key);
@@ -84,7 +84,7 @@ public class StringMenuGenerator implements MenuGenerator {
 		NbtElement nbt = getRealNbt(source);
 		if (nbt == null)
 			return;
-		MenuGenerator gen = MenuGenerator.TYPES.get((int) nbt.getType());
+		MenuGenerator gen = MenuGenerator.TYPES.get(nbt.getType());
 		if (gen == null || gen == this)
 			return;
 		gen.pasteElement(nbt, key, value);
@@ -95,7 +95,7 @@ public class StringMenuGenerator implements MenuGenerator {
 		NbtElement nbt = getRealNbt(source);
 		if (nbt == null)
 			return true;
-		MenuGenerator gen = MenuGenerator.TYPES.get((int) nbt.getType());
+		MenuGenerator gen = MenuGenerator.TYPES.get(nbt.getType());
 		if (gen == null || gen == this)
 			return true;
 		boolean output = gen.renameElement(nbt, key, newKey, force);

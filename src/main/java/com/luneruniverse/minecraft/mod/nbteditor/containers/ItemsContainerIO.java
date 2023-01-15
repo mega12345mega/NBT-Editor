@@ -1,6 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -19,7 +18,7 @@ public class ItemsContainerIO extends ContainerIO {
 	@Override
 	public ItemStack[] readItems(ItemStack container) {
 		ItemStack[] output = new ItemStack[numItems];
-		NbtList items = container.getOrCreateSubNbt(entity ? "EntityTag" : "BlockEntityTag").getList("Items", NbtType.COMPOUND);
+		NbtList items = container.getOrCreateSubNbt(entity ? "EntityTag" : "BlockEntityTag").getList("Items", NbtElement.COMPOUND_TYPE);
 		for (NbtElement item : items)
 			output[((NbtCompound) item).getInt("Slot")] = ItemStack.fromNbt((NbtCompound) item);
 		return output;

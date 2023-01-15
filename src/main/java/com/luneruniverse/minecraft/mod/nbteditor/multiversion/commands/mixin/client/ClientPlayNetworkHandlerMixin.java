@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandInternals;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager;
@@ -57,5 +58,22 @@ abstract class ClientPlayNetworkHandlerMixin {
 		// It's done here because both the server and the client commands have
 		// to be in the same dispatcher and completion results.
 		ClientCommandInternals.addCommands((CommandDispatcher) commandDispatcher, (FabricClientCommandSource) commandSource);
+	}
+	
+	// 1.19.3
+	@Inject(method = "sendCommand", at = @At("HEAD"), cancellable = true, require = 0)
+//	@Group(name = "sendChatMessage", min = 1)
+	private void onSendCommand(String command, CallbackInfoReturnable<Boolean> cir) {
+		if (ClientCommandInternals.executeCommand(command)) {
+			cir.setReturnValue(true);
+		}
+	}
+	
+	@Inject(method = "sendChatCommand", at = @At("HEAD"), cancellable = true, require = 0)
+//	@Group(name = "sendChatMessage", min = 1)
+	private void onSendCommand(String command, CallbackInfo info) {
+		if (ClientCommandInternals.executeCommand(command)) {
+			info.cancel();
+		}
 	}
 }

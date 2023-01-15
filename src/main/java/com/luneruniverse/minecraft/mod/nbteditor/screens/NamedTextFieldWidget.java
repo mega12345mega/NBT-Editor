@@ -1,12 +1,12 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.source.TextFieldWidgetMixin;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Matrix4f;
 
 public class NamedTextFieldWidget extends TextFieldWidget {
 	
@@ -14,7 +14,7 @@ public class NamedTextFieldWidget extends TextFieldWidget {
 	 * The selection highlight doesn't move when {@link MatrixStack#translate(double, double, double)} is called <br />
 	 * Via {@link TextFieldWidgetMixin}, the vertex calls are redirected to take this matrix into account
 	 */
-	public static Matrix4f matrix;
+	public static Object matrix;
 	
 	protected Text name;
 	protected boolean valid;
@@ -48,7 +48,7 @@ public class NamedTextFieldWidget extends TextFieldWidget {
 			this.setSuggestion(this.getText().isEmpty() ? name.getString() : null);
 		
 		try {
-			matrix = matrices.peek().getPositionMatrix().copy();
+			matrix = MultiVersionMisc.copyMatrix(MultiVersionMisc.getPositionMatrix(matrices.peek()));
 			super.render(matrices, mouseX, mouseY, delta);
 		} finally {
 			matrix = null;

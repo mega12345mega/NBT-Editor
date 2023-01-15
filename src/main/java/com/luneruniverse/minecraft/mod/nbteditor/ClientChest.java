@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -64,7 +63,7 @@ public class ClientChest {
 			return;
 		}
 		
-		NbtList pageNbt = NbtIo.read(file).getList("items", NbtType.COMPOUND);
+		NbtList pageNbt = NbtIo.read(file).getList("items", NbtElement.COMPOUND_TYPE);
 		ItemStack[] items = new ItemStack[54];
 		boolean empty = true;
 		int i = -1;

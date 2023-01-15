@@ -9,10 +9,10 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 
@@ -31,7 +31,7 @@ public class UnbindSkullCommand extends ClientCommand {
 			ItemStack item = heldItem.getItem();
 			
 			NbtCompound nbt = item.getOrCreateNbt();
-			if (nbt.contains("SkullOwner", NbtType.COMPOUND)) {
+			if (nbt.contains("SkullOwner", NbtElement.COMPOUND_TYPE)) {
 				NbtCompound owner = nbt.getCompound("SkullOwner");
 				owner.putIntArray("Id", new int[] {0, 0, 0, 0});
 				String name = owner.getString("Name");

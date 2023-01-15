@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -22,7 +23,6 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class EffectListArgumentType implements ArgumentType<Collection<StatusEffectInstance>> {
 	
@@ -30,7 +30,7 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 		DURATION("-duration", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), Integer.parseInt(str) * 20, effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), false),
 		AMPLIFIER("-amplifier", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), Integer.parseInt(str), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), false),
 		AMBIENT("-ambient", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), effect.getAmplifier(), parseBoolean(str), effect.shouldShowParticles(), effect.shouldShowIcon()), true),
-		PERMANENT("-permanent", (effect, str) -> { effect.setPermanent(parseBoolean(str)); return effect; }, true),
+		PERMANENT("-permanent", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), Integer.MAX_VALUE, effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), true),
 		SHOW_PARTICLES("-showparticles", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), parseBoolean(str), effect.shouldShowIcon()), true),
 		SHOW_ICON("-showicon", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), parseBoolean(str)), true);
 		
@@ -72,7 +72,7 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 		List<StatusEffectInstance> effects = new ArrayList<>();
 		while (stringReader.canRead()) {
 			Identifier identifier = Identifier.fromCommandInput(stringReader);
-			StatusEffect type = Registry.STATUS_EFFECT.getOrEmpty(identifier).orElseThrow(() -> {
+			StatusEffect type = MultiVersionRegistry.STATUS_EFFECT.getOrEmpty(identifier).orElseThrow(() -> {
 				return INVALID_EFFECT_EXCEPTION.create(identifier);
 			});
 			if (!stringReader.canRead()) {
@@ -143,7 +143,7 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 				}
 			}
 		}
-		return CommandSource.suggestIdentifiers(Registry.STATUS_EFFECT.getIds(), builder);
+		return CommandSource.suggestIdentifiers(MultiVersionRegistry.STATUS_EFFECT.getIds(), builder);
 	}
 
 	public Collection<String> getExamples() {

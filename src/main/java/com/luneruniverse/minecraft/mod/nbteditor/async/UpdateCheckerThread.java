@@ -10,11 +10,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.SharedConstants;
 import net.minecraft.client.toast.SystemToast;
 
 public class UpdateCheckerThread extends Thread {
@@ -39,11 +39,11 @@ public class UpdateCheckerThread extends Thread {
 	
 	@Override
 	public void run() {
-		if (URL == null || !ConfigScreen.isCheckUpdates())
+		if (URL == null || ConfigScreen.getCheckUpdates() == ConfigScreen.CheckUpdatesLevel.NONE)
 			return;
 		
 		try {
-			String thisGameVersion = SharedConstants.getGameVersion().getName();
+			String thisGameVersion = Version.getReleaseTarget();
 			HttpURLConnection conn = (HttpURLConnection) URL.openConnection();
 			JsonArray versions = new Gson().fromJson(new String(conn.getInputStream().readAllBytes(), "UTF-8"), JsonArray.class);
 			String highestVersion = null;
@@ -54,17 +54,20 @@ public class UpdateCheckerThread extends Thread {
 					if (!thisGameVersion.equals(gameVersion.getAsString()))
 						continue;
 					String number = version.getAsJsonObject().get("version_number").getAsString();
-					if (highestVersion == null || versionCompare(highestVersion, number) < 0)
+					if (highestVersion == null || versionCompare(highestVersion, number)[0] < 0)
 						highestVersion = number;
 				}
 			}
+			int[] versionDiff;
 			if (highestVersion == null)
 				NBTEditor.LOGGER.warn("Unable to check for updates! Is the game version invalid?");
-			else if (versionCompare(highestVersion, VERSION) > 0) {
-				NBTEditor.LOGGER.warn("NBT Editor is outdated!");
-				MainUtil.client.getToastManager().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT,
-						TextInst.translatable("nbteditor.outdated.title"),
-						TextInst.translatable("nbteditor.outdated.desc")));
+			else if ((versionDiff = versionCompare(highestVersion, VERSION))[0] > 0) {
+				NBTEditor.LOGGER.warn("NBT Editor is outdated! (" + highestVersion + " > " + VERSION + ")");
+				if (versionDiff[1] < 2 || ConfigScreen.getCheckUpdates() == ConfigScreen.CheckUpdatesLevel.PATCH) {
+					MainUtil.client.getToastManager().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT,
+							TextInst.translatable("nbteditor.outdated.title"),
+							TextInst.translatable("nbteditor.outdated.desc")));
+				}
 			} else
 				NBTEditor.LOGGER.info("NBT Editor is fully updated!");
 		} catch (Exception e) {
@@ -72,17 +75,17 @@ public class UpdateCheckerThread extends Thread {
 		}
 	}
 	
-	private static int versionCompare(String a, String b) {
+	private static int[] versionCompare(String a, String b) {
 		int[] aInts = getVersionInts(a);
 		int[] bInts = getVersionInts(b);
 		
 		for (int i = 0; i < Math.min(aInts.length, bInts.length); i++) {
 			int output = Integer.compare(aInts[i], bInts[i]);
 			if (output != 0)
-				return output;
+				return new int[] {output, i};
 		}
 		
-		return Integer.compare(aInts.length, bInts.length);
+		return new int[] {Integer.compare(aInts.length, bInts.length), Math.min(aInts.length, bInts.length)};
 	}
 	private static int[] getVersionInts(String version) {
 		return Stream.of(version.split("\\.")).mapToInt(Integer::parseInt).toArray();
