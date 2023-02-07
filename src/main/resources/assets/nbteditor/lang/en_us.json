@@ -51,6 +51,8 @@
 	"nbteditor.nbt.saving_air.no": "Cancel",
 	
 	"nbteditor.nbt.export.copied": "§aCommand copied to clipboard!",
+	"nbteditor.nbt.export.file.success": "Saved item as %s",
+	"nbteditor.nbt.export.file.error": "Couldn't save item: %s",
 	
 	"itemGroup.nbteditor.client_chest": "Client Chest",
 	"itemGroup.nbteditor.creative": "Creative Inventory",
@@ -67,8 +69,8 @@
 	"nbteditor.client_chest.clear_page.yes": "Destroy Items",
 	"nbteditor.client_chest.clear_page.no": "Cancel",
 	
-	"nbteditor.book.edit": "Edit Attributes",
 	"nbteditor.book.convert": "Make Writable",
+	"nbteditor.book.convert.formatting_saved": "That book contains formatting, which isn't supported by writable books. You have received a copy instead.",
 	
 	"nbteditor.container.title": "Nbt Editor >> ",
 	
@@ -89,6 +91,9 @@
 	"nbteditor.get.lost_item": "§cYou may have lost an item - ",
 	"nbteditor.get.lost_item.hover": "Click to execute",
 	"nbteditor.get.lost_item.none": "§cThere are no lost items saved!",
+	"nbteditor.get.lost_item.history_hint": "§aUse [run_command]{/get lostitem history}([show_text]{Click to execute}(§6/get lostitem history)) to view recent cursor contents",
+	"nbteditor.get.lost_item.history": "Cursor History",
+	"nbteditor.get.preset_item.missing": "§cPreset item failed to load!",
 	
 	"nbteditor.hide_flags": "Hide Flags",
 	"nbteditor.hide_flags.hide_all": "§cHide Everything",
@@ -181,14 +186,18 @@
 	"nbteditor.config.json_text.desc": "Use JSON for text instead of the\ncustom text format\nUse /get help textformat\nfor more info",
 	"nbteditor.config.json_text.yes": "Enabled",
 	"nbteditor.config.json_text.no": "Disabled",
-	"nbteditor.config.check_updates": "Check Updates",
-	"nbteditor.config.check_updates.desc": "Whether or not NBT Editor updates\nshould be checked at game startup.\nUse this to disable the notification.",
+	"nbteditor.config.check_updates": "Notify Updates",
+	"nbteditor.config.check_updates.desc": "Whether or not NBT Editor updates\nshould be shown at game startup.\nUse this to disable the notification.",
 	"nbteditor.config.check_updates.minor": "Main Updates",
-	"nbteditor.config.check_updates.minor.desc": "Check for large updates,\nincluding many new features",
+	"nbteditor.config.check_updates.minor.desc": "Display large updates, which\ninclude many new features",
 	"nbteditor.config.check_updates.patch": "Small Updates",
-	"nbteditor.config.check_updates.patch.desc": "Check for small updates,\nincluding bug fixes and single features",
+	"nbteditor.config.check_updates.patch.desc": "Display small updates, which include\nbug fixes and single features",
 	"nbteditor.config.check_updates.none": "No Updates",
-	"nbteditor.config.check_updates.none.desc": "Don't check for any updates",
+	"nbteditor.config.check_updates.none.desc": "Don't display any updates",
+	"nbteditor.config.client_chest_size": "Client Chest Size",
+	"nbteditor.config.client_chest_size.desc": "Increase the page limit from 100 to unlimited\nThis can cause freezing when scrolling\nthrough lots of pages\nThis MAY not increase memory usage",
+	"nbteditor.config.client_chest_size.small": "Small",
+	"nbteditor.config.client_chest_size.large": "Large",
 	
 	
 	"nbteditor.configurable.list.move": "Move",
@@ -251,14 +260,15 @@
 	"nbteditor.help.item_factories_7": "§6hideflags: §7Configure hide flags",
 	"nbteditor.help.item_factories_8": "§6lore <add | remove | set | clear | list> [<args>]: §7Edit lore",
 	"nbteditor.help.item_factories_9": "§6max [cursed] [all] [<level>]: §7Max an item's enchantments",
-	"nbteditor.help.item_factories_10": "§6unbindskull: §7Remove a skull's link to the original owner",
-	"nbteditor.help.item_factories_11": "§7--------------------",
+	"nbteditor.help.item_factories_10": "§6sign <add | remove | edit <new signature>>: §7Add a signature",
+	"nbteditor.help.item_factories_11": "§6unbindskull: §7Remove a skull's link to the original owner",
+	"nbteditor.help.item_factories_12": "§7--------------------",
 	
 	"nbteditor.help.text_format_1": "§7--------------------",
 	"nbteditor.help.text_format_2": "§6Help: Text Format",
 	"nbteditor.help.text_format_3": "§6Used instead of JSON for formatted text",
 	"nbteditor.help.text_format_4": "§6Can be toggled back to JSON in /nbteditor config",
-	"nbteditor.help.text_format_5": "[FORMAT] §6Formatting uses \\& for [run_command]{/get colorcodes}([show_text]{/get colorcodes}(§9§ncolor codes))",
+	"nbteditor.help.text_format_5": "[FORMAT] §6Formatting uses \\& for [run_command]{/get preset colorcodes}([show_text]{/get preset colorcodes}(§9§ncolor codes))",
 	"nbteditor.help.text_format_6": "§6When changing colors, the format is cleared for consistency",
 	"nbteditor.help.text_format_7": "§6Events: [<event_name>]{<event_value>}(<affected text>)",
 	"nbteditor.help.text_format_8": "§6Example: [run_command]{/say clicked!}(&6Click me!)",

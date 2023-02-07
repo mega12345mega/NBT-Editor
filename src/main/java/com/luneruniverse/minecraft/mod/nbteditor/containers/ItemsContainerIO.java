@@ -10,7 +10,7 @@ public class ItemsContainerIO extends ContainerIO {
 	private final boolean entity;
 	private final int numItems;
 	
-	ItemsContainerIO(boolean entity, int numItems) {
+	public ItemsContainerIO(boolean entity, int numItems) {
 		this.entity = entity;
 		this.numItems = numItems;
 	}

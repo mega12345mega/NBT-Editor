@@ -9,6 +9,12 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 public class ClientChestCommand extends ClientCommand {
 	
+	public static final ClientChestCommand INSTANCE = new ClientChestCommand();
+	
+	private ClientChestCommand() {
+		
+	}
+	
 	@Override
 	public String getName() {
 		return "clientchest";

@@ -44,7 +44,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	
 	private final boolean jsonAllowed;
 	
-	public FancyTextArgumentType(boolean jsonAllowed) {
+	private FancyTextArgumentType(boolean jsonAllowed) {
 		this.jsonAllowed = jsonAllowed;
 	}
 	

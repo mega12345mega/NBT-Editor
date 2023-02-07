@@ -18,6 +18,10 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 
+/**
+ * Refers to items in the players inventory, client chest, or container (possibly recursively)<br>
+ * Use {@link #getItem()} and {@link #saveItem(ItemStack, Runnable)} to interface with the item
+ */
 public class ItemReference {
 	
 	private final Hand hand;
@@ -27,7 +31,6 @@ public class ItemReference {
 	private final ItemReference parent;
 	private final int hotbarSlot;
 	private final SaveQueue saveQueue;
-	private volatile ItemStack toSave;
 	
 	public ItemReference(Hand hand) {
 		this.hand = hand;
@@ -37,7 +40,7 @@ public class ItemReference {
 		this.parent = null;
 		this.hotbarSlot = hand == Hand.MAIN_HAND ? MainUtil.client.player.getInventory().selectedSlot : 40;
 		
-		this.saveQueue = new SaveQueue("Player Hand", () -> {
+		this.saveQueue = new SaveQueue("Player Hand", (ItemStack toSave) -> {
 			MainUtil.saveItem(hand, toSave);
 		}, false);
 	}
@@ -50,7 +53,7 @@ public class ItemReference {
 		this.parent = null;
 		this.hotbarSlot = slot < 9 ? slot : (slot == 45 ? 40 : -1);
 		
-		this.saveQueue = new SaveQueue("Player Inventory", () -> {
+		this.saveQueue = new SaveQueue("Player Inventory", (ItemStack toSave) -> {
 			MainUtil.saveItemInvSlot(slot, toSave);
 		}, false);
 	}
@@ -66,7 +69,7 @@ public class ItemReference {
 		this.parent = null;
 		this.hotbarSlot = -1;
 		
-		this.saveQueue = new SaveQueue("Player Armor", () -> {
+		this.saveQueue = new SaveQueue("Player Armor", (ItemStack toSave) -> {
 			MainUtil.saveItem(armorSlot, toSave);
 		}, false);
 	}
@@ -93,16 +96,14 @@ public class ItemReference {
 		this.parent = null;
 		this.hotbarSlot = -1;
 		
-		this.saveQueue = new SaveQueue("Client Chest", () -> {
-			ItemStack item = toSave; // Thread safe
-			
+		this.saveQueue = new SaveQueue("Client Chest", (ItemStack toSave) -> {
 			ItemStack[] items = NBTEditorClient.CLIENT_CHEST.getPage(page);
-			items[slot] = item;
+			items[slot] = toSave;
 			try {
 				NBTEditorClient.CLIENT_CHEST.setPage(page, items);
 				
-				if (MainUtil.client.currentScreen instanceof ClientChestScreen)
-					((ClientChestScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStack(item);
+				if (MainUtil.client.currentScreen instanceof ClientChestScreen && ClientChestScreen.PAGE == page)
+					((ClientChestScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStack(toSave);
 			} catch (IOException e) {
 				NBTEditor.LOGGER.error("Error while saving client chest", e);
 				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
@@ -118,20 +119,17 @@ public class ItemReference {
 		this.parent = parent;
 		this.hotbarSlot = -1;
 		
-		this.saveQueue = new SaveQueue("Container", () -> {
-			ItemStack item = toSave;
-			
+		this.saveQueue = new SaveQueue("Container", (ItemStack toSave) -> {
 			ItemStack chest = parent.getItem().copy();
 			ItemStack[] contents = ContainerIO.read(chest);
-			contents[slot] = item;
+			contents[slot] = toSave;
 			ContainerIO.write(chest, contents);
 			
-			parent.toSave = chest;
-			parent.saveQueue.getOnSave().run();
+			parent.saveQueue.save(chest);
 			
 			// The recursive nature causes parent containers to also write items to the screen, hence the check
 			if (MainUtil.client.currentScreen instanceof ItemsScreen && ((ItemsScreen) MainUtil.client.currentScreen).getReference() == parent)
-				((ItemsScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStack(item);
+				((ItemsScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStack(toSave);
 		}, true);
 	}
 	
@@ -185,8 +183,7 @@ public class ItemReference {
 			throw new IllegalStateException("Invalid item reference");
 	}
 	public void saveItem(ItemStack toSave, Runnable onFinished) {
-		this.toSave = toSave.copy();
-		this.saveQueue.save(onFinished);
+		this.saveQueue.save(onFinished, toSave.copy());
 	}
 	
 	public boolean isLocked() {

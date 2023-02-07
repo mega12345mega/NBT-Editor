@@ -1,9 +1,11 @@
-package com.luneruniverse.minecraft.mod.nbteditor;
+package com.luneruniverse.minecraft.mod.nbteditor.clientchest;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
+
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -11,32 +13,14 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 
-public class ClientChest {
+public abstract class ClientChest {
 	
-	private static final File CLIENT_CHEST_FOLDER = new File(NBTEditorClient.SETTINGS_FOLDER, "client_chest");
+	protected static final File CLIENT_CHEST_FOLDER = new File(NBTEditorClient.SETTINGS_FOLDER, "client_chest");
 	
-	private final int maxPages;
-	private final HashMap<Integer, ItemStack[]> pages;
-	private volatile boolean loaded;
-	
-	public ClientChest(int maxPages) {
-		this.maxPages = maxPages;
-		pages = new HashMap<>();
-		loaded = false;
-	}
-	
-	public int getMaxPages() {
-		return maxPages;
-	}
-	public ItemStack[] getPage(int page) {
-		checkLoaded();
-		return pages.getOrDefault(page, new ItemStack[54]);
-	}
-	
-	public void loadAllAync() {
+	public void loadAync() {
 		Thread loader = new Thread(() -> {
 			try {
-				loadAllSync();
+				loadSync();
 			} catch (Exception e) {
 				NBTEditor.LOGGER.error("Unable to load the client chest!", e);
 			}
@@ -44,23 +28,12 @@ public class ClientChest {
 		loader.setDaemon(true);
 		loader.start();
 	}
-	public void loadAllSync() throws Exception {
-		loaded = false;
-		for (int i = 0; i < maxPages; i++) {
-			try {
-				loadSync(i);
-			} catch (Exception e) {
-				pages.clear();
-				throw new Exception("While loading page " + (i + 1) + ":", e);
-			}
-		}
-		loaded = true;
-	}
-	public void loadSync(int page) throws Exception {
+	public abstract void loadSync() throws Exception;
+	public ItemStack[] loadSync(int page) throws Exception {
 		File file = new File(CLIENT_CHEST_FOLDER, "page" + page + ".nbt");
 		if (!file.exists()) {
-			pages.remove(page);
-			return;
+			cacheEmptyPage(page);
+			return null;
 		}
 		
 		NbtList pageNbt = NbtIo.read(file).getList("items", NbtElement.COMPOUND_TYPE);
@@ -73,19 +46,23 @@ public class ClientChest {
 				empty = false;
 		}
 		if (empty) {
-			pages.remove(page);
+			cacheEmptyPage(page);
 			file.delete();
-		} else
-			pages.put(page, items);
+			return null;
+		} else {
+			cachePage(page, items);
+			return items;
+		}
 	}
 	
-	public boolean isLoaded() {
-		return loaded;
-	}
-	private void checkLoaded() {
-		if (!loaded)
+	public abstract boolean isLoaded();
+	protected void checkLoaded() {
+		if (!isLoaded())
 			throw new IllegalStateException("The client chest isn't loaded yet!");
 	}
+	
+	public abstract int getPageCount();
+	public abstract ItemStack[] getPage(int page);
 	
 	public void setPage(int page, ItemStack[] items) throws IOException {
 		checkLoaded();
@@ -101,12 +78,12 @@ public class ClientChest {
 			}
 		}
 		if (allAir) {
-			pages.remove(page);
+			cacheEmptyPage(page);
 			Files.deleteIfExists(file.toPath());
 			return;
 		}
 		
-		pages.put(page, items);
+		cachePage(page, items);
 		
 		NbtCompound nbt = new NbtCompound();
 		NbtList pageNbt = new NbtList();
@@ -116,20 +93,9 @@ public class ClientChest {
 		NbtIo.write(nbt, file);
 	}
 	
-	public int[] getNearestItems(int page) {
-		checkLoaded();
-		
-		int prev = -1;
-		int next = -1;
-		
-		for (int i : pages.keySet()) {
-			if (i < page && i > prev)
-				prev = i;
-			if (i > page && (i < next || next == -1))
-				next = i;
-		}
-		
-		return new int[] {prev, next};
-	}
+	protected abstract void cachePage(int page, ItemStack[] items);
+	protected abstract void cacheEmptyPage(int page);
+	
+	public abstract int[] getNearestItems(int page);
 	
 }

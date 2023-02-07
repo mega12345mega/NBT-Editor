@@ -19,7 +19,11 @@
     "TextFieldWidgetMixin",
     "MinecraftClientMixin",
     "StringNbtReaderMixin",
-    "TextSerializerMixin"
+    "TextSerializerMixin",
+    "ScreenMixin",
+    "ParentElementMixin",
+    "BookScreenMixin",
+    "HandledScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

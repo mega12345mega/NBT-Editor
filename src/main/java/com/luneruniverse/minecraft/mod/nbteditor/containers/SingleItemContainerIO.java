@@ -8,7 +8,7 @@ public class SingleItemContainerIO extends ContainerIO {
 	private final boolean entity;
 	private final String key;
 	
-	SingleItemContainerIO(boolean entity, String key) {
+	public SingleItemContainerIO(boolean entity, String key) {
 		this.entity = entity;
 		this.key = key;
 	}

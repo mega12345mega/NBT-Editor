@@ -241,6 +241,7 @@ public class HeadDatabase {
         
         URLConnection connection = new URL(url).openConnection();
         connection.setConnectTimeout(timeout);
+        connection.setReadTimeout(timeout);
         connection.setRequestProperty("User-Agent", "NBTEditor-DatabaseUpdater");
         try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             while ((line = in.readLine()) != null) {

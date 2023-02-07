@@ -60,6 +60,9 @@ public abstract class ContainerIO {
 		CONTAINERS.put(Items.ITEM_FRAME, ITEM_FRAME);
 		CONTAINERS.put(Items.GLOW_ITEM_FRAME, ITEM_FRAME);
 	}
+	public static void registerContainer(Item item, ContainerIO container) {
+		CONTAINERS.put(item, container);
+	}
 	
 	public static boolean isContainer(ItemStack item) {
 		return CONTAINERS.containsKey(item.getItem());

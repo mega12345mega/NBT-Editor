@@ -7,6 +7,7 @@ import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -18,8 +19,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChest;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -33,6 +37,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueSlider;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
@@ -40,7 +45,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-public class ConfigScreen extends Screen {
+public class ConfigScreen extends MultiVersionScreen {
 	
 	public enum EnchantLevelMax implements ConfigTooltipSupplier {
 		NEVER("nbteditor.config.enchant_level_max.never", (level, maxLevel) -> false),
@@ -77,16 +82,22 @@ public class ConfigScreen extends Screen {
 	}
 	
 	public enum CheckUpdatesLevel implements ConfigTooltipSupplier {
-		MINOR("nbteditor.config.check_updates.minor"),
-		PATCH("nbteditor.config.check_updates.patch"),
-		NONE("nbteditor.config.check_updates.none");
+		MINOR("nbteditor.config.check_updates.minor", 1),
+		PATCH("nbteditor.config.check_updates.patch", 2),
+		NONE("nbteditor.config.check_updates.none", -1);
 		
 		private final Text label;
 		private final Text desc;
+		private final int level;
 		
-		private CheckUpdatesLevel(String key) {
+		private CheckUpdatesLevel(String key, int level) {
 			this.label = TextInst.translatable(key);
 			this.desc = TextInst.translatable(key + ".desc");
+			this.level = level;
+		}
+		
+		public int getLevel() {
+			return level;
 		}
 		
 		@Override
@@ -112,6 +123,7 @@ public class ConfigScreen extends Screen {
 	private static boolean jsonText;
 	private static List<String> shortcuts;
 	private static CheckUpdatesLevel checkUpdates;
+	private static boolean largeClientChest;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -120,12 +132,13 @@ public class ConfigScreen extends Screen {
 		keybindsHidden = false;
 		chatLimitExtended = false;
 		singleQuotesAllowed = false;
-		macScrollPatch = SystemUtils.IS_OS_MAC;
+		macScrollPatch = MinecraftClient.IS_SYSTEM_MAC;
 		scrollSpeed = 1;
 		airEditable = false;
 		jsonText = false;
 		shortcuts = new ArrayList<>();
 		checkUpdates = CheckUpdatesLevel.MINOR;
+		largeClientChest = false;
 		
 		try {
 			// Many config options use the old names
@@ -148,6 +161,7 @@ public class ConfigScreen extends Screen {
 			checkUpdates = checkUpdatesLegacy.isBoolean() ?
 					(checkUpdatesLegacy.getAsBoolean() ? CheckUpdatesLevel.MINOR : CheckUpdatesLevel.NONE)
 					: CheckUpdatesLevel.valueOf(checkUpdatesLegacy.getAsString());
+			largeClientChest = settings.get("largeClientChest").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -170,6 +184,7 @@ public class ConfigScreen extends Screen {
 		settings.addProperty("jsonText", jsonText);
 		settings.add("shortcuts", shortcuts.stream().collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 		settings.addProperty("checkUpdates", checkUpdates.name());
+		settings.addProperty("largeClientChest", largeClientChest);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -224,6 +239,9 @@ public class ConfigScreen extends Screen {
 	public static CheckUpdatesLevel getCheckUpdates() {
 		return checkUpdates;
 	}
+	public static boolean isLargeClientChest() {
+		return largeClientChest;
+	}
 	
 	public static Text getEnchantName(Enchantment enchant, int level) {
 		if (enchantLevelMax == null)
@@ -258,6 +276,8 @@ public class ConfigScreen extends Screen {
 		return getEnchantNameWithMax(enchant, level, enchantLevelMax);
 	}
 	
+	
+	public static final List<Consumer<ConfigCategory>> ADDED_OPTIONS = new ArrayList<>();
 	
 	
 	private final Screen parent;
@@ -317,6 +337,11 @@ public class ConfigScreen extends Screen {
 				new ConfigValueDropdownEnum<>(checkUpdates, CheckUpdatesLevel.MINOR, CheckUpdatesLevel.class)
 				.addValueListener(value -> checkUpdates = value.getValidValue()))
 				.setTooltip("nbteditor.config.check_updates.desc"));
+		this.config.setConfigurable("largeClientChest", new ConfigItem<>(TextInst.translatable("nbteditor.config.client_chest_size"),
+				new ConfigValueBoolean(largeClientChest, false, 100, TextInst.translatable("nbteditor.config.client_chest_size.large"), TextInst.translatable("nbteditor.config.client_chest_size.small"))
+				.addValueListener(value -> largeClientChest = value.getValidValue()))
+				.setTooltip("nbteditor.config.client_chest_size.desc"));
+		ADDED_OPTIONS.forEach(option -> option.accept(config));
 	}
 	
 	@Override
@@ -341,16 +366,18 @@ public class ConfigScreen extends Screen {
 		super.render(matrices, mouseX, mouseY, delta);
 	}
 	
-	public final void onClose() { // 1.18
-		close();
-	}
-	public void close() { // 1.19
+	public void close() {
 		client.setScreen(this.parent);
 	}
 	
 	@Override
 	public void removed() {
 		saveSettings();
+		if (largeClientChest != (NBTEditorClient.CLIENT_CHEST instanceof LargeClientChest)) {
+			NBTEditorClient.CLIENT_CHEST = largeClientChest ? new LargeClientChest(5) : new SmallClientChest(100);
+			ClientChestScreen.PAGE = Math.min(ClientChestScreen.PAGE, NBTEditorClient.CLIENT_CHEST.getPageCount() - 1);
+			NBTEditorClient.CLIENT_CHEST.loadAync();
+		}
 	}
 	
 }

@@ -3,7 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
-public class MultiVersionScreen extends Screen {
+public class MultiVersionScreen extends Screen implements OldEventBehavior {
 	
 	protected MultiVersionScreen(Text title) {
 		super(title);

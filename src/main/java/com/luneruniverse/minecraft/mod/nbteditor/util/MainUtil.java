@@ -1,12 +1,24 @@
 package com.luneruniverse.minecraft.mod.nbteditor.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Proxy;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.zip.ZipException;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
@@ -16,6 +28,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -31,6 +45,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.ClickEvent;
@@ -39,6 +54,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.StringVisitable.StyledVisitor;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -130,9 +146,10 @@ public class MainUtil {
 	
 	
 	private static final Identifier LOGO = new Identifier("nbteditor", "textures/logo.png");
+	private static final Identifier LOGO_UPDATE_AVAILABLE = new Identifier("nbteditor", "textures/logo_update_available.png");
 	public static void renderLogo(MatrixStack matrices) {
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.setShaderTexture(0, LOGO);
+		RenderSystem.setShaderTexture(0, UpdateCheckerThread.UPDATE_AVAILABLE ? LOGO_UPDATE_AVAILABLE : LOGO);
 		Screen.drawTexture(matrices, 16, 16, 0, 0, 32, 32, 32, 32);
 	}
 	
@@ -416,6 +433,9 @@ public class MainUtil {
 			return TextInst.literal(text);
 		}
 	}
+	public static Text parseTranslatableFormatted(String key) {
+		return parseFormattedText(TextInst.translatable(key).getString());
+	}
 	
 	
 	public static ItemStack setType(Item type, ItemStack item, int count) {
@@ -427,6 +447,80 @@ public class MainUtil {
 	}
 	public static ItemStack setType(Item type, ItemStack item) {
 		return setType(type, item, item.getCount());
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public static <T> Event<T> newEvent(Class<T> clazz) {
+		return EventFactory.createArrayBacked(clazz, listeners -> {
+			return (T) Proxy.newProxyInstance(MainUtil.class.getClassLoader(), new Class<?>[] {clazz}, (obj, method, args) -> {
+				for (T listener : listeners) {
+					ActionResult result = (ActionResult) method.invoke(listener, args);
+					if (result != ActionResult.PASS)
+						return result;
+				}
+				return ActionResult.PASS;
+			});
+		});
+	}
+	
+	
+	public static NbtCompound readNBT(InputStream in) throws IOException {
+		byte[] data = in.readAllBytes();
+		DataInputStream resetableIn = new DataInputStream(new ByteArrayInputStream(data));
+		NbtCompound nbt;
+		try {
+			nbt = NbtIo.readCompressed(resetableIn);
+		} catch (ZipException e) {
+			resetableIn.reset();
+			nbt = NbtIo.read(resetableIn);
+		}
+		return nbt;
+	}
+	
+	
+	public static boolean isTextFormatted(Text text, boolean allowNonNull) {
+		return isTextFormatted(Text.Serializer.toJsonTree(text).getAsJsonObject(), allowNonNull);
+	}
+	private static boolean isTextFormatted(JsonObject data, boolean allowNonNull) {
+		if (data.has("extra")) {
+			for (JsonElement part : data.get("extra").getAsJsonArray()) {
+				if (isTextFormatted(part.getAsJsonObject(), allowNonNull))
+					return true;
+			}
+		}
+		
+		if (!allowNonNull)
+			return data.keySet().stream().anyMatch(key -> !key.equals("text") && !key.equals("extra"));
+		
+		if (data.has("bold") && data.get("bold").getAsBoolean())
+			return true;
+		if (data.has("italic") && data.get("italic").getAsBoolean())
+			return true;
+		if (data.has("underlined") && data.get("underlined").getAsBoolean())
+			return true;
+		if (data.has("strikethrough") && data.get("strikethrough").getAsBoolean())
+			return true;
+		if (data.has("obfuscated") && data.get("obfuscated").getAsBoolean())
+			return true;
+		if (data.has("color") && !data.get("color").getAsString().equals("white"))
+			return true;
+		if (data.has("insertion") && data.get("insertion").getAsBoolean())
+			return true;
+		if (data.has("clickEvent"))
+			return true;
+		if (data.has("hoverEvent"))
+			return true;
+		if (data.has("font") && !data.get("font").getAsString().equals(Style.DEFAULT_FONT_ID.toString()))
+			return true;
+		
+		return false;
+	}
+	
+	
+	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT);
+	public static String getFormattedCurrentTime() {
+		return DATE_TIME_FORMATTER.format(ZonedDateTime.now());
 	}
 	
 }

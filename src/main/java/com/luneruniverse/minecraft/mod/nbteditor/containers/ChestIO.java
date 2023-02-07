@@ -6,7 +6,7 @@ import net.minecraft.item.ItemStack;
 
 public class ChestIO extends ContainerIO {
 	
-	ChestIO() {
+	public ChestIO() {
 		
 	}
 	

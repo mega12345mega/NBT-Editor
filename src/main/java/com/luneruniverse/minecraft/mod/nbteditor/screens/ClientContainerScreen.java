@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -21,7 +22,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class ClientContainerScreen extends GenericContainerScreen {
+public class ClientContainerScreen extends GenericContainerScreen implements OldEventBehavior {
 	
 	private static final Identifier TEXTURE = new Identifier("textures/gui/container/generic_54.png");
 	
@@ -44,19 +45,19 @@ public class ClientContainerScreen extends GenericContainerScreen {
 			ItemStack clientStack = clientInv.getStack(i);
 			if (!ItemStack.areEqual(clientStack, SERVER_INV.getStack(i))) {
 				if (i > 35) { // Armor
-					SERVER_INV.setStack(i, clientStack);
+					SERVER_INV.setStack(i, clientStack.copy());
 					continue;
 				}
 				if (i == 40)
 					i = 45;
 				MainUtil.client.interactionManager.clickCreativeStack(clientStack, i < 9 ? i + 36 : i);
 				if (i != 45)
-					SERVER_INV.setStack(i, clientStack);
+					SERVER_INV.setStack(i, clientStack.copy());
 			}
 		}
 		if (!ItemStack.areEqual(clientCursor, SERVER_CURSOR)) {
 //			client.interactionManager.clickCreativeStack(clientCursor, -1);
-			SERVER_CURSOR = clientCursor;
+			SERVER_CURSOR = clientCursor.copy();
 		}
 	}
 	
@@ -142,6 +143,9 @@ public class ClientContainerScreen extends GenericContainerScreen {
 			beforeClickItem = slot.getStack().copy();
 		beforeClickCursor = this.handler.getCursorStack().copy();
 		
+		if (!beforeClickCursor.isEmpty() && !(this instanceof CursorHistoryScreen))
+			GetLostItemCommand.addToHistory(beforeClickCursor);
+		
 		if (slot != null && allowEnchantmentCombine(slot) && Screen.hasControlDown() && tryCombineEnchantments(slot, actionType))
 			onEnchantmentCombine(slot);
 		else
@@ -154,14 +158,13 @@ public class ClientContainerScreen extends GenericContainerScreen {
 		boolean changed = false;
 		boolean lockRevertUsed = false;
 		boolean locked = lockSlots();
-		ItemStack[] prevInv = getPrevInventory();
 		for (int i = 0; i < this.handler.getInventory().size(); i++) {
-			if (!ItemStack.areEqual(prevInv[i] == null ? ItemStack.EMPTY : prevInv[i], this.handler.getInventory().getStack(i))) {
+			if (!ItemStack.areEqual(prev[i] == null ? ItemStack.EMPTY : prev[i], this.handler.getInventory().getStack(i))) {
 				if (locked) {
-					if (prevInv[i] == null || prevInv[i].isEmpty())
+					if (prev[i] == null || prev[i].isEmpty())
 						changed = true;
 					else {
-						this.handler.getInventory().setStack(i, prevInv[i]);
+						this.handler.getInventory().setStack(i, prev[i].copy());
 						lockRevertUsed = true;
 					}
 				} else {

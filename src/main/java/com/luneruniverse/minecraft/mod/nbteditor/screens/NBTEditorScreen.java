@@ -1,5 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -188,7 +191,8 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			if (!airEditable && MultiVersionRegistry.ITEM.get(new Identifier(str)) == Items.AIR)
 				return;
 			
-			ItemStack editedItem = MainUtil.setType(MultiVersionRegistry.ITEM.get(new Identifier(str)), item, Integer.parseInt(count.getText()));
+			ItemStack editedItem = MainUtil.setType(MultiVersionRegistry.ITEM.get(new Identifier(str)), item,
+					count.getText().isEmpty() ? 1 : Integer.parseInt(count.getText()));
 			if (editedItem == ItemStack.EMPTY)
 				return;
 			
@@ -240,17 +244,17 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		
 		value = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16, TextInst.translatable("nbteditor.nbt.value")).name(TextInst.translatable("nbteditor.nbt.value"));
 		value.setRenderTextProvider((str, index) -> {
-			return MainUtil.substring(NbtFormatter.formatElementSafe(value.getText()).getValue(), index, index + str.length()).asOrderedText();
+			return MainUtil.substring(NbtFormatter.FORMATTER.formatSafely(value.getText()).text(), index, index + str.length()).asOrderedText();
 		});
 		value.setMaxLength(Integer.MAX_VALUE);
 		value.setText("");
 		value.setEditable(false);
 		value.setChangedListener(str -> {
 			if (selectedValue != null) {
-				selectedValue.setUnsafe(!NbtFormatter.formatElementSafe(value.getText()).getKey());
+				selectedValue.setUnsafe(!NbtFormatter.FORMATTER.formatSafely(value.getText()).isSuccess());
 				if (selectedValue.isUnsafe())
 					return;
-				selectedValue.valueChanged(str, (nbt) -> {
+				selectedValue.valueChanged(str, nbt -> {
 					gen.setElement(this.nbt, selectedValue.getKey(), nbt);
 					updateName();
 				});
@@ -259,8 +263,8 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		this.addSelectableChild(value);
 		
 		this.addDrawableChild(MultiVersionMisc.newButton(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, TextInst.translatable("nbteditor.nbt.value_expand"), btn -> {
-			if (selectedValue == null)
-				client.setScreen(new TextAreaScreen(this, nbt.asString(), NbtFormatter::formatElementSafe, str -> {
+			if (selectedValue == null) {
+				client.setScreen(new TextAreaScreen(this, nbt.asString(), NbtFormatter.FORMATTER, str -> {
 					try {
 						NbtElement newNbt = new StringNbtReader(new StringReader(str)).parseElement();
 						if (realPath.isEmpty()) {
@@ -281,8 +285,8 @@ public class NBTEditorScreen extends ItemEditorScreen {
 						NBTEditor.LOGGER.error("Error parsing nbt from Expand", e);
 					}
 				}));
-			else
-				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter::formatElementSafe, str -> value.setText(str)));
+			} else
+				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter.FORMATTER, str -> value.setText(str)));
 		}));
 		
 		final int editorY = 16 + 8 + 32 + (16 + 8) * 3;
@@ -463,6 +467,25 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		boolean output = super.mouseScrolled(mouseX, mouseY, amount);
 		scrollPerFolder.put(realPath.toString(), editor.getScroll());
 		return output;
+	}
+	
+	@Override
+	public void filesDragged(List<Path> paths) {
+		if (!(nbt instanceof NbtCompound))
+			return;
+		for (Path path : paths) {
+			File file = path.toFile();
+			if (file.isFile() && file.getName().endsWith(".nbt")) {
+				try (FileInputStream in = new FileInputStream(file)) {
+					NbtCompound nbt = MainUtil.readNBT(in);
+					for (String key : nbt.getKeys())
+						gen.setElement(this.nbt, key, nbt.get(key));
+					genEditor();
+				} catch (Exception e) {
+					NBTEditor.LOGGER.error("Error while importing a .nbt file", e);
+				}
+			}
+		}
 	}
 	
 	

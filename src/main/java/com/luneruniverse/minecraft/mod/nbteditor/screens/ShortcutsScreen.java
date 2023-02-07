@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager;
@@ -17,7 +18,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 
-public class ShortcutsScreen extends Screen {
+public class ShortcutsScreen extends MultiVersionScreen {
 	
 	private static final ConfigItem<ConfigValueText> SHORTCUT_ENTRY = new ConfigItem<>(TextInst.of(""), new ConfigValueText("", ""));
 	
@@ -52,10 +53,7 @@ public class ShortcutsScreen extends Screen {
 		super.render(matrices, mouseX, mouseY, delta);
 	}
 	
-	public final void onClose() { // 1.18
-		close();
-	}
-	public void close() { // 1.19
+	public void close() {
 		client.setScreen(this.parent);
 	}
 	

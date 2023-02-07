@@ -7,7 +7,7 @@ import net.minecraft.nbt.NbtList;
 
 public class EntityIO extends ContainerIO {
 	
-	EntityIO() {
+	public EntityIO() {
 		
 	}
 	

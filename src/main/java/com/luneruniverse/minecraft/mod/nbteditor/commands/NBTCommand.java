@@ -3,9 +3,13 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.argument;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.function.Function;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.EnumArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
@@ -21,32 +25,68 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 
 public class NBTCommand extends ClientCommand {
 	
+	private static final File exportDir = new File(NBTEditorClient.SETTINGS_FOLDER, "exported");
+	
 	public enum ExportType {
-		GIVE(item -> "/give @p " + item),
-		GET(item -> "/get item " + item),
+		GIVE(item -> "/give @p " + getCmdStr(item)),
+		GET(item -> "/get item " + getCmdStr(item)),
 		CMDBLOCK(item -> {
 			ItemStack cmdBlock = new ItemStack(Items.COMMAND_BLOCK);
-			cmdBlock.getOrCreateSubNbt("BlockEntityTag").putString("Command", ExportType.GIVE.export.apply(item));
+			cmdBlock.getOrCreateSubNbt("BlockEntityTag").putString("Command", GIVE.export.apply(item));
 			MainUtil.getWithMessage(cmdBlock);
+			return null;
+		}),
+		FILE(item -> {
+			File output;
+			String time = MainUtil.getFormattedCurrentTime();
+			int i = 0;
+			do {
+				output = new File(exportDir, time + (++i == 1 ? "" : "_" + i) + ".nbt");
+			} while (output.exists());
+			final File finalOutput = output;
+			try {
+				if (!exportDir.exists())
+					Files.createDirectory(exportDir.toPath());
+				NbtIo.writeCompressed(item.writeNbt(new NbtCompound()), output);
+				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.nbt.export.file.success",
+						TextInst.literal(output.getName()).formatted(Formatting.UNDERLINE).styled(style ->
+						style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, finalOutput.getAbsolutePath())))), false);
+			} catch (Exception e) {
+				NBTEditor.LOGGER.error("Error while exporting item", e);
+				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.nbt.export.file.error", e.getMessage()), false);
+			}
 			return null;
 		});
 		
-		private final Function<String, String> export;
-		private ExportType(Function<String, String> export) {
+		private final Function<ItemStack, String> export;
+		private ExportType(Function<ItemStack, String> export) {
 			this.export = export;
 		}
 		public void export(ItemStack item) {
-			String output = export.apply(MultiVersionRegistry.ITEM.getId(item.getItem()).toString() +
-					(item.getNbt() == null ? "" : item.getNbt().asString()) + " " + item.getCount());
+			String output = export.apply(item);
 			if (output != null) {
 				MainUtil.client.keyboard.setClipboard(output);
 				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.nbt.export.copied"), false);
 			}
 		}
+		private static String getCmdStr(ItemStack item) {
+			return MultiVersionRegistry.ITEM.getId(item.getItem()).toString() +
+					(item.getNbt() == null ? "" : item.getNbt().asString()) + " " + item.getCount();
+		}
+	}
+	
+	public static final NBTCommand INSTANCE = new NBTCommand();
+	
+	private NBTCommand() {
+		
 	}
 	
 	@Override

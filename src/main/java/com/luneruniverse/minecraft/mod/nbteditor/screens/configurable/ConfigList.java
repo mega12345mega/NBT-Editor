@@ -205,7 +205,7 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			}
 			
 			int height = getSpacingHeight();
-			if (mouseX >= -PADDING * 2 && mouseX <= -PADDING && mouseY >= 0 && mouseY <= height) { // Click on blue bar
+			if (mouseX >= -PADDING * 2 && mouseX <= -PADDING && mouseY >= 0 && mouseY <= height) { // Click on the bar
 				if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
 					if (mouseY <= PADDING) { // Move up
 						if (index > 0) {
@@ -228,6 +228,11 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 							parent.setListEntry(index, this);
 							parent.onChanged.forEach(listener -> listener.onValueChanged(null));
 						}
+						return true;
+					} else {
+						contextMenuOpen = true;
+						contextMenuX = (int) mouseX;
+						contextMenuY = (int) mouseY;
 						return true;
 					}
 				} else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
@@ -354,6 +359,14 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 				if (path instanceof ConfigListEntry) {
 					DrawableHelper.fill(matrices, 0, yOffset, PADDING, yOffset + height, 0xFF000000);
 					DrawableHelper.fill(matrices, 0, yOffset + PADDING, PADDING, yOffset + height - PADDING, 0xFF257789);
+					
+					matrices.push();
+					matrices.translate(-PADDING / 2, -(yOffset + height / 2), 0.0);
+					matrices.scale(2, 2, 1);
+					matrices.translate(PADDING / 2 - 0.5, yOffset + height / 2, 0.0);
+					DrawableHelper.drawStringWithShadow(matrices, MainUtil.client.textRenderer, "⋮", 0,
+							-MainUtil.client.textRenderer.fontHeight / 2, -1);
+					matrices.pop();
 				}
 				yOffset += height + PADDING;
 			}

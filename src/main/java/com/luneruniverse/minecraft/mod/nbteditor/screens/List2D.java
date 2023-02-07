@@ -10,7 +10,7 @@ import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 
-public class List2D extends Panel<com.luneruniverse.minecraft.mod.nbteditor.screens.List2D.List2DValue> {
+public class List2D extends Panel<List2D.List2DValue> {
 	
 	public static abstract class List2DValue implements Drawable, Element {
 		

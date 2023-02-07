@@ -1,9 +1,10 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.invoke.MethodType;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
@@ -12,6 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.client.Keyboard;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -21,8 +23,12 @@ import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourceFactory;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class MultiVersionMisc {
 	
@@ -42,11 +48,27 @@ public class MultiVersionMisc {
 		});
 	}
 	
+	private static final Reflection.MethodInvoker ResourceManager_getResource =
+			Reflection.getMethod(switch (Version.get()) {
+				case v1_19_3, v1_19 -> ResourceFactory.class;
+				case v1_18 -> ResourceManager.class;
+			}, "method_14486", MethodType.methodType(switch (Version.get()) {
+				case v1_19_3, v1_19 -> Optional.class;
+				case v1_18 -> Reflection.getClass("net.minecraft.class_3298");
+			}, Identifier.class));
+	private static final Supplier<Reflection.MethodInvoker> Resource_getInputStream =
+			Reflection.getOptionalMethod(Reflection.getClass("net.minecraft.class_3298"), "method_14482", MethodType.methodType(InputStream.class));
 	@SuppressWarnings("unchecked")
-	public static <T> T ifOptional(Object optional, Function<Optional<T>, T> getter) {
-		if (optional instanceof Optional)
-			return getter.apply((Optional<T>) optional);
-		return (T) optional;
+	public static Optional<InputStream> getResource(Identifier id) throws IOException {
+		Object output = ResourceManager_getResource.invoke(MinecraftClient.getInstance().getResourceManager(), id);
+		if (output instanceof Optional) {
+			if (((Optional<Resource>) output).isEmpty())
+				return Optional.empty();
+			return Optional.of(((Optional<Resource>) output).get().getInputStream());
+		}
+		if (output == null)
+			return Optional.empty();
+		return Optional.of(Resource_getInputStream.get().invoke(output));
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> ItemStackArgumentType_itemStack_registryAccess =

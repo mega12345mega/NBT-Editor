@@ -40,11 +40,11 @@ public class CommandHandler {
 	}
 	
 	public static final Map<String, ClientCommand> COMMANDS = Stream.of(
-			new NBTCommand(),
-			new ClientChestCommand(),
-			new ItemsCommand(),
-			new GetCommand(),
-			new FactoryCommand())
+			NBTCommand.INSTANCE,
+			ClientChestCommand.INSTANCE,
+			ItemsCommand.INSTANCE,
+			GetCommand.INSTANCE,
+			FactoryCommand.INSTANCE)
 			.collect(Collectors.toUnmodifiableMap(ClientCommand::getName, cmd -> cmd));
 	
 }

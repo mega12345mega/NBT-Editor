@@ -12,6 +12,12 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 public class ItemsCommand extends ClientCommand {
 	
+	public static final ItemsCommand INSTANCE = new ItemsCommand();
+	
+	private ItemsCommand() {
+		
+	}
+	
 	@Override
 	public String getName() {
 		return "items";

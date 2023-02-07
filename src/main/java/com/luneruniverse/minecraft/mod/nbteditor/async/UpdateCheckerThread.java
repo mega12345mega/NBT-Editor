@@ -32,6 +32,8 @@ public class UpdateCheckerThread extends Thread {
 		URL = url;
 	}
 	
+	public static boolean UPDATE_AVAILABLE = false;
+	
 	public UpdateCheckerThread() {
 		super("NBTEditor/Async/UpdateChecker");
 		setDaemon(true);
@@ -39,7 +41,7 @@ public class UpdateCheckerThread extends Thread {
 	
 	@Override
 	public void run() {
-		if (URL == null || ConfigScreen.getCheckUpdates() == ConfigScreen.CheckUpdatesLevel.NONE)
+		if (URL == null)
 			return;
 		
 		try {
@@ -62,8 +64,9 @@ public class UpdateCheckerThread extends Thread {
 			if (highestVersion == null)
 				NBTEditor.LOGGER.warn("Unable to check for updates! Is the game version invalid?");
 			else if ((versionDiff = versionCompare(highestVersion, VERSION))[0] > 0) {
+				UPDATE_AVAILABLE = true;
 				NBTEditor.LOGGER.warn("NBT Editor is outdated! (" + highestVersion + " > " + VERSION + ")");
-				if (versionDiff[1] < 2 || ConfigScreen.getCheckUpdates() == ConfigScreen.CheckUpdatesLevel.PATCH) {
+				if (versionDiff[1] <= ConfigScreen.getCheckUpdates().getLevel()) {
 					MainUtil.client.getToastManager().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT,
 							TextInst.translatable("nbteditor.outdated.title"),
 							TextInst.translatable("nbteditor.outdated.desc")));

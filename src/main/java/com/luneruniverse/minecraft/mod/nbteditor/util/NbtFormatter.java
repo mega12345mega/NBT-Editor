@@ -23,6 +23,23 @@ import net.minecraft.util.Formatting;
 
 public class NbtFormatter {
 	
+	public static record FormatterResult(Text text, boolean isSuccess) {}
+	
+	@FunctionalInterface
+	public interface Impl {
+		Text format(String str) throws CommandSyntaxException;
+		default FormatterResult formatSafely(String str) {
+			try {
+				return new FormatterResult(format(str), true);
+			} catch (Exception e) {
+				return new FormatterResult(TextInst.literal(str).formatted(Formatting.RED), false);
+			}
+		}
+	}
+	
+	public static Impl FORMATTER = NbtFormatter::formatElement;
+	
+	
 	private static final SimpleCommandExceptionType TRAILING_DATA = new SimpleCommandExceptionType(TextInst.translatable("argument.nbt.trailing"));
 	private static final SimpleCommandExceptionType EXPECTED_KEY = new SimpleCommandExceptionType(TextInst.translatable("argument.nbt.expected.key"));
 	private static final SimpleCommandExceptionType EXPECTED_VALUE = new SimpleCommandExceptionType(TextInst.translatable("argument.nbt.expected.value"));
@@ -57,14 +74,6 @@ public class NbtFormatter {
 	}
 	public static Text formatElement(String str) throws CommandSyntaxException {
 		return formatElement(new StringReader(str));
-	}
-	
-	public static Map.Entry<Boolean, Text> formatElementSafe(String str) {
-		try {
-			return Map.entry(true, formatElement(str));
-		} catch (Throwable e) {
-			return Map.entry(false, TextInst.literal(str).formatted(Formatting.RED));
-		}
 	}
 	
 	

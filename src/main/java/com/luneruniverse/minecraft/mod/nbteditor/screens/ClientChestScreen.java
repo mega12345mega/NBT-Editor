@@ -7,20 +7,19 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
 
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -51,21 +50,16 @@ public class ClientChestScreen extends ClientContainerScreen {
 	
 	
 	
-	private final SaveQueue saveQueue = new SaveQueue("Client Chest", () -> {
-		int page = PAGE; // Thread safe
-		
-		ItemStack[] items = new ItemStack[54];
-		for (int i = 0; i < this.handler.getInventory().size(); i++)
-			items[i] = this.handler.getInventory().getStack(i).copy();
+	private static record SaveRequest(int page, ItemStack[] items) {}
+	private final SaveQueue saveQueue = new SaveQueue("Client Chest", (SaveRequest request) -> {
 		try {
-			NBTEditorClient.CLIENT_CHEST.setPage(page, items);
+			NBTEditorClient.CLIENT_CHEST.setPage(request.page(), request.items());
 		} catch (IOException e) {
 			NBTEditor.LOGGER.error("Error while saving client chest", e);
 			this.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
 		}
 	}, true);
 	private boolean saved;
-	private Text unsavedTitle;
 	
 	private boolean navigationClicked;
 	private ButtonWidget prevPage;
@@ -78,7 +72,6 @@ public class ClientChestScreen extends ClientContainerScreen {
 		super(handler, inventory, title);
 		this.dropCursorOnClose = false;
 		this.saved = true;
-		this.unsavedTitle = MultiVersionMisc.copyText(title).append("*");
 	}
 	
 	@Override
@@ -86,8 +79,6 @@ public class ClientChestScreen extends ClientContainerScreen {
 		this.clearChildren();
 		super.init();
 		x += 87 / 2;
-		
-		this.addDrawableChild(new CreativeTab(this, new ItemStack(Items.BRICKS).setCustomName(TextInst.translatable("itemGroup.nbteditor.creative")), () -> client.setScreen(new InventoryScreen(client.player))));
 		
 		this.addDrawableChild(prevPage = MultiVersionMisc.newButton(this.x - 87, this.y, 20, 20, TextInst.of("<"), btn -> {
 			navigationClicked = true;
@@ -105,7 +96,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 				return output;
 			}
 		};
-		pageField.setMaxLength((int) Math.ceil(Math.log10(NBTEditorClient.CLIENT_CHEST.getMaxPages() + 1)));
+		pageField.setMaxLength((NBTEditorClient.CLIENT_CHEST.getPageCount() + "").length());
 		pageField.setText((PAGE + 1) + "");
 		pageField.setChangedListener(str -> {
 			if (str.isEmpty() || str.equals("0"))
@@ -120,7 +111,7 @@ public class ClientChestScreen extends ClientContainerScreen {
 			
 			try {
 				int num = Integer.parseInt(str);
-				return num > 0 && num <= NBTEditorClient.CLIENT_CHEST.getMaxPages();
+				return num > 0 && num <= NBTEditorClient.CLIENT_CHEST.getPageCount();
 			} catch (NumberFormatException e) {
 				return false;
 			}
@@ -182,11 +173,12 @@ public class ClientChestScreen extends ClientContainerScreen {
 	}
 	public void updatePageNavigation() {
 		int[] jumps = NBTEditorClient.CLIENT_CHEST.getNearestItems(PAGE);
+		int maxPage = NBTEditorClient.CLIENT_CHEST.getPageCount() - 1;
 		prevPageJumpTarget = jumps[0] == -1 ? (PAGE == 0 ? -1 : 0) : jumps[0];
-		nextPageJumpTarget = jumps[1] == -1 ? (PAGE == 99 ? -1 : 99) : jumps[1];
+		nextPageJumpTarget = jumps[1] == -1 ? (PAGE == maxPage ? -1 : maxPage) : jumps[1];
 		
 		prevPage.active = PAGE != 0;
-		nextPage.active = PAGE != 99;
+		nextPage.active = PAGE != maxPage;
 		prevPageJump.active = prevPageJumpTarget != -1;
 		nextPageJump.active = nextPageJumpTarget != -1;
 	}
@@ -256,9 +248,14 @@ public class ClientChestScreen extends ClientContainerScreen {
 	
 	private void save() {
 		saved = false;
+		
+		ItemStack[] items = new ItemStack[54];
+		for (int i = 0; i < this.handler.getInventory().size(); i++)
+			items[i] = this.handler.getInventory().getStack(i).copy();
+		
 		saveQueue.save(() -> {
 			saved = true;
-		});
+		}, new SaveRequest(PAGE, items));
 	}
 	
 	@Override
@@ -270,7 +267,10 @@ public class ClientChestScreen extends ClientContainerScreen {
 	
 	@Override
 	protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
-		this.textRenderer.draw(matrices, saved ? this.title : this.unsavedTitle, (float)this.titleX, (float)this.titleY, 4210752);
+		EditableText title = MultiVersionMisc.copyText(this.title).append(" (" + (PAGE + 1) + ")");
+		if (!saved)
+			title = title.append("*");
+		this.textRenderer.draw(matrices, title, (float)this.titleX, (float)this.titleY, 4210752);
 		this.textRenderer.draw(matrices, this.playerInventoryTitle, (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY, 4210752);
 	}
 	
