@@ -13,42 +13,21 @@ import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.CommandHandler;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.CursorHistoryHandler;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.CursorHistoryScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsHandler;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
-import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.util.Identifier;
 import tsp.headdb.ported.HeadAPI;
 
 public class NBTEditorClient implements ClientModInitializer {
-	
-	public static final ScreenHandlerType<ClientChestHandler> CLIENT_CHEST_SCREEN_HANDLER =
-			MultiVersionRegistry.register(MultiVersionRegistry.SCREEN_HANDLER,
-					new Identifier("nbteditor", "client_chest"),
-					new ScreenHandlerType<>(ClientChestHandler::new));
-	public static final ScreenHandlerType<ItemsHandler> ITEMS_SCREEN_HANDLER =
-			MultiVersionRegistry.register(MultiVersionRegistry.SCREEN_HANDLER,
-					new Identifier("nbteditor", "items"),
-					new ScreenHandlerType<>(ItemsHandler::new));
-	public static final ScreenHandlerType<CursorHistoryHandler> CURSOR_HISTORY_SCREEN_HANDLER =
-			MultiVersionRegistry.register(MultiVersionRegistry.SCREEN_HANDLER,
-					new Identifier("nbteditor", "cursor_history"),
-					new ScreenHandlerType<>(CursorHistoryHandler::new));
 	
 	public static boolean CLIENT_LOADED = false;
 	public static final File SETTINGS_FOLDER = new File("nbteditor");
@@ -68,9 +47,6 @@ public class NBTEditorClient implements ClientModInitializer {
 			SETTINGS_FOLDER.mkdir();
 		
 		NbtTypeModifier.loadClass();
-		HandledScreens.register(CLIENT_CHEST_SCREEN_HANDLER, ClientChestScreen::new);
-		HandledScreens.register(ITEMS_SCREEN_HANDLER, ItemsScreen::new);
-		HandledScreens.register(CURSOR_HISTORY_SCREEN_HANDLER, CursorHistoryScreen::new);
 		CommandHandler.registerCommands();
 		try {
 			HeadAPI.loadFavorites();

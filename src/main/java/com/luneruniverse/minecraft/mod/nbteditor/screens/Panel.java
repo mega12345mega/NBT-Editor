@@ -6,6 +6,7 @@ import java.util.stream.StreamSupport;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -15,7 +16,7 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.util.math.MatrixStack;
 
-public abstract class Panel<T extends Drawable & Element> implements Drawable, Element, Selectable {
+public abstract class Panel<T extends Drawable & Element> implements Drawable, MultiVersionElement, Selectable {
 	
 	public static record PositionedPanelElement<T extends Drawable & Element>(T element, int x, int y) {
 	}

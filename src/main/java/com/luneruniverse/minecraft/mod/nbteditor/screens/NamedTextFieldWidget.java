@@ -1,6 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
-import com.luneruniverse.minecraft.mod.nbteditor.mixin.source.TextFieldWidgetMixin;
+import com.luneruniverse.minecraft.mod.nbteditor.mixin.TextFieldWidgetMixin;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 
 import net.minecraft.client.font.TextRenderer;
@@ -13,6 +13,7 @@ public class NamedTextFieldWidget extends TextFieldWidget {
 	/**
 	 * The selection highlight doesn't move when {@link MatrixStack#translate(double, double, double)} is called <br />
 	 * Via {@link TextFieldWidgetMixin}, the vertex calls are redirected to take this matrix into account
+	 * As of 1.19.4, this is fixed
 	 */
 	public static Object matrix;
 	

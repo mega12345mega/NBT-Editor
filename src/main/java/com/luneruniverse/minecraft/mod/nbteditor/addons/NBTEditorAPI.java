@@ -6,15 +6,16 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.FactoryCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetPresetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
@@ -29,6 +30,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtType;
 import net.minecraft.nbt.NbtTypes;
+import net.minecraft.text.Text;
 
 /**
  * The main API<br>
@@ -65,6 +67,7 @@ public class NBTEditorAPI {
 	 * @param name The name of the item factory (used in the itemfactory command)
 	 * @param onRegister A consumer for the {@code /itemfactory <name>} argument builder
 	 * @see #registerItemFactory(String, Consumer)
+	 * @see #registerItemFactory(String, Text, Consumer)
 	 */
 	public static void registerAdvancedItemFactory(String name, Consumer<LiteralArgumentBuilder<FabricClientCommandSource>> onRegister) {
 		FactoryCommand.INSTANCE.getChildren().add(new ClientCommand() {
@@ -83,6 +86,7 @@ public class NBTEditorAPI {
 	 * Register a normal item factory
 	 * @param name The name of the item factory (used in the itemfactory command)
 	 * @param factory A consumer for the {@link ItemReference} the factory is called on
+	 * @see #registerItemFactory(String, Text, Consumer)
 	 * @see #registerAdvancedItemFactory(String, Consumer)
 	 */
 	public static void registerItemFactory(String name, Consumer<ItemReference> factory) {
@@ -90,6 +94,20 @@ public class NBTEditorAPI {
 			factory.accept(MainUtil.getHeldItem());
 			return Command.SINGLE_SUCCESS;
 		}));
+	}
+	
+	/**
+	 * Register a normal item factory, adding it to the factory gui
+	 * @param name The name of the item factory (used in the itemfactory command)
+	 * @param buttonMsg The text to display in the itemfactory gui
+	 * @param supported If the button should display for the current item
+	 * @param factory A consumer for the {@link ItemReference} the factory is called on
+	 * @see #registerItemFactory(String, Consumer)
+	 * @see #registerAdvancedItemFactory(String, Consumer)
+	 */
+	public static void registerItemFactory(String name, Text buttonMsg, Predicate<ItemReference> supported, Consumer<ItemReference> factory) {
+		registerItemFactory(name, factory);
+		ItemFactoryScreen.BASIC_FACTORIES.add(new ItemFactoryScreen.ItemFactoryReference(buttonMsg, supported, factory));
 	}
 	
 	/**

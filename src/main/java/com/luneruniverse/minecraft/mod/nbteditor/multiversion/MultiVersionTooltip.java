@@ -73,7 +73,7 @@ public class MultiVersionTooltip {
 	}
 	Object toOldTooltip() {
 		if (isEmpty())
-			return Reflection.getField(ButtonWidget.class, null, "field_25035", "Lnet/minecraft/class_4185$class_5316;"); // ButtonWidget.EMPTY
+			return Reflection.getField(ButtonWidget.class, "field_25035", "Lnet/minecraft/class_4185$class_5316;").get(null); // ButtonWidget.EMPTY
 		
 		return Proxy.newProxyInstance(MultiVersionMisc.class.getClassLoader(),
 				new Class<?>[] {Reflection.getClass("net.minecraft.class_4185$class_5316")}, (obj, method, args) -> {
@@ -93,7 +93,7 @@ public class MultiVersionTooltip {
 		// This allows Screen#renderTooltip to adjust for window height
 		Object matrix = MultiVersionMisc.getPositionMatrix(matrices.peek());
 		float[] translation = switch (Version.get()) {
-			case v1_19_3 -> {
+			case v1_19_4, v1_19_3 -> {
 				Vector3f output = ((Matrix4f) matrix).getColumn(3, new Vector3f());
 				yield new float[] {output.x, output.y, output.z};
 			}

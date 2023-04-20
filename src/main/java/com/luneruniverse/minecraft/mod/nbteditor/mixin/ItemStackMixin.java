@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.mixin.source;
+package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
 import java.util.List;
 
@@ -40,6 +40,7 @@ public class ItemStackMixin {
 		
 		if (creativeInv || MainUtil.client.currentScreen instanceof ClientChestScreen || MainUtil.client.currentScreen instanceof ItemsScreen) {
 			info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.edit"));
+			info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.item_factory"));
 			if (ContainerIO.isContainer(source))
 				info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.container"));
 			if (source.getItem() == Items.ENCHANTED_BOOK)

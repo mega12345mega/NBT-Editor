@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.luneruniverse.minecraft.mod.nbteditor.containers.MultiTargetContainerIO.Target;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 
 import net.minecraft.block.ShulkerBoxBlock;
@@ -16,14 +17,15 @@ public abstract class ContainerIO {
 	
 	public static final ContainerIO CHEST = new ChestIO();
 	public static final ContainerIO ENTITY = new EntityIO();
-	public static final ContainerIO FURNACE = new ItemsContainerIO(false, 3);
-	public static final ContainerIO BREWING_STAND = new ItemsContainerIO(false, 5);
-	public static final ContainerIO CAMPFIRE = new ItemsContainerIO(false, 4);
-	public static final ContainerIO DISPENSER = new ItemsContainerIO(false, 9);
-	public static final ContainerIO HOPPER = new ItemsContainerIO(false, 5);
-	public static final ContainerIO JUKEBOX = new SingleItemContainerIO(false, "RecordItem");
-	public static final ContainerIO LECTERN = new SingleItemContainerIO(false, "Book");
-	public static final ContainerIO ITEM_FRAME = new SingleItemContainerIO(true, "Item");
+	public static final ContainerIO FURNACE = new ConstSizeContainerIO(Target.BLOCK_ENTITY, 3);
+	public static final ContainerIO BREWING_STAND = new ConstSizeContainerIO(Target.BLOCK_ENTITY, 5);
+	public static final ContainerIO CAMPFIRE = new ConstSizeContainerIO(Target.BLOCK_ENTITY, 4);
+	public static final ContainerIO DISPENSER = new ConstSizeContainerIO(Target.BLOCK_ENTITY, 9);
+	public static final ContainerIO HOPPER = new ConstSizeContainerIO(Target.BLOCK_ENTITY, 5);
+	public static final ContainerIO JUKEBOX = new SingleItemContainerIO(Target.BLOCK_ENTITY, "RecordItem");
+	public static final ContainerIO LECTERN = new SingleItemContainerIO(Target.BLOCK_ENTITY, "Book");
+	public static final ContainerIO ITEM_FRAME = new SingleItemContainerIO(Target.ENTITY, "Item");
+	public static final ContainerIO BUNDLE = new DynamicSizeContainerIO(Target.ITEM);
 	
 	private static final Map<Item, ContainerIO> CONTAINERS;
 	static {
@@ -59,13 +61,17 @@ public abstract class ContainerIO {
 		CONTAINERS.put(Items.LECTERN, LECTERN);
 		CONTAINERS.put(Items.ITEM_FRAME, ITEM_FRAME);
 		CONTAINERS.put(Items.GLOW_ITEM_FRAME, ITEM_FRAME);
+		CONTAINERS.put(Items.BUNDLE, BUNDLE);
 	}
 	public static void registerContainer(Item item, ContainerIO container) {
 		CONTAINERS.put(item, container);
 	}
 	
 	public static boolean isContainer(ItemStack item) {
-		return CONTAINERS.containsKey(item.getItem());
+		ContainerIO io = CONTAINERS.get(item.getItem());
+		if (io == null)
+			return false;
+		return io.isReadable(item);
 	}
 	public static ItemStack[] read(ItemStack container) {
 		ItemStack[] output = CONTAINERS.get(container.getItem()).readItems(container);
@@ -81,6 +87,9 @@ public abstract class ContainerIO {
 	
 	
 	
+	public boolean isReadable(ItemStack container) {
+		return true;
+	}
 	public abstract ItemStack[] readItems(ItemStack container);
 	public abstract void writeItems(ItemStack container, ItemStack[] contents);
 	

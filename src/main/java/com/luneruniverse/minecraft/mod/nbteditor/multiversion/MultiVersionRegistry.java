@@ -36,17 +36,17 @@ public class MultiVersionRegistry<T> implements Iterable<T> {
 	
 	private static final Class<?> REGISTRY_CLASS = Reflection.getClass("net.minecraft.class_2378");
 	private static final Class<?> REGISTRIES_CLASS = switch (Version.get()) {
-		case v1_19_3 -> Reflection.getClass("net.minecraft.class_7923");
+		case v1_19_4, v1_19_3 -> Reflection.getClass("net.minecraft.class_7923");
 		case v1_19, v1_18 -> REGISTRY_CLASS;
 	};
 	private static <T> MultiVersionRegistry<T> getRegistry(String oldName, String newName, boolean defaulted) {
-		return new MultiVersionRegistry<>(Reflection.getField(REGISTRIES_CLASS, null, switch (Version.get()) {
-			case v1_19_3 -> newName;
+		return new MultiVersionRegistry<>(Reflection.getField(REGISTRIES_CLASS, switch (Version.get()) {
+			case v1_19_4, v1_19_3 -> newName;
 			case v1_19, v1_18 -> oldName;
 		}, defaulted ? switch (Version.get()) {
-			case v1_19_3 -> "Lnet/minecraft/class_7922;";
+			case v1_19_4, v1_19_3 -> "Lnet/minecraft/class_7922;";
 			case v1_19, v1_18 -> "Lnet/minecraft/class_2348;";
-		} : "Lnet/minecraft/class_2378;"));
+		} : "Lnet/minecraft/class_2378;").get(null));
 	}
 	
 	public static final MultiVersionRegistry<ScreenHandlerType<?>> SCREEN_HANDLER = getRegistry("field_17429", "field_41187", false);

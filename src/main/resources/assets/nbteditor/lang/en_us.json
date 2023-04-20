@@ -1,4 +1,5 @@
 {
+	"nbteditor": "NBT Editor",
 	"nbteditor.outdated.title": "NBT Editor Outdated",
 	"nbteditor.outdated.desc": "A new update has been released!",
 	
@@ -54,6 +55,14 @@
 	"nbteditor.nbt.export.file.success": "Saved item as %s",
 	"nbteditor.nbt.export.file.error": "Couldn't save item: %s",
 	
+	"nbteditor.file_options.show": "§a[Open Folder]",
+	"nbteditor.file_options.delete": "§c[Delete]",
+	"nbteditor.file_options.delete.title": "%s",
+	"nbteditor.file_options.delete.desc": "Are you sure you want to delete this file? This cannot be undone!",
+	"nbteditor.file_options.delete.success": "§aDeleted %s",
+	"nbteditor.file_options.delete.error": "§cError while deleting %s",
+	"nbteditor.file_options.delete.missing": "§c%s §cis already deleted!",
+	
 	"itemGroup.nbteditor.client_chest": "Client Chest",
 	"itemGroup.nbteditor.creative": "Creative Inventory",
 	"nbteditor.client_chest": "Nbt Editor >> Client Chest",
@@ -72,7 +81,10 @@
 	"nbteditor.book.convert": "Make Writable",
 	"nbteditor.book.convert.formatting_saved": "That book contains formatting, which isn't supported by writable books. You have received a copy instead.",
 	
+	"nbteditor.container": "Container",
 	"nbteditor.container.title": "Nbt Editor >> ",
+	
+	"nbteditor.item_factory": "Factory",
 	
 	"nbteditor.sign.added": "§aSignature added!",
 	"nbteditor.sign.removed": "§aSignature removed!",
@@ -109,6 +121,7 @@
 	"nbteditor.keybind.enchant": "§6§lCtrl + Click§r§6 to apply!",
 	"nbteditor.keybind.edit": "§6§lSpace§r§6 to edit!",
 	"nbteditor.keybind.container": "§6§lCtrl + Space§r§6 to open container!",
+	"nbteditor.keybind.item_factory": "§6§lShift + Space§r§6 to open the factory!",
 	
 	"nbteditor.unbind_skull.no_textures": "That head hasn't loaded any textures yet!",
 	"nbteditor.unbind_skull.unbound": "§aHead unbound!",
@@ -159,7 +172,7 @@
 	"nbteditor.config.key_text_size": "Key Scale",
 	"nbteditor.config.key_text_size.desc": "How large the text is in the\nnbt editor's key list",
 	"nbteditor.config.keybinds": "Keybind Hints",
-	"nbteditor.config.keybinds.desc": "Toggle showing keybind hints\nfor inventory items",
+	"nbteditor.config.keybinds.desc": "Toggle showing keybind hints",
 	"nbteditor.config.keybinds.hidden": "Hidden",
 	"nbteditor.config.keybinds.shown": "Shown",
 	"nbteditor.config.chat_limit": "Chat Limit",
@@ -198,10 +211,15 @@
 	"nbteditor.config.client_chest_size.desc": "Increase the page limit from 100 to unlimited\nThis can cause freezing when scrolling\nthrough lots of pages\nThis MAY not increase memory usage",
 	"nbteditor.config.client_chest_size.small": "Small",
 	"nbteditor.config.client_chest_size.large": "Large",
+	"nbteditor.config.screenshot_options": "Screenshot Options",
+	"nbteditor.config.screenshot_options.desc": "Add the buttons %s §rand %s\n§rto the screenshot message",
+	"nbteditor.config.screenshot_options.enabled": "Enabled",
+	"nbteditor.config.screenshot_options.disabled": "Disabled",
 	
 	
 	"nbteditor.configurable.list.move": "Move",
 	"nbteditor.configurable.list.duplicate": "Duplicate",
+	"nbteditor.configurable.list.duplicate.any_amount": "Shift for any amount",
 	"nbteditor.configurable.list.remove": "Remove",
 	
 	"nbteditor.effect_list_arg_type.expected.space": "Expected a space",

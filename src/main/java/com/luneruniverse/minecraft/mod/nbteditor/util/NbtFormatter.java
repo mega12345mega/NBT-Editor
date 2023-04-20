@@ -124,7 +124,7 @@ public class NbtFormatter {
 		final char next = reader.peek();
 		if (StringReader.isQuotedStringStart(next)) {
 			reader.skip();
-			return readStringUntil(next);
+			return next + readStringUntil(next) + next;
 		}
 		return reader.readUnquotedString();
 	}

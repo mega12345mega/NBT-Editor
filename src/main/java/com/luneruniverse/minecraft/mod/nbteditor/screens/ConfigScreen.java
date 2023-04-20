@@ -124,6 +124,7 @@ public class ConfigScreen extends MultiVersionScreen {
 	private static List<String> shortcuts;
 	private static CheckUpdatesLevel checkUpdates;
 	private static boolean largeClientChest;
+	private static boolean screenshotOptions;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -139,6 +140,7 @@ public class ConfigScreen extends MultiVersionScreen {
 		shortcuts = new ArrayList<>();
 		checkUpdates = CheckUpdatesLevel.MINOR;
 		largeClientChest = false;
+		screenshotOptions = true;
 		
 		try {
 			// Many config options use the old names
@@ -162,6 +164,7 @@ public class ConfigScreen extends MultiVersionScreen {
 					(checkUpdatesLegacy.getAsBoolean() ? CheckUpdatesLevel.MINOR : CheckUpdatesLevel.NONE)
 					: CheckUpdatesLevel.valueOf(checkUpdatesLegacy.getAsString());
 			largeClientChest = settings.get("largeClientChest").getAsBoolean();
+			screenshotOptions = settings.get("screenshotOptions").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -185,6 +188,7 @@ public class ConfigScreen extends MultiVersionScreen {
 		settings.add("shortcuts", shortcuts.stream().collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 		settings.addProperty("checkUpdates", checkUpdates.name());
 		settings.addProperty("largeClientChest", largeClientChest);
+		settings.addProperty("screenshotOptions", screenshotOptions);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -242,35 +246,35 @@ public class ConfigScreen extends MultiVersionScreen {
 	public static boolean isLargeClientChest() {
 		return largeClientChest;
 	}
+	public static boolean isScreenshotOptions() {
+		return screenshotOptions;
+	}
 	
-	public static Text getEnchantName(Enchantment enchant, int level) {
-		if (enchantLevelMax == null)
-			return enchant.getName(level);
-		
-		EditableText mutableText = TextInst.translatable(enchant.getTranslationKey());
+	private static EditableText getEnchantName(Enchantment enchant, int level) {
+		EditableText output = TextInst.translatable(enchant.getTranslationKey());
         if (enchant.isCursed()) {
-            mutableText.formatted(Formatting.RED);
+            output.formatted(Formatting.RED);
         } else {
-            mutableText.formatted(Formatting.GRAY);
+            output.formatted(Formatting.GRAY);
         }
         if (level != 1 || enchant.getMaxLevel() != 1 || enchantLevelMax == EnchantLevelMax.ALWAYS) {
-            mutableText.append(" ");
+            output.append(" ");
             if (isEnchantNumberTypeArabic())
-            	mutableText.append("" + level);
+            	output.append("" + level);
             else
-            	mutableText.append(TextInst.translatable("enchantment.level." + level));
+            	output.append(TextInst.translatable("enchantment.level." + level));
         }
-        return mutableText;
+        return output;
 	}
 	public static Text getEnchantNameWithMax(Enchantment enchant, int level, EnchantLevelMax display) {
-		Text text = getEnchantName(enchant, level);
+		EditableText text = getEnchantName(enchant, level);
 		if (display.shouldShowMax(level, enchant.getMaxLevel())) {
-			text = MultiVersionMisc.copyText(text).append("/").append(
+			text = text.append("/").append(
 					ConfigScreen.isEnchantNumberTypeArabic() ?
 							TextInst.of("" + enchant.getMaxLevel()) :
 							TextInst.translatable("enchantment.level." + enchant.getMaxLevel()));
 		}
-		return text;
+		return text.getInternalValue(); // Allows Enchantment Descriptions to detect the enchantments
 	}
 	public static Text getEnchantNameWithMax(Enchantment enchant, int level) {
 		return getEnchantNameWithMax(enchant, level, enchantLevelMax);
@@ -305,7 +309,7 @@ public class ConfigScreen extends MultiVersionScreen {
 				.setTooltip("nbteditor.config.key_text_size.desc"));
 		this.config.setConfigurable("hideKeybinds", new ConfigItem<>(TextInst.translatable("nbteditor.config.keybinds"),
 				new ConfigValueBoolean(keybindsHidden, false, 100, TextInst.translatable("nbteditor.config.keybinds.hidden"), TextInst.translatable("nbteditor.config.keybinds.shown"),
-				new MultiVersionTooltip("nbteditor.keybind.edit", "nbteditor.keybind.container", "nbteditor.keybind.enchant"))
+				new MultiVersionTooltip("nbteditor.keybind.edit", "nbteditor.keybind.item_factory", "nbteditor.keybind.container", "nbteditor.keybind.enchant"))
 				.addValueListener(value -> keybindsHidden = value.getValidValue()))
 				.setTooltip("nbteditor.config.keybinds.desc"));
 		this.config.setConfigurable("extendChatLimit", new ConfigItem<>(TextInst.translatable("nbteditor.config.chat_limit"),
@@ -341,6 +345,10 @@ public class ConfigScreen extends MultiVersionScreen {
 				new ConfigValueBoolean(largeClientChest, false, 100, TextInst.translatable("nbteditor.config.client_chest_size.large"), TextInst.translatable("nbteditor.config.client_chest_size.small"))
 				.addValueListener(value -> largeClientChest = value.getValidValue()))
 				.setTooltip("nbteditor.config.client_chest_size.desc"));
+		this.config.setConfigurable("screenshotOptions", new ConfigItem<>(TextInst.translatable("nbteditor.config.screenshot_options"),
+				new ConfigValueBoolean(screenshotOptions, true, 100, TextInst.translatable("nbteditor.config.screenshot_options.enabled"), TextInst.translatable("nbteditor.config.screenshot_options.disabled"))
+				.addValueListener(value -> screenshotOptions = value.getValidValue()))
+				.setTooltip(new MultiVersionTooltip(TextInst.translatable("nbteditor.config.screenshot_options.desc", TextInst.translatable("nbteditor.file_options.show"), TextInst.translatable("nbteditor.file_options.delete")))));
 		ADDED_OPTIONS.forEach(option -> option.accept(config));
 	}
 	

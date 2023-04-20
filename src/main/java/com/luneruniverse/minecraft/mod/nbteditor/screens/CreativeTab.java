@@ -4,25 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 public class CreativeTab {
 	
-	public static class CreativeTabGroup implements Element, Drawable, Selectable {
+	public static class CreativeTabGroup implements MultiVersionElement, Drawable, Selectable {
 		private final List<CreativeTab> tabs;
 		
 		public CreativeTabGroup(List<CreativeTab> tabs) {
@@ -59,7 +58,7 @@ public class CreativeTab {
 	public static record CreativeTabData(ItemStack item, Runnable onClick, Predicate<Screen> whenToShow) {}
 	public static final List<CreativeTabData> TABS = new ArrayList<>();
 	public static final int WIDTH = switch (Version.get()) {
-		case v1_19_3 -> 26;
+		case v1_19_4, v1_19_3 -> 26;
 		case v1_19, v1_18 -> 28;
 	};
 	
@@ -78,25 +77,19 @@ public class CreativeTab {
 	}
 	
 	private void renderTab(MatrixStack matrices) {
-		ItemRenderer itemRenderer = MainUtil.client.getItemRenderer();
-		TextRenderer textRenderer = MainUtil.client.textRenderer;
-		
 		int j = 0;
 		int k = 0;
 		int y = screen.height - 32;
 		
 		RenderSystem.setShader(GameRenderer::getPositionTexProgram); // getPositionTexShader <= 1.19.2
 		RenderSystem.setShaderTexture(0, tabs);
-		screen.drawTexture(matrices, x, y, j, k, WIDTH, 32);
-		itemRenderer.zOffset = 100.0F;
+		DrawableHelper.drawTexture(matrices, x, y, 0, j, k, WIDTH, 32, 256, 256);
 		
 		int xOffset = switch (Version.get()) {
-			case v1_19_3 -> 5;
+			case v1_19_4, v1_19_3 -> 5;
 			case v1_19, v1_18 -> 6;
 		};
-		itemRenderer.renderInGuiWithOverrides(item, x + xOffset, y + 9);
-		itemRenderer.renderGuiItemOverlay(textRenderer, item, x + xOffset, y + 9);
-		itemRenderer.zOffset = 0.0F;
+		MultiVersionMisc.renderItem(matrices, 100.0F, false, item, x + xOffset, y + 9);
 	}
 	private void renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
 		int y = screen.height - 32;

@@ -4,11 +4,10 @@ import java.lang.invoke.MethodType;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import com.mojang.bridge.game.GameVersion;
-
 import net.minecraft.SharedConstants;
 
 public enum Version {
+	v1_19_4,
 	v1_19_3,
 	v1_19,
 	v1_18;
@@ -28,6 +27,7 @@ public enum Version {
 		
 		return CURRENT = switch (parts[1]) {
 			case 19 -> switch (parts.length == 2 ? 0 : parts[2]) {
+				case 4 -> v1_19_4;
 				case 3 -> v1_19_3;
 				case 2, 1, 0 -> v1_19;
 				default -> throw unsupported.get();
@@ -37,20 +37,40 @@ public enum Version {
 		};
 	}
 	
-	private static final Supplier<Reflection.MethodInvoker> GameVersion_getReleaseTarget =
-			Reflection.getOptionalMethod(GameVersion.class, "getReleaseTarget", MethodType.methodType(String.class));
+	private static final Supplier<Class<?>> Bridge_GameVersion = () -> {
+				try {
+					return Class.forName("com.mojang.bridge.game.GameVersion");
+				} catch (ClassNotFoundException e) {
+					throw new RuntimeException(e);
+				}
+			};
+	private static final Supplier<Reflection.MethodInvoker> Bridge_GameVersion_getReleaseTarget =
+			Reflection.getOptionalMethod(Bridge_GameVersion, () -> "getReleaseTarget", () -> MethodType.methodType(String.class));
+	private static final Supplier<Reflection.MethodInvoker> Bridge_GameVersion_getId =
+			Reflection.getOptionalMethod(Bridge_GameVersion, () -> "getId", () -> MethodType.methodType(String.class));
 	private static final boolean getReleaseTargetExists;
-	static {
-		boolean exists = false;
+	private static final boolean getIdExists;
+	private static boolean testExists(Supplier<?> toTest) {
 		try {
-			GameVersion_getReleaseTarget.get();
-			exists = true;
-		} catch (Exception e) {}
-		getReleaseTargetExists = exists;
+			toTest.get();
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	static {
+		getReleaseTargetExists = testExists(Bridge_GameVersion_getReleaseTarget);
+		getIdExists = testExists(Bridge_GameVersion_getId);
 	}
 	public static String getReleaseTarget() {
 		if (getReleaseTargetExists)
-			return GameVersion_getReleaseTarget.get().invoke(SharedConstants.getGameVersion());
-		return SharedConstants.getGameVersion().getId().split("\\+|-")[0];
+			return Bridge_GameVersion_getReleaseTarget.get().invoke(SharedConstants.getGameVersion());
+		
+		String id;
+		if (getIdExists)
+			id = Bridge_GameVersion_getId.get().invoke(SharedConstants.getGameVersion());
+		else
+			id = SharedConstants.getGameVersion().getId();
+		return id.split("\\+|-")[0];
 	}
 }

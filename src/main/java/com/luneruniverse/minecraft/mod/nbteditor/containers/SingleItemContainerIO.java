@@ -3,19 +3,18 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 
-public class SingleItemContainerIO extends ContainerIO {
+public class SingleItemContainerIO extends MultiTargetContainerIO {
 	
-	private final boolean entity;
 	private final String key;
 	
-	public SingleItemContainerIO(boolean entity, String key) {
-		this.entity = entity;
+	public SingleItemContainerIO(Target target, String key) {
+		super(target);
 		this.key = key;
 	}
 	
 	@Override
 	public ItemStack[] readItems(ItemStack container) {
-		NbtCompound item = container.getOrCreateSubNbt(entity ? "EntityTag" : "BlockEntityTag").getCompound(key);
+		NbtCompound item = target.getItemsParent(container).getCompound(key);
 		if (item.isEmpty())
 			return new ItemStack[] {ItemStack.EMPTY};
 		return new ItemStack[] {ItemStack.fromNbt(item)};
@@ -23,7 +22,7 @@ public class SingleItemContainerIO extends ContainerIO {
 	
 	@Override
 	public void writeItems(ItemStack container, ItemStack[] contents) {
-		NbtCompound tag = container.getOrCreateSubNbt(entity ? "EntityTag" : "BlockEntityTag");
+		NbtCompound tag = target.getItemsParent(container);
 		if (contents[0] == null || contents[0].isEmpty())
 			tag.remove(key);
 		else

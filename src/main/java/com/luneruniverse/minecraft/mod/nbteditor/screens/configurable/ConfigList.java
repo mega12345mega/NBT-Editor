@@ -9,11 +9,14 @@ import java.util.stream.Collectors;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -24,12 +27,17 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 		
 		public enum ListContextMenuAction {
 			MOVE("nbteditor.configurable.list.move"),
-			DUPLICATE("nbteditor.configurable.list.duplicate"),
+			DUPLICATE("nbteditor.configurable.list.duplicate", "nbteditor.configurable.list.duplicate.any_amount"),
 			REMOVE("nbteditor.configurable.list.remove");
 			
 			private final Text msg;
-			private ListContextMenuAction(String msg) {
+			private final Text tooltip;
+			private ListContextMenuAction(String msg, String tooltip) {
 				this.msg = TextInst.translatable(msg);
+				this.tooltip = tooltip == null ? null : TextInst.translatable(tooltip);
+			}
+			private ListContextMenuAction(String msg) {
+				this(msg, null);
 			}
 		}
 		
@@ -71,6 +79,20 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			}
 		}
 		
+		public void duplicate(int numCopies) {
+			for (int dupe = 0; dupe < numCopies; dupe++) {
+				for (int i = parent.paths.size() - 2; i > index; i--) {
+					ConfigListEntry entry = parent.getListEntry(i);
+					entry.setIndex(i + 1);
+					parent.setListEntry(i + 1, entry);
+				}
+				ConfigListEntry clone = this.clone(false);
+				clone.setIndex(index + 1);
+				parent.setListEntry(index + 1, clone);
+			}
+			parent.onChanged.forEach(listener -> listener.onValueChanged(null));
+		}
+		
 		@Override
 		public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 			if (named)
@@ -94,12 +116,15 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			int y = contextMenuY;
 			for (ListContextMenuAction action : ListContextMenuAction.values()) {
 				int color = -1;
-				if (xHover && mouseY >= y && mouseY <= y + MainUtil.client.textRenderer.fontHeight)
+				if (xHover && mouseY >= y && mouseY <= y + MainUtil.client.textRenderer.fontHeight) {
 					color = 0xFF257789;
+					if (action.tooltip != null && !ConfigScreen.isKeybindsHidden())
+						new MultiVersionTooltip(action.tooltip).render(matrices, mouseX, mouseY);
+				}
 				Text msg = action.msg;
 				if (action == ListContextMenuAction.REMOVE)
 					msg = MultiVersionMisc.copyText(msg).formatted(color == -1 ? Formatting.RED : Formatting.GOLD);
-				DrawableHelper.drawCenteredText(matrices, MainUtil.client.textRenderer, msg, contextMenuX + 25, y + 2, color);
+				DrawableHelper.drawCenteredTextWithShadow(matrices, MainUtil.client.textRenderer, msg, contextMenuX + 25, y + 2, color);
 				y += MainUtil.client.textRenderer.fontHeight + 2;
 			}
 		}
@@ -173,15 +198,19 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 										}).show(index + 1 + "");
 									}
 									case DUPLICATE -> {
-										for (int i = parent.paths.size() - 2; i > index; i--) {
-											ConfigListEntry entry = parent.getListEntry(i);
-											entry.setIndex(i + 1);
-											parent.setListEntry(i + 1, entry);
-										}
-										ConfigListEntry clone = this.clone(false);
-										clone.setIndex(index + 1);
-										parent.setListEntry(index + 1, clone);
-										parent.onChanged.forEach(listener -> listener.onValueChanged(null));
+										if (Screen.hasShiftDown()) {
+											MainUtil.client.setScreen(new StringInputScreen(MainUtil.client.currentScreen,
+													numCopies -> duplicate(Integer.parseInt(numCopies)),
+													str -> {
+														try {
+															Integer.parseInt(str);
+															return true;
+														} catch (NumberFormatException e) {
+															return false;
+														}
+													}));
+										} else
+											duplicate(1);
 									}
 									case REMOVE -> {
 										for (int i = index; i < parent.paths.size() - 2; i++) {
@@ -364,7 +393,7 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 					matrices.translate(-PADDING / 2, -(yOffset + height / 2), 0.0);
 					matrices.scale(2, 2, 1);
 					matrices.translate(PADDING / 2 - 0.5, yOffset + height / 2, 0.0);
-					DrawableHelper.drawStringWithShadow(matrices, MainUtil.client.textRenderer, "⋮", 0,
+					DrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, "⋮", 0,
 							-MainUtil.client.textRenderer.fontHeight / 2, -1);
 					matrices.pop();
 				}

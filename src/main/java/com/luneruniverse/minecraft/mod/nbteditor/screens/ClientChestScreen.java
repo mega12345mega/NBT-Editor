@@ -6,7 +6,6 @@ import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -192,21 +191,8 @@ public class ClientChestScreen extends ClientContainerScreen {
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
 			close();
 		
-		if (keyCode == GLFW.GLFW_KEY_SPACE) {
-			Slot hoveredSlot = this.focusedSlot;
-			if (hoveredSlot != null && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
-				int slot = hoveredSlot.getIndex();
-				ItemReference ref = hoveredSlot.inventory == client.player.getInventory() ? new ItemReference(slot >= 36 ? slot - 36 : slot) : new ItemReference(PAGE, hoveredSlot.getIndex());
-				if (hasControlDown()) {
-					if (hoveredSlot.getStack() != null && ContainerIO.isContainer(hoveredSlot.getStack()))
-						ItemsScreen.show(ref);
-				} else
-					client.setScreen(new NBTEditorScreen(ref));
-				return true;
-			}
-		}
-		
-		return !this.pageField.keyPressed(keyCode, scanCode, modifiers) && !this.pageField.isActive()
+		return !handleKeybind(keyCode, focusedSlot, slot -> new ItemReference(PAGE, slot.getIndex())) &&
+				!this.pageField.keyPressed(keyCode, scanCode, modifiers) && !this.pageField.isActive()
 				? super.keyPressed(keyCode, scanCode, modifiers) : true;
 	}
 	

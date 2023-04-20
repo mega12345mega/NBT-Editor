@@ -25,7 +25,7 @@ public class CursorHistoryScreen extends ClientContainerScreen {
 		for (int i = 0; i < this.handler.getInventory().size(); i++) {
 			if (i == items.size())
 				break;
-			this.handler.getSlot(i).setStack(items.get(i).copy());
+			this.handler.getSlot(i).setStackNoCallbacks(items.get(i).copy());
 		}
 		
 		return this;

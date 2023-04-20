@@ -10,7 +10,8 @@ public class GetCommand extends ClientCommandGroup {
 	public static final GetCommand INSTANCE = new GetCommand();
 	
 	private GetCommand() {
-		super(new ArrayList<>(List.of(new GetItemCommand(),
+		super(new ArrayList<>(List.of(
+				new GetItemCommand(),
 				new GetPotionCommand(),
 				new GetSoupCommand(),
 				new GetSkullCommand(),

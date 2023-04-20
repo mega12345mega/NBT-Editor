@@ -4,9 +4,12 @@ import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -35,6 +38,14 @@ public abstract class ItemEditorScreen extends MultiVersionScreen {
 		return false;
 	}
 	
+	protected boolean isSaveRequried() {
+		return true;
+	}
+	
+	protected boolean isFactoryLinkEnabled() {
+		return true;
+	}
+	
 	
 	@Override
 	protected final void init() {
@@ -52,10 +63,18 @@ public abstract class ItemEditorScreen extends MultiVersionScreen {
 		name.setEditable(isNameEditable());
 		addDrawableChild(name);
 		
-		saveBtn = addDrawableChild(MultiVersionMisc.newButton(16 + (32 + 8) * 2 + 100 + 8, 16 + 6, 100, 20, TextInst.translatable("nbteditor.editor.save"), btn -> {
-			save();
-		}));
-		saveBtn.active = !saved;
+		if (isSaveRequried()) {
+			saveBtn = addDrawableChild(MultiVersionMisc.newButton(16 + (32 + 8) * 2 + 100 + 8, 16 + 6, 100, 20, TextInst.translatable("nbteditor.editor.save"), btn -> {
+				save();
+			}));
+			saveBtn.active = !saved;
+		}
+		
+		addDrawableChild(MultiVersionMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
+				ItemFactoryScreen.FACTORY_ICON,
+				btn -> closeSafely(() -> client.setScreen(new ItemFactoryScreen(ref))),
+				new MultiVersionTooltip("nbteditor.item_factory")))
+			.active = isFactoryLinkEnabled();
 		
 		initEditor();
 	}
@@ -67,7 +86,35 @@ public abstract class ItemEditorScreen extends MultiVersionScreen {
 		super.render(matrices, mouseX, mouseY, delta);
 		renderEditor(matrices, mouseX, mouseY, delta);
 		MainUtil.renderLogo(matrices);
-		MainUtil.renderItem(item);
+		renderItemPreview(matrices);
+	}
+	private void renderItemPreview(MatrixStack matrices) {
+		int x = 16 + 32 + 8;
+		int y = 16;
+		int scaleX = 2;
+		int scaleY = 2;
+		
+		x /= scaleX;
+		y /= scaleY;
+		
+		boolean oldMatrix = switch (Version.get()) {
+			case v1_19_4 -> false;
+			case v1_19_3, v1_19, v1_18 -> true;
+		};
+		if (oldMatrix)
+			matrices = RenderSystem.getModelViewStack();
+		
+		matrices.push();
+		matrices.translate(0.0D, 0.0D, 32.0D);
+		matrices.scale(scaleX, scaleY, 1);
+		if (oldMatrix)
+			RenderSystem.applyModelViewMatrix();
+		
+		MultiVersionMisc.renderItem(matrices, 200.0F, true, item, x, y);
+		
+		matrices.pop();
+		if (oldMatrix)
+			RenderSystem.applyModelViewMatrix();
 	}
 	protected void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {}
 	
@@ -115,14 +162,18 @@ public abstract class ItemEditorScreen extends MultiVersionScreen {
 	
 	@Override
 	public void close() {
+		closeSafely(() -> ref.showParent());
+	}
+	
+	public void closeSafely(Runnable onClose) {
 		if (saved)
-			ref.showParent();
+			onClose.run();
 		else {
 			client.setScreen(new FancyConfirmScreen(value -> {
 				if (value)
 					save();
 				
-				ref.showParent();
+				onClose.run();
 			}, TextInst.translatable("nbteditor.editor.unsaved.title"), TextInst.translatable("nbteditor.editor.unsaved.desc"),
 					TextInst.translatable("nbteditor.editor.unsaved.yes"), TextInst.translatable("nbteditor.editor.unsaved.no")));
 		}

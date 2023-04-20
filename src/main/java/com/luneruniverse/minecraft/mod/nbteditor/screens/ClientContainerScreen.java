@@ -1,8 +1,14 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
+import java.util.function.Function;
+
+import org.lwjgl.glfw.GLFW;
+
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
+import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -25,8 +31,6 @@ import net.minecraft.util.Identifier;
 public class ClientContainerScreen extends GenericContainerScreen implements OldEventBehavior {
 	
 	private static final Identifier TEXTURE = new Identifier("textures/gui/container/generic_54.png");
-	
-	
 	
 	private static Inventory SERVER_INV;
 	private static ItemStack SERVER_CURSOR;
@@ -59,6 +63,30 @@ public class ClientContainerScreen extends GenericContainerScreen implements Old
 //			client.interactionManager.clickCreativeStack(clientCursor, -1);
 			SERVER_CURSOR = clientCursor.copy();
 		}
+	}
+	
+	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, Function<Slot, ItemReference> containerRef) {
+		if (keyCode == GLFW.GLFW_KEY_SPACE) {
+			if (hoveredSlot != null && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
+				int slot = hoveredSlot.getIndex();
+				ItemReference ref = hoveredSlot.inventory == MainUtil.client.player.getInventory() ?
+						new ItemReference(slot >= 36 ? slot - 36 : slot) : containerRef.apply(hoveredSlot);
+				handleKeybind(hoveredSlot, ref);
+				return true;
+			}
+		}
+		return false;
+	}
+	public static void handleKeybind(Slot hoveredSlot, ItemReference ref) {
+		boolean notAir = hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty();
+		if (hasControlDown()) {
+			if (notAir && ContainerIO.isContainer(hoveredSlot.getStack()))
+				ItemsScreen.show(ref);
+		} else if (hasShiftDown()) {
+			if (notAir)
+				MainUtil.client.setScreen(new ItemFactoryScreen(ref));
+		} else
+			MainUtil.client.setScreen(new NBTEditorScreen(ref));
 	}
 	
 	
@@ -108,8 +136,8 @@ public class ClientContainerScreen extends GenericContainerScreen implements Old
 		RenderSystem.setShaderTexture(0, TEXTURE);
 		int i = x;
 		int j = y;
-		this.drawTexture(matrices, i, j, 0, 0, this.backgroundWidth, this.handler.getRows() * 18 + 17);
-		this.drawTexture(matrices, i, j + this.handler.getRows() * 18 + 17, 0, 126, this.backgroundWidth, 96);
+		drawTexture(matrices, i, j, 0, 0, this.backgroundWidth, this.handler.getRows() * 18 + 17, 256, 256);
+		drawTexture(matrices, i, j + this.handler.getRows() * 18 + 17, 0, 126, this.backgroundWidth, 96, 256, 256);
 	}
 	
 	public final boolean isPauseScreen() { // 1.18
@@ -206,7 +234,7 @@ public class ClientContainerScreen extends GenericContainerScreen implements Old
 				}
 				
 				MainUtil.addEnchants(EnchantmentHelper.get(cursor), item);
-				slot.setStack(item);
+				slot.setStackNoCallbacks(item);
 				handler.setCursorStack(ItemStack.EMPTY);
 				return true;
 			}

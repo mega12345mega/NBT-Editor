@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor;
+package com.luneruniverse.minecraft.mod.nbteditor.misc;
 
 import java.lang.reflect.Proxy;
 

@@ -7,7 +7,6 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -103,7 +102,7 @@ public class ItemReference {
 				NBTEditorClient.CLIENT_CHEST.setPage(page, items);
 				
 				if (MainUtil.client.currentScreen instanceof ClientChestScreen && ClientChestScreen.PAGE == page)
-					((ClientChestScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStack(toSave);
+					((ClientChestScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
 			} catch (IOException e) {
 				NBTEditor.LOGGER.error("Error while saving client chest", e);
 				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
@@ -129,7 +128,7 @@ public class ItemReference {
 			
 			// The recursive nature causes parent containers to also write items to the screen, hence the check
 			if (MainUtil.client.currentScreen instanceof ItemsScreen && ((ItemsScreen) MainUtil.client.currentScreen).getReference() == parent)
-				((ItemsScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStack(toSave);
+				((ItemsScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
 		}, true);
 	}
 	
@@ -222,7 +221,7 @@ public class ItemReference {
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
 			MainUtil.client.setScreen(null);
-		else if (MultiVersionMisc.getInventoryKey(MainUtil.client.options).matchesKey(keyCode, scanCode))
+		else if (MainUtil.client.options.inventoryKey.matchesKey(keyCode, scanCode))
 			showParent();
 		else
 			return false;

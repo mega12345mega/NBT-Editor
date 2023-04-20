@@ -5,20 +5,19 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 
-public class ItemsContainerIO extends ContainerIO {
+public class ConstSizeContainerIO extends MultiTargetContainerIO {
 	
-	private final boolean entity;
 	private final int numItems;
 	
-	public ItemsContainerIO(boolean entity, int numItems) {
-		this.entity = entity;
+	public ConstSizeContainerIO(Target target, int numItems) {
+		super(target);
 		this.numItems = numItems;
 	}
 	
 	@Override
 	public ItemStack[] readItems(ItemStack container) {
 		ItemStack[] output = new ItemStack[numItems];
-		NbtList items = container.getOrCreateSubNbt(entity ? "EntityTag" : "BlockEntityTag").getList("Items", NbtElement.COMPOUND_TYPE);
+		NbtList items = target.getItemsParent(container).getList("Items", NbtElement.COMPOUND_TYPE);
 		for (NbtElement item : items)
 			output[((NbtCompound) item).getInt("Slot")] = ItemStack.fromNbt((NbtCompound) item);
 		return output;
@@ -35,7 +34,7 @@ public class ItemsContainerIO extends ContainerIO {
 				items.add(item.writeNbt(nbt));
 			}
 		}
-		container.getOrCreateSubNbt(entity ? "EntityTag" : "BlockEntityTag").put("Items", items);
+		target.getItemsParent(container).put("Items", items);
 	}
 	
 }

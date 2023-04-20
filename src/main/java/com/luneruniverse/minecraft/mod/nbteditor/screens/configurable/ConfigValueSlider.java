@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.text.Text;
 
@@ -58,7 +60,7 @@ public class ConfigValueSlider<T extends Number> extends SliderWidget implements
 	}
 	@Override
 	protected void onDrag(double mouseX, double mouseY, double deltaX, double deltaY) {
-		if (clicked && mouseX == mouseClickX + deltaX && mouseY == mouseClickY + deltaY) {
+		if (clicked && MainUtil.equals(mouseX, mouseClickX + deltaX) && MainUtil.equals(mouseY, mouseClickY + deltaY)) {
 			mouseClickX += deltaX;
 			mouseClickY += deltaY;
 			super.onDrag(mouseX, mouseY, deltaX, deltaY);

@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -19,23 +20,14 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.item.EnchantedBookItem;
-import net.minecraft.item.Items;
+import net.minecraft.item.ItemStack;
 
 public class EnchantmentsScreen extends ItemEditorScreen {
 	
 	private static final Map<String, Enchantment> ENCHANTMENTS;
-	private static final ConfigCategory ENCHANTMENT_ENTRY;
 	static {
 		ENCHANTMENTS = MultiVersionRegistry.ENCHANTMENT.getEntrySet().stream().map(enchant -> Map.entry(enchant.getKey().toString(), enchant.getValue()))
 				.sorted((a, b) -> a.getKey().compareToIgnoreCase(b.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
-		String firstEnchant = ENCHANTMENTS.keySet().stream().findFirst().get();
-		
-		ENCHANTMENT_ENTRY = new ConfigCategory();
-		ENCHANTMENT_ENTRY.setConfigurable("enchantment", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.enchantment"), new ConfigValueDropdown<>(
-				firstEnchant, firstEnchant, new ArrayList<>(ENCHANTMENTS.keySet()))));
-		ENCHANTMENT_ENTRY.setConfigurable("level", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.level"), ConfigValueNumber.forInt(1, 1, 1, 32767)));
 	}
 	@SuppressWarnings("unchecked")
 	private static ConfigValueDropdown<String> getConfigEnchantment(ConfigCategory enchant) {
@@ -53,23 +45,40 @@ public class EnchantmentsScreen extends ItemEditorScreen {
 	public EnchantmentsScreen(ItemReference ref) {
 		super(TextInst.of("Enchantments"), ref);
 		
-		config = new ConfigList(TextInst.translatable("nbteditor.enchantments"), false, ENCHANTMENT_ENTRY);
+		ItemStack inputItem = ref.getItem();
+		ConfigCategory entry = new ConfigCategory();
+		List<String> orderedEnchants = ENCHANTMENTS.entrySet().stream()
+				.map(enchant -> Map.entry(enchant.getKey(), enchant.getValue().isAcceptableItem(inputItem)))
+				.sorted((a, b) -> {
+					if (a.getValue()) {
+						if (!b.getValue())
+							return -1;
+					} else if (b.getValue())
+						return 1;
+					return a.getKey().compareToIgnoreCase(b.getKey());
+				})
+				.map(Map.Entry::getKey).toList();
+		String firstEnchant = orderedEnchants.get(0);
+		entry.setConfigurable("enchantment", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.enchantment"),
+				new ConfigValueDropdown<>(firstEnchant, firstEnchant, orderedEnchants,
+				ENCHANTMENTS.entrySet().stream().filter(enchant -> enchant.getValue().isAcceptableItem(inputItem)).map(Map.Entry::getKey).toList())));
+		entry.setConfigurable("level", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.level"), ConfigValueNumber.forInt(1, 1, 1, 32767)));
+		config = new ConfigList(TextInst.translatable("nbteditor.enchantments"), false, entry);
 		
-		EnchantmentHelper.get(item).forEach((type, lvl) -> {
-			ConfigCategory enchant = ENCHANTMENT_ENTRY.clone(true);
-			getConfigEnchantment(enchant).setValue(MultiVersionRegistry.ENCHANTMENT.getId(type).toString());
-			getConfigLevel(enchant).setValue(lvl);
-			config.addConfigurable(enchant);
+		MainUtil.getEnchantments(item).forEach(enchant -> {
+			ConfigCategory enchantConfig = entry.clone(true);
+			getConfigEnchantment(enchantConfig).setValue(MultiVersionRegistry.ENCHANTMENT.getId(enchant.getKey()).toString());
+			getConfigLevel(enchantConfig).setValue(enchant.getValue());
+			config.addConfigurable(enchantConfig);
 		});
 		
 		config.addValueListener(source -> {
-			Map<Enchantment, Integer> newEnchants = new LinkedHashMap<>();
+			List<Map.Entry<Enchantment, Integer>> newEnchants = new ArrayList<>();
 			for (ConfigPath path : config.getConfigurables().values()) {
 				ConfigCategory enchant = (ConfigCategory) path;
-				newEnchants.put(ENCHANTMENTS.get(getConfigEnchantment(enchant).getValidValue()), getConfigLevel(enchant).getValidValue());
+				newEnchants.add(Map.entry(ENCHANTMENTS.get(getConfigEnchantment(enchant).getValidValue()), getConfigLevel(enchant).getValidValue()));
 			}
-			item.getOrCreateNbt().remove(item.isOf(Items.ENCHANTED_BOOK) ? EnchantedBookItem.STORED_ENCHANTMENTS_KEY : "Enchantments");
-			EnchantmentHelper.set(newEnchants, item);
+			MainUtil.setEnchantments(item, newEnchants);
 			checkSave();
 		});
 	}
@@ -87,7 +96,7 @@ public class EnchantmentsScreen extends ItemEditorScreen {
 		if (!ConfigScreen.isKeybindsHidden()) {
 			int x = 16 + (32 + 8) * 2 + (100 + 8) * 2;
 			MainUtil.drawWrappingString(matrices, textRenderer, TextInst.translatable("nbteditor.enchantments.tip").getString(),
-					16 + (32 + 8) * 2 + (100 + 8) * 2, 16 + 6 + 10, width - x - 8, -1, false, true);
+					16 + (32 + 8) * 2 + (100 + 8) * 2, 16 + 6 + 10, width - x - 8 - 20 - 8, -1, false, true);
 		}
 	}
 	

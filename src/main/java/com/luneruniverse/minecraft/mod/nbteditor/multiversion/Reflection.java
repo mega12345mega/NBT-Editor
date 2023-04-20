@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
@@ -15,6 +16,7 @@ public class Reflection {
 	
 	public static final MappingResolver mappings = FabricLoader.getInstance().getMappingResolver();
 	
+	
 	private static final Cache<String, Class<?>> classCache = CacheBuilder.newBuilder().build();
 	public static Class<?> getClass(String name) {
 		try {
@@ -28,6 +30,7 @@ public class Reflection {
 		}
 	}
 	
+	
 	@SuppressWarnings("unchecked")
 	public static <T> T newInstance(Class<?> clazz, Class<?>[] parameters, Object... args) {
 		try {
@@ -40,23 +43,48 @@ public class Reflection {
 		return newInstance(getClass(clazz), parameters, args);
 	}
 	
+	
+	public static class FieldReference {
+		private final Field field;
+		public FieldReference(Field field) {
+			this.field = field;
+		}
+		public void set(Object obj, Object value) {
+			try {
+				field.set(obj, value);
+			} catch (Exception e) {
+				throw new RuntimeException("Error setting field", e);
+			}
+		}
+		@SuppressWarnings("unchecked")
+		public <T> T get(Object obj) {
+			try {
+				return (T) field.get(obj);
+			} catch (Exception e) {
+				throw new RuntimeException("Error getting field value", e);
+			}
+		}
+	}
+	
 	static String getFieldName(Class<?> clazz, String field, String descriptor) {
 		synchronized (mappings) {
 			return mappings.mapFieldName("intermediary",
 					mappings.unmapClassName("intermediary", clazz.getName()), field, descriptor);
 		}
 	}
-	@SuppressWarnings("unchecked")
-	public static <T, C> T getField(Class<C> clazz, C obj, String field, String descriptor) {
+	public static FieldReference getField(Class<?> clazz, String field, String descriptor) {
 		try {
 			synchronized (mappings) {
-				String runtimeField = getFieldName(clazz, field, descriptor);
-				return (T) clazz.getField(runtimeField).get(obj);
+				return new FieldReference(clazz.getField(getFieldName(clazz, field, descriptor)));
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Error getting field", e);
 		}
 	}
+	public static Supplier<FieldReference> getOptionalField(Class<?> clazz, String field, String descriptor) {
+		return jitSupplier(() -> getField(clazz, field, descriptor));
+	}
+	
 	
 	public static class MethodInvoker {
 		private final Method method;
@@ -113,18 +141,23 @@ public class Reflection {
 		}
 	}
 	public static Supplier<MethodInvoker> getOptionalMethod(Supplier<Class<?>> clazz, Supplier<String> method, Supplier<MethodType> type) {
-		return new Supplier<>() {
-			private MethodInvoker value;
-			@Override
-			public MethodInvoker get() {
-				if (value == null)
-					value = getMethod(clazz.get(), method.get(), type.get());
-				return value;
-			}
-		};
+		return jitSupplier(() -> getMethod(clazz.get(), method.get(), type.get()));
 	}
 	public static Supplier<MethodInvoker> getOptionalMethod(Class<?> clazz, String method, MethodType type) {
 		return getOptionalMethod(() -> clazz, () -> method, () -> type);
+	}
+	
+	
+	private static <T> Supplier<T> jitSupplier(Supplier<T> supplier) {
+		return new Supplier<>() {
+			private T value;
+			@Override
+			public T get() {
+				if (value == null)
+					value = supplier.get();
+				return value;
+			}
+		};
 	}
 	
 }

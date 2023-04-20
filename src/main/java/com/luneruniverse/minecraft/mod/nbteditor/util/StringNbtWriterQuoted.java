@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.google.common.collect.Lists;
-import com.luneruniverse.minecraft.mod.nbteditor.mixin.source.StringNbtWriterAccessor;
+import com.luneruniverse.minecraft.mod.nbteditor.mixin.StringNbtWriterAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 
 import net.minecraft.nbt.NbtCompound;

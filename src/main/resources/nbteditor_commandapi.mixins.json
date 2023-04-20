@@ -8,7 +8,8 @@
     "HelpCommandAccessor",
     "client.ClientCommandSourceMixin",
     "client.ClientPlayerEntityMixin",
-    "client.ClientPlayNetworkHandlerMixin"
+    "client.ClientPlayNetworkHandlerMixin",
+    "client.CommandExecutionC2SPacketMixin"
   ],
   "client": [
   ],

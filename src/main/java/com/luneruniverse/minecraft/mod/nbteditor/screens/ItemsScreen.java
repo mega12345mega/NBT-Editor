@@ -4,6 +4,7 @@ import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -43,7 +44,7 @@ public class ItemsScreen extends ClientContainerScreen {
 		
 		ItemStack[] contents = ContainerIO.read(item);
 		for (int i = 0; i < contents.length; i++)
-			this.handler.getSlot(i).setStack(contents[i] == null ? ItemStack.EMPTY : contents[i]);
+			this.handler.getSlot(i).setStackNoCallbacks(contents[i] == null ? ItemStack.EMPTY : contents[i]);
 		this.numSlots = contents.length;
 		
 		return this;
@@ -65,6 +66,11 @@ public class ItemsScreen extends ClientContainerScreen {
 				btn.setMessage(ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"));
 			})).active = !ConfigScreen.isLockSlotsRequired();
 		}
+		
+		addDrawableChild(MultiVersionMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
+				ItemFactoryScreen.FACTORY_ICON,
+				btn -> client.setScreen(new ItemFactoryScreen(ref)),
+				new MultiVersionTooltip("nbteditor.item_factory")));
 	}
 	
 	@Override
@@ -139,16 +145,9 @@ public class ItemsScreen extends ClientContainerScreen {
 			return true;
 		
 		if (keyCode == GLFW.GLFW_KEY_SPACE) {
-			Slot hoveredSlot = this.focusedSlot;
-			if (hoveredSlot != null && (hoveredSlot.id < numSlots || hoveredSlot.inventory != this.handler.getInventory()) && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
-				int slot = hoveredSlot.getIndex();
-				ItemReference ref = hoveredSlot.inventory == client.player.getInventory() ? new ItemReference(slot >= 36 ? slot - 36 : slot) : new ItemReference(this.ref, hoveredSlot.getIndex());
-				if (hasControlDown()) {
-					if (hoveredSlot.getStack() != null && ContainerIO.isContainer(hoveredSlot.getStack()))
-						ItemsScreen.show(ref);
-				} else
-					client.setScreen(new NBTEditorScreen(ref));
-				return true;
+			if (focusedSlot != null && (focusedSlot.id < numSlots || focusedSlot.inventory != this.handler.getInventory())) {
+				if (handleKeybind(keyCode, focusedSlot, slot -> new ItemReference(ref, slot.getIndex())))
+					return true;
 			}
 		}
 		

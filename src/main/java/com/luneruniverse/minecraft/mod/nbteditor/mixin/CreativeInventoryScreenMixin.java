@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.mixin.source;
+package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
@@ -9,11 +9,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientContainerScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemsScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -90,11 +88,8 @@ public class CreativeInventoryScreenMixin {
 				if (source instanceof CreativeInventoryScreen && !MultiVersionMisc.isCreativeInventoryTabSelected())
 					slot += 36;
 				ItemReference ref = slot < 9 ? ItemReference.getArmorFromSlot(slot) : new ItemReference(slot == 45 ? 45 : (slot < 9 ? slot + 54 : (slot >= 36 ? slot - 36 : slot)));
-				if (Screen.hasControlDown()) {
-					if (hoveredSlot.getStack() != null && ContainerIO.isContainer(hoveredSlot.getStack()))
-						ItemsScreen.show(ref);
-				} else
-					MainUtil.client.setScreen(new NBTEditorScreen(ref));
+				ClientContainerScreen.handleKeybind(hoveredSlot, ref);
+				info.setReturnValue(true);
 			}
 		}
 	}

@@ -16,25 +16,30 @@ public class ConfigValueDropdown<T> extends ExtendableButtonWidget implements Co
 	protected boolean open;
 	protected final T defaultValue;
 	protected final List<T> allValues;
+	protected final List<T> importantValues;
 	
 	protected final List<ConfigValueListener<ConfigValueDropdown<T>>> onChanged;
 	
 	@SuppressWarnings("unchecked")
-	public ConfigValueDropdown(T value, T defaultValue, List<T> allValues) {
+	public ConfigValueDropdown(T value, T defaultValue, List<T> allValues, List<T> importantValues) {
 		super(0, 0, getMaxWidth(allValues) + MainUtil.client.textRenderer.fontHeight * 2, 20, TextInst.of(value.toString()),
 				btn -> ((ConfigValueDropdown<T>) btn).open = !((ConfigValueDropdown<T>) btn).open);
 		
 		this.value = value;
 		this.defaultValue = defaultValue;
 		this.allValues = allValues;
+		this.importantValues = importantValues;
 		this.open = false;
 		this.onChanged = new ArrayList<>();
+	}
+	public ConfigValueDropdown(T value, T defaultValue, List<T> allValues) {
+		this(value, defaultValue, allValues, new ArrayList<>());
 	}
 	private static int getMaxWidth(List<?> allValues) {
 		return allValues.stream().map(Object::toString).mapToInt(MainUtil.client.textRenderer::getWidth).max().orElse(0);
 	}
-	private ConfigValueDropdown(T value, T defaultValue, List<T> allValues, boolean open, List<ConfigValueListener<ConfigValueDropdown<T>>> onChanged) {
-		this(value, defaultValue, allValues);
+	private ConfigValueDropdown(T value, T defaultValue, List<T> allValues, List<T> importantValues, boolean open, List<ConfigValueListener<ConfigValueDropdown<T>>> onChanged) {
+		this(value, defaultValue, allValues, importantValues);
 		this.open = open;
 		this.onChanged.addAll(onChanged);
 	}
@@ -53,13 +58,15 @@ public class ConfigValueDropdown<T> extends ExtendableButtonWidget implements Co
 				int color = -1;
 				if (xHover && mouseY >= y && mouseY < y + this.height)
 					color = 0xFF257789;
-				drawCenteredText(matrices, MainUtil.client.textRenderer, TextInst.of(option.toString()),
+				else if (importantValues.contains(option))
+					color = 0xFFFFAA00;
+				drawCenteredTextWithShadow(matrices, MainUtil.client.textRenderer, TextInst.of(option.toString()),
 						this.x + this.width / 2, y + (this.height - MainUtil.client.textRenderer.fontHeight) / 2, color);
 				if (color != -1 && option instanceof ConfigTooltipSupplier) // Hovering
 					((ConfigTooltipSupplier) option).getTooltip().render(matrices, mouseX, mouseY);
 			}
 		}
-		if (isHovered() && value instanceof ConfigTooltipSupplier)
+		if (isSelected() && value instanceof ConfigTooltipSupplier)
 			((ConfigTooltipSupplier) value).getTooltip().render(matrices, mouseX, mouseY);
 	}
 	
@@ -137,7 +144,7 @@ public class ConfigValueDropdown<T> extends ExtendableButtonWidget implements Co
 	
 	@Override
 	public ConfigValueDropdown<T> clone(boolean defaults) {
-		return new ConfigValueDropdown<>(defaults ? defaultValue : value, defaultValue, allValues, open, onChanged);
+		return new ConfigValueDropdown<>(defaults ? defaultValue : value, defaultValue, allValues, importantValues, open, onChanged);
 	}
 	
 	

@@ -2,9 +2,11 @@ package com.luneruniverse.minecraft.mod.nbteditor.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
+import java.nio.file.Files;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -13,16 +15,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.zip.ZipException;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.FancyConfirmScreen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -33,7 +39,6 @@ import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -373,42 +378,6 @@ public class MainUtil {
 	}
 	
 	
-	private static final int itemX = 16 + 32 + 8;
-	private static final int itemY = 16;
-	// First edited from HandledScreen#drawItem to NBTEdtiorScreen#drawItem to include the scale
-	// Then moved here with default arguments
-	public static void renderItem(ItemStack stack) {
-		// Args
-		int x = itemX;
-		int y = itemY;
-		int scaleX = 2;
-		int scaleY = 2;
-		
-		// Other variables
-		Screen screen = client.currentScreen;
-		ItemRenderer itemRenderer = client.getItemRenderer();
-		TextRenderer textRenderer = client.textRenderer;
-		
-		// Function
-		x /= scaleX;
-		y /= scaleY;
-		
-		MatrixStack matrixStack = RenderSystem.getModelViewStack();
-		matrixStack.push();
-		matrixStack.translate(0.0D, 0.0D, 32.0D);
-		matrixStack.scale(scaleX, scaleY, 1);
-		RenderSystem.applyModelViewMatrix();
-		screen.setZOffset(200);
-		itemRenderer.zOffset = 200.0F;
-		itemRenderer.renderInGuiWithOverrides(stack, x, y);
-		itemRenderer.renderGuiItemOverlay(textRenderer, stack, x, y, null);
-		screen.setZOffset(0);
-		itemRenderer.zOffset = 0.0F;
-		matrixStack.pop();
-		RenderSystem.applyModelViewMatrix();
-	}
-	
-	
 	public static void addEnchants(Map<Enchantment, Integer> enchants, ItemStack stack) {
 		String key = (stack.getItem() == Items.ENCHANTED_BOOK ? EnchantedBookItem.STORED_ENCHANTMENTS_KEY : "Enchantments");
 		NbtList enchantsNbt = stack.getOrCreateNbt().getList(key, NbtElement.COMPOUND_TYPE);
@@ -521,6 +490,71 @@ public class MainUtil {
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT);
 	public static String getFormattedCurrentTime() {
 		return DATE_TIME_FORMATTER.format(ZonedDateTime.now());
+	}
+	
+	
+	public static Text attachFileTextOptions(EditableText link, File file) {
+		return link.append(" ").append(TextInst.translatable("nbteditor.file_options.show").styled(style ->
+				style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE,
+						file.getAbsoluteFile().getParentFile().getAbsolutePath()))))
+				.append(" ").append(TextInst.translatable("nbteditor.file_options.delete").styled(style ->
+				MixinLink.withRunClickEvent(style, () -> client.setScreen(
+						new FancyConfirmScreen(confirmed -> {
+							if (confirmed) {
+								if (file.exists()) {
+									try {
+										Files.deleteIfExists(file.toPath());
+										client.player.sendMessage(TextInst.translatable("nbteditor.file_options.delete.success", "§6" + file.getName()), false);
+									} catch (IOException e) {
+										NBTEditor.LOGGER.error("Error deleting file", e);
+										client.player.sendMessage(TextInst.translatable("nbteditor.file_options.delete.error", "§6" + file.getName()), false);
+									}
+								} else
+									client.player.sendMessage(TextInst.translatable("nbteditor.file_options.delete.missing", "§6" + file.getName()), false);
+							}
+							client.setScreen(null);
+						}, TextInst.translatable("nbteditor.file_options.delete.title", file.getName()),
+								TextInst.translatable("nbteditor.file_options.delete.desc", file.getName()))))));
+	}
+	
+	
+	public static List<Map.Entry<Enchantment, Integer>> getEnchantments(ItemStack item) {
+		NbtList enchants = item.isOf(Items.ENCHANTED_BOOK)
+				? EnchantedBookItem.getEnchantmentNbt(item)
+				: item.getEnchantments();
+		return enchants.stream()
+				.filter(enchant -> enchant instanceof NbtCompound)
+				.map(enchant -> (NbtCompound) enchant)
+				.map(enchant -> Map.entry(MultiVersionRegistry.ENCHANTMENT.get(EnchantmentHelper.getIdFromNbt(enchant)),
+						EnchantmentHelper.getLevelFromNbt(enchant)))
+				.filter(enchant -> enchant.getKey() != null)
+				.collect(Collectors.toList());
+	}
+	
+	public static void setEnchantments(ItemStack item, List<Map.Entry<Enchantment, Integer>> enchants) {
+		NbtList nbt = enchants.stream()
+				.map(enchant -> EnchantmentHelper.createNbt(EnchantmentHelper.getEnchantmentId(enchant.getKey()), enchant.getValue()))
+				.reduce(new NbtList(), (list, enchant) -> {
+					list.add(enchant);
+					return list;
+				}, (a, b) -> {
+					a.addAll(b);
+					return a;
+				});
+		String key = item.isOf(Items.ENCHANTED_BOOK) ? EnchantedBookItem.STORED_ENCHANTMENTS_KEY : "Enchantments";
+		if (nbt.isEmpty()) {
+			if (item.hasNbt())
+				item.getNbt().remove(key);
+		} else
+			item.getOrCreateNbt().put(key, nbt);
+	}
+	
+	
+	public static boolean equals(double a, double b, double epsilon) {
+		return Math.abs(a - b) <= epsilon;
+	}
+	public static boolean equals(double a, double b) {
+		return equals(a, b, 1E-5);
 	}
 	
 }
