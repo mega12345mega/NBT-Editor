@@ -1,0 +1,12 @@
+.git/
+.gradle/
+.settings/
+bin/
+build/
+run/
+.classpath
+.project
+nbteditor_client.launch
+nbteditor_server.launch
+
+src/test/
