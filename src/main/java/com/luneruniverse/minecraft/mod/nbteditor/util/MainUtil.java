@@ -1,5 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.util;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -12,10 +15,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 import java.util.zip.ZipException;
 
 import com.google.gson.JsonElement;
@@ -24,11 +28,14 @@ import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.HandItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.FancyConfirmScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -40,18 +47,12 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.ClickEvent.Action;
@@ -59,6 +60,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.StringVisitable.StyledVisitor;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
@@ -79,7 +81,7 @@ public class MainUtil {
 		if (item == null || item.isEmpty() || !isAllowed.test(item))
 			throw new SimpleCommandExceptionType(failText).create();
 		
-		return new ItemReference(hand);
+		return new HandItemReference(hand);
 	}
 	public static ItemReference getHeldItem() throws CommandSyntaxException {
 		return getHeldItem(item -> true, TextInst.translatable("nbteditor.no_hand.no_item.to_edit"));
@@ -88,8 +90,15 @@ public class MainUtil {
 		try {
 			return getHeldItem();
 		} catch (CommandSyntaxException e) {
-			return new ItemReference(Hand.MAIN_HAND);
+			return new HandItemReference(Hand.MAIN_HAND);
 		}
+	}
+	public static ItemReference getHeldAir() throws CommandSyntaxException {
+		if (MainUtil.client.player.getMainHandStack().isEmpty())
+			return new HandItemReference(Hand.MAIN_HAND);
+		if (MainUtil.client.player.getOffHandStack().isEmpty())
+			return new HandItemReference(Hand.OFF_HAND);
+		throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.no_hand.all_item")).create();
 	}
 	
 	public static void saveItem(Hand hand, ItemStack item) {
@@ -109,7 +118,7 @@ public class MainUtil {
 	}
 	
 	public static void saveItem(int slot, ItemStack item) {
-		client.player.getInventory().setStack(slot, item.copy());
+		client.player.getInventory().setStack(slot == 45 ? 40 : slot, item.copy());
 		client.interactionManager.clickCreativeStack(item, slot < 9 ? slot + 36 : slot);
 	}
 	public static void saveItemInvSlot(int slot, ItemStack item) {
@@ -378,14 +387,6 @@ public class MainUtil {
 	}
 	
 	
-	public static void addEnchants(Map<Enchantment, Integer> enchants, ItemStack stack) {
-		String key = (stack.getItem() == Items.ENCHANTED_BOOK ? EnchantedBookItem.STORED_ENCHANTMENTS_KEY : "Enchantments");
-		NbtList enchantsNbt = stack.getOrCreateNbt().getList(key, NbtElement.COMPOUND_TYPE);
-		enchants.forEach((type, lvl) -> enchantsNbt.add(EnchantmentHelper.createNbt(MultiVersionRegistry.ENCHANTMENT.getId(type), lvl)));
-		stack.getOrCreateNbt().put(key, enchantsNbt);
-	}
-	
-	
 	public static ItemStack copyAirable(ItemStack item) {
 		ItemStack output = new ItemStack(item.getItem(), item.getCount());
 		output.setBobbingAnimationTime(item.getBobbingAnimationTime());
@@ -518,43 +519,169 @@ public class MainUtil {
 	}
 	
 	
-	public static List<Map.Entry<Enchantment, Integer>> getEnchantments(ItemStack item) {
-		NbtList enchants = item.isOf(Items.ENCHANTED_BOOK)
-				? EnchantedBookItem.getEnchantmentNbt(item)
-				: item.getEnchantments();
-		return enchants.stream()
-				.filter(enchant -> enchant instanceof NbtCompound)
-				.map(enchant -> (NbtCompound) enchant)
-				.map(enchant -> Map.entry(MultiVersionRegistry.ENCHANTMENT.get(EnchantmentHelper.getIdFromNbt(enchant)),
-						EnchantmentHelper.getLevelFromNbt(enchant)))
-				.filter(enchant -> enchant.getKey() != null)
-				.collect(Collectors.toList());
-	}
-	
-	public static void setEnchantments(ItemStack item, List<Map.Entry<Enchantment, Integer>> enchants) {
-		NbtList nbt = enchants.stream()
-				.map(enchant -> EnchantmentHelper.createNbt(EnchantmentHelper.getEnchantmentId(enchant.getKey()), enchant.getValue()))
-				.reduce(new NbtList(), (list, enchant) -> {
-					list.add(enchant);
-					return list;
-				}, (a, b) -> {
-					a.addAll(b);
-					return a;
-				});
-		String key = item.isOf(Items.ENCHANTED_BOOK) ? EnchantedBookItem.STORED_ENCHANTMENTS_KEY : "Enchantments";
-		if (nbt.isEmpty()) {
-			if (item.hasNbt())
-				item.getNbt().remove(key);
-		} else
-			item.getOrCreateNbt().put(key, nbt);
-	}
-	
-	
 	public static boolean equals(double a, double b, double epsilon) {
 		return Math.abs(a - b) <= epsilon;
 	}
 	public static boolean equals(double a, double b) {
 		return equals(a, b, 1E-5);
+	}
+	
+	
+	public static BufferedImage scaleImage(BufferedImage img, int width, int height) {
+		Image temp = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+		BufferedImage output = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = output.createGraphics();
+		g.drawImage(temp, 0, 0, null);
+		g.dispose();
+		return output;
+	}
+	
+	
+	public static int[] getMousePos() {
+		double scale = (double) client.getWindow().getScaledWidth() / client.getWindow().getWidth();
+		int x = (int) (client.mouse.getX() * scale);
+		int y = (int) (client.mouse.getY() * scale);
+		return new int[] {x, y};
+	}
+	
+	
+	public static void mapMatrices(MatrixStack matrices,
+			int fromX, int fromY, int fromWidth, int fromHeight,
+			int toX, int toY, int toWidth, int toHeight) {
+		matrices.translate(toX, toY, 0.0);
+		matrices.scale((float) toWidth / fromWidth, (float) toHeight / fromHeight, 1);
+		matrices.translate(-fromX, -fromY, 0.0);
+	}
+	
+	
+	public static Predicate<String> intPredicate(Supplier<Integer> min, Supplier<Integer> max, boolean allowEmpty) {
+		return str -> {
+			if (str.isEmpty())
+				return allowEmpty;
+			try {
+				int value = Integer.parseInt(str);
+				return (min == null || min.get() <= value) && (max == null || value <= max.get());
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		};
+	}
+	public static Predicate<String> intPredicate(Integer min, Integer max, boolean allowEmpty) {
+		return intPredicate(() -> min, () -> max, allowEmpty);
+	}
+	public static Predicate<String> intPredicate() {
+		return intPredicate((Supplier<Integer>) null, null, true);
+	}
+	
+	public static Integer parseOptionalInt(String str) {
+		try {
+			return Integer.parseInt(str);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+	
+	
+	public static boolean styleEqualsExact(Style a, Style b) {
+		return Objects.equals(a.getColor(), b.getColor()) &&
+				a.bold == b.bold &&
+				a.italic == b.italic &&
+				a.underlined == b.underlined &&
+				a.strikethrough == b.strikethrough &&
+				a.obfuscated == b.obfuscated &&
+				Objects.equals(a.getClickEvent(), b.getClickEvent()) &&
+				Objects.equals(a.getHoverEvent(), b.getHoverEvent()) &&
+				Objects.equals(a.getInsertion(), b.getInsertion()) &&
+				Objects.equals(a.getFont(), b.getFont());
+	}
+	
+	public static boolean hasFormatting(Style style, Formatting formatting) {
+		return styleEqualsExact(style, style.withFormatting(formatting));
+	}
+	
+	public static Style removeFormatting(Style style, Formatting formatting, boolean force) {
+		if (formatting == Formatting.RESET)
+			return style;
+		if (formatting.isColor())
+			return style.withColor(force ? Formatting.WHITE : null);
+		Boolean newValue = (force ? false : null);
+		return switch (formatting) {
+			case BOLD -> style.withBold(newValue);
+			case ITALIC -> style.withItalic(newValue);
+			case UNDERLINE -> style.withUnderline(newValue);
+			case STRIKETHROUGH -> style.withStrikethrough(newValue);
+			case OBFUSCATED -> style.withObfuscated(newValue);
+			default -> throw new IllegalArgumentException("Unknown formatting: " + formatting);
+		};
+	}
+	
+	public static Style forceReset(Style base) {
+		return Style.EMPTY
+				.withColor(base.getColor() == null ||
+						base.getColor().equals(TextColor.fromFormatting(Formatting.WHITE)) ? null : Formatting.WHITE)
+				.withBold(base.bold == null || !base.bold ? null : false)
+				.withItalic(base.italic == null || !base.italic ? null : false)
+				.withUnderline(base.underlined == null || !base.underlined ? null : false)
+				.withStrikethrough(base.strikethrough == null || !base.strikethrough ? null : false)
+				.withObfuscated(base.obfuscated == null || !base.obfuscated ? null : false);
+	}
+	
+	
+	public static Text stripInvalidChars(Text text, boolean allowLineBreaks) {
+		EditableText output = TextInst.literal("");
+		text.visit((style, str) -> {
+			output.append(TextInst.literal(MultiVersionMisc.stripInvalidChars(str, allowLineBreaks)).setStyle(style));
+			return Optional.empty();
+		}, Style.EMPTY);
+		return output;
+	}
+	
+	public static int lastIndexOf(Text text, int ch) {
+		AtomicInteger output = new AtomicInteger(-1);
+		AtomicInteger pos = new AtomicInteger(0);
+		text.visit(str -> {
+			int i = str.lastIndexOf(ch);
+			if (i != -1)
+				output.setPlain(pos.getPlain() + i);
+			pos.setPlain(pos.getPlain() + str.length());
+			return Optional.empty();
+		});
+		return output.getPlain();
+	}
+	
+	public static Text deleteCharAt(Text text, int index) {
+		EditableText output = TextInst.literal("");
+		AtomicInteger pos = new AtomicInteger(0);
+		text.visit((style, str) -> {
+			int strLen = str.length();
+			if (pos.getPlain() <= index && index < pos.getPlain() + strLen)
+				str = new StringBuilder(str).deleteCharAt(index - pos.getPlain()).toString();
+			if (!str.isEmpty())
+				output.append(TextInst.literal(str).setStyle(style));
+			pos.setPlain(pos.getPlain() + strLen);
+			return Optional.empty();
+		}, Style.EMPTY);
+		return output;
+	}
+	
+	public static Text joinLines(List<Text> lines) {
+		EditableText output = TextInst.literal("");
+		for (int i = 0; i < lines.size(); i++) {
+			if (i > 0)
+				output.append("\n");
+			output.append(lines.get(i));
+		}
+		return output;
+	}
+	public static List<Text> splitText(Text text) {
+		List<Text> output = new ArrayList<>();
+		int i;
+		while ((i = text.getString().indexOf('\n')) != -1) {
+			output.add(MainUtil.substring(text, 0, i));
+			text = MainUtil.substring(text, i + 1);
+		}
+		output.add(text);
+		return output;
 	}
 	
 }

@@ -11,14 +11,14 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.FactoryComma
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetPresetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
-import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.mojang.brigadier.Command;

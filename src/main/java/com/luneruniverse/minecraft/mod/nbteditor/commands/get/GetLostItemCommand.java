@@ -8,7 +8,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.addons.events.ItemLostCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.CursorHistoryScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.CursorHistoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;

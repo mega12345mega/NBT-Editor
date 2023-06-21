@@ -34,12 +34,13 @@ public class EnumArgumentType<T extends Enum<T>> implements ArgumentType<T> {
 		return Arrays.stream(options.getEnumConstants()).filter(option -> option.name().equalsIgnoreCase(value.toString())).findFirst()
 				.orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(stringReader));
 	}
-
+	
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
 		return CommandSource.suggestMatching(Arrays.stream(options.getEnumConstants()).map(T::name).map(String::toLowerCase), builder);
 	}
-
+	
 	public Collection<String> getExamples() {
 		return EXAMPLES;
 	}
+	
 }

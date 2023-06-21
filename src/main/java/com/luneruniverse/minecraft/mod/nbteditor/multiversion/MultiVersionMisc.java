@@ -13,6 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricCli
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.CommandDispatcher;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -41,17 +42,17 @@ public class MultiVersionMisc {
 	public static EditableText copyText(Text text) {
 		return new EditableText(switch (Version.get()) {
 			case v1_19_4, v1_19_3, v1_19 -> text.copy();
-			case v1_18 -> Text_shallowCopy.get().invoke(text); // text.shallowCopy()
+			case v1_18_v1_17 -> Text_shallowCopy.get().invoke(text); // text.shallowCopy()
 		});
 	}
 	
 	private static final Reflection.MethodInvoker ResourceManager_getResource =
 			Reflection.getMethod(switch (Version.get()) {
 				case v1_19_4, v1_19_3, v1_19 -> ResourceFactory.class;
-				case v1_18 -> ResourceManager.class;
+				case v1_18_v1_17 -> ResourceManager.class;
 			}, "method_14486", MethodType.methodType(switch (Version.get()) {
 				case v1_19_4, v1_19_3, v1_19 -> Optional.class;
-				case v1_18 -> Reflection.getClass("net.minecraft.class_3298");
+				case v1_18_v1_17 -> Reflection.getClass("net.minecraft.class_3298");
 			}, Identifier.class));
 	private static final Supplier<Reflection.MethodInvoker> Resource_getInputStream =
 			Reflection.getOptionalMethod(Reflection.getClass("net.minecraft.class_3298"), "method_14482", MethodType.methodType(InputStream.class));
@@ -77,7 +78,7 @@ public class MultiVersionMisc {
 	public static ItemStackArgumentType getItemStackArg() {
 		return switch (Version.get()) {
 			case v1_19_4, v1_19_3, v1_19 -> ItemStackArgumentType_itemStack_registryAccess.get().invoke(null, registryAccess); // ItemStackArgumentType.itemStack(registryAccess)
-			case v1_18 -> ItemStackArgumentType_itemStack.get().invoke(null); // ItemStackArgumentType.itemStack()
+			case v1_18_v1_17 -> ItemStackArgumentType_itemStack.get().invoke(null); // ItemStackArgumentType.itemStack()
 		};
 	}
 	
@@ -87,19 +88,28 @@ public class MultiVersionMisc {
 				registryAccess = access;
 				callback.accept(dispatcher);
 			});
-			case v1_18 -> ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> {
+			case v1_18_v1_17 -> ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> {
 				callback.accept(dispatcher);
 			});
 		}
 	}
 	
 	public static ButtonWidget newButton(int x, int y, int width, int height, Text message, ButtonWidget.PressAction onPress, MultiVersionTooltip tooltip) {
+		switch (Version.get()) {
+			case v1_19_4 -> {}
+			case v1_19_3, v1_19, v1_18_v1_17 -> {
+				if (height > 20) {
+					y += (height - 20) / 2;
+					height = 20;
+				}
+			}
+		}
 		return switch (Version.get()) {
 			case v1_19_4, v1_19_3 -> {
 				Tooltip newTooltip = (tooltip == null ? null : tooltip.toNewTooltip());
 				yield ButtonWidget.builder(message, onPress).dimensions(x, y, width, height).tooltip(newTooltip).build();
 			}
-			case v1_19, v1_18 -> {
+			case v1_19, v1_18_v1_17 -> {
 				try {
 					Object oldTooltip = (tooltip == null ? MultiVersionTooltip.EMPTY : tooltip).toOldTooltip();
 					yield ButtonWidget.class.getConstructor(int.class, int.class, int.class, int.class, Text.class,
@@ -120,7 +130,7 @@ public class MultiVersionMisc {
 		if (tooltip != null) {
 			switch (Version.get()) {
 				case v1_19_4, v1_19_3 -> output.setTooltip(tooltip.toNewTooltip());
-				case v1_19, v1_18 -> {
+				case v1_19, v1_18_v1_17 -> {
 					try {
 						Object oldTooltip = tooltip.toOldTooltip();
 						Field field = ButtonWidget.class.getDeclaredField(Reflection.getFieldName(ButtonWidget.class,
@@ -149,9 +159,9 @@ public class MultiVersionMisc {
 		if (MainUtil.client.currentScreen instanceof CreativeInventoryScreen screen) {
 			return switch (Version.get()) {
 				case v1_19_4, v1_19_3 -> screen.isInventoryTabSelected();
-				case v1_19, v1_18 -> // screen.getSelectedTab() == ItemGroup.INVENTORY.getIndex()
-						CreativeInventoryScreen_getSelectedTab.get().invoke(screen) ==
-						ItemGroup_getIndex.get().invoke(ItemGroup_INVENTORY.get().get(null));
+				case v1_19, v1_18_v1_17 -> // screen.getSelectedTab() == ItemGroup.INVENTORY.getIndex()
+						(int) CreativeInventoryScreen_getSelectedTab.get().invoke(screen) ==
+						(int) ItemGroup_getIndex.get().invoke(ItemGroup_INVENTORY.get().get(null));
 			};
 		}
 		return false;
@@ -162,13 +172,13 @@ public class MultiVersionMisc {
 	public static void setKeyboardRepeatEvents(boolean repeatEvents) {
 		switch (Version.get()) {
 			case v1_19_4, v1_19_3 -> {} // Repeat events are now always on
-			case v1_19, v1_18 -> Keyboard_setRepeatEvents.get().invoke(MainUtil.client.keyboard, repeatEvents);
+			case v1_19, v1_18_v1_17 -> Keyboard_setRepeatEvents.get().invoke(MainUtil.client.keyboard, repeatEvents);
 		}
 	}
 	
 	static final Class<?> Matrix4f_class = switch (Version.get()) {
 		case v1_19_4, v1_19_3 -> Reflection.getClass("org.joml.Matrix4f");
-		case v1_19, v1_18 -> Reflection.getClass("net.minecraft.class_1159");
+		case v1_19, v1_18_v1_17 -> Reflection.getClass("net.minecraft.class_1159");
 	};
 	private static final Reflection.MethodInvoker MatrixStack_Entry_getPositionMatrix =
 			Reflection.getMethod(MatrixStack.Entry.class, "method_23761", MethodType.methodType(Matrix4f_class));
@@ -181,7 +191,7 @@ public class MultiVersionMisc {
 	public static Object copyMatrix(Object matrix) {
 		return switch (Version.get()) {
 			case v1_19_4, v1_19_3 -> Reflection.newInstance(Matrix4f_class, new Class<?>[] {Reflection.getClass("org.joml.Matrix4fc")}, matrix); // new Matrix4f((Matrix4f) matrix)
-			case v1_19, v1_18 -> Matrix4f_copy.get().invoke(matrix);
+			case v1_19, v1_18_v1_17 -> Matrix4f_copy.get().invoke(matrix);
 		};
 	}
 	
@@ -207,7 +217,7 @@ public class MultiVersionMisc {
 				itemRenderer.renderInGuiWithOverrides(matrices, item, x, y);
 				itemRenderer.renderGuiItemOverlay(matrices, textRenderer, item, x, y);
 			}
-			case v1_19_3, v1_19, v1_18 -> {
+			case v1_19_3, v1_19, v1_18_v1_17 -> {
 				if (setScreenZOffset)
 					DrawableHelper_setZOffset.get().invoke(MainUtil.client.currentScreen, (int) zOffset);
 				ItemRenderer_zOffset.get().set(itemRenderer, zOffset);
@@ -218,6 +228,34 @@ public class MultiVersionMisc {
 					DrawableHelper_setZOffset.get().invoke(MainUtil.client.currentScreen, 0);
 			}
 		}
+	}
+	
+	public static String stripInvalidChars(String str, boolean allowLinebreaks) {
+		StringBuilder output = new StringBuilder();
+		for (char c : str.toCharArray()) {
+			if (SharedConstants.isValidChar(c)) {
+				output.append(c);
+			} else if (allowLinebreaks && c == '\n') {
+				output.append(c);
+			}
+		}
+		return output.toString();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> Text_asString =
+			Reflection.getOptionalMethod(Text.class, "method_10851", MethodType.methodType(String.class));
+	public static String getContent(Text text) {
+		return switch (Version.get()) {
+			case v1_19_4, v1_19_3, v1_19 -> {
+				StringBuilder output = new StringBuilder();
+				text.getContent().visit(str -> {
+					output.append(str);
+					return Optional.empty();
+				});
+				yield output.toString();
+			}
+			case v1_18_v1_17 -> Text_asString.get().invoke(text);
+		};
 	}
 	
 }

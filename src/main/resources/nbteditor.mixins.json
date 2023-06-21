@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "com.luneruniverse.minecraft.mod.nbteditor.mixin",
   "compatibilityLevel": "JAVA_16",
+  "plugin": "com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled.NBTEditorMixinPlugin",
   "mixins": [
   ],
   "client": [
@@ -25,7 +26,12 @@
     "BookScreenMixin",
     "HandledScreenMixin",
     "NativeImageMixin",
-    "ScreenshotRecorderMixin"
+    "ScreenshotRecorderMixin",
+    "UtilMixin",
+    "KeyboardMixin",
+    "AbstractParentElementMixin",
+    "PlayerScreenHandler1Mixin",
+    "WrittenBookItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

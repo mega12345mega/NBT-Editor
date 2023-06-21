@@ -108,4 +108,9 @@ public class ConfigHiddenData<S extends ConfigPath, D> implements ConfigPath {
 		return visible.charTyped(chr, modifiers);
 	}
 	
+	@Override
+	public void tick() {
+		visible.tick();
+	}
+	
 }

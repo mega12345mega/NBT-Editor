@@ -1,9 +1,9 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -14,7 +14,6 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
 
 public class UnbindSkullCommand extends ClientCommand {
 	
@@ -26,9 +25,8 @@ public class UnbindSkullCommand extends ClientCommand {
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		builder.executes(context -> {
-			ItemReference heldItem = MainUtil.getHeldItem(item -> item.getItem() == Items.PLAYER_HEAD, TextInst.translatable("nbteditor.no_hand.no_item.skull"));
-			Hand hand = heldItem.getHand();
-			ItemStack item = heldItem.getItem();
+			ItemReference ref = MainUtil.getHeldItem(item -> item.getItem() == Items.PLAYER_HEAD, TextInst.translatable("nbteditor.no_hand.no_item.skull"));
+			ItemStack item = ref.getItem();
 			
 			NbtCompound nbt = item.getOrCreateNbt();
 			if (nbt.contains("SkullOwner", NbtElement.COMPOUND_TYPE)) {
@@ -41,8 +39,7 @@ public class UnbindSkullCommand extends ClientCommand {
 			} else
 				throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.unbind_skull.no_textures")).create();
 			
-			MainUtil.saveItem(hand, item);
-			context.getSource().sendFeedback(TextInst.translatable("nbteditor.unbind_skull.unbound"));
+			ref.saveItem(item, TextInst.translatable("nbteditor.unbind_skull.unbound"));
 			return Command.SINGLE_SUCCESS;
 		});
 	}

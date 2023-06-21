@@ -4,10 +4,11 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -15,12 +16,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
 
 public class MaxCommand extends ClientCommand {
 	
@@ -45,23 +41,17 @@ public class MaxCommand extends ClientCommand {
 				.executes(context -> max(context, -1, false, false));
 	}
 	private int max(CommandContext<FabricClientCommandSource> context, int enchantLevel, boolean allEnchants, boolean cursed) throws CommandSyntaxException {
-		ItemReference heldItem = MainUtil.getHeldItem();
-		Hand hand = heldItem.getHand();
-		ItemStack item = heldItem.getItem();
+		ItemReference ref = MainUtil.getHeldItem();
+		ItemStack item = ref.getItem();
 		
-		NbtList enchants = item.getEnchantments();
+		Enchants enchants = new Enchants(item);
+		enchants.removeDuplicates();
 		MultiVersionRegistry.ENCHANTMENT.forEach(enchant -> {
-			if ((allEnchants || enchant.isAcceptableItem(item)) && (cursed || !enchant.isCursed())) {
-				Identifier id = EnchantmentHelper.getEnchantmentId(enchant);
-				String idStr = id.toString();
-				enchants.removeIf(element -> ((NbtCompound) element).getString("id").equals(idStr));
-		        enchants.add(EnchantmentHelper.createNbt(id, enchantLevel == -1 ? enchant.getMaxLevel() : enchantLevel));
-			}
+			if ((allEnchants || enchant.isAcceptableItem(item)) && (cursed || !enchant.isCursed()))
+				enchants.setEnchant(enchant, enchantLevel == -1 ? enchant.getMaxLevel() : enchantLevel, true);
 		});
-		item.setSubNbt(ItemStack.ENCHANTMENTS_KEY, enchants);
 		
-		MainUtil.saveItem(hand, item);
-		context.getSource().sendFeedback(TextInst.translatable("nbteditor.maxed"));
+		ref.saveItem(item, TextInst.translatable("nbteditor.maxed"));
 		
 		return Command.SINGLE_SUCCESS;
 	}

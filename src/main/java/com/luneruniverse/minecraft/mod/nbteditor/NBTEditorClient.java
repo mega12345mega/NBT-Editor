@@ -15,8 +15,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.CommandHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.api.ClientModInitializer;
@@ -47,6 +48,7 @@ public class NBTEditorClient implements ClientModInitializer {
 			SETTINGS_FOLDER.mkdir();
 		
 		NbtTypeModifier.loadClass();
+		Enchants.checkCap();
 		CommandHandler.registerCommands();
 		try {
 			HeadAPI.loadFavorites();

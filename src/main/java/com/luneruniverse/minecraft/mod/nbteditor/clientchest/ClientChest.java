@@ -6,12 +6,16 @@ import java.nio.file.Files;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.text.ClickEvent;
 
 public abstract class ClientChest {
 	
@@ -55,6 +59,31 @@ public abstract class ClientChest {
 		}
 	}
 	
+	public void backupCorruptPage(int page) {
+		File file = new File(CLIENT_CHEST_FOLDER, "page" + page + ".nbt");
+		if (!file.exists())
+			return;
+		file.renameTo(new File(CLIENT_CHEST_FOLDER, "corrupt_page" + page + "_" + System.currentTimeMillis() + ".nbt"));
+		warnCorrupt();
+	}
+	public void warnIfCorrupt() {
+		if (!CLIENT_CHEST_FOLDER.exists())
+			return;
+		try {
+			if (Files.list(CLIENT_CHEST_FOLDER.toPath()).anyMatch(path -> path.toFile().getName().startsWith("corrupt_page")))
+				warnCorrupt();
+		} catch (IOException e) {
+			NBTEditor.LOGGER.error("Error checking for corrupt pages", e);
+		}
+	}
+	private void warnCorrupt() {
+		if (MainUtil.client.player == null)
+			return;
+		MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.corrupt_warning")
+				.append(" ").append(TextInst.translatable("nbteditor.file_options.show").styled(
+						style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, CLIENT_CHEST_FOLDER.getAbsolutePath())))), false);
+	}
+	
 	public abstract boolean isLoaded();
 	protected void checkLoaded() {
 		if (!isLoaded())
@@ -90,7 +119,11 @@ public abstract class ClientChest {
 		for (int i = 0; i < items.length; i++)
 			pageNbt.add((items[i] == null ? ItemStack.EMPTY : items[i]).writeNbt(new NbtCompound()));
 		nbt.put("items", pageNbt);
-		NbtIo.write(nbt, file);
+		try {
+			MixinLink.throwHiddenException(() -> NbtIo.write(nbt, file));
+		} catch (Throwable e) {
+			throw new IOException("Error saving client chest page", e);
+		}
 	}
 	
 	protected abstract void cachePage(int page, ItemStack[] items);

@@ -2,11 +2,14 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands.arguments;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 import java.util.stream.StreamSupport;
 
+import com.google.gson.JsonElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -40,6 +43,94 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	}
 	public static FancyTextArgumentType fancyText() {
 		return fancyText(true);
+	}
+	
+	public static String stringifyFancyText(Text text, boolean jsonAllowed, boolean printErrors) {
+		if (jsonAllowed && ConfigScreen.isJsonText())
+			return Text.Serializer.toJson(text);
+		
+		StringBuilder output = new StringBuilder();
+		if (stringifyFancyText(text, output) && printErrors)
+			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.fancy_text_arg_type.stringify_unsupported"), false);
+		return output.toString();
+	}
+	private static boolean stringifyFancyText(Text text, StringBuilder output) {
+		boolean errors = false;
+		
+		int numEvents = 0;
+		ClickEvent click = text.getStyle().getClickEvent();
+		HoverEvent hover = text.getStyle().getHoverEvent();
+		if (click != null) {
+			numEvents++;
+			output.append("[" + click.getAction().getName() + "]");
+			output.append("{");
+			output.append(click.getValue().replace("\\", "\\\\").replace("{", "\\{").replace("}", "\\}"));
+			output.append("}");
+			output.append("(");
+		}
+		if (hover != null) {
+			numEvents++;
+			output.append("[" + hover.getAction().getName() + "]");
+			if (hover.getAction() == HoverEvent.Action.SHOW_TEXT) {
+				StringBuilder buffer = new StringBuilder();
+				errors |= stringifyFancyText(hover.getValue(HoverEvent.Action.SHOW_TEXT), buffer);
+				output.append("{" + buffer.toString().replace("}", "\\}") + "}");
+			} else if (hover.getAction() == HoverEvent.Action.SHOW_ITEM)
+				errors = true;
+			else if (hover.getAction() == HoverEvent.Action.SHOW_ENTITY) {
+				output.append("{" + hover.getValue(HoverEvent.Action.SHOW_ENTITY).uuid.toString() + "}");
+				errors = true;
+			}
+			output.append("(");
+		}
+		
+		StringBuilder color = new StringBuilder();
+		StringBuilder formats = new StringBuilder();
+		boolean needsReset = false;
+		for (Map.Entry<String, JsonElement> entry : Text.Serializer.toJsonTree(text).getAsJsonObject().entrySet()) {
+			switch (entry.getKey()) {
+				case "color" -> {
+					Formatting colorFormatting = Formatting.byName(text.getStyle().getColor().getName());
+					if (colorFormatting == null) {
+						color.append("&c");
+						errors = true;
+					} else
+						color.append("&" + colorFormatting.getCode());
+				}
+				case "bold", "italic", "strikethrough", "obfuscated" -> {
+					if (entry.getValue().getAsBoolean())
+						formats.append("&" + Formatting.byName(entry.getKey()).getCode());
+					else
+						needsReset = true;
+				}
+				case "underlined" -> { // Formatting.UNDERLINE isn't past tense
+					if (entry.getValue().getAsBoolean())
+						formats.append("&" + Formatting.UNDERLINE.getCode());
+					else
+						needsReset = true;
+				}
+				case "insertion", "font" -> errors = true;
+			}
+		}
+		if (needsReset)
+			output.append("&r");
+		if (!(needsReset && color.toString().equals("&f")))
+			output.append(color);
+		output.append(formats);
+		
+		StringBuilder content = new StringBuilder();
+		text.getContent().visit(str -> {
+			content.append(str);
+			return Optional.empty();
+		});
+		output.append(content.toString().replace("\\", "\\\\").replace("&", "\\&").replace("§", "\\§").replace("[", "\\["));
+		
+		for (Text child : text.getSiblings())
+			errors |= stringifyFancyText(child, output);
+		
+		output.append(")".repeat(numEvents));
+		
+		return errors;
 	}
 	
 	private final boolean jsonAllowed;
@@ -138,7 +229,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 		List<EditableText> parts = new ArrayList<>();
 		String part = "";
 		Formatting color = null;
-		Formatting format = null;
+		List<Formatting> format = new ArrayList<>();
 		boolean reset = false;
 		
 		boolean escaped = false;
@@ -158,19 +249,19 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 								reset = false; // So no need to reset in children too
 						}
 						if (color != null) partText.formatted(color);
-						if (format != null) partText.formatted(format);
+						format.forEach(partText::formatted);
 						parts.add(partText);
 						part = "";
 					}
 					if (newFormat == Formatting.RESET) {
 						color = null;
-						format = null;
+						format.clear();
 						reset = true;
 					} else if (newFormat.isColor()) {
 						color = newFormat;
-						format = null;
+						format.clear();
 					} else
-						format = newFormat;
+						format.add(newFormat);
 				}
 			} else if (escaped) {
 				part += c;
@@ -186,7 +277,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 			EditableText partText = TextInst.literal(part);
 			if (reset) partText.styled(style -> BLANK_STYLE);
 			if (color != null) partText.formatted(color);
-			if (format != null) partText.formatted(format);
+			format.forEach(partText::formatted);
 			parts.add(partText);
 		}
 		

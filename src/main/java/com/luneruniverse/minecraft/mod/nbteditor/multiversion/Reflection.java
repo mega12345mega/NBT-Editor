@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.MappingResolver;
@@ -25,7 +26,7 @@ public class Reflection {
 					return Class.forName(mappings.mapClassName("intermediary", name));
 				}
 			});
-		} catch (ExecutionException e) {
+		} catch (ExecutionException | UncheckedExecutionException e) {
 			throw new RuntimeException("Error getting class", e);
 		}
 	}

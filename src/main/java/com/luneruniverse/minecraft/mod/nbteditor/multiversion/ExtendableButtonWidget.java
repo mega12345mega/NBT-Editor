@@ -26,7 +26,7 @@ public class ExtendableButtonWidget extends PressableWidget {
 		if (tooltip != null) {
 			switch (Version.get()) {
 				case v1_19_4, v1_19_3 -> setTooltip(tooltip.toNewTooltip());
-				case v1_19, v1_18 -> {}
+				case v1_19, v1_18_v1_17 -> {}
 			}
 		}
 	}
@@ -49,7 +49,7 @@ public class ExtendableButtonWidget extends PressableWidget {
 		switch (Version.get()) {
 			case v1_19_4 -> super.renderButton(matrices, mouseX, mouseY, delta);
 			case v1_19_3 -> super_method_25359(matrices, mouseX, mouseY, delta);
-			case v1_19, v1_18 -> {
+			case v1_19, v1_18_v1_17 -> {
 				super_method_25359(matrices, mouseX, mouseY, delta);
 				if (isSelected()) // Actually isHovered, got renamed
 					method_25352(matrices, mouseX, mouseY);

@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 
 import net.minecraft.item.ItemStack;
@@ -25,15 +26,19 @@ public class LargeClientChest extends ClientChest {
 	@Override
 	public void loadSync() throws Exception {
 		loaded = false;
+		Exception toThrow = new Exception("Error loading page(s)");
 		for (int i = 0; i < importantPages; i++) {
 			try {
 				loadSync(i);
 			} catch (Exception e) {
-				pages.invalidateAll();
-				throw new Exception("While loading page " + (i + 1) + ":", e);
+				backupCorruptPage(i);
+				pages.invalidate(i);
+				toThrow.addSuppressed(new Exception("Page " + (i + 1), e));
 			}
 		}
 		loaded = true;
+		if (toThrow.getSuppressed().length > 0)
+			throw toThrow;
 	}
 	
 	@Override
@@ -49,8 +54,10 @@ public class LargeClientChest extends ClientChest {
 	public ItemStack[] getPage(int page) {
 		try {
 			return pages.get(page, () -> Optional.ofNullable(loadSync(page))).orElseGet(() -> new ItemStack[54]);
-		} catch (ExecutionException e) {
-			NBTEditor.LOGGER.error("Error while loading a large client chest page", e);
+		} catch (ExecutionException | UncheckedExecutionException e) {
+			backupCorruptPage(page);
+			pages.invalidate(page);
+			NBTEditor.LOGGER.error("Error loading large client chest page " + (page + 1), e);
 			return new ItemStack[54];
 		}
 	}

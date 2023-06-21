@@ -8,6 +8,7 @@ import java.util.function.UnaryOperator;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
@@ -45,7 +46,7 @@ public class EditableText implements Text {
 					output = new EditableText(value);
 			}
 			return (R) output;
-		} catch (ExecutionException e) {
+		} catch (ExecutionException | UncheckedExecutionException e) {
 			throw new RuntimeException("Error invoking method", e);
 		}
 	}

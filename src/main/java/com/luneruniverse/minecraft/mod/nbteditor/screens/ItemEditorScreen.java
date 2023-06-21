@@ -1,22 +1,34 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
+import java.util.function.Function;
+
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
-public abstract class ItemEditorScreen extends MultiVersionScreen {
+public abstract class ItemEditorScreen extends OverlaySupportingScreen {
+	
+	protected static record FactoryLink(String langName, Function<ItemReference, Screen> factory) {
+		public FactoryLink(String langName, Function<ItemReference, Screen> factory) {
+			this.langName = langName;
+			this.factory = factory;
+		}
+	}
 	
 	protected final ItemReference ref;
 	protected ItemStack item;
@@ -42,13 +54,15 @@ public abstract class ItemEditorScreen extends MultiVersionScreen {
 		return true;
 	}
 	
-	protected boolean isFactoryLinkEnabled() {
-		return true;
+	protected FactoryLink getFactoryLink() {
+		return new FactoryLink("nbteditor.item_factory", ItemFactoryScreen::new);
 	}
 	
 	
 	@Override
 	protected final void init() {
+		super.init();
+		
 		name = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8, 100, 16, TextInst.of("")) {
 			@Override
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -70,20 +84,23 @@ public abstract class ItemEditorScreen extends MultiVersionScreen {
 			saveBtn.active = !saved;
 		}
 		
-		addDrawableChild(MultiVersionMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
-				ItemFactoryScreen.FACTORY_ICON,
-				btn -> closeSafely(() -> client.setScreen(new ItemFactoryScreen(ref))),
-				new MultiVersionTooltip("nbteditor.item_factory")))
-			.active = isFactoryLinkEnabled();
+		FactoryLink link = getFactoryLink();
+		if (link != null) {
+			addDrawableChild(MultiVersionMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
+					ItemFactoryScreen.FACTORY_ICON,
+					btn -> closeSafely(() -> client.setScreen(link.factory().apply(ref))),
+					new MultiVersionTooltip(link.langName())));
+		}
 		
 		initEditor();
 	}
 	protected void initEditor() {}
 	
 	@Override
-	public final void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+	public final void renderMain(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		super.renderBackground(matrices);
-		super.render(matrices, mouseX, mouseY, delta);
+		preRenderEditor(matrices, mouseX, mouseY, delta);
+		super.renderMain(matrices, mouseX, mouseY, delta);
 		renderEditor(matrices, mouseX, mouseY, delta);
 		MainUtil.renderLogo(matrices);
 		renderItemPreview(matrices);
@@ -99,7 +116,7 @@ public abstract class ItemEditorScreen extends MultiVersionScreen {
 		
 		boolean oldMatrix = switch (Version.get()) {
 			case v1_19_4 -> false;
-			case v1_19_3, v1_19, v1_18 -> true;
+			case v1_19_3, v1_19, v1_18_v1_17 -> true;
 		};
 		if (oldMatrix)
 			matrices = RenderSystem.getModelViewStack();
@@ -116,26 +133,28 @@ public abstract class ItemEditorScreen extends MultiVersionScreen {
 		if (oldMatrix)
 			RenderSystem.applyModelViewMatrix();
 	}
+	protected void preRenderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {}
 	protected void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {}
 	
-	@Override
-	public void tick() {
-		name.tick();
+	protected void renderTip(MatrixStack matrices, String langHint) {
+		if (!ConfigScreen.isKeybindsHidden()) {
+			int x = 16 + (32 + 8) * 2 + (100 + 8) * 2;
+			MainUtil.drawWrappingString(matrices, textRenderer, TextInst.translatable(langHint).getString(),
+					16 + (32 + 8) * 2 + (100 + 8) * 2, 16 + 6 + 10, width - x - 8 - 20 - 8, -1, false, true);
+		}
 	}
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-			close();
+		if (super.keyPressed(keyCode, scanCode, modifiers))
 			return true;
-		}
 		
-		if ((modifiers & GLFW.GLFW_MOD_CONTROL) != 0 && keyCode == GLFW.GLFW_KEY_S) {
+		if (hasControlDown() && !hasShiftDown() && !hasAltDown() && keyCode == GLFW.GLFW_KEY_S) {
 			save();
 			return true;
 		}
 		
-		return name.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+		return name.keyPressed(keyCode, scanCode, modifiers);
 	}
 	
 	protected void setSaved(boolean saved) {

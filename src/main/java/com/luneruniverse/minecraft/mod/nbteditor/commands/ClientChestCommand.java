@@ -3,7 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 

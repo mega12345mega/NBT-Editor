@@ -12,7 +12,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.StringInputScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.DrawableHelper;
@@ -188,27 +188,13 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 											setIndex(target);
 											parent.setListEntry(target, this);
 											parent.onChanged.forEach(listener -> listener.onValueChanged(null));
-										}, str -> {
-											try {
-												int target = Integer.parseInt(str);
-												return 0 < target && target < parent.paths.size();
-											} catch (NumberFormatException e) {
-												return false;
-											}
-										}).show(index + 1 + "");
+										}, MainUtil.intPredicate(() -> 1, () -> parent.paths.size() - 1, false)).show(index + 1 + "");
 									}
 									case DUPLICATE -> {
 										if (Screen.hasShiftDown()) {
 											MainUtil.client.setScreen(new StringInputScreen(MainUtil.client.currentScreen,
 													numCopies -> duplicate(Integer.parseInt(numCopies)),
-													str -> {
-														try {
-															Integer.parseInt(str);
-															return true;
-														} catch (NumberFormatException e) {
-															return false;
-														}
-													}));
+													MainUtil.intPredicate(1, Integer.MAX_VALUE, false)));
 										} else
 											duplicate(1);
 									}
@@ -302,6 +288,11 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 		@Override
 		public boolean charTyped(char chr, int modifiers) {
 			return value.charTyped(chr, modifiers);
+		}
+		
+		@Override
+		public void tick() {
+			value.tick();
 		}
 		
 	}

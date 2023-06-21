@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.DrawableHelper;
@@ -132,6 +133,12 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 	@Override
 	public boolean charTyped(char chr, int modifiers) {
 		return value.charTyped(chr, modifiers);
+	}
+	
+	@Override
+	public void tick() {
+		if (value instanceof Tickable tickable)
+			tickable.tick();
 	}
 	
 }

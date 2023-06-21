@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientContainerScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -19,11 +19,11 @@ public class ReceivePacketMixin {
 		if (!MainUtil.client.isOnThread())
 			return;
 		
-		if (MainUtil.client.currentScreen instanceof ClientContainerScreen) {
+		if (MainUtil.client.currentScreen instanceof ClientHandledScreen) {
 			info.cancel();
 			
 			if (packet.getSlot() == 45)
-				MainUtil.client.player.getInventory().setStack(45, packet.getItemStack());
+				MainUtil.client.player.getInventory().setStack(40, packet.getItemStack());
 			else if (packet.getSlot() < 9) {
 				if (packet.getSlot() > 4)
 					MainUtil.client.player.getInventory().armor.set(8 - packet.getSlot(), packet.getItemStack());

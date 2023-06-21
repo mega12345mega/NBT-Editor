@@ -17,7 +17,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import tsp.headdb.ported.Category;
 import tsp.headdb.ported.Head;
@@ -61,7 +60,7 @@ public class GetHdbCommand extends ClientCommand {
 				.then(literal("all").then(argument("category", EnumArgumentType.options(Category.class)).executes(context -> {
 					Category category = context.getArgument("category", Category.class);
 					ItemStack shulker = ShulkerBoxBlock.getItemStack(MainUtil.getDyeColor(category.getColor()));
-					shulker.setCustomName(Text.of(Formatting.RESET.toString() + category.getColor() + Formatting.BOLD + category.getTranslatedName().toUpperCase()));
+					shulker.setCustomName(TextInst.of(Formatting.RESET.toString() + category.getColor() + Formatting.BOLD + category.getTranslatedName().toUpperCase()));
 					shulker.getOrCreateNbt().putByte("HideFlags", (byte) 32);
 					ItemChest.writeDatabase(shulker, HeadAPI.getHeads(category), Head::getItemStack);
 					MainUtil.getWithMessage(shulker);

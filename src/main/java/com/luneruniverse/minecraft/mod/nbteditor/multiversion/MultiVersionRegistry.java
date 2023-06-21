@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -29,7 +30,7 @@ public class MultiVersionRegistry<T> implements Iterable<T> {
 	private static <R> R call(Object registry, String method, MethodType type, Object... args) {
 		try {
 			return (R) methodCache.get(method, () -> Reflection.getMethod(Registry.class, method, type)).invoke(registry, args);
-		} catch (ExecutionException e) {
+		} catch (ExecutionException | UncheckedExecutionException e) {
 			throw new RuntimeException("Error invoking method", e);
 		}
 	}
@@ -37,15 +38,15 @@ public class MultiVersionRegistry<T> implements Iterable<T> {
 	private static final Class<?> REGISTRY_CLASS = Reflection.getClass("net.minecraft.class_2378");
 	private static final Class<?> REGISTRIES_CLASS = switch (Version.get()) {
 		case v1_19_4, v1_19_3 -> Reflection.getClass("net.minecraft.class_7923");
-		case v1_19, v1_18 -> REGISTRY_CLASS;
+		case v1_19, v1_18_v1_17 -> REGISTRY_CLASS;
 	};
 	private static <T> MultiVersionRegistry<T> getRegistry(String oldName, String newName, boolean defaulted) {
 		return new MultiVersionRegistry<>(Reflection.getField(REGISTRIES_CLASS, switch (Version.get()) {
 			case v1_19_4, v1_19_3 -> newName;
-			case v1_19, v1_18 -> oldName;
+			case v1_19, v1_18_v1_17 -> oldName;
 		}, defaulted ? switch (Version.get()) {
 			case v1_19_4, v1_19_3 -> "Lnet/minecraft/class_7922;";
-			case v1_19, v1_18 -> "Lnet/minecraft/class_2348;";
+			case v1_19, v1_18_v1_17 -> "Lnet/minecraft/class_2348;";
 		} : "Lnet/minecraft/class_2378;").get(null));
 	}
 	

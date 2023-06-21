@@ -123,4 +123,9 @@ public abstract class ConfigGrouping<K, T extends ConfigGrouping<K, T>> implemen
 		return false;
 	}
 	
+	@Override
+	public void tick() {
+		for (ConfigPath path : new ArrayList<>(paths.values()))
+			path.tick();
+	}
 }

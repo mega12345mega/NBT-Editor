@@ -15,7 +15,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.text.Text;
 
 public class Head {
 
@@ -51,7 +50,7 @@ public class Head {
                 Utils.colorize("&e" + buildTagLore(tags)),
                 "",
                 Utils.colorize("&8Right-Click to add/remove from favorites.")
-        ).stream().map(Text::of).toList());
+        ).stream().map(TextInst::of).toList());
         
         return item;
     }

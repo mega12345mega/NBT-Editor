@@ -33,6 +33,7 @@ abstract class ClientPlayerEntityMixin {
 	// 1.19.1
 	@Inject(target = @Desc(value = "method_44099", args = String.class, ret = boolean.class), at = @At("HEAD"), cancellable = true, remap = false, require = 0) // boolean sendCommand(String)
 //	@Group(name = "sendChatMessage", min = 1)
+	@SuppressWarnings("target")
 	private void onSendCommand(String command, CallbackInfoReturnable<Boolean> cir) {
 		if (ClientCommandInternals.executeCommand(command)) {
 			cir.setReturnValue(true);
@@ -41,6 +42,7 @@ abstract class ClientPlayerEntityMixin {
 	// 1.19.0
 	@Inject(target = @Desc(value = "method_44099", args = String.class, ret = void.class), at = @At("HEAD"), cancellable = true, remap = false, require = 0) // void sendCommand(String)
 //	@Group(name = "sendChatMessage", min = 1)
+	@SuppressWarnings("target")
 	private void onSendCommand(String command, CallbackInfo info) {
 		if (ClientCommandInternals.executeCommand(command)) {
 			info.cancel();
@@ -50,6 +52,7 @@ abstract class ClientPlayerEntityMixin {
 	// 1.19.2 - 1.19.0
 	@Inject(method = "method_44098(Ljava/lang/String;Lnet/minecraft/text/Text;)V", at = @At("HEAD"), cancellable = true, require = 0) // void sendCommand(String, Text)
 //	@Group(name = "sendChatMessage", min = 1)
+	@SuppressWarnings("target")
 	private void onSendCommand(String command, Text preview, CallbackInfo info) {
 		if (ClientCommandInternals.executeCommand(command)) {
 			info.cancel();
@@ -59,6 +62,7 @@ abstract class ClientPlayerEntityMixin {
 	// 1.18
 	@Inject(at = @At("HEAD"), cancellable = true, target = @Desc(value = "method_3142", args = String.class), remap = false, require = 0) // void sendChatMessage(String)
 //	@Group(name = "sendChatMessage", min = 1)
+	@SuppressWarnings("target")
 	private void onSendChatMessage(String message, CallbackInfo info) {
 		if (!message.isEmpty() && message.charAt(0) == '/' && ClientCommandInternals.executeCommand(message.substring(1))) {
 			info.cancel();

@@ -97,7 +97,7 @@ public class MultiVersionTooltip {
 				Vector3f output = ((Matrix4f) matrix).getColumn(3, new Vector3f());
 				yield new float[] {output.x, output.y, output.z};
 			}
-			case v1_19, v1_18 -> {
+			case v1_19, v1_18_v1_17 -> {
 				FloatBuffer buffer = FloatBuffer.allocate(16);
 				Matrix4f_writeColumnMajor.get().invoke(matrix, buffer); // matrix.writeColumnMajor(buffer)
 				float[] output = new float[3];

@@ -59,7 +59,7 @@ public class CreativeTab {
 	public static final List<CreativeTabData> TABS = new ArrayList<>();
 	public static final int WIDTH = switch (Version.get()) {
 		case v1_19_4, v1_19_3 -> 26;
-		case v1_19, v1_18 -> 28;
+		case v1_19, v1_18_v1_17 -> 28;
 	};
 	
 	private static final Identifier tabs = new Identifier("textures/gui/container/creative_inventory/tabs.png");
@@ -87,7 +87,7 @@ public class CreativeTab {
 		
 		int xOffset = switch (Version.get()) {
 			case v1_19_4, v1_19_3 -> 5;
-			case v1_19, v1_18 -> 6;
+			case v1_19, v1_18_v1_17 -> 6;
 		};
 		MultiVersionMisc.renderItem(matrices, 100.0F, false, item, x + xOffset, y + 9);
 	}

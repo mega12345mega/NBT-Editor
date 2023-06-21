@@ -1,16 +1,20 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
-import java.lang.invoke.MethodType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import net.minecraft.SharedConstants;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 public enum Version {
 	v1_19_4,
 	v1_19_3,
 	v1_19,
-	v1_18;
+	v1_18_v1_17;
 	
 	private static volatile Version CURRENT;
 	public static Version get() {
@@ -32,45 +36,26 @@ public enum Version {
 				case 2, 1, 0 -> v1_19;
 				default -> throw unsupported.get();
 			};
-			case 18 -> v1_18;
+			case 18 -> v1_18_v1_17;
+			case 17 -> v1_18_v1_17;
 			default -> throw unsupported.get();
 		};
 	}
 	
-	private static final Supplier<Class<?>> Bridge_GameVersion = () -> {
-				try {
-					return Class.forName("com.mojang.bridge.game.GameVersion");
-				} catch (ClassNotFoundException e) {
-					throw new RuntimeException(e);
-				}
-			};
-	private static final Supplier<Reflection.MethodInvoker> Bridge_GameVersion_getReleaseTarget =
-			Reflection.getOptionalMethod(Bridge_GameVersion, () -> "getReleaseTarget", () -> MethodType.methodType(String.class));
-	private static final Supplier<Reflection.MethodInvoker> Bridge_GameVersion_getId =
-			Reflection.getOptionalMethod(Bridge_GameVersion, () -> "getId", () -> MethodType.methodType(String.class));
-	private static final boolean getReleaseTargetExists;
-	private static final boolean getIdExists;
-	private static boolean testExists(Supplier<?> toTest) {
-		try {
-			toTest.get();
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
-	static {
-		getReleaseTargetExists = testExists(Bridge_GameVersion_getReleaseTarget);
-		getIdExists = testExists(Bridge_GameVersion_getId);
-	}
+	private static String releaseTarget;
 	public static String getReleaseTarget() {
-		if (getReleaseTargetExists)
-			return Bridge_GameVersion_getReleaseTarget.get().invoke(SharedConstants.getGameVersion());
+		if (releaseTarget != null)
+			return releaseTarget;
 		
-		String id;
-		if (getIdExists)
-			id = Bridge_GameVersion_getId.get().invoke(SharedConstants.getGameVersion());
-		else
-			id = SharedConstants.getGameVersion().getId();
-		return id.split("\\+|-")[0];
+		try (InputStream in = Version.class.getResourceAsStream("/version.json");
+				InputStreamReader reader = new InputStreamReader(in);) {
+			JsonObject data = new Gson().fromJson(reader, JsonObject.class);
+			if (data.has("release_target"))
+				return releaseTarget = data.get("release_target").getAsString();
+			String id = data.get("id").getAsString();
+			return releaseTarget = id.split("\\+|-")[0];
+		} catch (IOException e) {
+			throw new UncheckedIOException("Error trying to read game version", e);
+		}
 	}
 }

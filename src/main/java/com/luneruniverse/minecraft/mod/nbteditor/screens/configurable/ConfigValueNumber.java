@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.NamedTextFieldWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 public class ConfigValueNumber<T extends Number> extends NamedTextFieldWidget implements ConfigValue<T, ConfigValueNumber<T>> {

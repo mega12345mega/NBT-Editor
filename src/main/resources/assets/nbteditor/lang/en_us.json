@@ -13,7 +13,9 @@
 	"nbteditor.no_hand.no_item.container": "You must be holding a container!",
 	"nbteditor.no_hand.no_item.skull": "You must be holding a player head to edit!",
 	"nbteditor.no_hand.no_item.block": "You must be holding a block to edit!",
-	"nbteditor.no_hand.all_item": "§cYou must be holding an empty slot to edit a new item!",
+	"nbteditor.no_hand.no_item.book": "You must be holding a written book to edit!",
+	"nbteditor.no_hand.no_item.signboard": "You must be holding a sign to edit!",
+	"nbteditor.no_hand.all_item": "You must be holding an empty slot to edit a new item!",
 	
 	"nbteditor.editor.save": "Save Item",
 	"nbteditor.editor.saving": "Saving ...",
@@ -63,11 +65,14 @@
 	"nbteditor.file_options.delete.error": "§cError while deleting %s",
 	"nbteditor.file_options.delete.missing": "§c%s §cis already deleted!",
 	
+	"nbteditor.img2lore": "Import Image(s)",
+	
 	"itemGroup.nbteditor.client_chest": "Client Chest",
 	"itemGroup.nbteditor.creative": "Creative Inventory",
 	"nbteditor.client_chest": "Nbt Editor >> Client Chest",
 	"nbteditor.client_chest.save_error": "§cError while saving the client chest!",
 	"nbteditor.client_chest.not_ready": "§cThe client chest hasn't finished loading! Does it have a lot of data?",
+	"nbteditor.client_chest.corrupt_warning": "§cSome page(s) appear to be corrupt and have been backed up separately.",
 	"nbteditor.client_chest.slots.lock": "Lock Slots",
 	"nbteditor.client_chest.slots.unlock": "Unlock Slots",
 	"nbteditor.client_chest.reload_page": "Reload Page",
@@ -98,6 +103,9 @@
 	
 	"nbteditor.lore.edited": "§aLore edited!",
 	"nbteditor.lore.none": "§cThere is no lore.",
+	
+	"nbteditor.img_to_lore.width": "Width",
+	"nbteditor.img_to_lore.height": "Height",
 	
 	"nbteditor.get.item": "§aReceived: ",
 	"nbteditor.get.lost_item": "§cYou may have lost an item - ",
@@ -147,12 +155,46 @@
 	"nbteditor.enchantments": "Enchantments",
 	"nbteditor.enchantments.enchantment": "Enchantment",
 	"nbteditor.enchantments.level": "Level",
-	"nbteditor.enchantments.tip": "You can Ctrl+Click enchanted books onto items in supported inventories.",
+	"nbteditor.enchantments.tip": "You can Ctrl+Click enchanted books onto items in supported inventories",
 	
 	"nbteditor.unstackable.msg": "§aItem is now unstackable! [Hover for more info]",
 	"nbteditor.unstackable.hover_msg": "A random UUID was added.\nWhen cloning the item, make\nsure to re-run this command\nfor all the individual items.",
 	
 	"nbteditor.named": "§aItem name changed to: ",
+	
+	"nbteditor.display": "Display",
+	
+	"nbteditor.book": "Book",
+	"nbteditor.book.open": "Edit Book",
+	"nbteditor.book.title": "Title",
+	"nbteditor.book.author": "Author",
+	"nbteditor.book.page": "Page %d/%d",
+	"nbteditor.book.back": "<",
+	"nbteditor.book.forward": ">",
+	"nbteditor.book.add": "§a+",
+	"nbteditor.book.remove": "§c-",
+	"nbteditor.book.preview": "Preview",
+	"nbteditor.book.preview.icon": "≡",
+	"nbteditor.book.preview.click.title": "§lClick Event Triggered",
+	"nbteditor.book.preview.click.action": "Action: %s",
+	"nbteditor.book.preview.click.value": "Value: %s",
+	
+	"nbteditor.signboard": "Sign (Block)",
+	"nbteditor.signboard.glowing.enabled": "☑ Glowing",
+	"nbteditor.signboard.glowing.disabled": "☐ Glowing",
+	
+	"nbteditor.multi_line_text.find": "Find",
+	"nbteditor.multi_line_text.replace": "Replace",
+	"nbteditor.multi_line_text.replace_all": "Replace All",
+	"nbteditor.multi_line_text.x": "X",
+	"nbteditor.multi_line_text.regex": "RegEx",
+	"nbteditor.multi_line_text.regex.on": "☑",
+	"nbteditor.multi_line_text.regex.off": "☐",
+	"nbteditor.formatted_text.custom_color": "Custom Color",
+	"nbteditor.formatted_text.events": "Click & Hover Event",
+	"nbteditor.formatted_text.click_event_value": "Click Event Value",
+	"nbteditor.formatted_text.hover_event_value": "Hover Event Value",
+	"nbteditor.formatted_text.tip": "Use Ctrl+Shift+C for custom colors & Ctrl+Shift+E for events",
 	
 	"nbteditor.config": "NBT Editor Config",
 	"nbteditor.config.shortcuts": "Group Shortcuts",
@@ -215,6 +257,18 @@
 	"nbteditor.config.screenshot_options.desc": "Add the buttons %s §rand %s\n§rto the screenshot message",
 	"nbteditor.config.screenshot_options.enabled": "Enabled",
 	"nbteditor.config.screenshot_options.disabled": "Disabled",
+	"nbteditor.config.tooltip_overflow_fix": "Tooltip Overflow Fix",
+	"nbteditor.config.tooltip_overflow_fix.desc": "Prevent tooltips from exiting the screen\nIf required, this will scale down tooltips",
+	"nbteditor.config.tooltip_overflow_fix.enabled": "Enabled",
+	"nbteditor.config.tooltip_overflow_fix.disabled": "Disabled",
+	"nbteditor.config.no_armor_restriction": "No Armor Restriction",
+	"nbteditor.config.no_armor_restriction.desc": "Allows you to put non-armor\nitems into armor slots",
+	"nbteditor.config.no_armor_restriction.enabled": "Enabled",
+	"nbteditor.config.no_armor_restriction.disabled": "Disabled",
+	"nbteditor.config.hide_format_buttons": "Format Buttons",
+	"nbteditor.config.hide_format_buttons.desc": "Hide all of the formats accessible via\nkeybind in the formatted text editors\n\nThis may allow the color dropdown\nto expand out when there wasn't\npreviously room",
+	"nbteditor.config.hide_format_buttons.enabled": "Hidden",
+	"nbteditor.config.hide_format_buttons.disabled": "Shown",
 	
 	
 	"nbteditor.configurable.list.move": "Move",
@@ -229,6 +283,7 @@
 	
 	"nbteditor.fancy_text_arg_type.invalid.event_type": "Invalid click or hover event",
 	"nbteditor.fancy_text_arg_type.invalid.entity": "That entity doesn't exist",
+	"nbteditor.fancy_text_arg_type.stringify_unsupported": "§cThis text contains hover events or formatting that can't be fully recreated",
 	
 	"nbteditor.chat_length_warning_1": "WARNING: The text will be truncated to",
 	"nbteditor.chat_length_warning_2": "256 characters for server commands",

@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.HideFlagsScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.HideFlagsScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;

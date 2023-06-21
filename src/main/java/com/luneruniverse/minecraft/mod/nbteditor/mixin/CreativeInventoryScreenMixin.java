@@ -9,15 +9,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ArmorItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.InventoryItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientContainerScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -61,7 +63,7 @@ public class CreativeInventoryScreenMixin {
 					else if (slotId < 9)
 						armor = true;
 					
-					MainUtil.addEnchants(EnchantmentHelper.get(cursor), item);
+					new Enchants(item).addEnchants(new Enchants(cursor).getEnchants());
 					if (armor)
 						MainUtil.saveItem(EquipmentSlot.fromTypeIndex(EquipmentSlot.Type.ARMOR, 8 - slotId), item);
 					else
@@ -85,10 +87,10 @@ public class CreativeInventoryScreenMixin {
 			Slot hoveredSlot = ((HandledScreenAccessor) source).getFocusedSlot();
 			if (hoveredSlot != null && hoveredSlot.inventory == MainUtil.client.player.getInventory() && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
 				int slot = hoveredSlot.getIndex();
-				if (source instanceof CreativeInventoryScreen && !MultiVersionMisc.isCreativeInventoryTabSelected())
+				if (!MultiVersionMisc.isCreativeInventoryTabSelected())
 					slot += 36;
-				ItemReference ref = slot < 9 ? ItemReference.getArmorFromSlot(slot) : new ItemReference(slot == 45 ? 45 : (slot < 9 ? slot + 54 : (slot >= 36 ? slot - 36 : slot)));
-				ClientContainerScreen.handleKeybind(hoveredSlot, ref);
+				ItemReference ref = slot < 9 ? new ArmorItemReference(slot) : new InventoryItemReference(slot == 45 ? 45 : (slot >= 36 ? slot - 36 : slot));
+				ClientHandledScreen.handleKeybind(hoveredSlot, ref);
 				info.setReturnValue(true);
 			}
 		}

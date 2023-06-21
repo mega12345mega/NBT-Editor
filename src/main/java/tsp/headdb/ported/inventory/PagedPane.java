@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientContainerScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.StringInputScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -23,14 +23,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.Text;
 import tsp.headdb.ported.HeadAPI;
 import tsp.headdb.ported.Utils;
 
 /**
  * A paged pane. Credits @ I Al Ianstaan
  */
-public class PagedPane extends ClientContainerScreen {
+public class PagedPane extends ClientHandledScreen {
 
     private SortedMap<Integer, Page> pages = new TreeMap<>();
     private int currentIndex;
@@ -282,7 +281,7 @@ public class PagedPane extends ClientContainerScreen {
     protected ItemStack setMeta(ItemStack itemStack, String name, String... lore) {
         itemStack.setCustomName(TextInst.of(Utils.colorize(name)));
         Lore loreObj = new Lore(itemStack);
-        loreObj.setAllLines(Arrays.stream(lore).map(MainUtil::colorize).map(Text::of).collect(Collectors.toList()));
+        loreObj.setAllLines(Arrays.stream(lore).map(MainUtil::colorize).map(TextInst::of).collect(Collectors.toList()));
         return itemStack;
     }
 

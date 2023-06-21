@@ -65,27 +65,21 @@ public interface FabricClientCommandSource extends CommandSource {
 	 *
 	 * @return the entity
 	 */
-	default Entity getEntity() {
-		return getPlayer();
-	}
+	Entity getEntity();
 
 	/**
 	 * Gets the position from where the command has been executed.
 	 *
 	 * @return the position
 	 */
-	default Vec3d getPosition() {
-		return getPlayer().getPos();
-	}
+	Vec3d getPosition();
 
 	/**
 	 * Gets the rotation of the entity that used the command.
 	 *
 	 * @return the rotation
 	 */
-	default Vec2f getRotation() {
-		return getPlayer().getRotationClient();
-	}
+	Vec2f getRotation();
 
 	/**
 	 * Gets the world where the player used the command.
@@ -102,7 +96,5 @@ public interface FabricClientCommandSource extends CommandSource {
 	 * @param key the meta key
 	 * @return the meta
 	 */
-	default Object getMeta(String key) {
-		return null;
-	}
+	Object getMeta(String key);
 }

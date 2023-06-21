@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nbteditor",
-  "version": "1.11.0",
+  "version": "1.12.0",
 
   "name": "NBT Editor",
   "description": "Lets you edit items' nbt ingame, store items in a client side chest, open shulker boxes, chests, and barrels in your inventory, and more!",
@@ -31,7 +31,8 @@
   },
   "mixins": [
     "nbteditor.mixins.json",
-    "nbteditor_commandapi.mixins.json"
+    "nbteditor_multiversion.mixins.json",
+    "nbteditor_multiversion_commandapi.mixins.json"
   ],
   
   "accessWidener": "nbteditor.accesswidener",
@@ -39,7 +40,7 @@
   "depends": {
     "fabricloader": ">=0.11.3",
     "fabric": "*",
-    "minecraft": ">=1.18-",
+    "minecraft": ">=1.17-",
     "java": ">=16"
   },
   

@@ -35,6 +35,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigTool
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueBoolean;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueSlider;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.MinecraftClient;
@@ -125,6 +126,9 @@ public class ConfigScreen extends MultiVersionScreen {
 	private static CheckUpdatesLevel checkUpdates;
 	private static boolean largeClientChest;
 	private static boolean screenshotOptions;
+	private static boolean tooltipOverflowFix;
+	private static boolean noArmorRestriction;
+	private static boolean hideFormatButtons;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -141,6 +145,9 @@ public class ConfigScreen extends MultiVersionScreen {
 		checkUpdates = CheckUpdatesLevel.MINOR;
 		largeClientChest = false;
 		screenshotOptions = true;
+		tooltipOverflowFix = true;
+		noArmorRestriction = false;
+		hideFormatButtons = false;
 		
 		try {
 			// Many config options use the old names
@@ -165,6 +172,9 @@ public class ConfigScreen extends MultiVersionScreen {
 					: CheckUpdatesLevel.valueOf(checkUpdatesLegacy.getAsString());
 			largeClientChest = settings.get("largeClientChest").getAsBoolean();
 			screenshotOptions = settings.get("screenshotOptions").getAsBoolean();
+			tooltipOverflowFix = settings.get("tooltipOverflowFix").getAsBoolean();
+			noArmorRestriction = settings.get("noArmorRestriction").getAsBoolean();
+			hideFormatButtons = settings.get("hideFormatButtons").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -189,6 +199,9 @@ public class ConfigScreen extends MultiVersionScreen {
 		settings.addProperty("checkUpdates", checkUpdates.name());
 		settings.addProperty("largeClientChest", largeClientChest);
 		settings.addProperty("screenshotOptions", screenshotOptions);
+		settings.addProperty("tooltipOverflowFix", tooltipOverflowFix);
+		settings.addProperty("noArmorRestriction", noArmorRestriction);
+		settings.addProperty("hideFormatButtons", hideFormatButtons);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -248,6 +261,15 @@ public class ConfigScreen extends MultiVersionScreen {
 	}
 	public static boolean isScreenshotOptions() {
 		return screenshotOptions;
+	}
+	public static boolean isTooltipOverflowFix() {
+		return tooltipOverflowFix;
+	}
+	public static boolean isNoArmorRestriction() {
+		return noArmorRestriction;
+	}
+	public static boolean isHideFormatButtons() {
+		return hideFormatButtons;
 	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
@@ -349,6 +371,18 @@ public class ConfigScreen extends MultiVersionScreen {
 				new ConfigValueBoolean(screenshotOptions, true, 100, TextInst.translatable("nbteditor.config.screenshot_options.enabled"), TextInst.translatable("nbteditor.config.screenshot_options.disabled"))
 				.addValueListener(value -> screenshotOptions = value.getValidValue()))
 				.setTooltip(new MultiVersionTooltip(TextInst.translatable("nbteditor.config.screenshot_options.desc", TextInst.translatable("nbteditor.file_options.show"), TextInst.translatable("nbteditor.file_options.delete")))));
+		this.config.setConfigurable("tooltipOverflowFix", new ConfigItem<>(TextInst.translatable("nbteditor.config.tooltip_overflow_fix"),
+				new ConfigValueBoolean(tooltipOverflowFix, true, 100, TextInst.translatable("nbteditor.config.tooltip_overflow_fix.enabled"), TextInst.translatable("nbteditor.config.tooltip_overflow_fix.disabled"))
+				.addValueListener(value -> tooltipOverflowFix = value.getValidValue()))
+				.setTooltip("nbteditor.config.tooltip_overflow_fix.desc"));
+		this.config.setConfigurable("noArmorRestriction", new ConfigItem<>(TextInst.translatable("nbteditor.config.no_armor_restriction"),
+				new ConfigValueBoolean(noArmorRestriction, false, 100, TextInst.translatable("nbteditor.config.no_armor_restriction.enabled"), TextInst.translatable("nbteditor.config.no_armor_restriction.disabled"))
+				.addValueListener(value -> noArmorRestriction = value.getValidValue()))
+				.setTooltip("nbteditor.config.no_armor_restriction.desc"));
+		this.config.setConfigurable("hideFormatButtons", new ConfigItem<>(TextInst.translatable("nbteditor.config.hide_format_buttons"),
+				new ConfigValueBoolean(hideFormatButtons, false, 100, TextInst.translatable("nbteditor.config.hide_format_buttons.enabled"), TextInst.translatable("nbteditor.config.hide_format_buttons.disabled"))
+				.addValueListener(value -> hideFormatButtons = value.getValidValue()))
+				.setTooltip("nbteditor.config.hide_format_buttons.desc"));
 		ADDED_OPTIONS.forEach(option -> option.accept(config));
 	}
 	

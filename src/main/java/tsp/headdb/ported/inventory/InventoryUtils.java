@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientContainerScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.StringInputScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -137,7 +137,7 @@ public class InventoryUtils {
     }
 
     public static void openDatabase() {
-    	ClientContainerScreen screen = new ClientContainerScreen(ClientContainerScreen.createGenericScreenHandler(6), MainUtil.client.player.getInventory(), TextInst.of(Utils.colorize("&c&lHeadDB &8(" + HeadAPI.getHeads().size() + ")"))) {
+    	ClientHandledScreen screen = new ClientHandledScreen(ClientHandledScreen.createGenericScreenHandler(6), MainUtil.client.player.getInventory(), TextInst.of(Utils.colorize("&c&lHeadDB &8(" + HeadAPI.getHeads().size() + ")"))) {
     		@Override
     		protected void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
     			if (slot == null)

@@ -17,3 +17,12 @@ accessible class net/minecraft/client/gui/screen/ingame/HandledScreens$Provider
 
 accessible field net/minecraft/client/gui/widget/ClickableWidget x I
 accessible field net/minecraft/client/gui/widget/ClickableWidget y I
+
+accessible field net/minecraft/text/Style bold Ljava/lang/Boolean;
+accessible field net/minecraft/text/Style italic Ljava/lang/Boolean;
+accessible field net/minecraft/text/Style underlined Ljava/lang/Boolean;
+accessible field net/minecraft/text/Style strikethrough Ljava/lang/Boolean;
+accessible field net/minecraft/text/Style obfuscated Ljava/lang/Boolean;
+
+# Private in older versions
+accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;

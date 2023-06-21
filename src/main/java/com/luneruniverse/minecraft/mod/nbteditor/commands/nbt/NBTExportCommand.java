@@ -1,7 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands.nbt;
 
-import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.argument;
+import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
 import java.io.File;
 import java.nio.file.Files;

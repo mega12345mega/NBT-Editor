@@ -19,15 +19,19 @@ public class SmallClientChest extends ClientChest {
 	@Override
 	public void loadSync() throws Exception {
 		loaded = false;
+		Exception toThrow = new Exception("Error loading page(s)");
 		for (int i = 0; i < maxPages; i++) {
 			try {
 				loadSync(i);
 			} catch (Exception e) {
-				pages.clear();
-				throw new Exception("While loading page " + (i + 1) + ":", e);
+				backupCorruptPage(i);
+				pages.remove(i);
+				toThrow.addSuppressed(new Exception("Page " + (i + 1), e));
 			}
 		}
 		loaded = true;
+		if (toThrow.getSuppressed().length > 0)
+			throw toThrow;
 	}
 	
 	@Override

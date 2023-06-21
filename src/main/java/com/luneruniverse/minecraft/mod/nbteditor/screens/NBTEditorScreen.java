@@ -14,19 +14,23 @@ import java.util.function.Consumer;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
-import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.util.TextAreaScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -199,7 +203,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			item = editedItem;
 			genEditor();
 		});
-		this.addSelectableChild(type);
+		this.addDrawableChild(type);
 		
 		count = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32, 72, 16, TextInst.of("")).name(TextInst.translatable("nbteditor.nbt.count"));
 		count.setMaxLength(Integer.MAX_VALUE);
@@ -210,17 +214,8 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			
 			item.setCount(Integer.parseInt(str));
 		});
-		count.setTextPredicate((str) -> {
-			if (str.isEmpty())
-				return true;
-			
-			try {
-				return Integer.parseInt(str) > 0;
-			} catch (NumberFormatException e) {
-				return false;
-			}
-		});
-		this.addSelectableChild(count);
+		count.setTextPredicate(MainUtil.intPredicate(1, Integer.MAX_VALUE, true));
+		this.addDrawableChild(count);
 		
 		path = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + 16 + 8, 288, 16, TextInst.translatable("nbteditor.nbt.path")).name(TextInst.translatable("nbteditor.nbt.path"));
 		path.setMaxLength(Integer.MAX_VALUE);
@@ -240,7 +235,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			realPath.addAll(Arrays.asList(parts));
 			genEditor();
 		});
-		this.addSelectableChild(path);
+		this.addDrawableChild(path);
 		
 		value = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16, TextInst.translatable("nbteditor.nbt.value")).name(TextInst.translatable("nbteditor.nbt.value"));
 		value.setRenderTextProvider((str, index) -> {
@@ -260,11 +255,11 @@ public class NBTEditorScreen extends ItemEditorScreen {
 				});
 			}
 		});
-		this.addSelectableChild(value);
+		this.addDrawableChild(value);
 		
 		this.addDrawableChild(MultiVersionMisc.newButton(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, TextInst.translatable("nbteditor.nbt.value_expand"), btn -> {
 			if (selectedValue == null) {
-				client.setScreen(new TextAreaScreen(this, nbt.asString(), NbtFormatter.FORMATTER, str -> {
+				client.setScreen(new TextAreaScreen(this, nbt.toString(), NbtFormatter.FORMATTER, false, str -> {
 					try {
 						NbtElement newNbt = new StringNbtReader(new StringReader(str)).parseElement();
 						if (realPath.isEmpty()) {
@@ -286,7 +281,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 					}
 				}));
 			} else
-				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter.FORMATTER, str -> value.setText(str)));
+				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter.FORMATTER, false, str -> value.setText(str)));
 		}));
 		
 		final int editorY = 16 + 8 + 32 + (16 + 8) * 3;
@@ -327,8 +322,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			if ((value = this.currentGen.getElement(this.nbt, key)) != null && (generator = MenuGenerator.TYPES.get(value.getType())) != null) {
 				this.nbt = value;
 				this.currentGen = generator;
-			}
-			else {
+			} else {
 				keys.remove();
 				removing = true;
 			}
@@ -353,7 +347,12 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		editor.setScroll(Math.max(editor.getMaxScroll(), scrollPerFolder.computeIfAbsent(realPath.toString(), key -> 0)));
 	}
 	private void updateName() {
-		name.text = MainUtil.getItemNameSafely(item).getString();
+		String newName = MainUtil.getItemNameSafely(item).getString();
+		if (!name.text.equals(newName)) {
+			name.text = newName;
+			name.setSelectionStart(name.getText().length());
+			name.setSelectionEnd(name.getText().length());
+		}
 	}
 	@Override
 	protected boolean isNameEditable() {
@@ -384,21 +383,8 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	}
 	
 	@Override
-	public void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		type.render(matrices, mouseX, mouseY, delta);
-		count.render(matrices, mouseX, mouseY, delta);
-		path.render(matrices, mouseX, mouseY, delta);
-		value.render(matrices, mouseX, mouseY, delta);
-	}
-	
-	
-	
-	@Override
 	public void tick() {
-		this.type.tick();
-		this.count.tick();
-		this.path.tick();
-		this.value.tick();
+		super.tick();
 		checkSave();
 	}
 	@Override
@@ -450,16 +436,6 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		}
 		
 		return super.keyPressed(keyCode, scanCode, modifiers);
-	}
-	
-	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		this.type.mouseClicked(mouseX, mouseY, button);
-		this.count.mouseClicked(mouseX, mouseY, button);
-		this.path.mouseClicked(mouseX, mouseY, button);
-		this.value.mouseClicked(mouseX, mouseY, button);
-		
-		return super.mouseClicked(mouseX, mouseY, button);
 	}
 	
 	@Override

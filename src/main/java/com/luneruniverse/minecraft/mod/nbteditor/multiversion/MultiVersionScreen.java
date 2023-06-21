@@ -36,7 +36,7 @@ public class MultiVersionScreen extends Screen implements OldEventBehavior {
 				super.setInitialFocus(element);
 				setFocused(element);
 			}
-			case v1_19_3, v1_19, v1_18 -> ParentElement_setInitialFocus.get().invoke(this, element);
+			case v1_19_3, v1_19, v1_18_v1_17 -> ParentElement_setInitialFocus.get().invoke(this, element);
 		}
 	}
 	

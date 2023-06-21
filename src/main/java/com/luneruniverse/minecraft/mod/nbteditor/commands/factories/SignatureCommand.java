@@ -12,9 +12,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.util.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
@@ -23,7 +23,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
 
 public class SignatureCommand extends ClientCommand {
 	
@@ -55,9 +54,8 @@ public class SignatureCommand extends ClientCommand {
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		Command<FabricClientCommandSource> addSignature = context -> {
-			ItemReference heldItem = MainUtil.getHeldItem();
-			Hand hand = heldItem.getHand();
-			ItemStack item = heldItem.getItem();
+			ItemReference ref = MainUtil.getHeldItem();
+			ItemStack item = ref.getItem();
 			
 			Lore lore = new Lore(item);
 			if (!hasSignature(lore))
@@ -67,8 +65,7 @@ public class SignatureCommand extends ClientCommand {
 				return Command.SINGLE_SUCCESS;
 			}
 			
-			MainUtil.saveItem(hand, item);
-			context.getSource().sendFeedback(TextInst.translatable("nbteditor.sign.added"));
+			ref.saveItem(item, TextInst.translatable("nbteditor.sign.added"));
 			
 			return Command.SINGLE_SUCCESS;
 		};
@@ -76,9 +73,8 @@ public class SignatureCommand extends ClientCommand {
 		builder.executes(addSignature)
 				.then(literal("add").executes(addSignature))
 				.then(literal("remove").executes(context -> {
-					ItemReference heldItem = MainUtil.getHeldItem();
-					Hand hand = heldItem.getHand();
-					ItemStack item = heldItem.getItem();
+					ItemReference ref = MainUtil.getHeldItem();
+					ItemStack item = ref.getItem();
 					
 					Lore lore = new Lore(item);
 					if (!hasSignature(lore)) {
@@ -87,8 +83,7 @@ public class SignatureCommand extends ClientCommand {
 					}
 					
 					lore.removeLine(-1);
-					MainUtil.saveItem(hand, item);
-					context.getSource().sendFeedback(TextInst.translatable("nbteditor.sign.removed"));
+					ref.saveItem(item, TextInst.translatable("nbteditor.sign.removed"));
 					
 					return Command.SINGLE_SUCCESS;
 				}))
@@ -107,17 +102,14 @@ public class SignatureCommand extends ClientCommand {
 						throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.sign.save_error")).create();
 					}
 					
-					ItemReference heldItem = MainUtil.getHeldItem();
-					Hand hand = heldItem.getHand();
-					ItemStack item = heldItem.getItem();
+					ItemReference ref = MainUtil.getHeldItem();
+					ItemStack item = ref.getItem();
 					
 					Lore lore = new Lore(item);
 					if (hasSignature(lore, oldSignature)) {
 						lore.setLine(signature, -1);
-						MainUtil.saveItem(hand, item);
+						ref.saveItem(item, TextInst.translatable("nbteditor.sign.edited"));
 					}
-					
-					context.getSource().sendFeedback(TextInst.translatable("nbteditor.sign.edited"));
 					
 					return Command.SINGLE_SUCCESS;
 				})));

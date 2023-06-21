@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommandGroup;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemFactoryScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -18,12 +18,12 @@ public class FactoryCommand extends ClientCommandGroup {
 		super(new ArrayList<>(List.of(
 				new AttributesCommand(),
 				new BlockStatesCommand(),
+				new BookCommand(),
+				new DisplayCommand(),
 				new EnchantmentsCommand(),
-				new HideFlagsCommand(),
-				new LoreCommand(),
 				new MaxCommand(),
-				new NameCommand(),
 				new SignatureCommand(),
+				new SignboardCommand(),
 				new UnbindSkullCommand(),
 				new UnstackableCommand())));
 	}

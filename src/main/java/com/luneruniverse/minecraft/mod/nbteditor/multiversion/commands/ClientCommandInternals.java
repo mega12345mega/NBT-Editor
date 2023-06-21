@@ -60,11 +60,11 @@ public final class ClientCommandInternals {
 	static {
 		API_COMMAND_NAME = switch (Version.get()) {
 			case v1_19_4, v1_19_3, v1_19 -> "fabric-command-api-v2:client";
-			case v1_18 -> "fabric-command-api-v1:client";
+			case v1_18_v1_17 -> "fabric-command-api-v1:client";
 		};
 		activeDispatcher = switch (Version.get()) {
 			case v1_19_4, v1_19_3, v1_19 -> null;
-			case v1_18 -> new CommandDispatcher<>();
+			case v1_18_v1_17 -> new CommandDispatcher<>();
 		};
 	}
 
@@ -116,7 +116,7 @@ public final class ClientCommandInternals {
 			return true;
 		} catch (RuntimeException e) {
 			LOGGER.warn("Error while executing client-sided command '{}'", command, e);
-			commandSource.sendError(Text.of(e.getMessage()));
+			commandSource.sendError(TextInst.of(e.getMessage()));
 			return true;
 		} finally {
 			client.getProfiler().pop();
@@ -141,10 +141,11 @@ public final class ClientCommandInternals {
 
 	// See ChatInputSuggestor.formatException. That cannot be used directly as it returns an OrderedText instead of a Text.
 	private static Text getErrorMessage(CommandSyntaxException e) {
-		Text message = Texts.toText(e.getRawMessage());
+		Text msg = Texts.toText(e.getRawMessage());
 		String context = e.getContext();
-
-		return context != null ? TextInst.translatable("command.context.parse_error", message, context) : message;
+		if (context == null)
+			return msg;
+		return TextInst.translatable("command.context.parse_error", msg, e.getCursor(), context);
 	}
 
 	/**

@@ -1,20 +1,22 @@
 package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.NamedTextFieldWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexConsumer;
 
 @Mixin(TextFieldWidget.class)
-public class TextFieldWidgetMixin {
+public abstract class TextFieldWidgetMixin implements Tickable {
 	// Development environment
 	@ModifyArg(method = "renderButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;fill(Lnet/minecraft/client/util/math/MatrixStack;IIIII)V", ordinal = 0), index = 5, remap = false)
 	@Group(name = "renderButton", min = 1)
@@ -34,10 +36,18 @@ public class TextFieldWidgetMixin {
 		return color;
 	}
 	
-	@Redirect(method = "drawSelectionHighlight", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/BufferBuilder;vertex(DDD)Lnet/minecraft/client/render/VertexConsumer;"), require = 0)
+	@Redirect(method = "method_1886(IIII)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_287;method_22912(DDD)Lnet/minecraft/class_4588;"), remap = false, require = 0)
+	@SuppressWarnings("target")
 	private VertexConsumer vertex(BufferBuilder buffer, double x, double y, double z) {
 		if (NamedTextFieldWidget.matrix == null)
 			return buffer.vertex(x, y, z);
 		return MultiVersionMisc.vertex(buffer, NamedTextFieldWidget.matrix, (float) x, (float) y, (float) z);
+	}
+	
+	@Shadow
+	private int focusedTicks;
+	@Override
+	public void tick() {
+		focusedTicks++;
 	}
 }

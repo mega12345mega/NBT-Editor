@@ -40,6 +40,7 @@ public abstract class CommandManagerMixin {
 
 	// 1.18
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/server/command/CommandManager;dispatcher:Lcom/mojang/brigadier/CommandDispatcher;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER), target = @Desc(value = "<init>", args = RegistrationEnvironment.class), require = 0)
+	@SuppressWarnings("target")
 	private void fabric_addCommands(CommandManager.RegistrationEnvironment environment, CallbackInfo ci) {
 		CommandRegistrationCallback.EVENT.invoker().register(this.dispatcher, null, environment);
 	}

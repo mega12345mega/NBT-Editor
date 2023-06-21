@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.StringReader;

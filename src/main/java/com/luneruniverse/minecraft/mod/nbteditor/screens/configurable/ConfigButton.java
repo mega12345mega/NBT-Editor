@@ -55,4 +55,7 @@ public class ConfigButton extends ExtendableButtonWidget implements ConfigPath {
 		return false; // Stop space from triggering the button
 	}
 	
+	@Override
+	public void tick() {}
+	
 }

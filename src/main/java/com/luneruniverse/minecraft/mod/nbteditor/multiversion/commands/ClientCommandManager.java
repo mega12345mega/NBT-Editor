@@ -119,7 +119,7 @@ public final class ClientCommandManager {
 			case v1_19 -> Reflection.newInstance("net.minecraft.class_7157",
 					new Class[] {Reflection.getClass("net.minecraft.class_5455")}, // DynamicRegistryManager.class
 					lastGamePacket.registryManager());
-			case v1_18 -> null;
+			case v1_18_v1_17 -> null;
 		};
 		ClientCommandRegistrationCallback.EVENT.invoker().register(dispatcher, registryAccess);
 		ClientCommandInternals.finalizeInit();

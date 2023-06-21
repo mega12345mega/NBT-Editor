@@ -2,11 +2,12 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
 import java.util.List;
 
-import com.luneruniverse.minecraft.mod.nbteditor.screens.Panel;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.Panel;
 
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 
-public class ConfigPanel extends Panel<ConfigPath> {
+public class ConfigPanel extends Panel<ConfigPath> implements Tickable {
 	
 	private final ConfigPath toRender;
 	private final List<PositionedPanelElement<ConfigPath>> elements;
@@ -32,6 +33,11 @@ public class ConfigPanel extends Panel<ConfigPath> {
 	@Override
 	protected int getHighestY() {
 		return toRender.getRenderHeight();
+	}
+	
+	@Override
+	public void tick() {
+		toRender.tick();
 	}
 	
 	
