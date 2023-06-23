@@ -36,18 +36,20 @@ public class MultiVersionRegistry<T> implements Iterable<T> {
 	}
 	
 	private static final Class<?> REGISTRY_CLASS = Reflection.getClass("net.minecraft.class_2378");
-	private static final Class<?> REGISTRIES_CLASS = switch (Version.get()) {
-		case v1_20, v1_19_4, v1_19_3 -> Reflection.getClass("net.minecraft.class_7923");
-		case v1_19, v1_18_v1_17 -> REGISTRY_CLASS;
-	};
+	private static final Class<?> REGISTRIES_CLASS = Version.<Class<?>>newSwitch()
+			.range("1.19.3", null, () -> Reflection.getClass("net.minecraft.class_7923"))
+			.range(null, "1.19.2", () -> REGISTRY_CLASS)
+			.get();
 	private static <T> MultiVersionRegistry<T> getRegistry(String oldName, String newName, boolean defaulted) {
-		return new MultiVersionRegistry<>(Reflection.getField(REGISTRIES_CLASS, switch (Version.get()) {
-			case v1_20, v1_19_4, v1_19_3 -> newName;
-			case v1_19, v1_18_v1_17 -> oldName;
-		}, defaulted ? switch (Version.get()) {
-			case v1_20, v1_19_4, v1_19_3 -> "Lnet/minecraft/class_7922;";
-			case v1_19, v1_18_v1_17 -> "Lnet/minecraft/class_2348;";
-		} : "Lnet/minecraft/class_2378;").get(null));
+		return new MultiVersionRegistry<>(Reflection.getField(REGISTRIES_CLASS, Version.<String>newSwitch()
+				.range("1.19.3", null, newName)
+				.range(null, "1.19.2", oldName)
+				.get(),
+				defaulted ? Version.<String>newSwitch()
+						.range("1.19.3", null, "Lnet/minecraft/class_7922;")
+						.range(null, "1.19.2", "Lnet/minecraft/class_2348;")
+						.get() : "Lnet/minecraft/class_2378;")
+				.get(null));
 	}
 	
 	public static final MultiVersionRegistry<ScreenHandlerType<?>> SCREEN_HANDLER = getRegistry("field_17429", "field_41187", false);

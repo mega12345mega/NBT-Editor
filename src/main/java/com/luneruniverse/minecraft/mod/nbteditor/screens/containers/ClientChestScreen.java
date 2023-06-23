@@ -249,7 +249,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 	
 	@Override
 	protected Text getRenderedTitle() {
-		EditableText title = MultiVersionMisc.copyText(this.title).append(" (" + (PAGE + 1) + ")");
+		EditableText title = TextInst.copy(this.title).append(" (" + (PAGE + 1) + ")");
 		return saved ? title : title.append("*");
 	}
 	

@@ -78,7 +78,7 @@ public class SignboardScreen extends ItemEditorScreen {
 		ClickEvent event = getClickEvent(line);
 		if (event == null)
 			return line;
-		return MultiVersionMisc.copyText(line).styled(style -> style.withClickEvent(event));
+		return TextInst.copy(line).styled(style -> style.withClickEvent(event));
 	}
 	private ClickEvent getClickEvent(Text text) {
 		ClickEvent event = text.getStyle().getClickEvent();

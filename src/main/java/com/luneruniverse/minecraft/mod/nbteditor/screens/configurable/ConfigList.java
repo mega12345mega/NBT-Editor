@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -126,7 +125,7 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 				}
 				Text msg = action.msg;
 				if (action == ListContextMenuAction.REMOVE)
-					msg = MultiVersionMisc.copyText(msg).formatted(color == -1 ? Formatting.RED : Formatting.GOLD);
+					msg = TextInst.copy(msg).formatted(color == -1 ? Formatting.RED : Formatting.GOLD);
 				MultiVersionDrawableHelper.drawCenteredTextWithShadow(matrices, MainUtil.client.textRenderer, msg, contextMenuX + 25, y + 2, color);
 				y += MainUtil.client.textRenderer.fontHeight + 2;
 			}

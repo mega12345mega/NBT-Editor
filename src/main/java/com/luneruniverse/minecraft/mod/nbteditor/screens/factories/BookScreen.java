@@ -186,7 +186,7 @@ public class BookScreen extends ItemEditorScreen {
 		};
 	}
 	private Text makePreviewText(Text text) {
-		EditableText output = MultiVersionMisc.copyText(text);
+		EditableText output = TextInst.copy(text);
 		output.setStyle(makePreviewStyle(output.getStyle()));
 		output.getSiblings().replaceAll(this::makePreviewText);
 		return output;

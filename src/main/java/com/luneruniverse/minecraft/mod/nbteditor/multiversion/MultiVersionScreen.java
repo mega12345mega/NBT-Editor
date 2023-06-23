@@ -33,7 +33,7 @@ public class MultiVersionScreen extends Screen implements OldEventBehavior {
 	// Prevents crash in 1.17 that's trying to find this method
 	@Override
 	public void renderBackground(MatrixStack matrices) {
-		MultiVersionMisc.renderBackground((Screen) this, matrices);
+		MultiVersionDrawableHelper.renderBackground((Screen) this, matrices);
 	}
 	
 	public final boolean isPauseScreen() { // 1.18
@@ -53,13 +53,13 @@ public class MultiVersionScreen extends Screen implements OldEventBehavior {
 	private static final Supplier<Reflection.MethodInvoker> ParentElement_setInitialFocus =
 			Reflection.getOptionalMethod(ParentElement.class, "method_20085", MethodType.methodType(void.class, Element.class));
 	public void setInitialFocus(Element element) {
-		switch (Version.get()) {
-			case v1_20, v1_19_4 -> {
-				super.setInitialFocus(element);
-				setFocused(element);
-			}
-			case v1_19_3, v1_19, v1_18_v1_17 -> ParentElement_setInitialFocus.get().invoke(this, element);
-		}
+		Version.newSwitch()
+				.range("1.19.4", null, () -> {
+					super.setInitialFocus(element);
+					setFocused(element);
+				})
+				.range(null, "1.19.3", () -> ParentElement_setInitialFocus.get().invoke(this, element))
+				.run();
 	}
 	
 }

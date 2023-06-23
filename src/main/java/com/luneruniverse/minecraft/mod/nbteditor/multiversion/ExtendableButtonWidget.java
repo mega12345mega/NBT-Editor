@@ -25,10 +25,10 @@ public class ExtendableButtonWidget extends PressableWidget {
 		this.onPress = onPress;
 		this.tooltip = tooltip;
 		if (tooltip != null) {
-			switch (Version.get()) {
-				case v1_20, v1_19_4, v1_19_3 -> setTooltip(tooltip.toNewTooltip());
-				case v1_19, v1_18_v1_17 -> {}
-			}
+			Version.newSwitch()
+					.range("1.19.3", null, () -> setTooltip(tooltip.toNewTooltip()))
+					.range(null, "1.19.2", () -> {})
+					.run();
 		}
 	}
 	public ExtendableButtonWidget(int x, int y, int width, int height, Text text, PressAction onPress) {
@@ -58,16 +58,16 @@ public class ExtendableButtonWidget extends PressableWidget {
 	}
 	
 	public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		switch (Version.get()) {
-			case v1_20 -> super.renderButton(MultiVersionDrawableHelper.getDrawContext(matrices), mouseX, mouseY, delta);
-			case v1_19_4 -> super_renderButton("method_48579", matrices, mouseX, mouseY, delta);
-			case v1_19_3 -> super_renderButton("method_25359", matrices, mouseX, mouseY, delta);
-			case v1_19, v1_18_v1_17 -> {
-				super_renderButton("method_25359", matrices, mouseX, mouseY, delta);
-				if (isSelected()) // Actually isHovered, got renamed
-					method_25352(matrices, mouseX, mouseY);
-			}
-		}
+		Version.newSwitch()
+				.range("1.20.0", null, () -> super.renderButton(MultiVersionDrawableHelper.getDrawContext(matrices), mouseX, mouseY, delta))
+				.range("1.19.4", "1.19.4", () -> super_renderButton("method_48579", matrices, mouseX, mouseY, delta))
+				.range("1.19.3", "1.19.3", () -> super_renderButton("method_25359", matrices, mouseX, mouseY, delta))
+				.range(null, "1.19.2", () -> {
+					super_renderButton("method_25359", matrices, mouseX, mouseY, delta);
+					if (isSelected()) // Actually isHovered, got renamed
+						method_25352(matrices, mouseX, mouseY);
+				})
+				.run();
 	}
 	@Override
 	protected final void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {

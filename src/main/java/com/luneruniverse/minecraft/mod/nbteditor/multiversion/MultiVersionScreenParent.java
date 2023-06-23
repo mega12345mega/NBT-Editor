@@ -5,6 +5,6 @@ import net.minecraft.client.util.math.MatrixStack;
 
 public interface MultiVersionScreenParent {
 	public default void renderBackground(MatrixStack matrices) {
-		MultiVersionMisc.renderBackground((Screen) this, matrices);
+		MultiVersionDrawableHelper.renderBackground((Screen) this, matrices);
 	}
 }

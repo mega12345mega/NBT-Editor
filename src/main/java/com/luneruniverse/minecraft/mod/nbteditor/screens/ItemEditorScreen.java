@@ -115,10 +115,10 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 		x /= scaleX;
 		y /= scaleY;
 		
-		boolean oldMatrix = switch (Version.get()) {
-			case v1_20, v1_19_4 -> false;
-			case v1_19_3, v1_19, v1_18_v1_17 -> true;
-		};
+		boolean oldMatrix = Version.<Boolean>newSwitch()
+				.range("1.19.4", null, false)
+				.range(null, "1.19.3", true)
+				.get();
 		if (oldMatrix)
 			matrices = RenderSystem.getModelViewStack();
 		

@@ -10,38 +10,63 @@ import java.util.stream.Stream;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-public enum Version {
-	v1_20,
-	v1_19_4,
-	v1_19_3,
-	v1_19,
-	v1_18_v1_17;
+public class Version {
+	public static class VersionSwitch<T> {
+		private Supplier<T> match;
+		private VersionSwitch() {}
+		public VersionSwitch<T> range(String min, String max, Supplier<T> value) {
+			int[] minParts = min == null ? null : parseVersion(min);
+			int[] maxParts = max == null ? null : parseVersion(max);
+			int[] actualParts = Version.get();
+			boolean minMatch = (min != null);
+			boolean maxMatch = (max != null);
+			for (int i = 0; i < 3; i++) {
+				if (minMatch) {
+					if (minParts[i] < actualParts[i])
+						minMatch = false;
+					else if (minParts[i] > actualParts[i])
+						return this;
+				}
+				if (maxMatch) {
+					if (actualParts[i] < maxParts[i])
+						maxMatch = false;
+					else if (actualParts[i] > maxParts[i])
+						return this;
+				}
+			}
+			if (match != null)
+				throw new IllegalArgumentException("Overlapping versions!");
+			match = value;
+			return this;
+		}
+		public VersionSwitch<T> range(String min, String max, T value) {
+			return range(min, max, () -> value);
+		}
+		public VersionSwitch<T> range(String min, String max, Runnable run) {
+			return range(min, max, () -> {
+				run.run();
+				return null;
+			});
+		}
+		public T get() {
+			if (match == null)
+				throw new IllegalStateException("Missing version!");
+			return match.get();
+		}
+		public void run() {
+			get();
+		}
+	}
 	
-	private static volatile Version CURRENT;
-	public static Version get() {
-		if (CURRENT != null)
-			return CURRENT;
-		
-		String version = getReleaseTarget();
-		Supplier<IllegalStateException> unsupported = () ->
-				new IllegalStateException("Unsupported Minecraft version: " + version);
-		
-		int[] parts = Stream.of(version.split("\\.")).mapToInt(Integer::parseInt).toArray();
-		if (parts[0] != 1)
-			throw unsupported.get();
-		
-		return CURRENT = switch (parts[1]) {
-			case 20 -> v1_20;
-			case 19 -> switch (parts.length == 2 ? 0 : parts[2]) {
-				case 4 -> v1_19_4;
-				case 3 -> v1_19_3;
-				case 2, 1, 0 -> v1_19;
-				default -> throw unsupported.get();
-			};
-			case 18 -> v1_18_v1_17;
-			case 17 -> v1_18_v1_17;
-			default -> throw unsupported.get();
-		};
+	public static <T> VersionSwitch<T> newSwitch() {
+		return new VersionSwitch<T>();
+	}
+	
+	private static volatile int[] CURRENT;
+	public static int[] get() {
+		if (CURRENT == null)
+			CURRENT = parseVersion(getReleaseTarget());
+		return CURRENT;
 	}
 	
 	private static String releaseTarget;
@@ -59,5 +84,14 @@ public enum Version {
 		} catch (IOException e) {
 			throw new UncheckedIOException("Error trying to read game version", e);
 		}
+	}
+	
+	private static int[] parseVersion(String version) {
+		int[] parts = Stream.of(version.split("\\.")).mapToInt(Integer::parseInt).toArray();
+		if (parts[0] != 1 || parts.length < 2 || parts.length > 3)
+			throw new IllegalArgumentException("Unsupported Minecraft version: " + version);
+		if (parts.length == 3)
+			return parts;
+		return new int[] {parts[0], parts[1], 0};
 	}
 }

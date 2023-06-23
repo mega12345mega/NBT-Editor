@@ -241,7 +241,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			this.base = base;
 			this.baseReset = MainUtil.forceReset(base);
 			this.styles = new ArrayList<>();
-			this.text = MultiVersionMisc.copyText(text);
+			this.text = text.copy();
 			this.undo = new ArrayList<>();
 			this.undo.add(text);
 			undoPos = 0;

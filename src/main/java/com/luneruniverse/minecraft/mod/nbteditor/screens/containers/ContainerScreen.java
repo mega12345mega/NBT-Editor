@@ -37,7 +37,7 @@ public class ContainerScreen extends ClientHandledScreen {
 		super(handler, inventory, title);
 		
 		this.saved = true;
-		this.unsavedTitle = MultiVersionMisc.copyText(title).append("*");
+		this.unsavedTitle = TextInst.copy(title).append("*");
 	}
 	private ContainerScreen build(ItemReference ref) {
 		this.ref = ref;

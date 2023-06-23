@@ -40,17 +40,17 @@ public class MultiVersionDrawableHelper {
 	
 	public static void super_render(Class<?> callerClass, Drawable caller, MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		try {
-			Class<?> matrixType = null;
-			Object matrixValue = null;
-			switch (Version.get()) {
-				case v1_20 -> {
-					matrixType = DrawContext.class;
-					matrixValue = getDrawContext(matrices);
-				}
-				case v1_19_4, v1_19_3, v1_19, v1_18_v1_17 -> {
-					matrixType = MatrixStack.class;
-					matrixValue = matrices;
-				}
+			Class<?> matrixType;
+			Object matrixValue;
+			if (Version.<Boolean>newSwitch()
+					.range("1.20.0", null, true)
+					.range(null, "1.19.4", false)
+					.get()) {
+				matrixType = DrawContext.class;
+				matrixValue = getDrawContext(matrices);
+			} else {
+				matrixType = MatrixStack.class;
+				matrixValue = matrices;
 			}
 			MethodType methodType = MethodType.methodType(void.class, matrixType, int.class, int.class, float.class);
 			String methodName = Reflection.getMethodName(Drawable.class, "method_25394", methodType);
@@ -64,35 +64,34 @@ public class MultiVersionDrawableHelper {
 	private static final Supplier<Reflection.MethodInvoker> Drawable_render =
 			Reflection.getOptionalMethod(Drawable.class, "method_25394", MethodType.methodType(void.class, MatrixStack.class, int.class, int.class, float.class));
 	public static void render(Drawable caller, MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		switch (Version.get()) {
-			case v1_20 -> caller.render(MultiVersionDrawableHelper.getDrawContext(matrices), mouseX, mouseY, delta);
-			case v1_19_4, v1_19_3, v1_19, v1_18_v1_17 -> Drawable_render.get().invoke(caller, matrices, mouseX, mouseY, delta);
-		}
+		Version.newSwitch()
+				.range("1.20.0", null, () -> caller.render(MultiVersionDrawableHelper.getDrawContext(matrices), mouseX, mouseY, delta))
+				.range(null, "1.19.4", () -> Drawable_render.get().invoke(caller, matrices, mouseX, mouseY, delta))
+				.run();
 	}
 	
 	
 	private static final Cache<String, Reflection.MethodInvoker> methodCache = CacheBuilder.newBuilder().build();
 	@SuppressWarnings("unchecked")
-	private static <R> R call(String method, Class<?> rtype, Class<?>[] classes, MatrixStack matrices, Object... args) {
+	private static <R> R call(String method, Class<?> rtype, Class<?>[] ptypes, MatrixStack matrices, Object... args) {
 		try {
-			DrawContext context = null;
-			MethodType type = null;
-			switch (Version.get()) {
-				case v1_20 -> {
-					context = MultiVersionDrawableHelper.getDrawContext(matrices);
-					type = MethodType.methodType(rtype, classes);
-				}
-				case v1_19_4, v1_19_3, v1_19, v1_18_v1_17 -> {
-					context = null;
-					type = MethodType.methodType(rtype, MatrixStack.class, classes);
-					Object[] newArgs = new Object[args.length + 1];
-					newArgs[0] = matrices;
-					System.arraycopy(args, 0, newArgs, 1, args.length);
-					args = newArgs;
-				}
+			DrawContext context;
+			MethodType type;
+			if (Version.<Boolean>newSwitch()
+					.range("1.20.0", null, true)
+					.range(null, "1.19.4", false)
+					.get()) {
+				context = MultiVersionDrawableHelper.getDrawContext(matrices);
+				type = MethodType.methodType(rtype, ptypes);
+			} else {
+				context = null;
+				type = MethodType.methodType(rtype, MatrixStack.class, ptypes);
+				Object[] newArgs = new Object[args.length + 1];
+				newArgs[0] = matrices;
+				System.arraycopy(args, 0, newArgs, 1, args.length);
+				args = newArgs;
 			}
-			final MethodType finalType = type;
-			return (R) methodCache.get(method, () -> Reflection.getMethod(DrawContext.class, method, finalType)).invoke(context, args);
+			return (R) methodCache.get(method, () -> Reflection.getMethod(DrawContext.class, method, type)).invoke(context, args);
 		} catch (ExecutionException | UncheckedExecutionException e) {
 			throw new RuntimeException("Error invoking method", e);
 		}
@@ -113,17 +112,17 @@ public class MultiVersionDrawableHelper {
 	private static final Supplier<Reflection.MethodInvoker> TextRenderer_draw =
 			Reflection.getOptionalMethod(TextRenderer.class, "method_30883", MethodType.methodType(int.class, MatrixStack.class, Text.class, float.class, float.class, int.class));
 	public static void drawTextWithoutShadow(MatrixStack matrices, TextRenderer textRenderer, Text text, int x, int y, int color) {
-		switch (Version.get()) {
-			case v1_20 -> getDrawContext(matrices).drawText(textRenderer, text, x, y, color, false);
-			case v1_19_4, v1_19_3, v1_19, v1_18_v1_17 -> TextRenderer_draw.get().invoke(textRenderer, matrices, text, x, y, color);
-		}
+		Version.newSwitch()
+				.range("1.20.0", null, () -> getDrawContext(matrices).drawText(textRenderer, text, x, y, color, false))
+				.range(null, "1.19.4", () -> TextRenderer_draw.get().invoke(textRenderer, matrices, text, x, y, color))
+				.run();
 	}
 	
 	public static void drawTextWithShadow(MatrixStack matrices, TextRenderer textRenderer, Text text, int x, int y, int color) {
-		call("method_27535", switch (Version.get()) {
-			case v1_20 -> int.class;
-			case v1_19_4, v1_19_3, v1_19, v1_18_v1_17 -> void.class;
-		}, new Class<?>[] {TextRenderer.class, Text.class, int.class, int.class, int.class}, matrices, textRenderer, text, x, y, color);
+		call("method_27535", Version.<Class<?>>newSwitch()
+				.range("1.20.0", null, int.class)
+				.range(null, "1.19.4", void.class)
+				.get(), new Class<?>[] {TextRenderer.class, Text.class, int.class, int.class, int.class}, matrices, textRenderer, text, x, y, color);
 	}
 	
 	public static void drawCenteredTextWithShadow(MatrixStack matrices, TextRenderer textRenderer, Text text, int x, int y, int color) {
@@ -131,17 +130,17 @@ public class MultiVersionDrawableHelper {
 	}
 	
 	public static void drawTexture(MatrixStack matrices, Identifier texture, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight) {
-		switch (Version.get()) {
-			case v1_20 -> getDrawContext(matrices).drawTexture(texture, x, y, u, v, width, height, textureWidth, textureHeight);
-			case v1_19_4, v1_19_3, v1_19, v1_18_v1_17 -> {
-				RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-				RenderSystem.setShaderTexture(0, texture);
-				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-				call("method_25290", void.class,
-						new Class<?>[] {int.class, int.class, float.class, float.class, int.class, int.class, int.class, int.class},
-						matrices, x, y, u, v, width, height, textureWidth, textureHeight);
-			}
-		}
+		Version.newSwitch()
+				.range("1.20.0", null, () -> getDrawContext(matrices).drawTexture(texture, x, y, u, v, width, height, textureWidth, textureHeight))
+				.range(null, "1.19.4", () -> {
+					RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+					RenderSystem.setShaderTexture(0, texture);
+					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+					call("method_25290", void.class,
+							new Class<?>[] {int.class, int.class, float.class, float.class, int.class, int.class, int.class, int.class},
+							matrices, x, y, u, v, width, height, textureWidth, textureHeight);
+				})
+				.run();
 	}
 	public static void drawTexture(MatrixStack matrices, Identifier texture, int x, int y, float u, float v, int width, int height) {
 		drawTexture(matrices, texture, x, y, u, v, width, height, 256, 256);
@@ -150,19 +149,19 @@ public class MultiVersionDrawableHelper {
 	private static final Supplier<Reflection.MethodInvoker> Screen_renderTooltip_Text =
 			Reflection.getOptionalMethod(Screen.class, "method_25424", MethodType.methodType(void.class, MatrixStack.class, Text.class, int.class, int.class));
 	public static void renderTooltip(MatrixStack matrices, Text text, int x, int y) {
-		switch (Version.get()) {
-			case v1_20 -> getDrawContext(matrices).drawTooltip(MainUtil.client.textRenderer, text, x, y);
-			case v1_19_4, v1_19_3, v1_19, v1_18_v1_17 -> Screen_renderTooltip_Text.get().invoke(MainUtil.client.currentScreen, matrices, text, x, y);
-		}
+		Version.newSwitch()
+				.range("1.20.0", null, () -> getDrawContext(matrices).drawTooltip(MainUtil.client.textRenderer, text, x, y))
+				.range(null, "1.19.4", () -> Screen_renderTooltip_Text.get().invoke(MainUtil.client.currentScreen, matrices, text, x, y))
+				.run();
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> Screen_renderTooltip_List =
 			Reflection.getOptionalMethod(Screen.class, "method_30901", MethodType.methodType(void.class, MatrixStack.class, List.class, int.class, int.class));
 	public static void renderTooltip(MatrixStack matrices, List<Text> lines, int x, int y) {
-		switch (Version.get()) {
-			case v1_20 -> getDrawContext(matrices).drawTooltip(MainUtil.client.textRenderer, lines, x, y);
-			case v1_19_4, v1_19_3, v1_19, v1_18_v1_17 -> Screen_renderTooltip_List.get().invoke(MainUtil.client.currentScreen, matrices, lines, x, y);
-		}
+		Version.newSwitch()
+				.range("1.20.0", null, () -> getDrawContext(matrices).drawTooltip(MainUtil.client.textRenderer, lines, x, y))
+				.range(null, "1.19.4", () -> Screen_renderTooltip_List.get().invoke(MainUtil.client.currentScreen, matrices, lines, x, y))
+				.run();
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> ItemRenderer_renderInGuiWithOverrides_MatrixStack =
@@ -180,27 +179,36 @@ public class MultiVersionDrawableHelper {
 	public static final void renderItem(MatrixStack matrices, float zOffset, boolean setScreenZOffset, ItemStack item, int x, int y) {
 		ItemRenderer itemRenderer = MainUtil.client.getItemRenderer();
 		TextRenderer textRenderer = MainUtil.client.textRenderer;
-		switch (Version.get()) {
-			case v1_20 -> {
-				DrawContext context = getDrawContext(matrices);
-				context.drawItem(item, x, y);
-				context.drawItemInSlot(textRenderer, item, x, y);
-			}
-			case v1_19_4 -> {
-				ItemRenderer_renderInGuiWithOverrides_MatrixStack.get().invoke(itemRenderer, matrices, item, x, y);
-				ItemRenderer_renderGuiItemOverlay_MatrixStack.get().invoke(itemRenderer, matrices, textRenderer, item, x, y);
-			}
-			case v1_19_3, v1_19, v1_18_v1_17 -> {
-				if (setScreenZOffset)
-					DrawableHelper_setZOffset.get().invoke(MainUtil.client.currentScreen, (int) zOffset);
-				ItemRenderer_zOffset.get().set(itemRenderer, zOffset);
-				ItemRenderer_renderInGuiWithOverrides.get().invoke(itemRenderer, item, x, y);
-				ItemRenderer_renderGuiItemOverlay.get().invoke(itemRenderer, textRenderer, item, x, y);
-				ItemRenderer_zOffset.get().set(itemRenderer, 0.0F);
-				if (setScreenZOffset)
-					DrawableHelper_setZOffset.get().invoke(MainUtil.client.currentScreen, 0);
-			}
-		}
+		Version.newSwitch()
+				.range("1.20.0", null, () -> {
+					DrawContext context = getDrawContext(matrices);
+					context.drawItem(item, x, y);
+					context.drawItemInSlot(textRenderer, item, x, y);
+				})
+				.range("1.19.4", "1.19.4", () -> {
+					ItemRenderer_renderInGuiWithOverrides_MatrixStack.get().invoke(itemRenderer, matrices, item, x, y);
+					ItemRenderer_renderGuiItemOverlay_MatrixStack.get().invoke(itemRenderer, matrices, textRenderer, item, x, y);
+				})
+				.range(null, "1.19.3", () -> {
+					if (setScreenZOffset)
+						DrawableHelper_setZOffset.get().invoke(MainUtil.client.currentScreen, (int) zOffset);
+					ItemRenderer_zOffset.get().set(itemRenderer, zOffset);
+					ItemRenderer_renderInGuiWithOverrides.get().invoke(itemRenderer, item, x, y);
+					ItemRenderer_renderGuiItemOverlay.get().invoke(itemRenderer, textRenderer, item, x, y);
+					ItemRenderer_zOffset.get().set(itemRenderer, 0.0F);
+					if (setScreenZOffset)
+						DrawableHelper_setZOffset.get().invoke(MainUtil.client.currentScreen, 0);
+				})
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> Screen_renderBackground =
+			Reflection.getOptionalMethod(Screen.class, "method_25420", MethodType.methodType(void.class, MatrixStack.class));
+	public static void renderBackground(Screen screen, MatrixStack matrices) {
+		Version.newSwitch()
+				.range("1.20.0", null, () -> screen.renderBackground(MultiVersionDrawableHelper.getDrawContext(matrices)))
+				.range(null, "1.19.4", () -> Screen_renderBackground.get().invoke(screen, matrices))
+				.run();
 	}
 	
 }

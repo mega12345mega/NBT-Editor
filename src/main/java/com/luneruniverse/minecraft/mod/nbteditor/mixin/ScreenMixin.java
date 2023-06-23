@@ -39,10 +39,10 @@ public class ScreenMixin {
 	}
 	@Inject(method = "init(Lnet/minecraft/client/MinecraftClient;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;init()V"), require = 0)
 	private void init(MinecraftClient client, int width, int height, CallbackInfo info) {
-		switch (Version.get()) {
-			case v1_20, v1_19_4 -> MixinLink.addCreativeTabs((Screen) (Object) this);
-			case v1_19_3, v1_19, v1_18_v1_17 -> {}
-		}
+		Version.newSwitch()
+				.range("1.19.4", null, () -> MixinLink.addCreativeTabs((Screen) (Object) this))
+				.range(null, "1.19.3", () -> {})
+				.run();
 	}
 	
 	@Inject(method = "filesDragged", at = @At("HEAD"))

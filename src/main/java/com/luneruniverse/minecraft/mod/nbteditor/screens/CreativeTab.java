@@ -54,10 +54,10 @@ public class CreativeTab {
 	
 	public static record CreativeTabData(ItemStack item, Runnable onClick, Predicate<Screen> whenToShow) {}
 	public static final List<CreativeTabData> TABS = new ArrayList<>();
-	public static final int WIDTH = switch (Version.get()) {
-		case v1_20, v1_19_4, v1_19_3 -> 26;
-		case v1_19, v1_18_v1_17 -> 28;
-	};
+	public static final int WIDTH = Version.<Integer>newSwitch()
+			.range("1.19.3", null, 26)
+			.range(null, "1.19.2", 28)
+			.get();
 	
 	private static final Identifier TEXTURE = new Identifier("textures/gui/container/creative_inventory/tabs.png");
 	
@@ -80,10 +80,10 @@ public class CreativeTab {
 		
 		MultiVersionDrawableHelper.drawTexture(matrices, TEXTURE, x, y, j, k, WIDTH, 32);
 		
-		int xOffset = switch (Version.get()) {
-			case v1_20, v1_19_4, v1_19_3 -> 5;
-			case v1_19, v1_18_v1_17 -> 6;
-		};
+		int xOffset = Version.<Integer>newSwitch()
+				.range("1.19.3", null, 5)
+				.range(null, "1.19.2", 6)
+				.get();
 		MultiVersionDrawableHelper.renderItem(matrices, 100.0F, false, item, x + xOffset, y + 9);
 	}
 	private void renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {

@@ -90,19 +90,19 @@ public class MultiVersionTooltip {
 		// Undo translations and render at actual position
 		// This allows Screen#renderTooltip to adjust for window height
 		Object matrix = MultiVersionMisc.getPositionMatrix(matrices.peek());
-		float[] translation = switch (Version.get()) {
-			case v1_20, v1_19_4, v1_19_3 -> {
-				Vector3f output = ((Matrix4f) matrix).getColumn(3, new Vector3f());
-				yield new float[] {output.x, output.y, output.z};
-			}
-			case v1_19, v1_18_v1_17 -> {
-				FloatBuffer buffer = FloatBuffer.allocate(16);
-				Matrix4f_writeColumnMajor.get().invoke(matrix, buffer); // matrix.writeColumnMajor(buffer)
-				float[] output = new float[3];
-				buffer.get(12, output);
-				yield output;
-			}
-		};
+		float[] translation = Version.<float[]>newSwitch()
+				.range("1.19.3", null, () -> {
+					Vector3f output = ((Matrix4f) matrix).getColumn(3, new Vector3f());
+					return new float[] {output.x, output.y, output.z};
+				})
+				.range(null, "1.19.2", () -> {
+					FloatBuffer buffer = FloatBuffer.allocate(16);
+					Matrix4f_writeColumnMajor.get().invoke(matrix, buffer); // matrix.writeColumnMajor(buffer)
+					float[] output = new float[3];
+					buffer.get(12, output);
+					return output;
+				})
+				.get();
 		matrices.push();
 		matrices.translate(-translation[0], -translation[1], 0.0);
 		boolean scissor = GL20.glGetBoolean(GL20.GL_SCISSOR_TEST);

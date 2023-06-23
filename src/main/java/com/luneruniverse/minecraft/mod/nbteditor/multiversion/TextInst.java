@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
 public class TextInst {
@@ -8,16 +9,20 @@ public class TextInst {
 		return Text.of(msg);
 	}
 	public static EditableText literal(String msg) {
-		return new EditableText(switch (Version.get()) {
-			case v1_20, v1_19_4, v1_19_3, v1_19 -> Text.literal(msg);
-			case v1_18_v1_17 -> Reflection.newInstance("net.minecraft.class_2585", new Class[] {String.class}, msg); // new LiteralText(msg)
-		});
+		return new EditableText(Version.<MutableText>newSwitch()
+				.range("1.19.0", null, () -> Text.literal(msg))
+				.range(null, "1.18.2", () -> Reflection.newInstance("net.minecraft.class_2585", new Class[] {String.class}, msg)) // new LiteralText(msg)
+				.get());
 	}
 	public static EditableText translatable(String key, Object... args) {
-		return new EditableText(switch (Version.get()) {
-			case v1_20, v1_19_4, v1_19_3, v1_19 -> Text.translatable(key, args);
-			case v1_18_v1_17 -> Reflection.newInstance("net.minecraft.class_2588", new Class[] {String.class, Object[].class}, key, args); // new TranslatableText(key, args)
-		});
+		return new EditableText(Version.<MutableText>newSwitch()
+				.range("1.19.0", null, () -> Text.translatable(key, args))
+				.range(null, "1.18.2", () -> Reflection.newInstance("net.minecraft.class_2588", new Class[] {String.class, Object[].class}, key, args)) // new TranslatableText(key, args)
+				.get());
+	}
+	
+	public static EditableText copy(Text text) {
+		return new EditableText(text.copy());
 	}
 	
 }
