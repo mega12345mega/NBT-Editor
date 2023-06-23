@@ -40,7 +40,7 @@ public class ScreenMixin {
 	@Inject(method = "init(Lnet/minecraft/client/MinecraftClient;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;init()V"), require = 0)
 	private void init(MinecraftClient client, int width, int height, CallbackInfo info) {
 		switch (Version.get()) {
-			case v1_19_4 -> MixinLink.addCreativeTabs((Screen) (Object) this);
+			case v1_20, v1_19_4 -> MixinLink.addCreativeTabs((Screen) (Object) this);
 			case v1_19_3, v1_19, v1_18_v1_17 -> {}
 		}
 	}
@@ -87,7 +87,7 @@ public class ScreenMixin {
 		}
 	}
 	
-	// See plugins.mixin.ScreenMixin#renderTooltipFromComponents
+	// See toggled.ScreenMixin#renderTooltipFromComponents, toggled.DrawContextMixin#drawTooltip
 	@Inject(method = "method_32633(Lnet/minecraft/class_4587;Ljava/util/List;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_4587;method_22903()V", shift = At.Shift.AFTER), remap = false, require = 0)
 	@SuppressWarnings("target")
 	private void renderTooltipFromComponents(MatrixStack matrices, List<TooltipComponent> tooltip, int x, int y, CallbackInfo info) {

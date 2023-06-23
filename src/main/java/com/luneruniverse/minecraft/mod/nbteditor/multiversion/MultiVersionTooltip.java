@@ -14,8 +14,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL20;
 
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -93,7 +91,7 @@ public class MultiVersionTooltip {
 		// This allows Screen#renderTooltip to adjust for window height
 		Object matrix = MultiVersionMisc.getPositionMatrix(matrices.peek());
 		float[] translation = switch (Version.get()) {
-			case v1_19_4, v1_19_3 -> {
+			case v1_20, v1_19_4, v1_19_3 -> {
 				Vector3f output = ((Matrix4f) matrix).getColumn(3, new Vector3f());
 				yield new float[] {output.x, output.y, output.z};
 			}
@@ -111,7 +109,7 @@ public class MultiVersionTooltip {
 		if (scissor)
 			GL20.glDisable(GL20.GL_SCISSOR_TEST);
 		
-		MainUtil.client.currentScreen.renderTooltip(matrices, lines, mouseX + (int) translation[0], mouseY + (int) translation[1]);
+		MultiVersionDrawableHelper.renderTooltip(matrices, lines, mouseX + (int) translation[0], mouseY + (int) translation[1]);
 		
 		if (scissor)
 			GL20.glEnable(GL20.GL_SCISSOR_TEST);

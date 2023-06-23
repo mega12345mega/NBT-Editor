@@ -5,6 +5,7 @@ import java.util.function.Function;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -115,7 +116,7 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 		y /= scaleY;
 		
 		boolean oldMatrix = switch (Version.get()) {
-			case v1_19_4 -> false;
+			case v1_20, v1_19_4 -> false;
 			case v1_19_3, v1_19, v1_18_v1_17 -> true;
 		};
 		if (oldMatrix)
@@ -127,7 +128,7 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 		if (oldMatrix)
 			RenderSystem.applyModelViewMatrix();
 		
-		MultiVersionMisc.renderItem(matrices, 200.0F, true, item, x, y);
+		MultiVersionDrawableHelper.renderItem(matrices, 200.0F, true, item, x, y);
 		
 		matrices.pop();
 		if (oldMatrix)

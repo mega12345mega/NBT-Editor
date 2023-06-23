@@ -3,11 +3,11 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
@@ -52,7 +52,7 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		DrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, name, 0, (getSpacingHeight() - MainUtil.client.textRenderer.fontHeight) / 2, 0xFFFFFFFF);
+		MultiVersionDrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, name, 0, (getSpacingHeight() - MainUtil.client.textRenderer.fontHeight) / 2, 0xFFFFFFFF);
 		
 		matrices.push();
 		matrices.translate(valueOffsetX, valueOffsetY, 0.0);

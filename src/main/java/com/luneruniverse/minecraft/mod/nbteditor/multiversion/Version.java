@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 public enum Version {
+	v1_20,
 	v1_19_4,
 	v1_19_3,
 	v1_19,
@@ -30,6 +31,7 @@ public enum Version {
 			throw unsupported.get();
 		
 		return CURRENT = switch (parts[1]) {
+			case 20 -> v1_20;
 			case 19 -> switch (parts.length == 2 ? 0 : parts[2]) {
 				case 4 -> v1_19_4;
 				case 3 -> v1_19_3;

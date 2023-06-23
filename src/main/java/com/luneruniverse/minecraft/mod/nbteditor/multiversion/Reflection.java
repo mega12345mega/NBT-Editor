@@ -67,7 +67,7 @@ public class Reflection {
 		}
 	}
 	
-	static String getFieldName(Class<?> clazz, String field, String descriptor) {
+	public static String getFieldName(Class<?> clazz, String field, String descriptor) {
 		synchronized (mappings) {
 			return mappings.mapFieldName("intermediary",
 					mappings.unmapClassName("intermediary", clazz.getName()), field, descriptor);
@@ -75,9 +75,7 @@ public class Reflection {
 	}
 	public static FieldReference getField(Class<?> clazz, String field, String descriptor) {
 		try {
-			synchronized (mappings) {
-				return new FieldReference(clazz.getField(getFieldName(clazz, field, descriptor)));
-			}
+			return new FieldReference(clazz.getField(getFieldName(clazz, field, descriptor)));
 		} catch (Exception e) {
 			throw new RuntimeException("Error getting field", e);
 		}
@@ -131,12 +129,13 @@ public class Reflection {
 			return descriptor;
 	}
 	
+	public static String getMethodName(Class<?> clazz, String method, MethodType type) {
+		return mappings.mapMethodName("intermediary",
+				mappings.unmapClassName("intermediary", clazz.getName()), method, getIntermediaryDescriptor(type));
+	}
 	public static MethodInvoker getMethod(Class<?> clazz, String method, MethodType type) {
 		try {
-			synchronized (mappings) {
-				return new MethodInvoker(clazz, mappings.mapMethodName("intermediary",
-						mappings.unmapClassName("intermediary", clazz.getName()), method, getIntermediaryDescriptor(type)), type);
-			}
+			return new MethodInvoker(clazz, getMethodName(clazz, method, type), type);
 		} catch (Exception e) {
 			throw new RuntimeException("Error getting method", e);
 		}

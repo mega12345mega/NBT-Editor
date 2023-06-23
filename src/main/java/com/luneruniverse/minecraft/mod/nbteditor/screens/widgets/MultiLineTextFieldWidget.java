@@ -12,6 +12,8 @@ import java.util.regex.PatternSyntaxException;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawable;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
@@ -25,7 +27,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
@@ -34,7 +35,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 
-public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, Tickable, Selectable {
+public class MultiLineTextFieldWidget implements MultiVersionDrawable, MultiVersionElement, Tickable, Selectable {
 	
 	private class FindAndReplaceWidget extends TranslatedGroupWidget {
 		private static String findValue = "";
@@ -161,7 +162,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 		
 		@Override
 		public void renderPre(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-			fill(matrices, -16, -16, 216, 76, 0xC8101010);
+			MultiVersionDrawableHelper.fill(matrices, -16, -16, 216, 76, 0xC8101010);
 		}
 		
 		@Override
@@ -362,7 +363,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		Screen.fill(matrices, x, y, x + width, y + height, bgColor);
+		MultiVersionDrawableHelper.fill(matrices, x, y, x + width, y + height, bgColor);
 		
 		boolean scissor = !ConfigScreen.isMacScrollPatch();
 		if (scissor) {
@@ -376,10 +377,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 		
 		int yOffset = y;
 		for (Text line : renderedLines) {
-			if (shadow)
-				textRenderer.drawWithShadow(matrices, line, x + textRenderer.fontHeight, yOffset + textRenderer.fontHeight, -1);
-			else
-				textRenderer.draw(matrices, line, x + textRenderer.fontHeight, yOffset + textRenderer.fontHeight, -1);
+			MultiVersionDrawableHelper.drawText(matrices, textRenderer, line, x + textRenderer.fontHeight, yOffset + textRenderer.fontHeight, -1, shadow);
 			yOffset += textRenderer.fontHeight * 1.5;
 		}
 		
@@ -388,7 +386,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 		
 		if (isMultiFocused() && cursorBlinkTracker / 6 % 2 == 0) {
 			Point cursor = getXYPos(this.cursor);
-			Screen.fill(matrices, cursor.x, cursor.y, cursor.x + 1, cursor.y + textRenderer.fontHeight, cursorColor);
+			MultiVersionDrawableHelper.fill(matrices, cursor.x, cursor.y, cursor.x + 1, cursor.y + textRenderer.fontHeight, cursorColor);
 		}
 		
 		matrices.pop();
@@ -401,16 +399,16 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 		Point startPos = getXYPos(start);
 		Point endPos = getXYPos(end);
 		if (startPos.y == endPos.y)
-			Screen.fill(matrices, startPos.x, startPos.y, endPos.x, endPos.y + textRenderer.fontHeight, color);
+			MultiVersionDrawableHelper.fill(matrices, startPos.x, startPos.y, endPos.x, endPos.y + textRenderer.fontHeight, color);
 		else {
 			int line = 0;
 			int lineY;
 			while ((lineY = startPos.y + line * (int) (textRenderer.fontHeight * 1.5)) < endPos.y) {
 				Point lineStart = line == 0 ? startPos : new Point(x + textRenderer.fontHeight, lineY);
-				Screen.fill(matrices, lineStart.x, lineStart.y, x + width - textRenderer.fontHeight, lineStart.y + textRenderer.fontHeight, color);
+				MultiVersionDrawableHelper.fill(matrices, lineStart.x, lineStart.y, x + width - textRenderer.fontHeight, lineStart.y + textRenderer.fontHeight, color);
 				line++;
 			}
-			Screen.fill(matrices, x + textRenderer.fontHeight, lineY, endPos.x, endPos.y + textRenderer.fontHeight, color);
+			MultiVersionDrawableHelper.fill(matrices, x + textRenderer.fontHeight, lineY, endPos.x, endPos.y + textRenderer.fontHeight, color);
 		}
 	}
 	

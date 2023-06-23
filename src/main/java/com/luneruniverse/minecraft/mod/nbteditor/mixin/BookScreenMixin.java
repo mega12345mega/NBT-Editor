@@ -3,10 +3,12 @@ package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -15,6 +17,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -84,6 +87,13 @@ public class BookScreenMixin extends Screen {
 	}
 	
 	@Inject(method = "render", at = @At("TAIL"))
+	@Group(name = "render", min = 1)
+	private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
+		MainUtil.renderLogo(MultiVersionDrawableHelper.getMatrices(context));
+	}
+	@Inject(method = "method_25394(Lnet/minecraft/class_4587;IIF)V", at = @At("TAIL"))
+	@Group(name = "render", min = 1)
+	@SuppressWarnings("target")
 	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
 		MainUtil.renderLogo(matrices);
 	}

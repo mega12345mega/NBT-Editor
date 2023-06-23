@@ -12,7 +12,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.GenericContainerScreenHandler;
@@ -80,9 +79,8 @@ public class ContainerScreen extends ClientHandledScreen {
 	}
 	
 	@Override
-	protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
-		this.textRenderer.draw(matrices, saved ? this.title : this.unsavedTitle, (float)this.titleX, (float)this.titleY, 4210752);
-		this.textRenderer.draw(matrices, this.playerInventoryTitle, (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY, 4210752);
+	protected Text getRenderedTitle() {
+		return saved ? title : unsavedTitle;
 	}
 	
 	@Override

@@ -2,9 +2,9 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
 import java.util.ArrayList;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
@@ -23,7 +23,7 @@ public abstract class ConfigGroupingHorizontal<K, T extends ConfigGroupingHorizo
 		int xOffset = 0;
 		Text fullName = getFullName();
 		if (fullName != null) {
-			DrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, fullName, PADDING * 2, 0, 0xFFFFFFFF);
+			MultiVersionDrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, fullName, PADDING * 2, 0, 0xFFFFFFFF);
 			xOffset += getNameWidth();
 		}
 		

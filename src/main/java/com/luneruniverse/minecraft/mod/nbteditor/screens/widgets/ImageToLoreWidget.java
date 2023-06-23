@@ -15,6 +15,7 @@ import javax.imageio.ImageIO;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -125,9 +126,9 @@ public class ImageToLoreWidget extends GroupWidget implements InitializableOverl
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		if (!(MainUtil.client.currentScreen instanceof WidgetScreen))
-			fill(matrices, width / 2 - 102 - 16, height / 2 - 18 - 16, width / 2 + 102 + 16, height / 2 + 22 + 16, 0xC8101010);
+			MultiVersionDrawableHelper.fill(matrices, width / 2 - 102 - 16, height / 2 - 18 - 16, width / 2 + 102 + 16, height / 2 + 22 + 16, 0xC8101010);
 		super.render(matrices, mouseX, mouseY, delta);
-		drawCenteredTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.img2lore"),
+		MultiVersionDrawableHelper.drawCenteredTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.img2lore"),
 				width / 2, height / 2 - textRenderer.fontHeight - 22, -1);
 		MainUtil.renderLogo(matrices);
 	}

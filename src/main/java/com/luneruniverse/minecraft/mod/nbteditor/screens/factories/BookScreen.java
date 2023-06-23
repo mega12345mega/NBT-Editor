@@ -11,6 +11,7 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -268,7 +269,7 @@ public class BookScreen extends ItemEditorScreen {
 	
 	@Override
 	protected void renderEditor(MatrixStack matrices, int fdf8eb, int mouseY, float delta) {
-		textRenderer.drawWithShadow(matrices, TextInst.translatable("nbteditor.book.page", page + 1, getPageCount()),
+		MultiVersionDrawableHelper.drawTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.book.page", page + 1, getPageCount()),
 				16 + 108 * 3 - 4 + 24 * 3, 64 + 10 - textRenderer.fontHeight / 2, -1);
 		renderTip(matrices, "nbteditor.formatted_text.tip");
 	}

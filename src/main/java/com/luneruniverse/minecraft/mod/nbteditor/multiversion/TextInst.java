@@ -9,13 +9,13 @@ public class TextInst {
 	}
 	public static EditableText literal(String msg) {
 		return new EditableText(switch (Version.get()) {
-			case v1_19_4, v1_19_3, v1_19 -> Text.literal(msg);
+			case v1_20, v1_19_4, v1_19_3, v1_19 -> Text.literal(msg);
 			case v1_18_v1_17 -> Reflection.newInstance("net.minecraft.class_2585", new Class[] {String.class}, msg); // new LiteralText(msg)
 		});
 	}
 	public static EditableText translatable(String key, Object... args) {
 		return new EditableText(switch (Version.get()) {
-			case v1_19_4, v1_19_3, v1_19 -> Text.translatable(key, args);
+			case v1_20, v1_19_4, v1_19_3, v1_19 -> Text.translatable(key, args);
 			case v1_18_v1_17 -> Reflection.newInstance("net.minecraft.class_2588", new Class[] {String.class, Object[].class}, key, args); // new TranslatableText(key, args)
 		});
 	}

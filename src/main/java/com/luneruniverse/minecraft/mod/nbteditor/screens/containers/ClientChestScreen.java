@@ -16,7 +16,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.GenericContainerScreenHandler;
@@ -249,12 +248,9 @@ public class ClientChestScreen extends ClientHandledScreen {
 	}
 	
 	@Override
-	protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
+	protected Text getRenderedTitle() {
 		EditableText title = MultiVersionMisc.copyText(this.title).append(" (" + (PAGE + 1) + ")");
-		if (!saved)
-			title = title.append("*");
-		this.textRenderer.draw(matrices, title, (float)this.titleX, (float)this.titleY, 4210752);
-		this.textRenderer.draw(matrices, this.playerInventoryTitle, (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY, 4210752);
+		return saved ? title : title.append("*");
 	}
 	
 	@Override

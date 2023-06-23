@@ -114,7 +114,7 @@ public final class ClientCommandManager {
 		final CommandDispatcher<FabricClientCommandSource> dispatcher = new CommandDispatcher<>();
 		ClientCommandInternals.setActiveDispatcher(dispatcher);
 		Object registryAccess = switch (Version.get()) {
-			case v1_19_4, v1_19_3 -> CommandRegistryAccess.of(MainUtil.client.getNetworkHandler().getRegistryManager(),
+			case v1_20, v1_19_4, v1_19_3 -> CommandRegistryAccess.of(MainUtil.client.getNetworkHandler().getRegistryManager(),
 					MainUtil.client.getNetworkHandler().getEnabledFeatures());
 			case v1_19 -> Reflection.newInstance("net.minecraft.class_7157",
 					new Class[] {Reflection.getClass("net.minecraft.class_5455")}, // DynamicRegistryManager.class

@@ -404,7 +404,7 @@ public class ConfigScreen extends MultiVersionScreen {
 	}
 	
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		this.renderBackground(matrices);
+		super.renderBackground(matrices);
 		super.render(matrices, mouseX, mouseY, delta);
 	}
 	

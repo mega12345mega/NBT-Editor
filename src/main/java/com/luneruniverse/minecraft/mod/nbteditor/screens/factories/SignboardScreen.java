@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
@@ -110,8 +110,7 @@ public class SignboardScreen extends ItemEditorScreen {
 	
 	@Override
 	protected void preRenderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		RenderSystem.setShaderTexture(0, texture);
-		drawTexture(matrices, 16, 64 + 24 * 2, 0, 0, width - 32, height - 80 - 24 * 2, 256, 256);
+		MultiVersionDrawableHelper.drawTexture(matrices, texture, 16, 64 + 24 * 2, 0, 0, width - 32, height - 80 - 24 * 2);
 	}
 	
 }

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
@@ -22,12 +22,12 @@ public abstract class ConfigGroupingVertical<K, T extends ConfigGroupingVertical
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		DrawableHelper.fill(matrices, 0, 0, PADDING, getSpacingHeight(), isValueValid() ? 0xFFAAAAAA : 0xFFDF4949);
+		MultiVersionDrawableHelper.fill(matrices, 0, 0, PADDING, getSpacingHeight(), isValueValid() ? 0xFFAAAAAA : 0xFFDF4949);
 		
 		int yOffset = 0;
 		Text fullName = getFullName();
 		if (fullName != null) {
-			DrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, fullName, PADDING * 2, 0, 0xFFFFFFFF);
+			MultiVersionDrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, fullName, PADDING * 2, 0, 0xFFFFFFFF);
 			yOffset += getNameHeight();
 		}
 		

@@ -59,11 +59,11 @@ public final class ClientCommandInternals {
 	private static @Nullable CommandDispatcher<FabricClientCommandSource> activeDispatcher;
 	static {
 		API_COMMAND_NAME = switch (Version.get()) {
-			case v1_19_4, v1_19_3, v1_19 -> "fabric-command-api-v2:client";
+			case v1_20, v1_19_4, v1_19_3, v1_19 -> "fabric-command-api-v2:client";
 			case v1_18_v1_17 -> "fabric-command-api-v1:client";
 		};
 		activeDispatcher = switch (Version.get()) {
-			case v1_19_4, v1_19_3, v1_19 -> null;
+			case v1_20, v1_19_4, v1_19_3, v1_19 -> null;
 			case v1_18_v1_17 -> new CommandDispatcher<>();
 		};
 	}

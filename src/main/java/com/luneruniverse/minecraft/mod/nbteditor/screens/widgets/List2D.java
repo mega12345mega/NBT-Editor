@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 
 public class List2D extends Panel<List2D.List2DValue> {
 	
-	public static abstract class List2DValue implements Drawable, MultiVersionElement {
+	public static abstract class List2DValue implements MultiVersionDrawable, MultiVersionElement {
 		
 		protected static final MinecraftClient client = MinecraftClient.getInstance();
 		protected static final TextRenderer textRenderer = client.textRenderer;
