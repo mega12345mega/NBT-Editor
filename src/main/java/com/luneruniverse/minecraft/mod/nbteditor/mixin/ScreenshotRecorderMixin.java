@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.text.Text;
@@ -22,7 +22,7 @@ public class ScreenshotRecorderMixin {
 	private static Consumer<Text> saveScreenshotInner(Consumer<Text> receiver) {
 		if (!ConfigScreen.isScreenshotOptions())
 			return receiver;
-		return msg -> receiver.accept(MainUtil.attachFileTextOptions(TextInst.copy(msg), MixinLink.screenshotTarget));
+		return msg -> receiver.accept(TextUtil.attachFileTextOptions(TextInst.copy(msg), MixinLink.screenshotTarget));
 	}
 	
 	@ModifyVariable(method = "method_1662(Ljava/io/File;Ljava/lang/String;IILnet/minecraft/class_276;Ljava/util/function/Consumer;)V", at = @At("HEAD"), ordinal = 0, remap = false)
@@ -31,6 +31,6 @@ public class ScreenshotRecorderMixin {
 	private static Consumer<Text> saveScreenshotInnerOld(Consumer<Text> receiver) {
 		if (!ConfigScreen.isScreenshotOptions())
 			return receiver;
-		return msg -> receiver.accept(MainUtil.attachFileTextOptions(TextInst.copy(msg), MixinLink.screenshotTarget));
+		return msg -> receiver.accept(TextUtil.attachFileTextOptions(TextInst.copy(msg), MixinLink.screenshotTarget));
 	}
 }

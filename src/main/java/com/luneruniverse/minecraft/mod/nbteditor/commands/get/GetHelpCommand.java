@@ -5,7 +5,7 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.EnumArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
@@ -32,10 +32,10 @@ public class GetHelpCommand extends ClientCommand {
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		builder.then(argument("feature", EnumArgumentType.options(HelpType.class)).executes(context -> {
-			context.getSource().sendFeedback(MainUtil.getLongTranslatableText(context.getArgument("feature", HelpType.class).msgKey));
+			context.getSource().sendFeedback(TextUtil.getLongTranslatableText(context.getArgument("feature", HelpType.class).msgKey));
 			return Command.SINGLE_SUCCESS;
 		})).executes(context -> {
-			context.getSource().sendFeedback(MainUtil.getLongTranslatableText("nbteditor.help"));
+			context.getSource().sendFeedback(TextUtil.getLongTranslatableText("nbteditor.help"));
 			return Command.SINGLE_SUCCESS;
 		});
 	}

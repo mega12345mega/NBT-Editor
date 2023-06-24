@@ -22,6 +22,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.SharedConstants;
@@ -430,21 +431,21 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 				lines.add(TextInst.of("\n"));
 				renderedLines.add(TextInst.of(""));
 				text = text.substring(1);
-				formattedText = MainUtil.substring(formattedText, 1);
+				formattedText = TextUtil.substring(formattedText, 1);
 				continue;
 			}
 			int charPos = 1;
-			while (textRenderer.getWidth(MainUtil.substring(formattedText, 0, charPos)) < width - textRenderer.fontHeight * 2) {
+			while (textRenderer.getWidth(TextUtil.substring(formattedText, 0, charPos)) < width - textRenderer.fontHeight * 2) {
 				charPos++;
 				if (text.length() < charPos || text.charAt(charPos - 1) == '\n')
 					break;
 			}
 			endsWithNewLine = charPos - 1 < text.length() && text.charAt(charPos - 1) == '\n';
 			int extraPos = charPos - 1 + (endsWithNewLine ? 1 : 0);
-			lines.add(MainUtil.substring(formattedText, 0, extraPos));
-			renderedLines.add(MainUtil.substring(formattedText, 0, charPos - 1));
+			lines.add(TextUtil.substring(formattedText, 0, extraPos));
+			renderedLines.add(TextUtil.substring(formattedText, 0, charPos - 1));
 			text = text.substring(extraPos);
-			formattedText = MainUtil.substring(formattedText, extraPos);
+			formattedText = TextUtil.substring(formattedText, extraPos);
 		}
 		if (endsWithNewLine) {
 			Text emptyLine = TextInst.of("");
@@ -497,7 +498,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		Text lineValue = renderedLines.get(line);
 		int lineLen = lineValue.getString().length();
 		int charPos = 0;
-		while (textRenderer.getWidth(MainUtil.substring(lineValue, 0, charPos)) < mouseX - x - textRenderer.fontHeight) {
+		while (textRenderer.getWidth(TextUtil.substring(lineValue, 0, charPos)) < mouseX - x - textRenderer.fontHeight) {
 			charPos++;
 			if (charPos > lineLen)
 				break;
@@ -527,7 +528,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 					lineY++;
 					charPos -= lineLen;
 				} else {
-					lineX = textRenderer.getWidth(MainUtil.substring(lines.get(i), 0, charPos));
+					lineX = textRenderer.getWidth(TextUtil.substring(lines.get(i), 0, charPos));
 					break;
 				}
 				i++;

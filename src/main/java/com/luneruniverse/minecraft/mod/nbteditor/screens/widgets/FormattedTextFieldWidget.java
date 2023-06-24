@@ -18,6 +18,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -214,7 +215,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				return new InternalTextFieldWidget(x, y, width, height, text, newLines, base, onChange);
 			if (prev.allowsNewLines() != newLines)
 				throw new IllegalArgumentException("Cannot convert to/from newLines on FormattedTextFieldWidget");
-			if (!MainUtil.styleEqualsExact(prev.base, base))
+			if (!TextUtil.styleEqualsExact(prev.base, base))
 				throw new IllegalArgumentException("Cannot change base on FormattedTextFieldWidget");
 			prev.setTextChangeListener(onChange);
 			prev.ignoreNextSetText = true;
@@ -239,7 +240,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			super(x, y, width, height, text.getString(), newLines, null);
 			this.onChange = onChange;
 			this.base = base;
-			this.baseReset = MainUtil.forceReset(base);
+			this.baseReset = TextUtil.forceReset(base);
 			this.styles = new ArrayList<>();
 			this.text = text.copy();
 			this.undo = new ArrayList<>();
@@ -293,8 +294,8 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			if (start == end) {
 				if (cursorStyle == null)
 					cursorStyle = getStyle(start == 0 ? 0 : start - 1);
-				if (MainUtil.hasFormatting(cursorStyle, formatting))
-					cursorStyle = MainUtil.removeFormatting(cursorStyle, formatting, true);
+				if (TextUtil.hasFormatting(cursorStyle, formatting))
+					cursorStyle = TextUtil.removeFormatting(cursorStyle, formatting, true);
 				else
 					cursorStyle = withFormatting(cursorStyle, formatting);
 				return;
@@ -303,11 +304,11 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			Style startStyle = getStyle(start);
 			Style endStyle = getStyle(end);
 			
-			boolean filled = MainUtil.hasFormatting(startStyle, formatting);
+			boolean filled = TextUtil.hasFormatting(startStyle, formatting);
 			setStyle(start, withFormatting(startStyle, formatting));
 			for (int i = start + 1; i < end && i < styles.size(); i++) {
 				Style style = styles.get(i);
-				if (style != null && !MainUtil.hasFormatting(style, formatting)) {
+				if (style != null && !TextUtil.hasFormatting(style, formatting)) {
 					styles.set(i, withFormatting(style, formatting));
 					filled = false;
 				}
@@ -315,11 +316,11 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			setStyle(end, endStyle);
 			
 			if (filled) {
-				setStyle(start, MainUtil.removeFormatting(startStyle, formatting, true));
+				setStyle(start, TextUtil.removeFormatting(startStyle, formatting, true));
 				for (int i = start + 1; i < end && i < styles.size(); i++) {
 					Style style = styles.get(i);
 					if (style != null)
-						styles.set(i, MainUtil.removeFormatting(style, formatting, true));
+						styles.set(i, TextUtil.removeFormatting(style, formatting, true));
 				}
 			}
 			
@@ -573,7 +574,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		
 		@Override
 		protected String onCopy(String text, int pos, int len) {
-			return Text.Serializer.toJson(MainUtil.substring(this.text, pos, pos + len));
+			return Text.Serializer.toJson(TextUtil.substring(this.text, pos, pos + len));
 		}
 		
 		@Override
@@ -605,14 +606,14 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			}
 		}
 		private Text pasteFilter(Text toPaste) {
-			toPaste = MainUtil.stripInvalidChars(toPaste, allowsNewLines());
+			toPaste = TextUtil.stripInvalidChars(toPaste, allowsNewLines());
 			int numNewLines = getNumNewLines(getText());
 			int toPasteNewLines = getNumNewLines(toPaste);
 			while (numNewLines + toPasteNewLines + 1 > maxLines) {
-				int i = MainUtil.lastIndexOf(toPaste, '\n');
+				int i = TextUtil.lastIndexOf(toPaste, '\n');
 				if (i == -1)
 					break;
-				toPaste = MainUtil.deleteCharAt(toPaste, i);
+				toPaste = TextUtil.deleteCharAt(toPaste, i);
 				toPasteNewLines--;
 			}
 			return toPaste;
@@ -650,7 +651,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 	}
 	public static FormattedTextFieldWidget create(FormattedTextFieldWidget prev, int x, int y, int width, int height,
 			List<Text> lines, Style base, Consumer<List<Text>> onChange) {
-		return create(prev, x, y, width, height, MainUtil.joinLines(lines), true, base, text -> onChange.accept(MainUtil.splitText(text)));
+		return create(prev, x, y, width, height, TextUtil.joinLines(lines), true, base, text -> onChange.accept(TextUtil.splitText(text)));
 	}
 	
 	private int x;
@@ -761,14 +762,14 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		field.setFormattedText(text);
 	}
 	public void setText(List<Text> lines) {
-		setText(MainUtil.joinLines(lines));
+		setText(TextUtil.joinLines(lines));
 	}
 	public Text getText() {
 		return field.getFormattedText();
 	}
 	
 	public List<Text> getTextLines() {
-		return MainUtil.splitText(getText());
+		return TextUtil.splitText(getText());
 	}
 	
 	@Override

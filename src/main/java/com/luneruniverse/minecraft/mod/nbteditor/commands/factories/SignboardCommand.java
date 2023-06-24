@@ -26,12 +26,12 @@ public class SignboardCommand extends ClientCommand {
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		builder.then(literal("new").then(argument("sign", SignboardArgumentType.signboard()).executes(context -> {
-			ItemReference ref = MainUtil.getHeldAir();
+			ItemReference ref = ItemReference.getHeldAir();
 			ref.saveItem(new ItemStack(context.getArgument("sign", SignItem.class)));
 			MainUtil.client.setScreen(new SignboardScreen(ref));
 			return Command.SINGLE_SUCCESS;
 		}))).executes(context -> {
-			MainUtil.client.setScreen(new SignboardScreen(MainUtil.getHeldItem(
+			MainUtil.client.setScreen(new SignboardScreen(ItemReference.getHeldItem(
 					item -> item.getItem() instanceof SignItem, TextInst.translatable("nbteditor.no_hand.no_item.signboard"))));
 			return Command.SINGLE_SUCCESS;
 		});

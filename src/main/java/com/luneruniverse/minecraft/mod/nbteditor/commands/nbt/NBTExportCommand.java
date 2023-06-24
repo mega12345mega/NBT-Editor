@@ -9,10 +9,12 @@ import java.nio.file.Files;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -31,7 +33,7 @@ public class NBTExportCommand extends ClientCommand {
 	private static final File exportDir = new File(NBTEditorClient.SETTINGS_FOLDER, "exported");
 	
 	private static ItemStack getItemToExport() throws CommandSyntaxException {
-		return MainUtil.getHeldItem(item -> true, TextInst.translatable("nbteditor.no_hand.no_item.to_export")).getItem();
+		return ItemReference.getHeldItem(item -> true, TextInst.translatable("nbteditor.no_hand.no_item.to_export")).getItem();
 	}
 	
 	private static String getItemToExportStr() throws CommandSyntaxException {
@@ -50,7 +52,7 @@ public class NBTExportCommand extends ClientCommand {
 				Files.createDirectory(exportDir.toPath());
 			File output = new File(exportDir, PathUtil.getNextUniqueName(exportDir.toPath(), name, ".nbt"));
 			NbtIo.writeCompressed(item.writeNbt(new NbtCompound()), output);
-			MainUtil.client.player.sendMessage(MainUtil.attachFileTextOptions(TextInst.translatable("nbteditor.nbt.export.file.success",
+			MainUtil.client.player.sendMessage(TextUtil.attachFileTextOptions(TextInst.translatable("nbteditor.nbt.export.file.success",
 					TextInst.literal(output.getName()).formatted(Formatting.UNDERLINE).styled(style ->
 					style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, output.getAbsolutePath())))), output), false);
 		} catch (Exception e) {

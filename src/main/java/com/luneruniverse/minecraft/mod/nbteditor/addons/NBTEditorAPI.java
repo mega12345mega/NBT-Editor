@@ -91,7 +91,7 @@ public class NBTEditorAPI {
 	 */
 	public static void registerItemFactory(String name, Consumer<ItemReference> factory) {
 		registerAdvancedItemFactory(name, builder -> builder.executes(context -> {
-			factory.accept(MainUtil.getHeldItem());
+			factory.accept(ItemReference.getHeldItem());
 			return Command.SINGLE_SUCCESS;
 		}));
 	}

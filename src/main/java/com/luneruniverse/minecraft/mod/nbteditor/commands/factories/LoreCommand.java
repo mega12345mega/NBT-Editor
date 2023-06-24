@@ -39,7 +39,7 @@ public class LoreCommand extends ClientCommand {
 				pos = context.getArgument("line", Integer.class);
 			} catch (IllegalArgumentException e) {}
 			
-			ItemReference ref = MainUtil.getHeldItem();
+			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			
 			Lore lore = new Lore(item);
@@ -54,7 +54,7 @@ public class LoreCommand extends ClientCommand {
 				pos = context.getArgument("line", Integer.class);
 			} catch (IllegalArgumentException e) {}
 			
-			ItemReference ref = MainUtil.getHeldItem();
+			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			
 			Lore lore = new Lore(item);
@@ -70,7 +70,7 @@ public class LoreCommand extends ClientCommand {
 				pos = context.getArgument("line", Integer.class);
 			} catch (IllegalArgumentException e) {}
 			
-			ItemReference ref = MainUtil.getHeldItem();
+			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			
 			Lore lore = new Lore(item);
@@ -80,7 +80,7 @@ public class LoreCommand extends ClientCommand {
 			return Command.SINGLE_SUCCESS;
 		};
 		Command<FabricClientCommandSource> clear = context -> {
-			ItemReference ref = MainUtil.getHeldItem();
+			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			
 			Lore lore = new Lore(item);
@@ -90,7 +90,7 @@ public class LoreCommand extends ClientCommand {
 			return Command.SINGLE_SUCCESS;
 		};
 		Command<FabricClientCommandSource> list = context -> {
-			ItemReference heldItem = MainUtil.getHeldItem(item -> true, TextInst.translatable("nbteditor.no_hand.no_item.to_view"));
+			ItemReference heldItem = ItemReference.getHeldItem(item -> true, TextInst.translatable("nbteditor.no_hand.no_item.to_view"));
 			ItemStack item = heldItem.getItem();
 			
 			context.getSource().sendFeedback(TextInst.literal("[").formatted(Formatting.GRAY).append(TextInst.literal("+").formatted(Formatting.GREEN)).append(TextInst.literal("] ").formatted(Formatting.GRAY))
@@ -131,7 +131,7 @@ public class LoreCommand extends ClientCommand {
 				.then(literal("clear").executes(clear))
 				.then(literal("list").executes(list))
 			.executes(context -> {
-				MainUtil.client.setScreen(new DisplayScreen(MainUtil.getHeldItem()));
+				MainUtil.client.setScreen(new DisplayScreen(ItemReference.getHeldItem()));
 				return Command.SINGLE_SUCCESS;
 			});
 	}

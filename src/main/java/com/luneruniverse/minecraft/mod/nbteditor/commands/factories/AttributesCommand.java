@@ -28,7 +28,7 @@ public class AttributesCommand extends ClientCommand {
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		builder.then(literal("newuuids").executes(context -> {
-			ItemReference ref = MainUtil.getHeldItem();
+			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			NbtList attributes = item.getOrCreateNbt().getList("AttributeModifiers", NbtElement.COMPOUND_TYPE);
 			if (attributes.isEmpty())
@@ -40,7 +40,7 @@ public class AttributesCommand extends ClientCommand {
 			}
 			return Command.SINGLE_SUCCESS;
 		})).executes(context -> {
-			MainUtil.client.setScreen(new AttributesScreen(MainUtil.getHeldItem()));
+			MainUtil.client.setScreen(new AttributesScreen(ItemReference.getHeldItem()));
 			return Command.SINGLE_SUCCESS;
 		});
 	}

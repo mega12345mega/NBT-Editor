@@ -14,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -46,21 +47,21 @@ public class BookScreenMixin extends Screen {
 		
 		addDrawableChild(MVMisc.newButton(16, 64, 100, 20, TextInst.translatable("nbteditor.book.open"), btn -> {
 			try {
-				MainUtil.client.setScreen(new com.luneruniverse.minecraft.mod.nbteditor.screens.factories.BookScreen(MainUtil.getHeldItem(), pageIndex));
+				MainUtil.client.setScreen(new com.luneruniverse.minecraft.mod.nbteditor.screens.factories.BookScreen(ItemReference.getHeldItem(), pageIndex));
 			} catch (CommandSyntaxException e) {
 				MainUtil.client.player.sendMessage(TextInst.literal(e.getMessage()).formatted(Formatting.RED), false);
 			}
 		}));
 		addDrawableChild(MVMisc.newButton(16, 64 + 24, 100, 20, TextInst.translatable("nbteditor.book.convert"), btn -> {
 			try {
-				ItemReference ref = MainUtil.getHeldItem();
+				ItemReference ref = ItemReference.getHeldItem();
 				ItemStack item = MainUtil.setType(Items.WRITABLE_BOOK, ref.getItem(), 1);
 				boolean formatted = false;
 				if (item.hasNbt() && item.getNbt().contains("pages", NbtElement.LIST_TYPE)) {
 					NbtList convertedPages = new NbtList();
 					for (NbtElement page : item.getNbt().getList("pages", NbtElement.STRING_TYPE)) {
 						Text text = TextArgumentType.text().parse(new StringReader(((NbtString) page).value));
-						if (!formatted && MainUtil.isTextFormatted(text, true))
+						if (!formatted && TextUtil.isTextFormatted(text, true))
 							formatted = true;
 						convertedPages.add(NbtString.of(text.getString()));
 					}

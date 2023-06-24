@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.BlockStatesScreen;
@@ -20,7 +21,7 @@ public class BlockStatesCommand extends ClientCommand {
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		builder.executes(context -> {
-			MainUtil.client.setScreen(new BlockStatesScreen(MainUtil.getHeldItem(
+			MainUtil.client.setScreen(new BlockStatesScreen(ItemReference.getHeldItem(
 					item -> item.getItem() instanceof BlockItem, TextInst.translatable("nbteditor.no_hand.no_item.block"))));
 			return Command.SINGLE_SUCCESS;
 		});

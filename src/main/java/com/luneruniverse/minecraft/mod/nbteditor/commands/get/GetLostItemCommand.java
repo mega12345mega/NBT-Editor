@@ -10,6 +10,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.CursorHistoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
@@ -49,7 +50,7 @@ public class GetLostItemCommand extends ClientCommand {
 			CursorHistoryScreen.show(history);
 			return Command.SINGLE_SUCCESS;
 		})).executes(context -> {
-			MainUtil.client.player.sendMessage(MainUtil.parseTranslatableFormatted("nbteditor.get.lost_item.history_hint"), false);
+			MainUtil.client.player.sendMessage(TextUtil.parseTranslatableFormatted("nbteditor.get.lost_item.history_hint"), false);
 			if (LOST_ITEM == null)
 				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.get.lost_item.none"), false);
 			else
