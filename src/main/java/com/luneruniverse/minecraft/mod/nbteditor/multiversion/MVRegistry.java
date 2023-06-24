@@ -22,7 +22,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
 
-public class MultiVersionRegistry<T> implements Iterable<T> {
+public class MVRegistry<T> implements Iterable<T> {
 	
 	// Wrapper handler
 	private static final Cache<String, Reflection.MethodInvoker> methodCache = CacheBuilder.newBuilder().build();
@@ -40,8 +40,8 @@ public class MultiVersionRegistry<T> implements Iterable<T> {
 			.range("1.19.3", null, () -> Reflection.getClass("net.minecraft.class_7923"))
 			.range(null, "1.19.2", () -> REGISTRY_CLASS)
 			.get();
-	private static <T> MultiVersionRegistry<T> getRegistry(String oldName, String newName, boolean defaulted) {
-		return new MultiVersionRegistry<>(Reflection.getField(REGISTRIES_CLASS, Version.<String>newSwitch()
+	private static <T> MVRegistry<T> getRegistry(String oldName, String newName, boolean defaulted) {
+		return new MVRegistry<>(Reflection.getField(REGISTRIES_CLASS, Version.<String>newSwitch()
 				.range("1.19.3", null, newName)
 				.range(null, "1.19.2", oldName)
 				.get(),
@@ -52,21 +52,21 @@ public class MultiVersionRegistry<T> implements Iterable<T> {
 				.get(null));
 	}
 	
-	public static final MultiVersionRegistry<ScreenHandlerType<?>> SCREEN_HANDLER = getRegistry("field_17429", "field_41187", false);
-	public static final MultiVersionRegistry<Item> ITEM = getRegistry("field_11142", "field_41178", true);
-	public static final MultiVersionRegistry<Enchantment> ENCHANTMENT = getRegistry("field_11160", "field_41176", false);
-	public static final MultiVersionRegistry<EntityAttribute> ATTRIBUTE = getRegistry("field_23781", "field_41190", false);
-	public static final MultiVersionRegistry<Potion> POTION = getRegistry("field_11143", "field_41179", true);
-	public static final MultiVersionRegistry<StatusEffect> STATUS_EFFECT = getRegistry("field_11159", "field_41174", false);
+	public static final MVRegistry<ScreenHandlerType<?>> SCREEN_HANDLER = getRegistry("field_17429", "field_41187", false);
+	public static final MVRegistry<Item> ITEM = getRegistry("field_11142", "field_41178", true);
+	public static final MVRegistry<Enchantment> ENCHANTMENT = getRegistry("field_11160", "field_41176", false);
+	public static final MVRegistry<EntityAttribute> ATTRIBUTE = getRegistry("field_23781", "field_41190", false);
+	public static final MVRegistry<Potion> POTION = getRegistry("field_11143", "field_41179", true);
+	public static final MVRegistry<StatusEffect> STATUS_EFFECT = getRegistry("field_11159", "field_41174", false);
 	
-	public static <V, T extends V> T register(MultiVersionRegistry<V> registry, Identifier id, T entry) {
+	public static <V, T extends V> T register(MVRegistry<V> registry, Identifier id, T entry) {
 		return call(null, "method_10230", MethodType.methodType(Object.class, REGISTRY_CLASS, Identifier.class, Object.class), registry.value, id, entry);
 	}
 	
 	
 	private final Object value;
 	
-	private MultiVersionRegistry(Object value) {
+	private MVRegistry(Object value) {
 		this.value = value;
 	}
 	

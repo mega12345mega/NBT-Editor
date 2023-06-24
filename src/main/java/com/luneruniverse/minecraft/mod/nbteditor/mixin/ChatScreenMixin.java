@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -29,7 +29,7 @@ public class ChatScreenMixin {
 	@Inject(method = "render", at = @At("HEAD"))
 	@Group(name = "render", min = 1)
 	private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
-		MixinLink.renderChatLimitWarning((ChatScreen) (Object) this, MultiVersionDrawableHelper.getMatrices(context));
+		MixinLink.renderChatLimitWarning((ChatScreen) (Object) this, MVDrawableHelper.getMatrices(context));
 	}
 	@Inject(method = "method_25394(Lnet/minecraft/class_4587;IIF)V", at = @At("HEAD"))
 	@Group(name = "render", min = 1)

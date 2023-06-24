@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import java.util.function.Consumer;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -85,7 +85,7 @@ public class NBTValue extends List2D.List2DValue {
 		else if (value.getType() == NbtElement.COMPOUND_TYPE)
 			icon = COMPOUND;
 		if (icon != null)
-			MultiVersionDrawableHelper.drawTexture(matrices, icon, 0, 0, 0, 0, 32, 32, 32, 32);
+			MVDrawableHelper.drawTexture(matrices, icon, 0, 0, 0, 0, 32, 32, 32, 32);
 		
 		int color = -1;
 		if (unsafe && selected || parentList != null && parentList.getHeldType() != value.getType())
@@ -95,10 +95,10 @@ public class NBTValue extends List2D.List2DValue {
 		else if (isHovering(mouseX, mouseY))
 			color = 0xFF257789;
 		if (color != -1) {
-			MultiVersionDrawableHelper.fill(matrices, -4, -4, 36, 0, color);
-			MultiVersionDrawableHelper.fill(matrices, -4, -4, 0, 36, color);
-			MultiVersionDrawableHelper.fill(matrices, -4, 32, 36, 36, color);
-			MultiVersionDrawableHelper.fill(matrices, 32, -4, 36, 36, color);
+			MVDrawableHelper.fill(matrices, -4, -4, 36, 0, color);
+			MVDrawableHelper.fill(matrices, -4, -4, 0, 36, color);
+			MVDrawableHelper.fill(matrices, -4, 32, 36, 36, color);
+			MVDrawableHelper.fill(matrices, 32, -4, 36, 36, color);
 		}
 		
 		if (key == null)

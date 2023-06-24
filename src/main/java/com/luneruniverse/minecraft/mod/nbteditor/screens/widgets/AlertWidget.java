@@ -2,8 +2,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -30,7 +30,7 @@ public class AlertWidget extends GroupWidget implements InitializableOverlay<Scr
 		x = width / 2;
 		y = height / 2 - lines.length * MainUtil.client.textRenderer.fontHeight / 2;
 		
-		addWidget(MultiVersionMisc.newButton(width / 2 - 50, height - 28, 100, 20, TextInst.translatable("nbteditor.ok"), btn -> {
+		addWidget(MVMisc.newButton(width / 2 - 50, height - 28, 100, 20, TextInst.translatable("nbteditor.ok"), btn -> {
 			onClose.run();
 		}));
 	}
@@ -39,7 +39,7 @@ public class AlertWidget extends GroupWidget implements InitializableOverlay<Scr
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		MainUtil.client.currentScreen.renderBackground(matrices);
 		for (int i = 0; i < lines.length; i++) {
-			MultiVersionDrawableHelper.drawCenteredTextWithShadow(matrices, MainUtil.client.textRenderer, lines[i],
+			MVDrawableHelper.drawCenteredTextWithShadow(matrices, MainUtil.client.textRenderer, lines[i],
 					x, y + i * MainUtil.client.textRenderer.fontHeight, -1);
 		}
 		super.render(matrices, mouseX, mouseY, delta);

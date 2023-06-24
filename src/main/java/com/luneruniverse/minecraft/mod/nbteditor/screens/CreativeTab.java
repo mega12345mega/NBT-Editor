@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawable;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 
 import net.minecraft.client.gui.Selectable;
@@ -18,7 +18,7 @@ import net.minecraft.util.Identifier;
 
 public class CreativeTab {
 	
-	public static class CreativeTabGroup implements MultiVersionDrawable, MultiVersionElement, Selectable {
+	public static class CreativeTabGroup implements MVDrawable, MVElement, Selectable {
 		private final List<CreativeTab> tabs;
 		
 		public CreativeTabGroup(List<CreativeTab> tabs) {
@@ -78,19 +78,19 @@ public class CreativeTab {
 		int k = 0;
 		int y = screen.height - 32;
 		
-		MultiVersionDrawableHelper.drawTexture(matrices, TEXTURE, x, y, j, k, WIDTH, 32);
+		MVDrawableHelper.drawTexture(matrices, TEXTURE, x, y, j, k, WIDTH, 32);
 		
 		int xOffset = Version.<Integer>newSwitch()
 				.range("1.19.3", null, 5)
 				.range(null, "1.19.2", 6)
 				.get();
-		MultiVersionDrawableHelper.renderItem(matrices, 100.0F, false, item, x + xOffset, y + 9);
+		MVDrawableHelper.renderItem(matrices, 100.0F, false, item, x + xOffset, y + 9);
 	}
 	private void renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
 		int y = screen.height - 32;
 		
 		if (isHoveringOverTab(x, y, mouseX, mouseY))
-			MultiVersionDrawableHelper.renderTooltip(matrices, item.getName(), mouseX, mouseY);
+			MVDrawableHelper.renderTooltip(matrices, item.getName(), mouseX, mouseY);
 	}
 	
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {

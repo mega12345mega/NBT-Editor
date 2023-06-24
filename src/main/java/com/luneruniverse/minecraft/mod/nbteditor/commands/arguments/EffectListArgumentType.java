@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -72,7 +72,7 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 		List<StatusEffectInstance> effects = new ArrayList<>();
 		while (stringReader.canRead()) {
 			Identifier identifier = Identifier.fromCommandInput(stringReader);
-			StatusEffect type = MultiVersionRegistry.STATUS_EFFECT.getOrEmpty(identifier).orElseThrow(() -> {
+			StatusEffect type = MVRegistry.STATUS_EFFECT.getOrEmpty(identifier).orElseThrow(() -> {
 				return INVALID_EFFECT_EXCEPTION.create(identifier);
 			});
 			if (!stringReader.canRead()) {
@@ -143,7 +143,7 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 				}
 			}
 		}
-		return CommandSource.suggestIdentifiers(MultiVersionRegistry.STATUS_EFFECT.getIds(), builder);
+		return CommandSource.suggestIdentifiers(MVRegistry.STATUS_EFFECT.getIds(), builder);
 	}
 
 	public Collection<String> getExamples() {

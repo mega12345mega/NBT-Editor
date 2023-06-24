@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.util;
 
 import java.util.function.Consumer;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
@@ -38,16 +38,16 @@ public class TextAreaScreen extends OverlaySupportingScreen {
 	@Override
 	protected void init() {
 		super.init();
-		MultiVersionMisc.setKeyboardRepeatEvents(true);
+		MVMisc.setKeyboardRepeatEvents(true);
 		
 		ButtonWidget done;
-		this.addDrawableChild(done = MultiVersionMisc.newButton(20, 20, Math.min(200, width / 2 - 25), 20, ScreenTexts.DONE, btn -> {
+		this.addDrawableChild(done = MVMisc.newButton(20, 20, Math.min(200, width / 2 - 25), 20, ScreenTexts.DONE, btn -> {
 			onDone.accept(text);
 			close();
 		}));
 		if (width - (done.getWidth() * 2 + 50) < 100) // When the end of the second button is near the end of the text field, it looks bad
 			done.setWidth(done.getWidth() * 2 / 3);
-		this.addDrawableChild(MultiVersionMisc.newButton(done.x + done.getWidth() + 10, 20, done.getWidth(), 20, ScreenTexts.CANCEL, btn -> close()));
+		this.addDrawableChild(MVMisc.newButton(done.x + done.getWidth() + 10, 20, done.getWidth(), 20, ScreenTexts.CANCEL, btn -> close()));
 		
 		textArea = addDrawableChild(MultiLineTextFieldWidget.create(textArea, 20, 50, width - 40, height - 70, text, formatter == null ? null : str -> {
 			NbtFormatter.FormatterResult formattedText = formatter.formatSafely(str);
@@ -70,7 +70,7 @@ public class TextAreaScreen extends OverlaySupportingScreen {
 	
 	@Override
 	public void removed() {
-		MultiVersionMisc.setKeyboardRepeatEvents(false);
+		MVMisc.setKeyboardRepeatEvents(false);
 	}
 	
 }

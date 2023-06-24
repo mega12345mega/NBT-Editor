@@ -5,8 +5,8 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ContainerItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
@@ -65,17 +65,17 @@ public class ContainerScreen extends ClientHandledScreen {
 		super.init();
 		
 		if (ref.isLockable()) {
-			this.addDrawableChild(MultiVersionMisc.newButton(16, 64, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
+			this.addDrawableChild(MVMisc.newButton(16, 64, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
 				navigationClicked = true;
 				ConfigScreen.setLockSlots(!ConfigScreen.isLockSlots());
 				btn.setMessage(ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"));
 			})).active = !ConfigScreen.isLockSlotsRequired();
 		}
 		
-		addDrawableChild(MultiVersionMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
+		addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
 				ItemFactoryScreen.FACTORY_ICON,
 				btn -> client.setScreen(new ItemFactoryScreen(ref)),
-				new MultiVersionTooltip("nbteditor.item_factory")));
+				new MVTooltip("nbteditor.item_factory")));
 	}
 	
 	@Override

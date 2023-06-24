@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
@@ -28,7 +28,7 @@ public class SignboardScreen extends ItemEditorScreen {
 	public SignboardScreen(ItemReference ref) {
 		super(TextInst.of("Signboard"), ref);
 		this.texture = new Identifier("minecraft", "textures/block/" +
-				MultiVersionRegistry.ITEM.getId(ref.getItem().getItem()).getPath().replace("_sign", "_planks") + ".png");
+				MVRegistry.ITEM.getId(ref.getItem().getItem()).getPath().replace("_sign", "_planks") + ".png");
 	}
 	
 	private void setGlowing(boolean glowing) {
@@ -94,7 +94,7 @@ public class SignboardScreen extends ItemEditorScreen {
 	
 	@Override
 	protected void initEditor() {
-		addDrawableChild(MultiVersionMisc.newButton(16, 64, 100, 20,
+		addDrawableChild(MVMisc.newButton(16, 64, 100, 20,
 				TextInst.translatable("nbteditor.signboard.glowing." + (isGlowing() ? "enabled" : "disabled")), btn -> {
 			boolean prevGlowing = isGlowing();
 			setGlowing(!prevGlowing);
@@ -110,7 +110,7 @@ public class SignboardScreen extends ItemEditorScreen {
 	
 	@Override
 	protected void preRenderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		MultiVersionDrawableHelper.drawTexture(matrices, texture, 16, 64 + 24 * 2, 0, 0, width - 32, height - 80 - 24 * 2);
+		MVDrawableHelper.drawTexture(matrices, texture, 16, 64 + 24 * 2, 0, 0, width - 32, height - 80 - 24 * 2);
 	}
 	
 }

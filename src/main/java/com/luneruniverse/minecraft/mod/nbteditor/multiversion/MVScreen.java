@@ -10,22 +10,22 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-public class MultiVersionScreen extends Screen implements OldEventBehavior {
+public class MVScreen extends Screen implements OldEventBehavior {
 	
-	protected MultiVersionScreen(Text title) {
+	protected MVScreen(Text title) {
 		super(title);
 	}
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		MultiVersionDrawableHelper.super_render(MultiVersionScreen.class, this, matrices, mouseX, mouseY, delta);
+		MVDrawableHelper.super_render(MVScreen.class, this, matrices, mouseX, mouseY, delta);
 	}
 	public final void method_25394(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		render(matrices, mouseX, mouseY, delta);
 	}
 	@Override
 	public final void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		render(MultiVersionDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
+		render(MVDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
 	}
 	
 	// Needed for some reason ...
@@ -33,7 +33,7 @@ public class MultiVersionScreen extends Screen implements OldEventBehavior {
 	// Prevents crash in 1.17 that's trying to find this method
 	@Override
 	public void renderBackground(MatrixStack matrices) {
-		MultiVersionDrawableHelper.renderBackground((Screen) this, matrices);
+		MVDrawableHelper.renderBackground((Screen) this, matrices);
 	}
 	
 	public final boolean isPauseScreen() { // 1.18

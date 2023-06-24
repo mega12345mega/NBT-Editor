@@ -6,9 +6,9 @@ import java.util.stream.StreamSupport;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawable;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -18,7 +18,7 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.util.math.MatrixStack;
 
-public abstract class Panel<T extends Drawable & Element> implements MultiVersionDrawable, MultiVersionElement, Selectable {
+public abstract class Panel<T extends Drawable & Element> implements MVDrawable, MVElement, Selectable {
 	
 	public static record PositionedPanelElement<T extends Drawable & Element>(T element, int x, int y) {
 	}
@@ -96,8 +96,8 @@ public abstract class Panel<T extends Drawable & Element> implements MultiVersio
 		double scrollArea = height / maxScroll;
 		if (scrollArea < 1) {
 			double barY = y - scroll / (maxScroll + scrollArea) * height;
-			MultiVersionDrawableHelper.fill(matrices, x + width + renderPadding - 8, y, x + width + renderPadding, y + height, 0xFFAAAAAA);
-			MultiVersionDrawableHelper.fill(matrices, x + width + renderPadding - 8, (int) barY, x + width + renderPadding, (int) (barY + scrollArea * height + 1), 0xFF000000);
+			MVDrawableHelper.fill(matrices, x + width + renderPadding - 8, y, x + width + renderPadding, y + height, 0xFFAAAAAA);
+			MVDrawableHelper.fill(matrices, x + width + renderPadding - 8, (int) barY, x + width + renderPadding, (int) (barY + scrollArea * height + 1), 0xFF000000);
 		}
 		
 		if (dragging && dragStartX == -1) {

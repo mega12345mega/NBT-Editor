@@ -48,8 +48,8 @@
     "modmenu": {
     },
     "loom:injected_interfaces": {
-      "net/minecraft/class_4068": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MultiVersionDrawableParent"],
-      "net/minecraft/class_437": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MultiVersionScreenParent"]
+      "net/minecraft/class_4068": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVDrawableParent"],
+      "net/minecraft/class_437": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVScreenParent"]
     }
   }
 }

@@ -1,6 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.util;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
@@ -35,7 +35,7 @@ public class FancyConfirmScreen extends ConfirmScreen {
 		
 		matrices.push();
 		matrices.translate(0.0, 0.0, 500.0);
-		MultiVersionDrawableHelper.super_render(FancyConfirmScreen.class, this, matrices, mouseX, mouseY, delta);
+		MVDrawableHelper.super_render(FancyConfirmScreen.class, this, matrices, mouseX, mouseY, delta);
 		MainUtil.renderLogo(matrices);
 		matrices.pop();
 	}
@@ -44,7 +44,7 @@ public class FancyConfirmScreen extends ConfirmScreen {
 	}
 	@Override
 	public final void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		render(MultiVersionDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
+		render(MVDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
 	}
 	
 }

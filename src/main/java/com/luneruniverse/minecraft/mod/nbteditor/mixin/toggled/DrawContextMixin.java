@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -30,7 +30,7 @@ public abstract class DrawContextMixin {
 			return;
 		
 		int[] size = MixinLink.getTooltipSize(tooltip);
-		Vector2ic pos = MultiVersionMisc.getPosition(positioner, MainUtil.client.currentScreen, x, y, size[0], size[1]);
+		Vector2ic pos = MVMisc.getPosition(positioner, MainUtil.client.currentScreen, x, y, size[0], size[1]);
 		int screenWidth = MainUtil.client.currentScreen.width;
 		int screenHeight = MainUtil.client.currentScreen.height;
 		

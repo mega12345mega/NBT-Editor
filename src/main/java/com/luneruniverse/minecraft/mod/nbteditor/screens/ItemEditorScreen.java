@@ -5,9 +5,9 @@ import java.util.function.Function;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
@@ -79,7 +79,7 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 		addDrawableChild(name);
 		
 		if (isSaveRequried()) {
-			saveBtn = addDrawableChild(MultiVersionMisc.newButton(16 + (32 + 8) * 2 + 100 + 8, 16 + 6, 100, 20, TextInst.translatable("nbteditor.editor.save"), btn -> {
+			saveBtn = addDrawableChild(MVMisc.newButton(16 + (32 + 8) * 2 + 100 + 8, 16 + 6, 100, 20, TextInst.translatable("nbteditor.editor.save"), btn -> {
 				save();
 			}));
 			saveBtn.active = !saved;
@@ -87,10 +87,10 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 		
 		FactoryLink link = getFactoryLink();
 		if (link != null) {
-			addDrawableChild(MultiVersionMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
+			addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
 					ItemFactoryScreen.FACTORY_ICON,
 					btn -> closeSafely(() -> client.setScreen(link.factory().apply(ref))),
-					new MultiVersionTooltip(link.langName())));
+					new MVTooltip(link.langName())));
 		}
 		
 		initEditor();
@@ -128,7 +128,7 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 		if (oldMatrix)
 			RenderSystem.applyModelViewMatrix();
 		
-		MultiVersionDrawableHelper.renderItem(matrices, 200.0F, true, item, x, y);
+		MVDrawableHelper.renderItem(matrices, 200.0F, true, item, x, y);
 		
 		matrices.pop();
 		if (oldMatrix)

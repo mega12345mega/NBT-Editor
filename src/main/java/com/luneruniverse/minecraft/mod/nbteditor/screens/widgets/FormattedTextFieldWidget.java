@@ -11,8 +11,8 @@ import org.lwjgl.glfw.GLFW;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
@@ -140,12 +140,12 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				hoverValueField.setText(hoverValue);
 				hoverValueField.setChangedListener(str -> updateOk());
 				
-				ok = addWidget(MultiVersionMisc.newButton(0, 0, 150, 20, TextInst.translatable("nbteditor.ok"), btn -> {
+				ok = addWidget(MVMisc.newButton(0, 0, 150, 20, TextInst.translatable("nbteditor.ok"), btn -> {
 					onDone.onEventChange(clickActionDropdown.getValidValue().toEvent(clickValueField.getText()),
 							hoverActionDropdown.getValidValue().toEvent(hoverValueField.getText()));
 					OverlaySupportingScreen.setOverlayStatic(null);
 				}));
-				cancel = addWidget(MultiVersionMisc.newButton(0, 0, 150, 20, TextInst.translatable("nbteditor.cancel"), btn -> {
+				cancel = addWidget(MVMisc.newButton(0, 0, 150, 20, TextInst.translatable("nbteditor.cancel"), btn -> {
 					OverlaySupportingScreen.setOverlayStatic(null);
 				}));
 				
@@ -258,7 +258,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		}
 		
 		private void genStyles(Text text, Style parent, int index) {
-			int len = MultiVersionMisc.getContent(text).length();
+			int len = MVMisc.getContent(text).length();
 			Style style = text.getStyle().withParent(parent);
 			if (len > 0) {
 				setStyle(index, style);
@@ -266,7 +266,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			}
 			for (Text child : text.getSiblings()) {
 				genStyles(child, style, index);
-				index += MultiVersionMisc.stripInvalidChars(child.getString(), allowsNewLines()).length();
+				index += MVMisc.stripInvalidChars(child.getString(), allowsNewLines()).length();
 			}
 		}
 		
@@ -679,7 +679,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				colors.addButton(TextInst.literal("⬛").formatted(formatting), btn -> {
 					field.applyFormatting(formatting);
 					colors.setOpen(false);
-				}, new MultiVersionTooltip(TextInst.of(formatting.getName())));
+				}, new MVTooltip(TextInst.of(formatting.getName())));
 			}
 			colors.build();
 		} else {
@@ -688,8 +688,8 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			for (Formatting formatting : Formatting.values()) {
 				if (!formatting.isColor())
 					break;
-				addWidget(MultiVersionMisc.newButton(x + i * 20, y, 20, 20, TextInst.literal("⬛").formatted(formatting),
-						btn -> field.applyFormatting(formatting), new MultiVersionTooltip(TextInst.of(formatting.getName()))));
+				addWidget(MVMisc.newButton(x + i * 20, y, 20, 20, TextInst.literal("⬛").formatted(formatting),
+						btn -> field.applyFormatting(formatting), new MVTooltip(TextInst.of(formatting.getName()))));
 				i++;
 			}
 		}
@@ -705,17 +705,17 @@ public class FormattedTextFieldWidget extends GroupWidget {
 					btnText = TextInst.of("");
 				else
 					btnText = TextInst.literal(formatting.name().substring(0, 1)).formatted(formatting);
-				addWidget(MultiVersionMisc.newButton(afterColorsX + 24 + i * 20 + (i >= 5 ? 4 + 20 + 4 : 0), y, 20, 20,
-						btnText, btn -> field.applyFormatting(formatting), new MultiVersionTooltip(TextInst.of(formatting.getName()))));
+				addWidget(MVMisc.newButton(afterColorsX + 24 + i * 20 + (i >= 5 ? 4 + 20 + 4 : 0), y, 20, 20,
+						btnText, btn -> field.applyFormatting(formatting), new MVTooltip(TextInst.of(formatting.getName()))));
 				i++;
 			}
 			
-			addWidget(MultiVersionMisc.newButton(afterColorsX, y, 20, 20, TextInst.literal("⬛")
+			addWidget(MVMisc.newButton(afterColorsX, y, 20, 20, TextInst.literal("⬛")
 					.setStyle(Style.EMPTY.withColor(0x9999C0).withFormatting(Formatting.ITALIC)), btn -> field.showCustomColor(),
-					new MultiVersionTooltip(TextInst.translatable("nbteditor.formatted_text.custom_color"))));
+					new MVTooltip(TextInst.translatable("nbteditor.formatted_text.custom_color"))));
 			
-			addWidget(MultiVersionMisc.newButton(afterColorsX + 24 + 5 * 20 + 4, y, 20, 20, TextInst.literal("E"), btn -> field.showEvents(),
-					new MultiVersionTooltip(TextInst.translatable("nbteditor.formatted_text.events"))));
+			addWidget(MVMisc.newButton(afterColorsX + 24 + 5 * 20 + 4, y, 20, 20, TextInst.literal("E"), btn -> field.showEvents(),
+					new MVTooltip(TextInst.translatable("nbteditor.formatted_text.events"))));
 		}
 	}
 	

@@ -11,9 +11,9 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
@@ -208,7 +208,7 @@ public class BookScreen extends ItemEditorScreen {
 	
 	@Override
 	protected void initEditor() {
-		MultiVersionMisc.setKeyboardRepeatEvents(true);
+		MVMisc.setKeyboardRepeatEvents(true);
 		
 		group = new GroupWidget();
 		addDrawableChild(group);
@@ -229,11 +229,11 @@ public class BookScreen extends ItemEditorScreen {
 				new ConfigValueDropdownEnum<>(getGeneration(), Generation.ORIGINAL, Generation.class)
 						.addValueListener(value -> setGeneration(value.getValidValue())), 16 + 108 * 2, 64, 0));
 		
-		group.addWidget(MultiVersionMisc.newButton(16 + 108 * 3 - 4, 64, 20, 20,
+		group.addWidget(MVMisc.newButton(16 + 108 * 3 - 4, 64, 20, 20,
 				TextInst.translatable("nbteditor.book.add"), btn -> addPage()));
-		group.addWidget(MultiVersionMisc.newButton(16 + 108 * 3 + 20, 64, 20, 20,
+		group.addWidget(MVMisc.newButton(16 + 108 * 3 + 20, 64, 20, 20,
 				TextInst.translatable("nbteditor.book.remove"), btn -> removePage()));
-		group.addWidget(MultiVersionMisc.newButton(16 + 108 * 3 + 44, 64, 20, 20,
+		group.addWidget(MVMisc.newButton(16 + 108 * 3 + 44, 64, 20, 20,
 				TextInst.translatable("nbteditor.book.preview.icon"),
 				btn -> {
 					net.minecraft.client.gui.screen.ingame.BookScreen preview =
@@ -250,7 +250,7 @@ public class BookScreen extends ItemEditorScreen {
 					setOverlayScreen(preview, 200);
 					preview.setPage(page);
 				},
-				new MultiVersionTooltip("nbteditor.book.preview")));
+				new MVTooltip("nbteditor.book.preview")));
 		
 		contents = group.addWidget(FormattedTextFieldWidget.create(contents, 16 + 24, 64 + 24, width - 32 - 24 * 2,
 				height - 80 - 24, getPage(), true, Style.EMPTY.withColor(Formatting.BLACK), this::setPage));
@@ -261,15 +261,15 @@ public class BookScreen extends ItemEditorScreen {
 		
 		group.addDrawable(gen);
 		
-		group.addWidget(MultiVersionMisc.newButton(16, 64 + 24, 20, height - 80 - 24,
+		group.addWidget(MVMisc.newButton(16, 64 + 24, 20, height - 80 - 24,
 				TextInst.translatable("nbteditor.book.back"), btn -> back())).active = (page > 0);
-		group.addWidget(MultiVersionMisc.newButton(width - 16 - 20, 64 + 24, 20, height - 80 - 24,
+		group.addWidget(MVMisc.newButton(width - 16 - 20, 64 + 24, 20, height - 80 - 24,
 				TextInst.translatable("nbteditor.book.forward"), btn -> forward()));
 	}
 	
 	@Override
 	protected void renderEditor(MatrixStack matrices, int fdf8eb, int mouseY, float delta) {
-		MultiVersionDrawableHelper.drawTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.book.page", page + 1, getPageCount()),
+		MVDrawableHelper.drawTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.book.page", page + 1, getPageCount()),
 				16 + 108 * 3 - 4 + 24 * 3, 64 + 10 - textRenderer.fontHeight / 2, -1);
 		renderTip(matrices, "nbteditor.formatted_text.tip");
 	}
@@ -301,7 +301,7 @@ public class BookScreen extends ItemEditorScreen {
 	
 	@Override
 	public void removed() {
-		MultiVersionMisc.setKeyboardRepeatEvents(false);
+		MVMisc.setKeyboardRepeatEvents(false);
 	}
 	
 }

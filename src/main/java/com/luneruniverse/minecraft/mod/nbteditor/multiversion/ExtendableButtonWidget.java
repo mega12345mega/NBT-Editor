@@ -18,9 +18,9 @@ public class ExtendableButtonWidget extends PressableWidget {
 	}
 	
 	private final PressAction onPress;
-	private final MultiVersionTooltip tooltip;
+	private final MVTooltip tooltip;
 	
-	public ExtendableButtonWidget(int x, int y, int width, int height, Text text, PressAction onPress, MultiVersionTooltip tooltip) {
+	public ExtendableButtonWidget(int x, int y, int width, int height, Text text, PressAction onPress, MVTooltip tooltip) {
 		super(x, y, width, height, text);
 		this.onPress = onPress;
 		this.tooltip = tooltip;
@@ -47,19 +47,19 @@ public class ExtendableButtonWidget extends PressableWidget {
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		MultiVersionDrawableHelper.super_render(ExtendableButtonWidget.class, this, matrices, mouseX, mouseY, delta);
+		MVDrawableHelper.super_render(ExtendableButtonWidget.class, this, matrices, mouseX, mouseY, delta);
 	}
 	public final void method_25394(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		render(matrices, mouseX, mouseY, delta);
 	}
 	@Override
 	public final void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		render(MultiVersionDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
+		render(MVDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
 	}
 	
 	public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		Version.newSwitch()
-				.range("1.20.0", null, () -> super.renderButton(MultiVersionDrawableHelper.getDrawContext(matrices), mouseX, mouseY, delta))
+				.range("1.20.0", null, () -> super.renderButton(MVDrawableHelper.getDrawContext(matrices), mouseX, mouseY, delta))
 				.range("1.19.4", "1.19.4", () -> super_renderButton("method_48579", matrices, mouseX, mouseY, delta))
 				.range("1.19.3", "1.19.3", () -> super_renderButton("method_25359", matrices, mouseX, mouseY, delta))
 				.range(null, "1.19.2", () -> {
@@ -71,7 +71,7 @@ public class ExtendableButtonWidget extends PressableWidget {
 	}
 	@Override
 	protected final void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-		renderButton(MultiVersionDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
+		renderButton(MVDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
 	}
 	public final void method_48579(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		renderButton(matrices, mouseX, mouseY, delta);

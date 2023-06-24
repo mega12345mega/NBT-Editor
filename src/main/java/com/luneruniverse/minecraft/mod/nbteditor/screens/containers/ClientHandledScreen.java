@@ -9,7 +9,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.InventoryItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
@@ -131,15 +131,15 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	}
 	
 	protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
-		MultiVersionDrawableHelper.drawTexture(matrices, TEXTURE, x, y, 0, 0, backgroundWidth, handler.getRows() * 18 + 17);
-		MultiVersionDrawableHelper.drawTexture(matrices, TEXTURE, x, y + handler.getRows() * 18 + 17, 0, 126, backgroundWidth, 96);
+		MVDrawableHelper.drawTexture(matrices, TEXTURE, x, y, 0, 0, backgroundWidth, handler.getRows() * 18 + 17);
+		MVDrawableHelper.drawTexture(matrices, TEXTURE, x, y + handler.getRows() * 18 + 17, 0, 126, backgroundWidth, 96);
 		
 		if (showLogo())
 			MainUtil.renderLogo(matrices);
 	}
 	@Override
 	protected final void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-		drawBackground(MultiVersionDrawableHelper.getMatrices(context), delta, mouseX, mouseY);
+		drawBackground(MVDrawableHelper.getMatrices(context), delta, mouseX, mouseY);
 	}
 	protected final void method_2389(MatrixStack matrices, float delta, int mouseX, int mouseY) {
 		drawBackground(matrices, delta, mouseX, mouseY);
@@ -149,12 +149,12 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	}
 	
 	protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
-		MultiVersionDrawableHelper.drawTextWithoutShadow(matrices, textRenderer, getRenderedTitle(), titleX, titleY, 4210752);
-		MultiVersionDrawableHelper.drawTextWithoutShadow(matrices, textRenderer, playerInventoryTitle, playerInventoryTitleX, playerInventoryTitleY, 4210752);
+		MVDrawableHelper.drawTextWithoutShadow(matrices, textRenderer, getRenderedTitle(), titleX, titleY, 4210752);
+		MVDrawableHelper.drawTextWithoutShadow(matrices, textRenderer, playerInventoryTitle, playerInventoryTitleX, playerInventoryTitleY, 4210752);
 	}
 	@Override
 	protected final void drawForeground(DrawContext context, int mouseX, int mouseY) {
-		drawForeground(MultiVersionDrawableHelper.getMatrices(context), mouseX, mouseY);
+		drawForeground(MVDrawableHelper.getMatrices(context), mouseX, mouseY);
 	}
 	protected final void method_2388(MatrixStack matrices, int mouseX, int mouseY) {
 		drawForeground(matrices, mouseX, mouseY);

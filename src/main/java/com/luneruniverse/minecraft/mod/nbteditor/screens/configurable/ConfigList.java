@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
@@ -97,7 +97,7 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			if (named)
 				value.render(matrices, mouseX, mouseY, delta);
 			else {
-				MultiVersionDrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, indexText, 0, (getSpacingHeight() - MainUtil.client.textRenderer.fontHeight) / 2, -1);
+				MVDrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, indexText, 0, (getSpacingHeight() - MainUtil.client.textRenderer.fontHeight) / 2, -1);
 				matrices.push();
 				matrices.translate(indexTextOffset, 0.0, 0.0);
 				value.render(matrices, mouseX - indexTextOffset, mouseY, delta);
@@ -112,8 +112,8 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			matrices.push();
 			matrices.translate(0.0, 0.0, 1.0);
 			
-			MultiVersionDrawableHelper.fill(matrices, contextMenuX - 1, contextMenuY - 1, contextMenuX + 51, contextMenuY + LIST_CONTEXT_MENU_HEIGHT + 1, -1);
-			MultiVersionDrawableHelper.fill(matrices, contextMenuX, contextMenuY, contextMenuX + 50, contextMenuY + LIST_CONTEXT_MENU_HEIGHT, 0xFF000000);
+			MVDrawableHelper.fill(matrices, contextMenuX - 1, contextMenuY - 1, contextMenuX + 51, contextMenuY + LIST_CONTEXT_MENU_HEIGHT + 1, -1);
+			MVDrawableHelper.fill(matrices, contextMenuX, contextMenuY, contextMenuX + 50, contextMenuY + LIST_CONTEXT_MENU_HEIGHT, 0xFF000000);
 			boolean xHover = mouseX > contextMenuX && mouseX < contextMenuX + 50; // Prevent the first option from being hovered before moving the mouse
 			int y = contextMenuY;
 			for (ListContextMenuAction action : ListContextMenuAction.values()) {
@@ -121,12 +121,12 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 				if (xHover && mouseY >= y && mouseY <= y + MainUtil.client.textRenderer.fontHeight) {
 					color = 0xFF257789;
 					if (action.tooltip != null && !ConfigScreen.isKeybindsHidden())
-						new MultiVersionTooltip(action.tooltip).render(matrices, mouseX, mouseY);
+						new MVTooltip(action.tooltip).render(matrices, mouseX, mouseY);
 				}
 				Text msg = action.msg;
 				if (action == ListContextMenuAction.REMOVE)
 					msg = TextInst.copy(msg).formatted(color == -1 ? Formatting.RED : Formatting.GOLD);
-				MultiVersionDrawableHelper.drawCenteredTextWithShadow(matrices, MainUtil.client.textRenderer, msg, contextMenuX + 25, y + 2, color);
+				MVDrawableHelper.drawCenteredTextWithShadow(matrices, MainUtil.client.textRenderer, msg, contextMenuX + 25, y + 2, color);
 				y += MainUtil.client.textRenderer.fontHeight + 2;
 			}
 			
@@ -381,14 +381,14 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			for (ConfigPath path : paths.values()) {
 				int height = path.getSpacingHeight();
 				if (path instanceof ConfigListEntry) {
-					MultiVersionDrawableHelper.fill(matrices, 0, yOffset, PADDING, yOffset + height, 0xFF000000);
-					MultiVersionDrawableHelper.fill(matrices, 0, yOffset + PADDING, PADDING, yOffset + height - PADDING, 0xFF257789);
+					MVDrawableHelper.fill(matrices, 0, yOffset, PADDING, yOffset + height, 0xFF000000);
+					MVDrawableHelper.fill(matrices, 0, yOffset + PADDING, PADDING, yOffset + height - PADDING, 0xFF257789);
 					
 					matrices.push();
 					matrices.translate(-PADDING / 2, -(yOffset + height / 2), 0.0);
 					matrices.scale(2, 2, 1);
 					matrices.translate(PADDING / 2 - 0.5, yOffset + height / 2, 0.0);
-					MultiVersionDrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, TextInst.of("⋮"), 0,
+					MVDrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, TextInst.of("⋮"), 0,
 							-MainUtil.client.textRenderer.fontHeight / 2, -1);
 					matrices.pop();
 				}

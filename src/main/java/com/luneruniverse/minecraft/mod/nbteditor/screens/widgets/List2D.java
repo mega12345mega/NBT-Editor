@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionDrawable;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -14,7 +14,7 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 
 public class List2D extends Panel<List2D.List2DValue> {
 	
-	public static abstract class List2DValue implements MultiVersionDrawable, MultiVersionElement {
+	public static abstract class List2DValue implements MVDrawable, MVElement {
 		
 		protected static final MinecraftClient client = MinecraftClient.getInstance();
 		protected static final TextRenderer textRenderer = client.textRenderer;

@@ -35,7 +35,7 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class MultiVersionMisc {
+public class MVMisc {
 	
 	private static final Reflection.MethodInvoker ResourceManager_getResource =
 			Reflection.getMethod(Version.<Class<?>>newSwitch()
@@ -85,7 +85,7 @@ public class MultiVersionMisc {
 				.run();
 	}
 	
-	public static ButtonWidget newButton(int x, int y, int width, int height, Text message, ButtonWidget.PressAction onPress, MultiVersionTooltip tooltip) {
+	public static ButtonWidget newButton(int x, int y, int width, int height, Text message, ButtonWidget.PressAction onPress, MVTooltip tooltip) {
 		if (Version.<Boolean>newSwitch()
 				.range("1.19.4", null, false)
 				.range(null, "1.19.3", true)
@@ -104,7 +104,7 @@ public class MultiVersionMisc {
 				})
 				.range(null, "1.19.2", () -> {
 					try {
-						Object oldTooltip = (tooltip == null ? MultiVersionTooltip.EMPTY : tooltip).toOldTooltip();
+						Object oldTooltip = (tooltip == null ? MVTooltip.EMPTY : tooltip).toOldTooltip();
 						return ButtonWidget.class.getConstructor(int.class, int.class, int.class, int.class, Text.class,
 								ButtonWidget.PressAction.class, Reflection.getClass("net.minecraft.class_4185$class_5316"))
 								.newInstance(x, finalY, width, finalHeight, message, onPress, oldTooltip);
@@ -118,7 +118,7 @@ public class MultiVersionMisc {
 		return newButton(x, y, width, height, message, onPress, null);
 	}
 	
-	public static TexturedButtonWidget newTexturedButton(int x, int y, int width, int height, int hoveredVOffset, Identifier img, ButtonWidget.PressAction onPress, MultiVersionTooltip tooltip) {
+	public static TexturedButtonWidget newTexturedButton(int x, int y, int width, int height, int hoveredVOffset, Identifier img, ButtonWidget.PressAction onPress, MVTooltip tooltip) {
 		TexturedButtonWidget output = new TexturedButtonWidget(x, y, width, height, 0, 0, hoveredVOffset, img, width, height + hoveredVOffset, onPress);
 		if (tooltip != null) {
 			Version.newSwitch()
