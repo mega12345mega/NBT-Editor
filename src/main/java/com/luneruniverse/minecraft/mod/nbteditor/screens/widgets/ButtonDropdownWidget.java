@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
@@ -14,7 +14,7 @@ public class ButtonDropdownWidget extends GroupWidget {
 	
 	private static class ButtonGrid extends GroupWidget {
 		
-		private static record QueuedButton(Text msg, ButtonWidget.PressAction onPress, MultiVersionTooltip tooltip) {}
+		private static record QueuedButton(Text msg, ButtonWidget.PressAction onPress, MVTooltip tooltip) {}
 		
 		private final int x;
 		private final int y;
@@ -32,7 +32,7 @@ public class ButtonDropdownWidget extends GroupWidget {
 			this.buttons = new ArrayList<>();
 		}
 		
-		public void addButton(Text msg, ButtonWidget.PressAction onPress, MultiVersionTooltip tooltip) {
+		public void addButton(Text msg, ButtonWidget.PressAction onPress, MVTooltip tooltip) {
 			buttons.add(new QueuedButton(msg, onPress, tooltip));
 		}
 		
@@ -44,7 +44,7 @@ public class ButtonDropdownWidget extends GroupWidget {
 				QueuedButton btn = buttons.get(i);
 				int gridX = i % columns;
 				int gridY = i / columns;
-				addWidget(MultiVersionMisc.newButton(x + gridX * gridWidth, y + gridY * gridHeight, gridWidth, gridHeight,
+				addWidget(MVMisc.newButton(x + gridX * gridWidth, y + gridY * gridHeight, gridWidth, gridHeight,
 						btn.msg(), btn.onPress(), btn.tooltip()));
 			}
 		}
@@ -62,15 +62,15 @@ public class ButtonDropdownWidget extends GroupWidget {
 	private final ButtonGrid grid;
 	private boolean open;
 	
-	public ButtonDropdownWidget(int x, int y, int btnWidth, int btnHeight, Text msg, MultiVersionTooltip tooltip, int gridWidth, int gridHeight) {
+	public ButtonDropdownWidget(int x, int y, int btnWidth, int btnHeight, Text msg, MVTooltip tooltip, int gridWidth, int gridHeight) {
 		grid = new ButtonGrid(x, y + btnHeight, gridWidth, gridHeight, grid2 -> setOpen(false));
-		addWidget(MultiVersionMisc.newButton(x, y, btnWidth, btnHeight, msg, btn -> setOpen(!open), tooltip));
+		addWidget(MVMisc.newButton(x, y, btnWidth, btnHeight, msg, btn -> setOpen(!open), tooltip));
 	}
 	public ButtonDropdownWidget(int x, int y, int btnWidth, int btnHeight, Text msg, int gridWidth, int gridHeight) {
 		this(x, y, btnWidth, btnHeight, msg, null, gridWidth, gridHeight);
 	}
 	
-	public ButtonDropdownWidget addButton(Text msg, ButtonWidget.PressAction onPress, MultiVersionTooltip tooltip) {
+	public ButtonDropdownWidget addButton(Text msg, ButtonWidget.PressAction onPress, MVTooltip tooltip) {
 		grid.addButton(msg, onPress, tooltip);
 		return this;
 	}

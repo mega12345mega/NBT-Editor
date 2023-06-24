@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -41,11 +41,11 @@ public class StringInputWidget extends GroupWidget implements InitializableOverl
 		addWidget(value);
 		setFocused(value);
 		
-		ok = addWidget(MultiVersionMisc.newButton(width / 2 - 104, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.ok"), btn -> {
+		ok = addWidget(MVMisc.newButton(width / 2 - 104, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.ok"), btn -> {
 			this.close.run();
 			valueConsumer.accept(value.getText());
 		}));
-		addWidget(MultiVersionMisc.newButton(width / 2 + 4, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.cancel"), btn -> {
+		addWidget(MVMisc.newButton(width / 2 + 4, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.cancel"), btn -> {
 			this.close.run();
 		}));
 		

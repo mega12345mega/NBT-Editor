@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -34,7 +34,7 @@ public class GetPresetCommand extends ClientCommand {
 	}
 	private static ItemStack getItem(String name) {
 		try {
-			return ItemStack.fromNbt(MainUtil.readNBT(MultiVersionMisc.getResource(
+			return ItemStack.fromNbt(MainUtil.readNBT(MVMisc.getResource(
 					new Identifier("nbteditor", "presetitems/" + name + ".nbt")).orElseThrow()));
 		} catch (Exception e) {
 			NBTEditor.LOGGER.error("Error while loading preset item '" + name + "'", e);

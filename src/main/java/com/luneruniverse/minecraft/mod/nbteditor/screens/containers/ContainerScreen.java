@@ -5,14 +5,13 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ContainerItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.GenericContainerScreenHandler;
@@ -38,7 +37,7 @@ public class ContainerScreen extends ClientHandledScreen {
 		super(handler, inventory, title);
 		
 		this.saved = true;
-		this.unsavedTitle = MultiVersionMisc.copyText(title).append("*");
+		this.unsavedTitle = TextInst.copy(title).append("*");
 	}
 	private ContainerScreen build(ItemReference ref) {
 		this.ref = ref;
@@ -66,23 +65,22 @@ public class ContainerScreen extends ClientHandledScreen {
 		super.init();
 		
 		if (ref.isLockable()) {
-			this.addDrawableChild(MultiVersionMisc.newButton(16, 64, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
+			this.addDrawableChild(MVMisc.newButton(16, 64, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
 				navigationClicked = true;
 				ConfigScreen.setLockSlots(!ConfigScreen.isLockSlots());
 				btn.setMessage(ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"));
 			})).active = !ConfigScreen.isLockSlotsRequired();
 		}
 		
-		addDrawableChild(MultiVersionMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
+		addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
 				ItemFactoryScreen.FACTORY_ICON,
 				btn -> client.setScreen(new ItemFactoryScreen(ref)),
-				new MultiVersionTooltip("nbteditor.item_factory")));
+				new MVTooltip("nbteditor.item_factory")));
 	}
 	
 	@Override
-	protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
-		this.textRenderer.draw(matrices, saved ? this.title : this.unsavedTitle, (float)this.titleX, (float)this.titleY, 4210752);
-		this.textRenderer.draw(matrices, this.playerInventoryTitle, (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY, 4210752);
+	protected Text getRenderedTitle() {
+		return saved ? title : unsavedTitle;
 	}
 	
 	@Override

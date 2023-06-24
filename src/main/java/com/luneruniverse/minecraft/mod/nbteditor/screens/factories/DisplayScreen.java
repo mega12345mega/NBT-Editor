@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
@@ -27,7 +27,7 @@ public class DisplayScreen extends ItemEditorScreen {
 	
 	@Override
 	protected void initEditor() {
-		MultiVersionMisc.setKeyboardRepeatEvents(true);
+		MVMisc.setKeyboardRepeatEvents(true);
 		
 		name = FormattedTextFieldWidget.create(name, 16, 64, width - 32, 24 + textRenderer.fontHeight * 3, item.getName(),
 				false, Style.EMPTY.withFormatting(Formatting.ITALIC, item.getRarity().formatting), text -> {
@@ -45,7 +45,7 @@ public class DisplayScreen extends ItemEditorScreen {
 		});
 		addSelectableChild(name);
 		addSelectableChild(lore);
-		addDrawableChild(MultiVersionMisc.newButton(16, height - 16 - 20, 100, 20, TextInst.translatable("nbteditor.hide_flags"),
+		addDrawableChild(MVMisc.newButton(16, height - 16 - 20, 100, 20, TextInst.translatable("nbteditor.hide_flags"),
 				btn -> closeSafely(() -> client.setScreen(new HideFlagsScreen(ref)))));
 		addDrawable(lore);
 	}
@@ -68,7 +68,7 @@ public class DisplayScreen extends ItemEditorScreen {
 	
 	@Override
 	public void removed() {
-		MultiVersionMisc.setKeyboardRepeatEvents(false);
+		MVMisc.setKeyboardRepeatEvents(false);
 	}
 	
 }

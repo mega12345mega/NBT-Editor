@@ -1,10 +1,12 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.TextFieldWidgetMixin;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -50,11 +52,18 @@ public class NamedTextFieldWidget extends TextFieldWidget implements Tickable {
 			this.setSuggestion(this.getText().isEmpty() ? name.getString() : null);
 		
 		try {
-			matrix = MultiVersionMisc.copyMatrix(MultiVersionMisc.getPositionMatrix(matrices.peek()));
-			super.render(matrices, mouseX, mouseY, delta);
+			matrix = MVMisc.copyMatrix(MVMisc.getPositionMatrix(matrices.peek()));
+			MVDrawableHelper.super_render(NamedTextFieldWidget.class, this, matrices, mouseX, mouseY, delta);
 		} finally {
 			matrix = null;
 		}
+	}
+	public final void method_25394(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		render(matrices, mouseX, mouseY, delta);
+	}
+	@Override
+	public final void render(DrawContext context, int mouseX, int mouseY, float delta) {
+		render(MVDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
 	}
 	
 }

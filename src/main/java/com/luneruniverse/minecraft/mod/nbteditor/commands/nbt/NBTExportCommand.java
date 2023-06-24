@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -36,7 +36,7 @@ public class NBTExportCommand extends ClientCommand {
 	
 	private static String getItemToExportStr() throws CommandSyntaxException {
 		ItemStack item = getItemToExport();
-		return MultiVersionRegistry.ITEM.getId(item.getItem()).toString() +
+		return MVRegistry.ITEM.getId(item.getItem()).toString() +
 				(item.getNbt() == null ? "" : item.getNbt().asString()) + " " + item.getCount();
 	}
 	private static void exportToClipboard(String str) {

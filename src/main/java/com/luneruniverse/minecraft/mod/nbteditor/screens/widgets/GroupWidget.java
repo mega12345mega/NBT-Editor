@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 
 import net.minecraft.client.gui.AbstractParentElement;
@@ -16,7 +17,7 @@ import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.util.math.MatrixStack;
 
-public class GroupWidget extends AbstractParentElement implements Drawable, MultiVersionElement, Tickable, Selectable {
+public class GroupWidget extends AbstractParentElement implements MVDrawable, MVElement, Tickable, Selectable {
 	
 	private final List<Drawable> drawables;
 	private final List<Element> elements;
@@ -148,13 +149,13 @@ public class GroupWidget extends AbstractParentElement implements Drawable, Mult
 	@SuppressWarnings("deprecation")
 	@Override
 	public void setFocused(boolean focused) {
-		MultiVersionElement.super.setFocused(focused);
+		MVElement.super.setFocused(focused);
 	}
 	
 	@SuppressWarnings("deprecation")
 	@Override
 	public boolean isFocused() {
-		return MultiVersionElement.super.isFocused();
+		return MVElement.super.isFocused();
 	}
 	
 	

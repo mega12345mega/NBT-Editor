@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ExtendableButtonWidget;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 
 import net.minecraft.text.Text;
 
@@ -14,11 +14,11 @@ public class ConfigValueBoolean extends ExtendableButtonWidget implements Config
 	private final Text off;
 	private final boolean defaultValue;
 	private boolean value;
-	private MultiVersionTooltip tooltip;
+	private MVTooltip tooltip;
 	
 	private final List<ConfigValueListener<ConfigValueBoolean>> onChanged;
 	
-	public ConfigValueBoolean(boolean value, boolean defaultValue, int width, Text on, Text off, MultiVersionTooltip tooltip) {
+	public ConfigValueBoolean(boolean value, boolean defaultValue, int width, Text on, Text off, MVTooltip tooltip) {
 		super(0, 0, width, 20, value ? on : off, btn -> ((ConfigValueBoolean) btn).setValue(!((ConfigValueBoolean) btn).getValue()), tooltip);
 		this.on = on;
 		this.off = off;
@@ -28,9 +28,9 @@ public class ConfigValueBoolean extends ExtendableButtonWidget implements Config
 		this.onChanged = new ArrayList<>();
 	}
 	public ConfigValueBoolean(boolean value, boolean defaultValue, int width, Text on, Text off) {
-		this(value, defaultValue, width, on, off, MultiVersionTooltip.EMPTY);
+		this(value, defaultValue, width, on, off, MVTooltip.EMPTY);
 	}
-	private ConfigValueBoolean(boolean value, boolean defaultValue, int width, Text on, Text off, MultiVersionTooltip tooltipSupplier, List<ConfigValueListener<ConfigValueBoolean>> onChanged) {
+	private ConfigValueBoolean(boolean value, boolean defaultValue, int width, Text on, Text off, MVTooltip tooltipSupplier, List<ConfigValueListener<ConfigValueBoolean>> onChanged) {
 		this(value, defaultValue, width, on, off, tooltipSupplier);
 		this.onChanged.addAll(onChanged);
 	}

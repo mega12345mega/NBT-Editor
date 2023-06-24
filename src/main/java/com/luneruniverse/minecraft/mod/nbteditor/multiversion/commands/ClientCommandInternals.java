@@ -58,14 +58,14 @@ public final class ClientCommandInternals {
 	private static final String SHORT_API_COMMAND_NAME = "fcc";
 	private static @Nullable CommandDispatcher<FabricClientCommandSource> activeDispatcher;
 	static {
-		API_COMMAND_NAME = switch (Version.get()) {
-			case v1_19_4, v1_19_3, v1_19 -> "fabric-command-api-v2:client";
-			case v1_18_v1_17 -> "fabric-command-api-v1:client";
-		};
-		activeDispatcher = switch (Version.get()) {
-			case v1_19_4, v1_19_3, v1_19 -> null;
-			case v1_18_v1_17 -> new CommandDispatcher<>();
-		};
+		API_COMMAND_NAME = Version.<String>newSwitch()
+				.range("1.19.0", null, "fabric-command-api-v2:client")
+				.range(null, "1.18.2", "fabric-command-api-v1:client")
+				.get();
+		activeDispatcher = Version.<CommandDispatcher<FabricClientCommandSource>>newSwitch()
+				.range("1.19.0", null, () -> null)
+				.range(null, "1.18.2", () -> new CommandDispatcher<>())
+				.get();
 	}
 
 	public static void setActiveDispatcher(@Nullable CommandDispatcher<FabricClientCommandSource> dispatcher) {

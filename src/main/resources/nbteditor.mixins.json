@@ -7,7 +7,7 @@
   "mixins": [
   ],
   "client": [
-    "ChatMixin",
+    "ChatScreenMixin",
     "ChatScreenAccessor",
     "SendPacketMixin",
     "ReceivePacketMixin",

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
@@ -77,7 +77,7 @@ public class Enchants {
 		return enchants.stream()
 				.filter(nbt -> nbt instanceof NbtCompound)
 				.map(nbt -> (NbtCompound) nbt)
-				.map(nbt -> new EnchantWithLevel(MultiVersionRegistry.ENCHANTMENT.getOrEmpty(
+				.map(nbt -> new EnchantWithLevel(MVRegistry.ENCHANTMENT.getOrEmpty(
 						Identifier.tryParse(nbt.getString("id"))).orElse(null), nbt.getInt("lvl")))
 				.filter(enchant -> enchant.enchant() != null)
 				.collect(Collectors.toList());
@@ -89,7 +89,7 @@ public class Enchants {
 	
 	public void addEnchant(Enchantment enchant, int level) {
 		NbtCompound nbt = new NbtCompound();
-		nbt.putString("id", MultiVersionRegistry.ENCHANTMENT.getId(enchant).toString());
+		nbt.putString("id", MVRegistry.ENCHANTMENT.getId(enchant).toString());
 		nbt.putShort("lvl", (short) level);
 		enchants.add(nbt);
 		save();
@@ -103,7 +103,7 @@ public class Enchants {
 	}
 	
 	public boolean removeEnchant(Enchantment enchant) {
-		String key = MultiVersionRegistry.ENCHANTMENT.getId(enchant).toString();
+		String key = MVRegistry.ENCHANTMENT.getId(enchant).toString();
 		boolean output = enchants.removeIf(test -> !(test instanceof NbtCompound nbt) || nbt.getString("id").equals(key));
 		save();
 		return output;
@@ -120,7 +120,7 @@ public class Enchants {
 		boolean anyRemoved = false;
 		for (Iterator<NbtElement> i = enchants.iterator(); i.hasNext();) {
 			if (i.next() instanceof NbtCompound nbt) {
-				Optional<Enchantment> enchant = MultiVersionRegistry.ENCHANTMENT.getOrEmpty(Identifier.tryParse(nbt.getString("id")));
+				Optional<Enchantment> enchant = MVRegistry.ENCHANTMENT.getOrEmpty(Identifier.tryParse(nbt.getString("id")));
 				if (enchant.isPresent()) {
 					int level = nbt.getInt("lvl");
 					Integer maxLevel = foundEnchants.get(enchant.get());
@@ -135,7 +135,7 @@ public class Enchants {
 		if (anyRemoved) {
 			for (NbtElement element : enchants) {
 				if (element instanceof NbtCompound nbt) {
-					Optional<Enchantment> enchant = MultiVersionRegistry.ENCHANTMENT.getOrEmpty(Identifier.tryParse(nbt.getString("id")));
+					Optional<Enchantment> enchant = MVRegistry.ENCHANTMENT.getOrEmpty(Identifier.tryParse(nbt.getString("id")));
 					if (enchant.isPresent())
 						nbt.putShort("lvl", (short) (int) foundEnchants.get(enchant.get()));
 				}
@@ -146,7 +146,7 @@ public class Enchants {
 	}
 	
 	public void setEnchant(Enchantment enchant, int level, boolean onlyUpgrade) {
-		String key = MultiVersionRegistry.ENCHANTMENT.getId(enchant).toString();
+		String key = MVRegistry.ENCHANTMENT.getId(enchant).toString();
 		boolean anySet = false;
 		boolean anyFound = false;
 		for (NbtElement element : enchants) {

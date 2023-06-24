@@ -1,7 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ExtendableButtonWidget;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 
 import net.minecraft.text.Text;
 
@@ -13,15 +13,15 @@ public class ConfigButton extends ExtendableButtonWidget implements ConfigPath {
 	}
 	
 	private final PressAction onPress;
-	private final MultiVersionTooltip tooltip;
+	private final MVTooltip tooltip;
 	
-	public ConfigButton(int width, Text message, PressAction onPress, MultiVersionTooltip tooltip) {
+	public ConfigButton(int width, Text message, PressAction onPress, MVTooltip tooltip) {
 		super(0, 0, width, 20, message, btn -> onPress.onPress((ConfigButton) btn), tooltip);
 		this.onPress = onPress;
 		this.tooltip = tooltip;
 	}
 	public ConfigButton(int width, Text message, PressAction onPress) {
-		this(width, message, onPress, MultiVersionTooltip.EMPTY);
+		this(width, message, onPress, MVTooltip.EMPTY);
 	}
 	
 	@Override

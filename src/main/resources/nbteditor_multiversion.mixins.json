@@ -6,7 +6,9 @@
   "mixins": [
   ],
   "client": [
-    "ScreenHandlerMixin"
+    "ScreenHandlerMixin",
+    "DrawableMixin",
+    "ScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

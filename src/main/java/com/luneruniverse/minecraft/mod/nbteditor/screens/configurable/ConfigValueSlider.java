@@ -7,6 +7,7 @@ import java.util.function.Function;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.widget.SliderWidget;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 public class ConfigValueSlider<T extends Number> extends SliderWidget implements ConfigValue<T, ConfigValueSlider<T>> {
@@ -41,6 +42,11 @@ public class ConfigValueSlider<T extends Number> extends SliderWidget implements
 		this.onChanged = new ArrayList<>();
 		if (onChanged != null)
 			this.onChanged.addAll(onChanged);
+	}
+	
+	@Override
+	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		super.render(matrices, mouseX, mouseY, delta);
 	}
 	
 	// There is no element focusing in configs, so onDrag is called for everything

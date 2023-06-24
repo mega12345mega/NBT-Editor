@@ -113,14 +113,14 @@ public final class ClientCommandManager {
 	public static void createDispatcher() {
 		final CommandDispatcher<FabricClientCommandSource> dispatcher = new CommandDispatcher<>();
 		ClientCommandInternals.setActiveDispatcher(dispatcher);
-		Object registryAccess = switch (Version.get()) {
-			case v1_19_4, v1_19_3 -> CommandRegistryAccess.of(MainUtil.client.getNetworkHandler().getRegistryManager(),
-					MainUtil.client.getNetworkHandler().getEnabledFeatures());
-			case v1_19 -> Reflection.newInstance("net.minecraft.class_7157",
-					new Class[] {Reflection.getClass("net.minecraft.class_5455")}, // DynamicRegistryManager.class
-					lastGamePacket.registryManager());
-			case v1_18_v1_17 -> null;
-		};
+		Object registryAccess = Version.newSwitch()
+				.range("1.19.3", null, () -> CommandRegistryAccess.of(MainUtil.client.getNetworkHandler().getRegistryManager(),
+						MainUtil.client.getNetworkHandler().getEnabledFeatures()))
+				.range("1.19.0", "1.19.2", () -> Reflection.newInstance("net.minecraft.class_7157",
+						new Class[] {Reflection.getClass("net.minecraft.class_5455")}, // DynamicRegistryManager.class
+						lastGamePacket.registryManager()))
+				.range(null, "1.18.2", () -> null)
+				.get();
 		ClientCommandRegistrationCallback.EVENT.invoker().register(dispatcher, registryAccess);
 		ClientCommandInternals.finalizeInit();
 	}

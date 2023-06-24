@@ -7,8 +7,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigBar;
@@ -40,7 +40,7 @@ public class AttributesScreen extends ItemEditorScreen {
 		private static final Text MIN = TextInst.translatable("nbteditor.attributes.amount.min");
 		private static final Text INFINITY = TextInst.translatable("nbteditor.attributes.amount.infinity");
 		private static final Text NEG_INFINITY = TextInst.translatable("nbteditor.attributes.amount.negative_infinity");
-		private static final MultiVersionTooltip TOOLTIP = new MultiVersionTooltip("nbteditor.attributes.amount.autofill_keybinds");
+		private static final MVTooltip TOOLTIP = new MVTooltip("nbteditor.attributes.amount.autofill_keybinds");
 		
 		public MaxButton() {
 			super(100, getMaxMsg(), btn -> {
@@ -103,7 +103,7 @@ public class AttributesScreen extends ItemEditorScreen {
 	private static final Map<String, EntityAttribute> ATTRIBUTES;
 	private static final ConfigHiddenDataNamed<ConfigCategory, UUID> ATTRIBUTE_ENTRY;
 	static {
-		ATTRIBUTES = MultiVersionRegistry.ATTRIBUTE.getEntrySet().stream().map(attribute -> Map.entry(attribute.getKey().toString(), attribute.getValue()))
+		ATTRIBUTES = MVRegistry.ATTRIBUTE.getEntrySet().stream().map(attribute -> Map.entry(attribute.getKey().toString(), attribute.getValue()))
 				.sorted((a, b) -> a.getKey().compareToIgnoreCase(b.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
 		String firstAttribute = ATTRIBUTES.keySet().stream().findFirst().get();
 		

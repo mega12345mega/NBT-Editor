@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
@@ -37,7 +37,7 @@ public class ItemStackMixin {
 			return;
 		
 		// Checking slots in your hotbar vs item selection is difficult, so the lore is just disabled in non-inventory tabs
-		boolean creativeInv = MultiVersionMisc.isCreativeInventoryTabSelected();
+		boolean creativeInv = MVMisc.isCreativeInventoryTabSelected();
 		
 		if (creativeInv || MainUtil.client.currentScreen instanceof ClientChestScreen || MainUtil.client.currentScreen instanceof ContainerScreen) {
 			info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.edit"));
@@ -58,7 +58,7 @@ public class ItemStackMixin {
 		
 		for (int i = 0; i < enchantments.size(); ++i) {
 			NbtCompound nbtCompound = enchantments.getCompound(i);
-			MultiVersionRegistry.ENCHANTMENT.getOrEmpty(Identifier.tryParse(nbtCompound.getString("id")))
+			MVRegistry.ENCHANTMENT.getOrEmpty(Identifier.tryParse(nbtCompound.getString("id")))
 					.ifPresent(e -> tooltip.add(ConfigScreen.getEnchantNameWithMax(e, Enchants.applyCap(nbtCompound.getInt("lvl")))));
 		}
 	}

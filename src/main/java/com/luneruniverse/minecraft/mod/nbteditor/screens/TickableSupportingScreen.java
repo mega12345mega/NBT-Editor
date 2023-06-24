@@ -1,11 +1,11 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVScreen;
 
 import net.minecraft.client.gui.Element;
 import net.minecraft.text.Text;
 
-public class TickableSupportingScreen extends MultiVersionScreen {
+public class TickableSupportingScreen extends MVScreen {
 	
 	protected TickableSupportingScreen(Text title) {
 		super(title);

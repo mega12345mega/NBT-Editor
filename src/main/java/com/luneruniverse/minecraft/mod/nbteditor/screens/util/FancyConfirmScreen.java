@@ -1,8 +1,10 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.util;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -33,9 +35,16 @@ public class FancyConfirmScreen extends ConfirmScreen {
 		
 		matrices.push();
 		matrices.translate(0.0, 0.0, 500.0);
-		super.render(matrices, mouseX, mouseY, delta);
+		MVDrawableHelper.super_render(FancyConfirmScreen.class, this, matrices, mouseX, mouseY, delta);
 		MainUtil.renderLogo(matrices);
 		matrices.pop();
+	}
+	public final void method_25394(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		render(matrices, mouseX, mouseY, delta);
+	}
+	@Override
+	public final void render(DrawContext context, int mouseX, int mouseY, float delta) {
+		render(MVDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
 	}
 	
 }

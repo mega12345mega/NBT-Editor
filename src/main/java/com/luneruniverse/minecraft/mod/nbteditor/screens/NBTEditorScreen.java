@@ -15,9 +15,9 @@ import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
@@ -149,7 +149,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		}
 		
 		
-		MultiVersionMisc.setKeyboardRepeatEvents(true);
+		MVMisc.setKeyboardRepeatEvents(true);
 		
 		name.setChangedListener(str -> {
 			if (str.equals(item.getItem().getName().getString()))
@@ -160,22 +160,22 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			genEditor();
 		});
 		
-		this.addDrawableChild(MultiVersionMisc.newButton(16, height - 16 * 2, 20, 20, TextInst.translatable("nbteditor.nbt.add"), btn -> {
+		this.addDrawableChild(MVMisc.newButton(16, height - 16 * 2, 20, 20, TextInst.translatable("nbteditor.nbt.add"), btn -> {
 			add();
 		}));
-		this.addDrawableChild(MultiVersionMisc.newButton(16 + 16 + 8, height - 16 * 2, 20, 20, TextInst.translatable("nbteditor.nbt.remove"), btn -> {
+		this.addDrawableChild(MVMisc.newButton(16 + 16 + 8, height - 16 * 2, 20, 20, TextInst.translatable("nbteditor.nbt.remove"), btn -> {
 			remove();
 		}));
-		this.addDrawableChild(MultiVersionMisc.newButton(16 + (16 + 8) * 2, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.copy"), btn -> {
+		this.addDrawableChild(MVMisc.newButton(16 + (16 + 8) * 2, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.copy"), btn -> {
 			copy();
 		}));
-		this.addDrawableChild(MultiVersionMisc.newButton(16 + (16 + 8) * 2 + (48 + 4), height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.cut"), btn -> {
+		this.addDrawableChild(MVMisc.newButton(16 + (16 + 8) * 2 + (48 + 4), height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.cut"), btn -> {
 			cut();
 		}));
-		this.addDrawableChild(MultiVersionMisc.newButton(16 + (16 + 8) * 2 + (48 + 4) * 2, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.paste"), btn -> {
+		this.addDrawableChild(MVMisc.newButton(16 + (16 + 8) * 2 + (48 + 4) * 2, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.paste"), btn -> {
 			paste();
 		}));
-		this.addDrawableChild(MultiVersionMisc.newButton(16 + (16 + 8) * 2 + (48 + 4) * 3, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.rename"), btn -> {
+		this.addDrawableChild(MVMisc.newButton(16 + (16 + 8) * 2 + (48 + 4) * 3, height - 16 * 2, 48, 20, TextInst.translatable("nbteditor.nbt.rename"), btn -> {
 			rename();
 		}));
 		
@@ -183,19 +183,19 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		
 		type = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8 + 32, 208, 16, TextInst.of("")).name(TextInst.translatable("nbteditor.nbt.identifier"));
 		type.setMaxLength(Integer.MAX_VALUE);
-		type.setText(MultiVersionRegistry.ITEM.getId(item.getItem()).toString());
+		type.setText(MVRegistry.ITEM.getId(item.getItem()).toString());
 		type.setChangedListener(str -> {
 			try {
-				if (!MultiVersionRegistry.ITEM.containsId(new Identifier(str)))
+				if (!MVRegistry.ITEM.containsId(new Identifier(str)))
 					return;
 			} catch (InvalidIdentifierException e) {
 				return;
 			}
 			boolean airEditable = ConfigScreen.isAirEditable();
-			if (!airEditable && MultiVersionRegistry.ITEM.get(new Identifier(str)) == Items.AIR)
+			if (!airEditable && MVRegistry.ITEM.get(new Identifier(str)) == Items.AIR)
 				return;
 			
-			ItemStack editedItem = MainUtil.setType(MultiVersionRegistry.ITEM.get(new Identifier(str)), item,
+			ItemStack editedItem = MainUtil.setType(MVRegistry.ITEM.get(new Identifier(str)), item,
 					count.getText().isEmpty() ? 1 : Integer.parseInt(count.getText()));
 			if (editedItem == ItemStack.EMPTY)
 				return;
@@ -257,7 +257,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		});
 		this.addDrawableChild(value);
 		
-		this.addDrawableChild(MultiVersionMisc.newButton(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, TextInst.translatable("nbteditor.nbt.value_expand"), btn -> {
+		this.addDrawableChild(MVMisc.newButton(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, TextInst.translatable("nbteditor.nbt.value_expand"), btn -> {
 			if (selectedValue == null) {
 				client.setScreen(new TextAreaScreen(this, nbt.toString(), NbtFormatter.FORMATTER, false, str -> {
 					try {
@@ -286,7 +286,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		
 		final int editorY = 16 + 8 + 32 + (16 + 8) * 3;
 		editor = new List2D(16, editorY, width - 16 * 2, height - editorY - 16 * 2 - 8, 4, 32, 32, 8)
-				.setFinalEventHandler(new MultiVersionElement() {
+				.setFinalEventHandler(new MVElement() {
 					@Override
 					public boolean mouseClicked(double mouseX, double mouseY, int button) {
 						selectedValue = null;
@@ -379,7 +379,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	
 	@Override
 	public void removed() {
-		MultiVersionMisc.setKeyboardRepeatEvents(false);
+		MVMisc.setKeyboardRepeatEvents(false);
 	}
 	
 	@Override

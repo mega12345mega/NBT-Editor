@@ -32,11 +32,11 @@ import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.HandItemReferenc
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -45,7 +45,6 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerInventory;
@@ -162,9 +161,8 @@ public class MainUtil {
 	private static final Identifier LOGO = new Identifier("nbteditor", "textures/logo.png");
 	private static final Identifier LOGO_UPDATE_AVAILABLE = new Identifier("nbteditor", "textures/logo_update_available.png");
 	public static void renderLogo(MatrixStack matrices) {
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.setShaderTexture(0, UpdateCheckerThread.UPDATE_AVAILABLE ? LOGO_UPDATE_AVAILABLE : LOGO);
-		Screen.drawTexture(matrices, 16, 16, 0, 0, 32, 32, 32, 32);
+		MVDrawableHelper.drawTexture(matrices,
+				UpdateCheckerThread.UPDATE_AVAILABLE ? LOGO_UPDATE_AVAILABLE : LOGO, 16, 16, 0, 0, 32, 32, 32, 32);
 	}
 	
 	
@@ -242,9 +240,9 @@ public class MainUtil {
 			line = lines.get(i);
 			int offsetY = i * renderer.fontHeight + (centerVertical ? -renderer.fontHeight * lines.size() / 2 : 0);
 			if (centerHorizontal)
-				Screen.drawCenteredTextWithShadow(matrices, renderer, TextInst.of(line).asOrderedText(), x, y + offsetY, color);
+				MVDrawableHelper.drawCenteredTextWithShadow(matrices, renderer, TextInst.of(line), x, y + offsetY, color);
 			else
-				Screen.drawTextWithShadow(matrices, renderer, TextInst.of(line), x, y + offsetY, color);
+				MVDrawableHelper.drawTextWithShadow(matrices, renderer, TextInst.of(line), x, y + offsetY, color);
 		}
 	}
 	
@@ -411,7 +409,7 @@ public class MainUtil {
 	public static ItemStack setType(Item type, ItemStack item, int count) {
 		NbtCompound fullData = new NbtCompound();
 		item.writeNbt(fullData);
-		fullData.putString("id", MultiVersionRegistry.ITEM.getId(type).toString());
+		fullData.putString("id", MVRegistry.ITEM.getId(type).toString());
 		fullData.putInt("Count", count);
 		return ItemStack.fromNbt(fullData);
 	}
@@ -630,7 +628,7 @@ public class MainUtil {
 	public static Text stripInvalidChars(Text text, boolean allowLineBreaks) {
 		EditableText output = TextInst.literal("");
 		text.visit((style, str) -> {
-			output.append(TextInst.literal(MultiVersionMisc.stripInvalidChars(str, allowLineBreaks)).setStyle(style));
+			output.append(TextInst.literal(MVMisc.stripInvalidChars(str, allowLineBreaks)).setStyle(style));
 			return Optional.empty();
 		}, Style.EMPTY);
 		return output;

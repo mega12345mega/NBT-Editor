@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nbteditor",
-  "version": "1.12.0",
+  "version": "1.12.999",
 
   "name": "NBT Editor",
   "description": "Lets you edit items' nbt ingame, store items in a client side chest, open shulker boxes, chests, and barrels in your inventory, and more!",
@@ -46,6 +46,10 @@
   
   "custom": {
     "modmenu": {
+    },
+    "loom:injected_interfaces": {
+      "net/minecraft/class_4068": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVDrawableParent"],
+      "net/minecraft/class_437": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVScreenParent"]
     }
   }
 }

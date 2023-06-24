@@ -4,7 +4,7 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -22,7 +22,7 @@ public class NBTNewCommand extends ClientCommand {
 	
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
-		builder.then(argument("item", MultiVersionMisc.getItemStackArg()).executes(context -> {
+		builder.then(argument("item", MVMisc.getItemStackArg()).executes(context -> {
 			ItemReference ref = MainUtil.getHeldAir();
 			ref.saveItem(context.getArgument("item", ItemStackArgument.class).createStack(1, true));
 			MainUtil.client.setScreen(new NBTEditorScreen(ref));
