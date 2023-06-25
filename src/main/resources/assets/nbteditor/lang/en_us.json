@@ -275,6 +275,10 @@
 	"nbteditor.config.hide_format_buttons.desc": "Hide all of the formats accessible via\nkeybind in the formatted text editors\n\nThis may allow the color dropdown\nto expand out when there wasn't\npreviously room",
 	"nbteditor.config.hide_format_buttons.enabled": "Hidden",
 	"nbteditor.config.hide_format_buttons.disabled": "Shown",
+	"nbteditor.config.special_numbers": "Special Numbers",
+	"nbteditor.config.special_numbers.desc": "Allow entering §6NaN§cd§r, §6Infinity§cf§r, §6-Infinity§cd§r, etc.\ninto the nbt editor\nThis is not consistent with /data (MC-200070)",
+	"nbteditor.config.special_numbers.enabled": "Enabled",
+	"nbteditor.config.special_numbers.disabled": "Disabled",
 	
 	
 	"nbteditor.configurable.list.move": "Move",

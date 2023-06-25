@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTValue;
 import com.luneruniverse.minecraft.mod.nbteditor.util.StringNbtWriterQuoted;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.command.argument.NbtElementArgumentType;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
 
@@ -106,7 +106,7 @@ public class StringMenuGenerator implements MenuGenerator {
 	private NbtElement getRealNbt(NbtElement str) {
 		try {
 			STR_BOOL_REQUESTED.add(Thread.currentThread());
-			return NbtElementArgumentType.nbtElement().parse(new StringReader(((NbtString) str).asString()));
+			return MixinLink.parseSpecialElement(new StringReader(((NbtString) str).asString()));
 		} catch (CommandSyntaxException e) {
 			return null;
 		} finally {

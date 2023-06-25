@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import java.util.function.Consumer;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
@@ -10,7 +11,6 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.command.argument.NbtElementArgumentType;
 import net.minecraft.nbt.AbstractNbtList;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Identifier;
@@ -135,7 +135,7 @@ public class NBTValue extends List2D.List2DValue {
 	
 	public void valueChanged(String str, Consumer<NbtElement> onChange) {
 		try {
-			value = NbtElementArgumentType.nbtElement().parse(new StringReader(str));
+			value = MixinLink.parseSpecialElement(new StringReader(str));
 			onChange.accept(value);
 		} catch (CommandSyntaxException e) {}
 	}

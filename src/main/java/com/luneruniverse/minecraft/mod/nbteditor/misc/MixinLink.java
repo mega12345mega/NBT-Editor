@@ -16,6 +16,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -25,6 +27,8 @@ import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 
@@ -149,6 +153,17 @@ public class MixinLink {
 			TextRenderer textRenderer = MainUtil.client.textRenderer;
 			MVDrawableHelper.drawCenteredTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.chat_length_warning_1"), source.width - 102, source.height - 40 + textRenderer.fontHeight / 2, 0xFFAA5500);
 			MVDrawableHelper.drawCenteredTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.chat_length_warning_2"), source.width - 102, source.height - 28 + textRenderer.fontHeight / 2, 0xFFAA5500);
+		}
+	}
+	
+	
+	public static final Set<Thread> specialNumbers = Collections.synchronizedSet(new HashSet<>());
+	public static NbtElement parseSpecialElement(StringReader reader) throws CommandSyntaxException {
+		specialNumbers.add(Thread.currentThread());
+		try {
+			return new StringNbtReader(reader).parseElement();
+		} finally {
+			specialNumbers.remove(Thread.currentThread());
 		}
 	}
 	

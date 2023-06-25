@@ -3,8 +3,10 @@ package com.luneruniverse.minecraft.mod.nbteditor.util;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -17,7 +19,6 @@ import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtLong;
 import net.minecraft.nbt.NbtLongArray;
 import net.minecraft.nbt.NbtType;
-import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -56,12 +57,20 @@ public class NbtFormatter {
 	private static final Formatting NUMBER_COLOR = Formatting.GOLD;
 	private static final Formatting TYPE_SUFFIX_COLOR = Formatting.RED;
 	
+	public static final Map<String, Number> SPECIAL_NUMS = Map.of(
+			"NaNd", Double.NaN,
+			"Infinityd", Double.POSITIVE_INFINITY,
+			"-Infinityd", Double.NEGATIVE_INFINITY,
+			"NaNf", Float.NaN,
+			"Infinityf", Float.POSITIVE_INFINITY,
+			"-Infinityf", Float.NEGATIVE_INFINITY);
+	
 	
 	
 	public static Text formatElement(StringReader reader) throws CommandSyntaxException {
 		// Check list types
 		int cursor = reader.getCursor();
-		new StringNbtReader(reader).parseElement();
+		MixinLink.parseSpecialElement(reader);
 		reader.setCursor(cursor);
 		
 		// Format
@@ -334,6 +343,8 @@ public class NbtFormatter {
 			if ("false".equalsIgnoreCase(input)) {
 				return TextInst.literal(input).formatted(NUMBER_COLOR);
 			}
+			if (ConfigScreen.isSpecialNumbers() && SPECIAL_NUMS.containsKey(input))
+				return numberInput;
 		} catch (NumberFormatException numberFormatException) {
 			// empty catch block
 		}

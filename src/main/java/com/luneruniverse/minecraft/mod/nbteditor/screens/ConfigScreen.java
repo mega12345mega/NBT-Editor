@@ -129,6 +129,7 @@ public class ConfigScreen extends MVScreen {
 	private static boolean tooltipOverflowFix;
 	private static boolean noArmorRestriction;
 	private static boolean hideFormatButtons;
+	private static boolean specialNumbers;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -148,6 +149,7 @@ public class ConfigScreen extends MVScreen {
 		tooltipOverflowFix = true;
 		noArmorRestriction = false;
 		hideFormatButtons = false;
+		specialNumbers = true;
 		
 		try {
 			// Many config options use the old names
@@ -175,6 +177,7 @@ public class ConfigScreen extends MVScreen {
 			tooltipOverflowFix = settings.get("tooltipOverflowFix").getAsBoolean();
 			noArmorRestriction = settings.get("noArmorRestriction").getAsBoolean();
 			hideFormatButtons = settings.get("hideFormatButtons").getAsBoolean();
+			specialNumbers = settings.get("specialNumbers").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -202,6 +205,7 @@ public class ConfigScreen extends MVScreen {
 		settings.addProperty("tooltipOverflowFix", tooltipOverflowFix);
 		settings.addProperty("noArmorRestriction", noArmorRestriction);
 		settings.addProperty("hideFormatButtons", hideFormatButtons);
+		settings.addProperty("specialNumbers", specialNumbers);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -270,6 +274,9 @@ public class ConfigScreen extends MVScreen {
 	}
 	public static boolean isHideFormatButtons() {
 		return hideFormatButtons;
+	}
+	public static boolean isSpecialNumbers() {
+		return specialNumbers;
 	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
@@ -383,6 +390,10 @@ public class ConfigScreen extends MVScreen {
 				new ConfigValueBoolean(hideFormatButtons, false, 100, TextInst.translatable("nbteditor.config.hide_format_buttons.enabled"), TextInst.translatable("nbteditor.config.hide_format_buttons.disabled"))
 				.addValueListener(value -> hideFormatButtons = value.getValidValue()))
 				.setTooltip("nbteditor.config.hide_format_buttons.desc"));
+		this.config.setConfigurable("specialNumbers", new ConfigItem<>(TextInst.translatable("nbteditor.config.special_numbers"),
+				new ConfigValueBoolean(specialNumbers, true, 100, TextInst.translatable("nbteditor.config.special_numbers.enabled"), TextInst.translatable("nbteditor.config.special_numbers.disabled"))
+				.addValueListener(value -> specialNumbers = value.getValidValue()))
+				.setTooltip("nbteditor.config.special_numbers.desc"));
 		ADDED_OPTIONS.forEach(option -> option.accept(config));
 	}
 	

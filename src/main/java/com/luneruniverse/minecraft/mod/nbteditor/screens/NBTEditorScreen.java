@@ -15,6 +15,7 @@ import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
@@ -36,7 +37,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 
@@ -262,7 +262,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			if (selectedValue == null) {
 				client.setScreen(new TextAreaScreen(this, nbt.toString(), NbtFormatter.FORMATTER, false, str -> {
 					try {
-						NbtElement newNbt = new StringNbtReader(new StringReader(str)).parseElement();
+						NbtElement newNbt = MixinLink.parseSpecialElement(new StringReader(str));
 						if (realPath.isEmpty()) {
 							if (newNbt instanceof NbtCompound)
 								nbt = newNbt;
