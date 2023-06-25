@@ -180,8 +180,14 @@
 	"nbteditor.book.preview.click.value": "Value: %s",
 	
 	"nbteditor.signboard": "Sign (Block)",
+	"nbteditor.signboard.side.front": "Switch To Back",
+	"nbteditor.signboard.side.back": "Switch To Front",
+	"nbteditor.signboard.wax.enabled": "☑ Waxed",
+	"nbteditor.signboard.wax.disabled": "☐ Waxed",
 	"nbteditor.signboard.glowing.enabled": "☑ Glowing",
 	"nbteditor.signboard.glowing.disabled": "☐ Glowing",
+	"nbteditor.signboard.import.success": "§aSign updated to %s",
+	"nbteditor.signboard.import.fail": "§cSign is already %s",
 	
 	"nbteditor.multi_line_text.find": "Find",
 	"nbteditor.multi_line_text.replace": "Replace",
