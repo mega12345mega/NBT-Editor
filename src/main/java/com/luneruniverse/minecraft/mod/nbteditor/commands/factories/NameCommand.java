@@ -26,14 +26,14 @@ public class NameCommand extends ClientCommand {
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		builder.then(argument("name", FancyTextArgumentType.fancyText()).executes(context -> {
 			Text name = context.getArgument("name", Text.class);
-			ItemReference ref = MainUtil.getHeldItem();
+			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			item.setCustomName(name);
 			ref.saveItem(item, TextInst.translatable("nbteditor.named").append(name));
 			
 			return Command.SINGLE_SUCCESS;
 		})).executes(context -> {
-			MainUtil.client.setScreen(new DisplayScreen(MainUtil.getHeldItem()));
+			MainUtil.client.setScreen(new DisplayScreen(ItemReference.getHeldItem()));
 			return Command.SINGLE_SUCCESS;
 		});
 	}

@@ -28,11 +28,11 @@ public class StatusEffectArgumentType implements ArgumentType<StatusEffect> {
 	
 	public StatusEffect parse(StringReader stringReader) throws CommandSyntaxException {
 		Identifier id = Identifier.fromCommandInput(stringReader);
-		return MultiVersionRegistry.STATUS_EFFECT.getOrEmpty(id).orElseThrow(() -> INVALID_EFFECT_EXCEPTION.create(id));
+		return MVRegistry.STATUS_EFFECT.getOrEmpty(id).orElseThrow(() -> INVALID_EFFECT_EXCEPTION.create(id));
 	}
 	
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		return CommandSource.suggestIdentifiers(MultiVersionRegistry.STATUS_EFFECT.getIds(), builder);
+		return CommandSource.suggestIdentifiers(MVRegistry.STATUS_EFFECT.getIds(), builder);
 	}
 	
 	public Collection<String> getExamples() {

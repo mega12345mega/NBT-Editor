@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
@@ -27,7 +27,7 @@ public class EnchantmentsScreen extends ItemEditorScreen {
 	
 	private static final Map<String, Enchantment> ENCHANTMENTS;
 	static {
-		ENCHANTMENTS = MultiVersionRegistry.ENCHANTMENT.getEntrySet().stream().map(enchant -> Map.entry(enchant.getKey().toString(), enchant.getValue()))
+		ENCHANTMENTS = MVRegistry.ENCHANTMENT.getEntrySet().stream().map(enchant -> Map.entry(enchant.getKey().toString(), enchant.getValue()))
 				.sorted((a, b) -> a.getKey().compareToIgnoreCase(b.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
 	}
 	@SuppressWarnings("unchecked")
@@ -68,7 +68,7 @@ public class EnchantmentsScreen extends ItemEditorScreen {
 		
 		new Enchants(item).getEnchants().forEach(enchant -> {
 			ConfigCategory enchantConfig = entry.clone(true);
-			getConfigEnchantment(enchantConfig).setValue(MultiVersionRegistry.ENCHANTMENT.getId(enchant.enchant()).toString());
+			getConfigEnchantment(enchantConfig).setValue(MVRegistry.ENCHANTMENT.getId(enchant.enchant()).toString());
 			getConfigLevel(enchantConfig).setValue(enchant.level());
 			config.addConfigurable(enchantConfig);
 		});

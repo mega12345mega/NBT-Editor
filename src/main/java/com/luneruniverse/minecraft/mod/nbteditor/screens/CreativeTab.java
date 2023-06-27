@@ -4,24 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 public class CreativeTab {
 	
-	public static class CreativeTabGroup implements MultiVersionElement, Drawable, Selectable {
+	public static class CreativeTabGroup implements MVDrawable, MVElement, Selectable {
 		private final List<CreativeTab> tabs;
 		
 		public CreativeTabGroup(List<CreativeTab> tabs) {
@@ -57,12 +54,12 @@ public class CreativeTab {
 	
 	public static record CreativeTabData(ItemStack item, Runnable onClick, Predicate<Screen> whenToShow) {}
 	public static final List<CreativeTabData> TABS = new ArrayList<>();
-	public static final int WIDTH = switch (Version.get()) {
-		case v1_19_4, v1_19_3 -> 26;
-		case v1_19, v1_18_v1_17 -> 28;
-	};
+	public static final int WIDTH = Version.<Integer>newSwitch()
+			.range("1.19.3", null, 26)
+			.range(null, "1.19.2", 28)
+			.get();
 	
-	private static final Identifier tabs = new Identifier("textures/gui/container/creative_inventory/tabs.png");
+	private static final Identifier TEXTURE = new Identifier("textures/gui/container/creative_inventory/tabs.png");
 	
 	private final Screen screen;
 	private final int x;
@@ -81,21 +78,19 @@ public class CreativeTab {
 		int k = 0;
 		int y = screen.height - 32;
 		
-		RenderSystem.setShader(GameRenderer::getPositionTexProgram); // getPositionTexShader <= 1.19.2
-		RenderSystem.setShaderTexture(0, tabs);
-		DrawableHelper.drawTexture(matrices, x, y, 0, j, k, WIDTH, 32, 256, 256);
+		MVDrawableHelper.drawTexture(matrices, TEXTURE, x, y, j, k, WIDTH, 32);
 		
-		int xOffset = switch (Version.get()) {
-			case v1_19_4, v1_19_3 -> 5;
-			case v1_19, v1_18_v1_17 -> 6;
-		};
-		MultiVersionMisc.renderItem(matrices, 100.0F, false, item, x + xOffset, y + 9);
+		int xOffset = Version.<Integer>newSwitch()
+				.range("1.19.3", null, 5)
+				.range(null, "1.19.2", 6)
+				.get();
+		MVDrawableHelper.renderItem(matrices, 100.0F, false, item, x + xOffset, y + 9);
 	}
 	private void renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
 		int y = screen.height - 32;
 		
 		if (isHoveringOverTab(x, y, mouseX, mouseY))
-			screen.renderTooltip(matrices, item.getName(), mouseX, mouseY);
+			MVDrawableHelper.renderTooltip(matrices, item.getName(), mouseX, mouseY);
 	}
 	
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {

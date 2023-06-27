@@ -2,10 +2,12 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
 import java.util.List;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.Panel;
 
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.util.math.MatrixStack;
 
 public class ConfigPanel extends Panel<ConfigPath> implements Tickable {
 	
@@ -33,6 +35,22 @@ public class ConfigPanel extends Panel<ConfigPath> implements Tickable {
 	@Override
 	protected int getHighestY() {
 		return toRender.getRenderHeight();
+	}
+	
+	@Override
+	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		boolean prevOneTooltip = MVTooltip.isOneTooltip();
+		if (!prevOneTooltip)
+			MVTooltip.setOneTooltip(true, true);
+		try {
+			super.render(matrices, mouseX, mouseY, delta);
+		} finally {
+			if (!prevOneTooltip) {
+				MVTooltip tooltip = MVTooltip.setOneTooltip(false, false);
+				if (tooltip != null)
+					tooltip.render(matrices, mouseX, mouseY);
+			}
+		}
 	}
 	
 	@Override

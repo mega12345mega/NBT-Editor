@@ -12,7 +12,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ArmorItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.InventoryItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
@@ -58,7 +58,7 @@ public class CreativeInventoryScreenMixin {
 					
 					slotId = slot.id;
 					boolean armor = false;
-					if (source instanceof CreativeInventoryScreen && !MultiVersionMisc.isCreativeInventoryTabSelected())
+					if (source instanceof CreativeInventoryScreen && !MVMisc.isCreativeInventoryTabSelected())
 						slotId -= 9;
 					else if (slotId < 9)
 						armor = true;
@@ -87,7 +87,7 @@ public class CreativeInventoryScreenMixin {
 			Slot hoveredSlot = ((HandledScreenAccessor) source).getFocusedSlot();
 			if (hoveredSlot != null && hoveredSlot.inventory == MainUtil.client.player.getInventory() && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
 				int slot = hoveredSlot.getIndex();
-				if (!MultiVersionMisc.isCreativeInventoryTabSelected())
+				if (!MVMisc.isCreativeInventoryTabSelected())
 					slot += 36;
 				ItemReference ref = slot < 9 ? new ArmorItemReference(slot) : new InventoryItemReference(slot == 45 ? 45 : (slot >= 36 ? slot - 36 : slot));
 				ClientHandledScreen.handleKeybind(hoveredSlot, ref);

@@ -12,20 +12,23 @@ import java.util.regex.PatternSyntaxException;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionElement;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
@@ -34,7 +37,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 
-public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, Tickable, Selectable {
+public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable, Selectable {
 	
 	private class FindAndReplaceWidget extends TranslatedGroupWidget {
 		private static String findValue = "";
@@ -54,19 +57,19 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 					.name(TextInst.translatable("nbteditor.multi_line_text.find")));
 			replace = addWidget(new NamedTextFieldWidget(textRenderer, 0, 20, 200, 16, TextInst.of(""))
 					.name(TextInst.translatable("nbteditor.multi_line_text.replace")));
-			regexBtn = addWidget(MultiVersionMisc.newButton(180, -2, 20, 20,
+			regexBtn = addWidget(MVMisc.newButton(180, -2, 20, 20,
 					TextInst.translatable("nbteditor.multi_line_text.regex." + (regex ? "on" : "off")), btn -> {
 				regex = !regex;
 				btn.setMessage(TextInst.translatable("nbteditor.multi_line_text.regex." + (regex ? "on" : "off")));
-			}, new MultiVersionTooltip("nbteditor.multi_line_text.regex")));
-			addWidget(MultiVersionMisc.newButton(0, 40, 40, 20, TextInst.translatable("nbteditor.multi_line_text.find"), btn -> {
+			}, new MVTooltip("nbteditor.multi_line_text.regex")));
+			addWidget(MVMisc.newButton(0, 40, 40, 20, TextInst.translatable("nbteditor.multi_line_text.find"), btn -> {
 				goToNext(Screen.hasShiftDown(), true);
 			}));
-			addWidget(MultiVersionMisc.newButton(44, 40, 64, 20, TextInst.translatable("nbteditor.multi_line_text.replace"), btn -> {
+			addWidget(MVMisc.newButton(44, 40, 64, 20, TextInst.translatable("nbteditor.multi_line_text.replace"), btn -> {
 				if (goToNext(Screen.hasShiftDown(), true))
 					replaceSel();
 			}));
-			addWidget(MultiVersionMisc.newButton(112, 40, 64, 20, TextInst.translatable("nbteditor.multi_line_text.replace_all"), btn -> {
+			addWidget(MVMisc.newButton(112, 40, 64, 20, TextInst.translatable("nbteditor.multi_line_text.replace_all"), btn -> {
 				boolean first = true;
 				int prevCursor = cursor;
 				cursor = 0;
@@ -82,7 +85,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 				if (first)
 					cursor = prevCursor;
 			}));
-			addWidget(MultiVersionMisc.newButton(180, 40, 20, 20, TextInst.translatable("nbteditor.multi_line_text.x"), btn -> {
+			addWidget(MVMisc.newButton(180, 40, 20, 20, TextInst.translatable("nbteditor.multi_line_text.x"), btn -> {
 				OverlaySupportingScreen.setOverlayStatic(null);
 			}));
 			
@@ -161,7 +164,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 		
 		@Override
 		public void renderPre(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-			fill(matrices, -16, -16, 216, 76, 0xC8101010);
+			MVDrawableHelper.fill(matrices, -16, -16, 216, 76, 0xC8101010);
 		}
 		
 		@Override
@@ -266,7 +269,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 	
 	protected MultiLineTextFieldWidget(int x, int y, int width, int height, String text,
 			Function<String, Text> formatter, boolean newLines, Consumer<String> onChange) {
-		text = MultiVersionMisc.stripInvalidChars(text, newLines);
+		text = MVMisc.stripInvalidChars(text, newLines);
 		
 		this.x = x;
 		this.y = y;
@@ -362,7 +365,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		Screen.fill(matrices, x, y, x + width, y + height, bgColor);
+		MVDrawableHelper.fill(matrices, x, y, x + width, y + height, bgColor);
 		
 		boolean scissor = !ConfigScreen.isMacScrollPatch();
 		if (scissor) {
@@ -376,19 +379,21 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 		
 		int yOffset = y;
 		for (Text line : renderedLines) {
-			if (shadow)
-				textRenderer.drawWithShadow(matrices, line, x + textRenderer.fontHeight, yOffset + textRenderer.fontHeight, -1);
-			else
-				textRenderer.draw(matrices, line, x + textRenderer.fontHeight, yOffset + textRenderer.fontHeight, -1);
+			MVDrawableHelper.drawText(matrices, textRenderer, line, x + textRenderer.fontHeight, yOffset + textRenderer.fontHeight, -1, shadow);
 			yOffset += textRenderer.fontHeight * 1.5;
 		}
+		
+		Version.newSwitch()
+				.range("1.20.0", null, () -> matrices.translate(0.0, 0.0, 1.0))
+				.range(null, "1.19.4", () -> {})
+				.run();
 		
 		renderHighlightsAbove(matrices, mouseX, mouseY, delta);
 		renderHighlight(matrices, getSelStart(), getSelEnd(), selColor);
 		
 		if (isMultiFocused() && cursorBlinkTracker / 6 % 2 == 0) {
 			Point cursor = getXYPos(this.cursor);
-			Screen.fill(matrices, cursor.x, cursor.y, cursor.x + 1, cursor.y + textRenderer.fontHeight, cursorColor);
+			MVDrawableHelper.fill(matrices, cursor.x, cursor.y, cursor.x + 1, cursor.y + textRenderer.fontHeight, cursorColor);
 		}
 		
 		matrices.pop();
@@ -401,16 +406,16 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 		Point startPos = getXYPos(start);
 		Point endPos = getXYPos(end);
 		if (startPos.y == endPos.y)
-			Screen.fill(matrices, startPos.x, startPos.y, endPos.x, endPos.y + textRenderer.fontHeight, color);
+			MVDrawableHelper.fill(matrices, startPos.x, startPos.y, endPos.x, endPos.y + textRenderer.fontHeight, color);
 		else {
 			int line = 0;
 			int lineY;
 			while ((lineY = startPos.y + line * (int) (textRenderer.fontHeight * 1.5)) < endPos.y) {
 				Point lineStart = line == 0 ? startPos : new Point(x + textRenderer.fontHeight, lineY);
-				Screen.fill(matrices, lineStart.x, lineStart.y, x + width - textRenderer.fontHeight, lineStart.y + textRenderer.fontHeight, color);
+				MVDrawableHelper.fill(matrices, lineStart.x, lineStart.y, x + width - textRenderer.fontHeight, lineStart.y + textRenderer.fontHeight, color);
 				line++;
 			}
-			Screen.fill(matrices, x + textRenderer.fontHeight, lineY, endPos.x, endPos.y + textRenderer.fontHeight, color);
+			MVDrawableHelper.fill(matrices, x + textRenderer.fontHeight, lineY, endPos.x, endPos.y + textRenderer.fontHeight, color);
 		}
 	}
 	
@@ -432,21 +437,21 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 				lines.add(TextInst.of("\n"));
 				renderedLines.add(TextInst.of(""));
 				text = text.substring(1);
-				formattedText = MainUtil.substring(formattedText, 1);
+				formattedText = TextUtil.substring(formattedText, 1);
 				continue;
 			}
 			int charPos = 1;
-			while (textRenderer.getWidth(MainUtil.substring(formattedText, 0, charPos)) < width - textRenderer.fontHeight * 2) {
+			while (textRenderer.getWidth(TextUtil.substring(formattedText, 0, charPos)) < width - textRenderer.fontHeight * 2) {
 				charPos++;
 				if (text.length() < charPos || text.charAt(charPos - 1) == '\n')
 					break;
 			}
 			endsWithNewLine = charPos - 1 < text.length() && text.charAt(charPos - 1) == '\n';
 			int extraPos = charPos - 1 + (endsWithNewLine ? 1 : 0);
-			lines.add(MainUtil.substring(formattedText, 0, extraPos));
-			renderedLines.add(MainUtil.substring(formattedText, 0, charPos - 1));
+			lines.add(TextUtil.substring(formattedText, 0, extraPos));
+			renderedLines.add(TextUtil.substring(formattedText, 0, charPos - 1));
 			text = text.substring(extraPos);
-			formattedText = MainUtil.substring(formattedText, extraPos);
+			formattedText = TextUtil.substring(formattedText, extraPos);
 		}
 		if (endsWithNewLine) {
 			Text emptyLine = TextInst.of("");
@@ -499,7 +504,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 		Text lineValue = renderedLines.get(line);
 		int lineLen = lineValue.getString().length();
 		int charPos = 0;
-		while (textRenderer.getWidth(MainUtil.substring(lineValue, 0, charPos)) < mouseX - x - textRenderer.fontHeight) {
+		while (textRenderer.getWidth(TextUtil.substring(lineValue, 0, charPos)) < mouseX - x - textRenderer.fontHeight) {
 			charPos++;
 			if (charPos > lineLen)
 				break;
@@ -529,7 +534,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 					lineY++;
 					charPos -= lineLen;
 				} else {
-					lineX = textRenderer.getWidth(MainUtil.substring(lines.get(i), 0, charPos));
+					lineX = textRenderer.getWidth(TextUtil.substring(lines.get(i), 0, charPos));
 					break;
 				}
 				i++;
@@ -588,7 +593,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 			undoPos--;
 		}
 		
-		text = MultiVersionMisc.stripInvalidChars(text, newLines);
+		text = MVMisc.stripInvalidChars(text, newLines);
 		onEdit(text, getSelStart(), getSelEnd() - getSelStart());
 		this.text = new StringBuilder(this.text).replace(getSelStart(), getSelEnd(), text).toString();
 		setCursor(getSelStart() + text.length());
@@ -736,7 +741,7 @@ public class MultiLineTextFieldWidget implements Drawable, MultiVersionElement, 
 		return false;
 	}
 	protected String pasteFilter(String toPaste) {
-		toPaste = MultiVersionMisc.stripInvalidChars(toPaste, newLines);
+		toPaste = MVMisc.stripInvalidChars(toPaste, newLines);
 		int numNewLines = getNumNewLines(text);
 		int toPasteNewLines = getNumNewLines(toPaste);
 		while (numNewLines + toPasteNewLines + 1 > maxLines) {

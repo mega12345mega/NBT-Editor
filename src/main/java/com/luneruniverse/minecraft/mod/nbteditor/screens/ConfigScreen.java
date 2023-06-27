@@ -22,9 +22,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton;
@@ -46,7 +45,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-public class ConfigScreen extends MultiVersionScreen {
+public class ConfigScreen extends TickableSupportingScreen {
 	
 	public enum EnchantLevelMax implements ConfigTooltipSupplier {
 		NEVER("nbteditor.config.enchant_level_max.never", (level, maxLevel) -> false),
@@ -74,11 +73,11 @@ public class ConfigScreen extends MultiVersionScreen {
 			return label.getString();
 		}
 		@Override
-		public MultiVersionTooltip getTooltip() {
+		public MVTooltip getTooltip() {
 			List<Text> output = new ArrayList<>();
 			for (int lvl = 1; lvl <= 3; lvl++)
 				output.add(getEnchantNameWithMax(Enchantments.FIRE_ASPECT, lvl, this));
-			return new MultiVersionTooltip(output);
+			return new MVTooltip(output);
 		}
 	}
 	
@@ -106,8 +105,8 @@ public class ConfigScreen extends MultiVersionScreen {
 			return label.getString();
 		}
 		@Override
-		public MultiVersionTooltip getTooltip() {
-			return new MultiVersionTooltip(desc);
+		public MVTooltip getTooltip() {
+			return new MVTooltip(desc);
 		}
 	}
 	
@@ -129,6 +128,7 @@ public class ConfigScreen extends MultiVersionScreen {
 	private static boolean tooltipOverflowFix;
 	private static boolean noArmorRestriction;
 	private static boolean hideFormatButtons;
+	private static boolean specialNumbers;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -148,6 +148,7 @@ public class ConfigScreen extends MultiVersionScreen {
 		tooltipOverflowFix = true;
 		noArmorRestriction = false;
 		hideFormatButtons = false;
+		specialNumbers = true;
 		
 		try {
 			// Many config options use the old names
@@ -175,6 +176,7 @@ public class ConfigScreen extends MultiVersionScreen {
 			tooltipOverflowFix = settings.get("tooltipOverflowFix").getAsBoolean();
 			noArmorRestriction = settings.get("noArmorRestriction").getAsBoolean();
 			hideFormatButtons = settings.get("hideFormatButtons").getAsBoolean();
+			specialNumbers = settings.get("specialNumbers").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -202,6 +204,7 @@ public class ConfigScreen extends MultiVersionScreen {
 		settings.addProperty("tooltipOverflowFix", tooltipOverflowFix);
 		settings.addProperty("noArmorRestriction", noArmorRestriction);
 		settings.addProperty("hideFormatButtons", hideFormatButtons);
+		settings.addProperty("specialNumbers", specialNumbers);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -271,6 +274,9 @@ public class ConfigScreen extends MultiVersionScreen {
 	public static boolean isHideFormatButtons() {
 		return hideFormatButtons;
 	}
+	public static boolean isSpecialNumbers() {
+		return specialNumbers;
+	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
 		EditableText output = TextInst.translatable(enchant.getTranslationKey());
@@ -314,75 +320,112 @@ public class ConfigScreen extends MultiVersionScreen {
 		super(TextInst.translatable("nbteditor.config"));
 		this.parent = parent;
 		this.config = new ConfigCategory(TextInst.translatable("nbteditor.config"));
-		this.config.setConfigurable("shortcuts", new ConfigButton(100, TextInst.translatable("nbteditor.config.shortcuts"),
-				btn -> client.setScreen(new ShortcutsScreen(this)), new MultiVersionTooltip("nbteditor.config.shortcuts.desc")));
-		this.config.setConfigurable("maxEnchantLevelDisplay", new ConfigItem<>(TextInst.translatable("nbteditor.config.enchant_level_max"),
-				new ConfigValueDropdownEnum<>(enchantLevelMax, EnchantLevelMax.NEVER, EnchantLevelMax.class)
-				.addValueListener(value -> enchantLevelMax = value.getValidValue()))
-				.setTooltip("nbteditor.config.enchant_level_max.desc"));
-		this.config.setConfigurable("useArabicEnchantLevels", new ConfigItem<>(TextInst.translatable("nbteditor.config.enchant_number_type"),
-				new ConfigValueBoolean(enchantNumberTypeArabic, false, 100, TextInst.translatable("nbteditor.config.enchant_number_type.arabic"),
-				TextInst.translatable("nbteditor.config.enchant_number_type.roman"), new MultiVersionTooltip(TextInst.translatable("nbteditor.config.enchant_number_type.desc2")))
-				.addValueListener(value -> enchantNumberTypeArabic = value.getValidValue()))
-				.setTooltip("nbteditor.config.enchant_number_type.desc"));
-		this.config.setConfigurable("keyTextSize", new ConfigItem<>(TextInst.translatable("nbteditor.config.key_text_size"),
-				ConfigValueSlider.forDouble(100, keyTextSize, 0.5, 0.5, 1, 0.05, value -> TextInst.literal(String.format("%.2f", value)))
-				.addValueListener(value -> keyTextSize = value.getValidValue()))
-				.setTooltip("nbteditor.config.key_text_size.desc"));
-		this.config.setConfigurable("hideKeybinds", new ConfigItem<>(TextInst.translatable("nbteditor.config.keybinds"),
-				new ConfigValueBoolean(keybindsHidden, false, 100, TextInst.translatable("nbteditor.config.keybinds.hidden"), TextInst.translatable("nbteditor.config.keybinds.shown"),
-				new MultiVersionTooltip("nbteditor.keybind.edit", "nbteditor.keybind.item_factory", "nbteditor.keybind.container", "nbteditor.keybind.enchant"))
-				.addValueListener(value -> keybindsHidden = value.getValidValue()))
-				.setTooltip("nbteditor.config.keybinds.desc"));
-		this.config.setConfigurable("extendChatLimit", new ConfigItem<>(TextInst.translatable("nbteditor.config.chat_limit"),
+		
+		ConfigCategory mc = new ConfigCategory(TextInst.translatable("nbteditor.config.category.mc"));
+		ConfigCategory guis = new ConfigCategory(TextInst.translatable("nbteditor.config.category.guis"));
+		ConfigCategory functional = new ConfigCategory(TextInst.translatable("nbteditor.config.category.functional"));
+		this.config.setConfigurable("mc", mc);
+		this.config.setConfigurable("guis", guis);
+		this.config.setConfigurable("functional", functional);
+		
+		
+		// ---------- MC ----------
+		
+		mc.setConfigurable("extendChatLimit", new ConfigItem<>(TextInst.translatable("nbteditor.config.chat_limit"),
 				new ConfigValueBoolean(chatLimitExtended, false, 100, TextInst.translatable("nbteditor.config.chat_limit.extended"), TextInst.translatable("nbteditor.config.chat_limit.normal"))
 				.addValueListener(value -> chatLimitExtended = value.getValidValue()))
 				.setTooltip("nbteditor.config.chat_limit.desc"));
-		this.config.setConfigurable("allowSingleQuotes", new ConfigItem<>(TextInst.translatable("nbteditor.config.single_quotes"),
-				new ConfigValueBoolean(singleQuotesAllowed, false, 100, TextInst.translatable("nbteditor.config.single_quotes.allowed"),
-				TextInst.translatable("nbteditor.config.single_quotes.not_allowed"), new MultiVersionTooltip("nbteditor.config.single_quotes.example"))
-				.addValueListener(value -> singleQuotesAllowed = value.getValidValue()))
-				.setTooltip("nbteditor.config.single_quotes.desc"));
-		this.config.setConfigurable("macScrollPatch", new ConfigItem<>(TextInst.translatable("nbteditor.config.mac_scroll_patch" + (SystemUtils.IS_OS_MAC ? ".on_mac" : "")),
-				new ConfigValueBoolean(macScrollPatch, SystemUtils.IS_OS_MAC, 100, TextInst.translatable("nbteditor.config.mac_scroll_patch.enabled"), TextInst.translatable("nbteditor.config.mac_scroll_patch.disabled"))
-				.addValueListener(value -> macScrollPatch = value.getValidValue()))
-				.setTooltip("nbteditor.config.mac_scroll_patch.desc"));
-		this.config.setConfigurable("scrollSpeed", new ConfigItem<>(TextInst.translatable("nbteditor.config.scroll_speed"),
-				ConfigValueSlider.forDouble(100, scrollSpeed, 1, 0.5, 2, 0.05, value -> TextInst.literal(String.format("%.2f", value)))
-				.addValueListener(value -> scrollSpeed = value.getValidValue()))
-				.setTooltip("nbteditor.config.scroll_speed.desc"));
-		this.config.setConfigurable("airEditable", new ConfigItem<>(TextInst.translatable("nbteditor.config.air_editable"),
-				new ConfigValueBoolean(airEditable, false, 100, TextInst.translatable("nbteditor.config.air_editable.yes"), TextInst.translatable("nbteditor.config.air_editable.no"))
-				.addValueListener(value -> airEditable = value.getValidValue()))
-				.setTooltip("nbteditor.config.air_editable.desc"));
-		this.config.setConfigurable("jsonText", new ConfigItem<>(TextInst.translatable("nbteditor.config.json_text"),
-				new ConfigValueBoolean(jsonText, false, 100, TextInst.translatable("nbteditor.config.json_text.yes"), TextInst.translatable("nbteditor.config.json_text.no"))
-				.addValueListener(value -> jsonText = value.getValidValue()))
-				.setTooltip("nbteditor.config.json_text.desc"));
-		this.config.setConfigurable("checkUpdates", new ConfigItem<>(TextInst.translatable("nbteditor.config.check_updates"),
-				new ConfigValueDropdownEnum<>(checkUpdates, CheckUpdatesLevel.MINOR, CheckUpdatesLevel.class)
-				.addValueListener(value -> checkUpdates = value.getValidValue()))
-				.setTooltip("nbteditor.config.check_updates.desc"));
-		this.config.setConfigurable("largeClientChest", new ConfigItem<>(TextInst.translatable("nbteditor.config.client_chest_size"),
-				new ConfigValueBoolean(largeClientChest, false, 100, TextInst.translatable("nbteditor.config.client_chest_size.large"), TextInst.translatable("nbteditor.config.client_chest_size.small"))
-				.addValueListener(value -> largeClientChest = value.getValidValue()))
-				.setTooltip("nbteditor.config.client_chest_size.desc"));
-		this.config.setConfigurable("screenshotOptions", new ConfigItem<>(TextInst.translatable("nbteditor.config.screenshot_options"),
-				new ConfigValueBoolean(screenshotOptions, true, 100, TextInst.translatable("nbteditor.config.screenshot_options.enabled"), TextInst.translatable("nbteditor.config.screenshot_options.disabled"))
-				.addValueListener(value -> screenshotOptions = value.getValidValue()))
-				.setTooltip(new MultiVersionTooltip(TextInst.translatable("nbteditor.config.screenshot_options.desc", TextInst.translatable("nbteditor.file_options.show"), TextInst.translatable("nbteditor.file_options.delete")))));
-		this.config.setConfigurable("tooltipOverflowFix", new ConfigItem<>(TextInst.translatable("nbteditor.config.tooltip_overflow_fix"),
+		
+		mc.setConfigurable("tooltipOverflowFix", new ConfigItem<>(TextInst.translatable("nbteditor.config.tooltip_overflow_fix"),
 				new ConfigValueBoolean(tooltipOverflowFix, true, 100, TextInst.translatable("nbteditor.config.tooltip_overflow_fix.enabled"), TextInst.translatable("nbteditor.config.tooltip_overflow_fix.disabled"))
 				.addValueListener(value -> tooltipOverflowFix = value.getValidValue()))
 				.setTooltip("nbteditor.config.tooltip_overflow_fix.desc"));
-		this.config.setConfigurable("noArmorRestriction", new ConfigItem<>(TextInst.translatable("nbteditor.config.no_armor_restriction"),
+		
+		mc.setConfigurable("maxEnchantLevelDisplay", new ConfigItem<>(TextInst.translatable("nbteditor.config.enchant_level_max"),
+				new ConfigValueDropdownEnum<>(enchantLevelMax, EnchantLevelMax.NEVER, EnchantLevelMax.class)
+				.addValueListener(value -> enchantLevelMax = value.getValidValue()))
+				.setTooltip("nbteditor.config.enchant_level_max.desc"));
+		
+		mc.setConfigurable("useArabicEnchantLevels", new ConfigItem<>(TextInst.translatable("nbteditor.config.enchant_number_type"),
+				new ConfigValueBoolean(enchantNumberTypeArabic, false, 100, TextInst.translatable("nbteditor.config.enchant_number_type.arabic"),
+				TextInst.translatable("nbteditor.config.enchant_number_type.roman"), new MVTooltip(TextInst.translatable("nbteditor.config.enchant_number_type.desc2")))
+				.addValueListener(value -> enchantNumberTypeArabic = value.getValidValue()))
+				.setTooltip("nbteditor.config.enchant_number_type.desc"));
+		
+		mc.setConfigurable("noArmorRestriction", new ConfigItem<>(TextInst.translatable("nbteditor.config.no_armor_restriction"),
 				new ConfigValueBoolean(noArmorRestriction, false, 100, TextInst.translatable("nbteditor.config.no_armor_restriction.enabled"), TextInst.translatable("nbteditor.config.no_armor_restriction.disabled"))
 				.addValueListener(value -> noArmorRestriction = value.getValidValue()))
 				.setTooltip("nbteditor.config.no_armor_restriction.desc"));
-		this.config.setConfigurable("hideFormatButtons", new ConfigItem<>(TextInst.translatable("nbteditor.config.hide_format_buttons"),
+		
+		mc.setConfigurable("screenshotOptions", new ConfigItem<>(TextInst.translatable("nbteditor.config.screenshot_options"),
+				new ConfigValueBoolean(screenshotOptions, true, 100, TextInst.translatable("nbteditor.config.screenshot_options.enabled"), TextInst.translatable("nbteditor.config.screenshot_options.disabled"))
+				.addValueListener(value -> screenshotOptions = value.getValidValue()))
+				.setTooltip(new MVTooltip(TextInst.translatable("nbteditor.config.screenshot_options.desc", TextInst.translatable("nbteditor.file_options.show"), TextInst.translatable("nbteditor.file_options.delete")))));
+		
+		// ---------- GUIs ----------
+		
+		guis.setConfigurable("scrollSpeed", new ConfigItem<>(TextInst.translatable("nbteditor.config.scroll_speed"),
+				ConfigValueSlider.forDouble(100, scrollSpeed, 1, 0.5, 2, 0.05, value -> TextInst.literal(String.format("%.2f", value)))
+				.addValueListener(value -> scrollSpeed = value.getValidValue()))
+				.setTooltip("nbteditor.config.scroll_speed.desc"));
+		
+		guis.setConfigurable("hideFormatButtons", new ConfigItem<>(TextInst.translatable("nbteditor.config.hide_format_buttons"),
 				new ConfigValueBoolean(hideFormatButtons, false, 100, TextInst.translatable("nbteditor.config.hide_format_buttons.enabled"), TextInst.translatable("nbteditor.config.hide_format_buttons.disabled"))
 				.addValueListener(value -> hideFormatButtons = value.getValidValue()))
 				.setTooltip("nbteditor.config.hide_format_buttons.desc"));
+		
+		guis.setConfigurable("macScrollPatch", new ConfigItem<>(TextInst.translatable("nbteditor.config.mac_scroll_patch" + (SystemUtils.IS_OS_MAC ? ".on_mac" : "")),
+				new ConfigValueBoolean(macScrollPatch, SystemUtils.IS_OS_MAC, 100, TextInst.translatable("nbteditor.config.mac_scroll_patch.enabled"), TextInst.translatable("nbteditor.config.mac_scroll_patch.disabled"))
+				.addValueListener(value -> macScrollPatch = value.getValidValue()))
+				.setTooltip("nbteditor.config.mac_scroll_patch.desc"));
+		
+		guis.setConfigurable("hideKeybinds", new ConfigItem<>(TextInst.translatable("nbteditor.config.keybinds"),
+				new ConfigValueBoolean(keybindsHidden, false, 100, TextInst.translatable("nbteditor.config.keybinds.hidden"), TextInst.translatable("nbteditor.config.keybinds.shown"),
+				new MVTooltip("nbteditor.keybind.edit", "nbteditor.keybind.item_factory", "nbteditor.keybind.container", "nbteditor.keybind.enchant"))
+				.addValueListener(value -> keybindsHidden = value.getValidValue()))
+				.setTooltip("nbteditor.config.keybinds.desc"));
+		
+		guis.setConfigurable("keyTextSize", new ConfigItem<>(TextInst.translatable("nbteditor.config.key_text_size"),
+				ConfigValueSlider.forDouble(100, keyTextSize, 0.5, 0.5, 1, 0.05, value -> TextInst.literal(String.format("%.2f", value)))
+				.addValueListener(value -> keyTextSize = value.getValidValue()))
+				.setTooltip("nbteditor.config.key_text_size.desc"));
+		
+		guis.setConfigurable("checkUpdates", new ConfigItem<>(TextInst.translatable("nbteditor.config.check_updates"),
+				new ConfigValueDropdownEnum<>(checkUpdates, CheckUpdatesLevel.MINOR, CheckUpdatesLevel.class)
+				.addValueListener(value -> checkUpdates = value.getValidValue()))
+				.setTooltip("nbteditor.config.check_updates.desc"));
+		
+		// ---------- FUNCTIONAL ----------
+		
+		functional.setConfigurable("shortcuts", new ConfigButton(100, TextInst.translatable("nbteditor.config.shortcuts"),
+				btn -> client.setScreen(new ShortcutsScreen(this)), new MVTooltip("nbteditor.config.shortcuts.desc")));
+		
+		functional.setConfigurable("largeClientChest", new ConfigItem<>(TextInst.translatable("nbteditor.config.client_chest_size"),
+				new ConfigValueBoolean(largeClientChest, false, 100, TextInst.translatable("nbteditor.config.client_chest_size.large"), TextInst.translatable("nbteditor.config.client_chest_size.small"))
+				.addValueListener(value -> largeClientChest = value.getValidValue()))
+				.setTooltip("nbteditor.config.client_chest_size.desc"));
+		
+		functional.setConfigurable("airEditable", new ConfigItem<>(TextInst.translatable("nbteditor.config.air_editable"),
+				new ConfigValueBoolean(airEditable, false, 100, TextInst.translatable("nbteditor.config.air_editable.yes"), TextInst.translatable("nbteditor.config.air_editable.no"))
+				.addValueListener(value -> airEditable = value.getValidValue()))
+				.setTooltip("nbteditor.config.air_editable.desc"));
+		
+		functional.setConfigurable("specialNumbers", new ConfigItem<>(TextInst.translatable("nbteditor.config.special_numbers"),
+				new ConfigValueBoolean(specialNumbers, true, 100, TextInst.translatable("nbteditor.config.special_numbers.enabled"), TextInst.translatable("nbteditor.config.special_numbers.disabled"))
+				.addValueListener(value -> specialNumbers = value.getValidValue()))
+				.setTooltip("nbteditor.config.special_numbers.desc"));
+		
+		functional.setConfigurable("jsonText", new ConfigItem<>(TextInst.translatable("nbteditor.config.json_text"),
+				new ConfigValueBoolean(jsonText, false, 100, TextInst.translatable("nbteditor.config.json_text.yes"), TextInst.translatable("nbteditor.config.json_text.no"))
+				.addValueListener(value -> jsonText = value.getValidValue()))
+				.setTooltip("nbteditor.config.json_text.desc"));
+		
+		functional.setConfigurable("allowSingleQuotes", new ConfigItem<>(TextInst.translatable("nbteditor.config.single_quotes"),
+				new ConfigValueBoolean(singleQuotesAllowed, false, 100, TextInst.translatable("nbteditor.config.single_quotes.allowed"),
+				TextInst.translatable("nbteditor.config.single_quotes.not_allowed"), new MVTooltip("nbteditor.config.single_quotes.example"))
+				.addValueListener(value -> singleQuotesAllowed = value.getValidValue()))
+				.setTooltip("nbteditor.config.single_quotes.desc"));
+		
 		ADDED_OPTIONS.forEach(option -> option.accept(config));
 	}
 	
@@ -400,11 +443,11 @@ public class ConfigScreen extends MultiVersionScreen {
 			newPanel.setScroll(panel.getScroll());
 		panel = newPanel;
 		
-		this.addDrawableChild(MultiVersionMisc.newButton(this.width - 134, this.height - 36, 100, 20, ScreenTexts.DONE, btn -> close()));
+		this.addDrawableChild(MVMisc.newButton(this.width - 134, this.height - 36, 100, 20, ScreenTexts.DONE, btn -> close()));
 	}
 	
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		this.renderBackground(matrices);
+		super.renderBackground(matrices);
 		super.render(matrices, mouseX, mouseY, delta);
 	}
 	

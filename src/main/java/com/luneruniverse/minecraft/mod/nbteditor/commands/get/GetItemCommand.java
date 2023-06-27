@@ -3,7 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands.get;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.argument;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
@@ -29,7 +29,7 @@ public class GetItemCommand extends ClientCommand {
 			return Command.SINGLE_SUCCESS;
 		};
 		
-		builder.then(argument("item", MultiVersionMisc.getItemStackArg())
+		builder.then(argument("item", MVMisc.getItemStackArg())
 				.then(argument("count", IntegerArgumentType.integer(1)).executes(getItem)).executes(getItem));
 	}
 	

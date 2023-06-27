@@ -62,6 +62,13 @@ public class ConfigValueNumber<T extends Number> extends NamedTextFieldWidget im
 	}
 	
 	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		boolean output = super.mouseClicked(mouseX, mouseY, button);
+		setFocused(output);
+		return output;
+	}
+	
+	@Override
 	public T getDefaultValue() {
 		return defaultValue;
 	}

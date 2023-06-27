@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -31,7 +31,7 @@ public class SignboardArgumentType implements ArgumentType<SignItem> {
 	
 	private SignboardArgumentType() {
 		signs = new HashMap<>();
-		for (Map.Entry<Identifier, Item> item : MultiVersionRegistry.ITEM.getEntrySet()) {
+		for (Map.Entry<Identifier, Item> item : MVRegistry.ITEM.getEntrySet()) {
 			if (item.getValue() instanceof SignItem sign)
 				signs.put(item.getKey(), sign);
 		}

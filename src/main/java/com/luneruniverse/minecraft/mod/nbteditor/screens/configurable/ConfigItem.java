@@ -3,11 +3,11 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
@@ -20,7 +20,7 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 	
 	private final List<ConfigValueListener<ConfigValue<?, ?>>> onChanged;
 	
-	private MultiVersionTooltip tooltip;
+	private MVTooltip tooltip;
 	
 	public ConfigItem(Text name, V value) {
 		this.name = name;
@@ -41,18 +41,18 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 		return value;
 	}
 	
-	public ConfigItem<V> setTooltip(MultiVersionTooltip tooltip) {
+	public ConfigItem<V> setTooltip(MVTooltip tooltip) {
 		this.tooltip = tooltip;
 		return this;
 	}
 	public ConfigItem<V> setTooltip(String... keys) {
-		setTooltip(new MultiVersionTooltip(keys));
+		setTooltip(new MVTooltip(keys));
 		return this;
 	}
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		DrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, name, 0, (getSpacingHeight() - MainUtil.client.textRenderer.fontHeight) / 2, 0xFFFFFFFF);
+		MVDrawableHelper.drawTextWithShadow(matrices, MainUtil.client.textRenderer, name, 0, (getSpacingHeight() - MainUtil.client.textRenderer.fontHeight) / 2, 0xFFFFFFFF);
 		
 		matrices.push();
 		matrices.translate(valueOffsetX, valueOffsetY, 0.0);

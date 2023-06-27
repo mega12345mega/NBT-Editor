@@ -3,10 +3,13 @@
   "minVersion": "0.8",
   "package": "com.luneruniverse.minecraft.mod.nbteditor.multiversion.mixin",
   "compatibilityLevel": "JAVA_16",
+  "plugin": "com.luneruniverse.minecraft.mod.nbteditor.multiversion.mixin.toggled.MVMixinPlugin",
   "mixins": [
   ],
   "client": [
-    "ScreenHandlerMixin"
+    "ScreenHandlerMixin",
+    "DrawableMixin",
+    "ScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

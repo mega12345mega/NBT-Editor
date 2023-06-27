@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommandGroup;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.DisplayScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -32,7 +33,7 @@ public class DisplayCommand extends ClientCommandGroup {
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		super.register(builder);
 		builder.executes(context -> {
-			MainUtil.client.setScreen(new DisplayScreen(MainUtil.getHeldItem()));
+			MainUtil.client.setScreen(new DisplayScreen(ItemReference.getHeldItem()));
 			return Command.SINGLE_SUCCESS;
 		});
 	}

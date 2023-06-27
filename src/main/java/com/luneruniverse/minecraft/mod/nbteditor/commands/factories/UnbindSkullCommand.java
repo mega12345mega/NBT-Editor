@@ -4,7 +4,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -25,7 +24,7 @@ public class UnbindSkullCommand extends ClientCommand {
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		builder.executes(context -> {
-			ItemReference ref = MainUtil.getHeldItem(item -> item.getItem() == Items.PLAYER_HEAD, TextInst.translatable("nbteditor.no_hand.no_item.skull"));
+			ItemReference ref = ItemReference.getHeldItem(item -> item.getItem() == Items.PLAYER_HEAD, TextInst.translatable("nbteditor.no_hand.no_item.skull"));
 			ItemStack item = ref.getItem();
 			
 			NbtCompound nbt = item.getOrCreateNbt();

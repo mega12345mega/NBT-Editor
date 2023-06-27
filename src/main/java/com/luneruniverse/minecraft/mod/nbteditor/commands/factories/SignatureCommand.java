@@ -16,7 +16,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -54,7 +53,7 @@ public class SignatureCommand extends ClientCommand {
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		Command<FabricClientCommandSource> addSignature = context -> {
-			ItemReference ref = MainUtil.getHeldItem();
+			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			
 			Lore lore = new Lore(item);
@@ -73,7 +72,7 @@ public class SignatureCommand extends ClientCommand {
 		builder.executes(addSignature)
 				.then(literal("add").executes(addSignature))
 				.then(literal("remove").executes(context -> {
-					ItemReference ref = MainUtil.getHeldItem();
+					ItemReference ref = ItemReference.getHeldItem();
 					ItemStack item = ref.getItem();
 					
 					Lore lore = new Lore(item);
@@ -102,7 +101,7 @@ public class SignatureCommand extends ClientCommand {
 						throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.sign.save_error")).create();
 					}
 					
-					ItemReference ref = MainUtil.getHeldItem();
+					ItemReference ref = ItemReference.getHeldItem();
 					ItemStack item = ref.getItem();
 					
 					Lore lore = new Lore(item);

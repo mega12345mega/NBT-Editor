@@ -10,6 +10,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.StreamSupport;
 
 import com.google.gson.JsonElement;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -190,7 +191,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 						reader.expect('}');
 						item = MainUtil.client.player.getInventory().getStack(slot);
 					} else
-						item = MainUtil.getHeldItem().getItem();
+						item = ItemReference.getHeldItem().getItem();
 					eventAdder = style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,
 							new HoverEvent.ItemStackContent(item)));
 				}

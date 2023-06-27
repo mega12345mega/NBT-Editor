@@ -2,16 +2,15 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import java.util.function.Consumer;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.command.argument.NbtElementArgumentType;
 import net.minecraft.nbt.AbstractNbtList;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Identifier;
@@ -85,11 +84,8 @@ public class NBTValue extends List2D.List2DValue {
 			icon = LONG_ARRAY;
 		else if (value.getType() == NbtElement.COMPOUND_TYPE)
 			icon = COMPOUND;
-		if (icon != null) {
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			RenderSystem.setShaderTexture(0, icon);
-			Screen.drawTexture(matrices, 0, 0, 0, 0, 32, 32, 32, 32);
-		}
+		if (icon != null)
+			MVDrawableHelper.drawTexture(matrices, icon, 0, 0, 0, 0, 32, 32, 32, 32);
 		
 		int color = -1;
 		if (unsafe && selected || parentList != null && parentList.getHeldType() != value.getType())
@@ -99,10 +95,10 @@ public class NBTValue extends List2D.List2DValue {
 		else if (isHovering(mouseX, mouseY))
 			color = 0xFF257789;
 		if (color != -1) {
-			Screen.fill(matrices, -4, -4, 36, 0, color);
-			Screen.fill(matrices, -4, -4, 0, 36, color);
-			Screen.fill(matrices, -4, 32, 36, 36, color);
-			Screen.fill(matrices, 32, -4, 36, 36, color);
+			MVDrawableHelper.fill(matrices, -4, -4, 36, 0, color);
+			MVDrawableHelper.fill(matrices, -4, -4, 0, 36, color);
+			MVDrawableHelper.fill(matrices, -4, 32, 36, 36, color);
+			MVDrawableHelper.fill(matrices, 32, -4, 36, 36, color);
 		}
 		
 		if (key == null)
@@ -139,7 +135,7 @@ public class NBTValue extends List2D.List2DValue {
 	
 	public void valueChanged(String str, Consumer<NbtElement> onChange) {
 		try {
-			value = NbtElementArgumentType.nbtElement().parse(new StringReader(str));
+			value = MixinLink.parseSpecialElement(new StringReader(str));
 			onChange.accept(value);
 		} catch (CommandSyntaxException e) {}
 	}

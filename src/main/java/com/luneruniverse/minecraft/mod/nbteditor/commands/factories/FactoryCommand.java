@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommandGroup;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -42,7 +43,7 @@ public class FactoryCommand extends ClientCommandGroup {
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		super.register(builder);
 		builder.executes(context -> {
-			MainUtil.client.setScreen(new ItemFactoryScreen(MainUtil.getHeldItem()));
+			MainUtil.client.setScreen(new ItemFactoryScreen(ItemReference.getHeldItem()));
 			return Command.SINGLE_SUCCESS;
 		});
 	}

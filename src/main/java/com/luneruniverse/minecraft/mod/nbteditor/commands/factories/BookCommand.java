@@ -25,7 +25,7 @@ public class BookCommand extends ClientCommand {
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
 		builder.then(literal("new").executes(context -> {
-			ItemReference ref = MainUtil.getHeldAir();
+			ItemReference ref = ItemReference.getHeldAir();
 			ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
 			book.getOrCreateNbt().putString("title", "");
 			book.getNbt().putString("author", "");
@@ -34,7 +34,7 @@ public class BookCommand extends ClientCommand {
 			MainUtil.client.setScreen(new BookScreen(ref));
 			return Command.SINGLE_SUCCESS;
 		})).executes(context -> {
-			MainUtil.client.setScreen(new BookScreen(MainUtil.getHeldItem(
+			MainUtil.client.setScreen(new BookScreen(ItemReference.getHeldItem(
 					item -> item.getItem() == Items.WRITTEN_BOOK, TextInst.translatable("nbteditor.no_hand.no_item.book"))));
 			return Command.SINGLE_SUCCESS;
 		});

@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MultiVersionMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.TickableSupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -53,13 +53,13 @@ public class StringInputScreen extends TickableSupportingScreen {
 		this.addSelectableChild(value);
 		setInitialFocus(value);
 		
-		ok = this.addDrawableChild(MultiVersionMisc.newButton(width / 2 - 104, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.ok"), btn -> {
+		ok = this.addDrawableChild(MVMisc.newButton(width / 2 - 104, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.ok"), btn -> {
 			if (valueValidator.test(value.getText())) {
 				client.setScreen(parent);
 				valueConsumer.accept(value.getText());
 			}
 		}));
-		this.addDrawableChild(MultiVersionMisc.newButton(width / 2 + 4, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.cancel"), btn -> {
+		this.addDrawableChild(MVMisc.newButton(width / 2 + 4, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.cancel"), btn -> {
 			client.setScreen(parent);
 		}));
 		

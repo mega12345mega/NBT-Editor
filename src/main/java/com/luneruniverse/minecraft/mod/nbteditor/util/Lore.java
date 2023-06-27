@@ -52,7 +52,7 @@ public class Lore {
 		}
 		public static LoreConsumer createAppendPage(Text page, Consumer<Text> newPage) {
 			Lore lore = new Lore(new ItemStack(Items.BOOK));
-			lore.setAllLines(MainUtil.splitText(page));
+			lore.setAllLines(TextUtil.splitText(page));
 			return new LoreConsumer() {
 				@Override
 				public Lore getLore() {
@@ -64,7 +64,7 @@ public class Lore {
 				}
 				@Override
 				public void onLoreEdit(Lore lore) {
-					newPage.accept(MainUtil.joinLines(lore.getLore()));
+					newPage.accept(TextUtil.joinLines(lore.getLore()));
 				}
 			};
 		}
