@@ -16,6 +16,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
@@ -207,11 +208,22 @@ public class NBTEditorAPI {
 	
 	/**
 	 * Add an option to the config screen
+	 * @param item A consumer of the global config category, called every time the config screen is opened
+	 * @see #registerConfigItem(String, Supplier)
+	 * @see ConfigCategory#setConfigurable(String, ConfigPath)
+	 */
+	public static void registerConfigItem(Consumer<ConfigCategory> item) {
+		ConfigScreen.ADDED_OPTIONS.add(item);
+	}
+	
+	/**
+	 * Add an option to the config screen
 	 * @param name The internal name of the option - this must be unique
 	 * @param item The option to add, called every time the config screen is opened
+	 * @see #registerConfigItem(Consumer)
 	 */
 	public static void registerConfigItem(String name, Supplier<ConfigPath> item) {
-		ConfigScreen.ADDED_OPTIONS.add(config -> config.setConfigurable(name, item.get()));
+		registerConfigItem(config -> config.setConfigurable(name, item.get()));
 	}
 	
 	/**

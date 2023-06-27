@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "nbteditor",
-  "version": "1.12.999",
+  "version": "1.12.1",
 
   "name": "NBT Editor",
-  "description": "Lets you edit items' nbt ingame, store items in a client side chest, open shulker boxes, chests, and barrels in your inventory, and more!",
+  "description": "Lets you edit items' nbt ingame, store items in a client side chest, open containers in your inventory, and more!",
   "authors": [
     "mega12345mega"
   ],

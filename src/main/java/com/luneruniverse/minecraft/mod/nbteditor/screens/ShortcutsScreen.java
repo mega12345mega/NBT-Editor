@@ -5,7 +5,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager;
@@ -18,7 +17,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 
-public class ShortcutsScreen extends MVScreen {
+public class ShortcutsScreen extends TickableSupportingScreen {
 	
 	private static final ConfigItem<ConfigValueText> SHORTCUT_ENTRY = new ConfigItem<>(TextInst.of(""), new ConfigValueText("", ""));
 	

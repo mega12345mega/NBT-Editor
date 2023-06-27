@@ -17,7 +17,7 @@ import net.minecraft.client.render.VertexConsumer;
 
 @Mixin(TextFieldWidget.class)
 public abstract class TextFieldWidgetMixin implements Tickable {
-	@ModifyArg(method = "renderButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;fill(IIIII)V", ordinal = 0), index = 4, remap = false)
+	@ModifyArg(method = "renderButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;fill(IIIII)V", ordinal = 0), index = 4)
 	@Group(name = "renderButton", min = 1)
 	private int fillDrawContext(int color) {
 		TextFieldWidget source = (TextFieldWidget) (Object) this;

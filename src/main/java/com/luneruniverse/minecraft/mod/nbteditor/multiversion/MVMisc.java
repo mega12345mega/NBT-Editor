@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
+import java.nio.FloatBuffer;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.joml.Matrix4f;
 import org.joml.Vector2ic;
+import org.joml.Vector3f;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
@@ -229,6 +232,25 @@ public class MVMisc {
 		return Version.<Vector2ic>newSwitch()
 				.range("1.20.0", null, () -> ((TooltipPositioner) positioner).getPosition(screen.width, screen.height, x, y, width, height))
 				.range("1.19.3", "1.19.4", () -> TooltipPositioner_getPosition.get().invoke(positioner, screen, x, y, width, height))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> Matrix4f_writeColumnMajor =
+			Reflection.getOptionalMethod(MVMisc.Matrix4f_class, "method_4932", MethodType.methodType(void.class, FloatBuffer.class));
+	public static float[] getTranslation(MatrixStack matrices) {
+		Object matrix = MVMisc.getPositionMatrix(matrices.peek());
+		return Version.<float[]>newSwitch()
+				.range("1.19.3", null, () -> {
+					Vector3f output = ((Matrix4f) matrix).getColumn(3, new Vector3f());
+					return new float[] {output.x, output.y, output.z};
+				})
+				.range(null, "1.19.2", () -> {
+					FloatBuffer buffer = FloatBuffer.allocate(16);
+					Matrix4f_writeColumnMajor.get().invoke(matrix, buffer); // matrix.writeColumnMajor(buffer)
+					float[] output = new float[3];
+					buffer.get(12, output);
+					return output;
+				})
 				.get();
 	}
 	

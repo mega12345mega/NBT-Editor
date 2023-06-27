@@ -151,13 +151,13 @@ public class TextUtil {
 								if (file.exists()) {
 									try {
 										Files.deleteIfExists(file.toPath());
-										MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.file_options.delete.success", "ง6" + file.getName()), false);
+										MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.file_options.delete.success", "ยง6" + file.getName()), false);
 									} catch (IOException e) {
 										NBTEditor.LOGGER.error("Error deleting file", e);
-										MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.file_options.delete.error", "ง6" + file.getName()), false);
+										MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.file_options.delete.error", "ยง6" + file.getName()), false);
 									}
 								} else
-									MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.file_options.delete.missing", "ง6" + file.getName()), false);
+									MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.file_options.delete.missing", "ยง6" + file.getName()), false);
 							}
 							MainUtil.client.setScreen(null);
 						}, TextInst.translatable("nbteditor.file_options.delete.title", file.getName()),

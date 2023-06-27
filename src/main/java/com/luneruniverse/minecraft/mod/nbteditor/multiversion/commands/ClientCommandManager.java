@@ -125,6 +125,8 @@ public final class ClientCommandManager {
 		ClientCommandInternals.finalizeInit();
 	}
 	public static void reregisterClientCommands() {
+		if (MainUtil.client.getNetworkHandler() == null)
+			return;
 		createDispatcher();
 		MainUtil.client.getNetworkHandler().onCommandTree(lastCommandPacket);
 	}

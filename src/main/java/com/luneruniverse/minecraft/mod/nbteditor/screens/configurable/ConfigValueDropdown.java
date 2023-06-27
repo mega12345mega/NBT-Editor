@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ExtendableButtonWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -47,11 +48,12 @@ public class ConfigValueDropdown<T> extends ExtendableButtonWidget implements Co
 	
 	@Override
 	public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		float[] translation = MVMisc.getTranslation(matrices);
+		matrices.push();
+		matrices.translate(0.0, 0.0, (MainUtil.client.getWindow().getScaledHeight() - translation[1]) / 20);
+		
 		super.renderButton(matrices, mouseX, mouseY, delta);
 		if (open) {
-			matrices.push();
-			matrices.translate(0.0, 0.0, 401.0);
-			
 			MVDrawableHelper.fill(matrices, this.x, this.height, this.x + this.width, allValues.size() * this.height, 0xFF000000);
 			boolean xHover = this.active && mouseX >= this.x && mouseX < this.x + this.width;
 			int i = 0;
@@ -69,11 +71,11 @@ public class ConfigValueDropdown<T> extends ExtendableButtonWidget implements Co
 				if (color != -1 && option instanceof ConfigTooltipSupplier) // Hovering
 					((ConfigTooltipSupplier) option).getTooltip().render(matrices, mouseX, mouseY);
 			}
-			
-			matrices.pop();
 		}
 		if (isSelected() && value instanceof ConfigTooltipSupplier)
 			((ConfigTooltipSupplier) value).getTooltip().render(matrices, mouseX, mouseY);
+		
+		matrices.pop();
 	}
 	
 	@Override

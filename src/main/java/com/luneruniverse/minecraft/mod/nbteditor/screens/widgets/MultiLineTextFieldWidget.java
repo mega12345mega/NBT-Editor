@@ -18,6 +18,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
@@ -381,6 +382,11 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 			MVDrawableHelper.drawText(matrices, textRenderer, line, x + textRenderer.fontHeight, yOffset + textRenderer.fontHeight, -1, shadow);
 			yOffset += textRenderer.fontHeight * 1.5;
 		}
+		
+		Version.newSwitch()
+				.range("1.20.0", null, () -> matrices.translate(0.0, 0.0, 1.0))
+				.range(null, "1.19.4", () -> {})
+				.run();
 		
 		renderHighlightsAbove(matrices, mouseX, mouseY, delta);
 		renderHighlight(matrices, getSelStart(), getSelEnd(), selColor);

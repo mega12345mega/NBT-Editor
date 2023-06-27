@@ -23,6 +23,7 @@ import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -156,10 +157,10 @@ public class MVDrawableHelper {
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> Screen_renderTooltip_List =
-			Reflection.getOptionalMethod(Screen.class, "method_30901", MethodType.methodType(void.class, MatrixStack.class, List.class, int.class, int.class));
-	public static void renderTooltip(MatrixStack matrices, List<Text> lines, int x, int y) {
+			Reflection.getOptionalMethod(Screen.class, "method_25417", MethodType.methodType(void.class, MatrixStack.class, List.class, int.class, int.class));
+	public static void renderTooltip(MatrixStack matrices, List<OrderedText> lines, int x, int y) {
 		Version.newSwitch()
-				.range("1.20.0", null, () -> getDrawContext(matrices).drawTooltip(MainUtil.client.textRenderer, lines, x, y))
+				.range("1.20.0", null, () -> getDrawContext(matrices).drawOrderedTooltip(MainUtil.client.textRenderer, lines, x, y))
 				.range(null, "1.19.4", () -> Screen_renderTooltip_List.get().invoke(MainUtil.client.currentScreen, matrices, lines, x, y))
 				.run();
 	}
