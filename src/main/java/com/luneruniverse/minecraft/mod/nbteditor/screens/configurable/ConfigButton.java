@@ -12,15 +12,15 @@ public class ConfigButton extends ExtendableButtonWidget implements ConfigPath {
 		public void onPress(ConfigButton button);
 	}
 	
-	private final PressAction onPress;
+	private final com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton.PressAction onPress;
 	private final MVTooltip tooltip;
 	
-	public ConfigButton(int width, Text message, PressAction onPress, MVTooltip tooltip) {
+	public ConfigButton(int width, Text message, com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton.PressAction onPress, MVTooltip tooltip) {
 		super(0, 0, width, 20, message, btn -> onPress.onPress((ConfigButton) btn), tooltip);
 		this.onPress = onPress;
 		this.tooltip = tooltip;
 	}
-	public ConfigButton(int width, Text message, PressAction onPress) {
+	public ConfigButton(int width, Text message, com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton.PressAction onPress) {
 		this(width, message, onPress, MVTooltip.EMPTY);
 	}
 	

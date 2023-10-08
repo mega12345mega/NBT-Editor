@@ -3,15 +3,13 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.TextFieldWidgetMixin;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
-
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-public class NamedTextFieldWidget extends TextFieldWidget implements Tickable {
+public class NamedTextFieldWidget extends TextFieldWidget {
 	
 	/**
 	 * The selection highlight doesn't move when {@link MatrixStack#translate(double, double, double)} is called <br />
@@ -65,5 +63,4 @@ public class NamedTextFieldWidget extends TextFieldWidget implements Tickable {
 	public final void render(DrawContext context, int mouseX, int mouseY, float delta) {
 		render(MVDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
 	}
-	
 }

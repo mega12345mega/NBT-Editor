@@ -1,11 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -16,7 +10,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCate
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
@@ -24,9 +17,16 @@ import net.minecraft.item.SignItem;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 public class ItemFactoryScreen extends ItemEditorScreen {
-	
-	public static final Identifier FACTORY_ICON = new Identifier("nbteditor", "textures/factory.png");
+
+	public static final Identifier FACTORY_ICON = new Identifier("nbteditor", "textures/factory");
+	public static final Identifier FACTORY_ICON_HOVERED = new Identifier("nbteditor", "textures/factory_hovered");
 	
 	public record ItemFactoryReference(Text buttonText, Predicate<ItemReference> supported, Consumer<ItemReference> factory) {}
 	public static final List<ItemFactoryReference> BASIC_FACTORIES = new ArrayList<>();

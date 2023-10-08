@@ -1,12 +1,11 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
-import java.util.ArrayList;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+
+import java.util.ArrayList;
 
 public abstract class ConfigGroupingHorizontal<K, T extends ConfigGroupingHorizontal<K, T>> extends ConfigGrouping<K, T> {
 	
@@ -120,11 +119,11 @@ public abstract class ConfigGroupingHorizontal<K, T extends ConfigGroupingHorizo
 		return false;
 	}
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		int xOffset = getNameWidth();
 		
 		for (ConfigPath path : new ArrayList<>(paths.values())) {
-			if (path.mouseScrolled(mouseX - xOffset, mouseY, amount))
+			if (path.mouseScrolled(mouseX - xOffset, mouseY, horizontalAmount, verticalAmount))
 				return true;
 			xOffset += path.getSpacingWidth() + PADDING;
 		}

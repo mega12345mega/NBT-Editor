@@ -1,22 +1,20 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.StreamSupport;
-
-import org.lwjgl.glfw.GLFW;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.util.math.MatrixStack;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 public abstract class Panel<T extends Drawable & Element> implements MVDrawable, MVElement, Selectable {
 	
@@ -203,19 +201,19 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 	}
 	
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		updateMousePos(mouseX, mouseY);
 		
 		boolean success = false;
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element().mouseScrolled(mouseX - pos.x() - x, mouseY - pos.y() - y, amount)) {
+			if (pos.element().mouseScrolled(mouseX - pos.x() - x, mouseY - pos.y() - y, horizontalAmount, verticalAmount)) {
 				success = true;
 				if (!continueEvents())
 					break;
 			}
 		}
 		if (!success && scrollable)
-			success = scroll(amount * 5 * ConfigScreen.getScrollSpeed());
+			success = scroll(verticalAmount* 5 * ConfigScreen.getScrollSpeed());
 		return success;
 	}
 	protected boolean scroll(double amount) {

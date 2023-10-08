@@ -1,16 +1,15 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.UnaryOperator;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.UnaryOperator;
 
 public class List2D extends Panel<List2D.List2DValue> {
 	
@@ -117,8 +116,8 @@ public class List2D extends Panel<List2D.List2DValue> {
 	}
 	
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-		return super.mouseScrolled(mouseX, mouseY, amount) || finalEventHandler.mouseScrolled(mouseX, mouseY, amount);
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount) || finalEventHandler.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 	@Override
 	protected int getPanelElementHeight(List2DValue element) {

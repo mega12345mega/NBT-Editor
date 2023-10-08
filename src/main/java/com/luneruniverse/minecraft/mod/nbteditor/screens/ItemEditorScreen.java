@@ -1,26 +1,20 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
-import java.util.function.Function;
-
-import org.lwjgl.glfw.GLFW;
-
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.*;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.function.Function;
 
 public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 	
@@ -87,8 +81,8 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 		
 		FactoryLink link = getFactoryLink();
 		if (link != null) {
-			addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
-					ItemFactoryScreen.FACTORY_ICON,
+			addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, ItemFactoryScreen.FACTORY_ICON,
+					ItemFactoryScreen.FACTORY_ICON_HOVERED,
 					btn -> closeSafely(() -> client.setScreen(link.factory().apply(ref))),
 					new MVTooltip(link.langName())));
 		}

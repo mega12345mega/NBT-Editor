@@ -1,24 +1,22 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
-import org.lwjgl.glfw.GLFW;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 	
@@ -277,8 +275,8 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			return value.mouseDragged(mouseX - indexTextOffset, mouseY, button, deltaX, deltaY);
 		}
 		@Override
-		public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-			return value.mouseScrolled(mouseX - indexTextOffset, mouseY, amount);
+		public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+			return value.mouseScrolled(mouseX - indexTextOffset, mouseY, horizontalAmount, verticalAmount);
 		}
 		
 		@Override

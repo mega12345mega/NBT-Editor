@@ -4,7 +4,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 
 public interface MVScreenParent {
-	public default void renderBackground(MatrixStack matrices) {
+	default void renderBackground(MatrixStack matrices) {
 		MVDrawableHelper.renderBackground((Screen) this, matrices);
 	}
 }

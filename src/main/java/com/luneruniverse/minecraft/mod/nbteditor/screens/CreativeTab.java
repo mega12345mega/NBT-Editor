@@ -1,20 +1,19 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
 public class CreativeTab {
 	
@@ -58,8 +57,8 @@ public class CreativeTab {
 			.range("1.19.3", null, 26)
 			.range(null, "1.19.2", 28)
 			.get();
-	
-	private static final Identifier TEXTURE = new Identifier("textures/gui/container/creative_inventory/tabs.png");
+
+	private static final Identifier TEXTURE = new Identifier("nbteditor", "textures/tabs.png");
 	
 	private final Screen screen;
 	private final int x;

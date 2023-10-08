@@ -1,14 +1,14 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 public class Version {
 	public static class VersionSwitch<T> {

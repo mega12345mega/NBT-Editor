@@ -187,7 +187,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 	
 	@Override
 	protected void handledScreenTick() {
-		pageField.tick();
+//		pageField.tick(); //TOOO: Noch nötig?
 	}
 	
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {

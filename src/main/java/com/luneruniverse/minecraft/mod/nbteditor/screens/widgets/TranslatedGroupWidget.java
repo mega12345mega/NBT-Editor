@@ -115,17 +115,17 @@ public class TranslatedGroupWidget extends GroupWidget {
 	}
 	
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		mouseX -= x;
 		mouseY -= y;
-		return mouseScrolledPre(mouseX, mouseY, amount) ||
-				super.mouseScrolled(mouseX, mouseY, amount) ||
-				mouseScrolledPost(mouseX, mouseY, amount);
+		return mouseScrolledPre(mouseX, mouseY,horizontalAmount, verticalAmount) ||
+				super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount) ||
+				mouseScrolledPost(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
-	protected boolean mouseScrolledPre(double mouseX, double mouseY, double amount) {
+	protected boolean mouseScrolledPre(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		return false;
 	}
-	protected boolean mouseScrolledPost(double mouseX, double mouseY, double amount) {
+	protected boolean mouseScrolledPost(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		return false;
 	}
 	

@@ -1,14 +1,9 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-
 import com.luneruniverse.minecraft.mod.nbteditor.util.OrderedMap;
-
 import net.minecraft.text.Text;
+
+import java.util.*;
 
 public abstract class ConfigGrouping<K, T extends ConfigGrouping<K, T>> implements ConfigPathNamed {
 	
@@ -96,8 +91,8 @@ public abstract class ConfigGrouping<K, T extends ConfigGrouping<K, T>> implemen
 	@Override
 	public abstract boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY);
 	@Override
-	public abstract boolean mouseScrolled(double mouseX, double mouseY, double amount);
-	
+	public abstract boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount);
+
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		for (ConfigPath path : new ArrayList<>(paths.values())) {

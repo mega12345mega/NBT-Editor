@@ -1,20 +1,10 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.function.Supplier;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
@@ -26,6 +16,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
 public class MVDrawableHelper {
 	
@@ -129,7 +128,7 @@ public class MVDrawableHelper {
 	public static void drawCenteredTextWithShadow(MatrixStack matrices, TextRenderer textRenderer, Text text, int x, int y, int color) {
 		call("method_27534", void.class, new Class<?>[] {TextRenderer.class, Text.class, int.class, int.class, int.class}, matrices, textRenderer, text, x, y, color);
 	}
-	
+
 	public static void drawTexture(MatrixStack matrices, Identifier texture, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight) {
 		Version.newSwitch()
 				.range("1.20.0", null, () -> getDrawContext(matrices).drawTexture(texture, x, y, u, v, width, height, textureWidth, textureHeight))
@@ -177,7 +176,8 @@ public class MVDrawableHelper {
 			Reflection.getOptionalMethod(ItemRenderer.class, "method_4023", MethodType.methodType(void.class, ItemStack.class, int.class, int.class));
 	private static final Supplier<Reflection.MethodInvoker> ItemRenderer_renderGuiItemOverlay =
 			Reflection.getOptionalMethod(ItemRenderer.class, "method_4025", MethodType.methodType(void.class, TextRenderer.class, ItemStack.class, int.class, int.class));
-	public static final void renderItem(MatrixStack matrices, float zOffset, boolean setScreenZOffset, ItemStack item, int x, int y) {
+
+	public static void renderItem(MatrixStack matrices, float zOffset, boolean setScreenZOffset, ItemStack item, int x, int y) {
 		ItemRenderer itemRenderer = MainUtil.client.getItemRenderer();
 		TextRenderer textRenderer = MainUtil.client.textRenderer;
 		Version.newSwitch()
@@ -207,7 +207,8 @@ public class MVDrawableHelper {
 			Reflection.getOptionalMethod(Screen.class, "method_25420", MethodType.methodType(void.class, MatrixStack.class));
 	public static void renderBackground(Screen screen, MatrixStack matrices) {
 		Version.newSwitch()
-				.range("1.20.0", null, () -> screen.renderBackground(MVDrawableHelper.getDrawContext(matrices)))
+				.range("1.20.2", null, () -> screen.renderInGameBackground(MVDrawableHelper.getDrawContext(matrices)))
+//				.range("1.20.0", "1.20.1", () -> screen.renderBackground(MVDrawableHelper.getDrawContext(matrices)))//TODO: Add Reflection for older versions.
 				.range(null, "1.19.4", () -> Screen_renderBackground.get().invoke(screen, matrices))
 				.run();
 	}

@@ -1,31 +1,12 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
-import org.lwjgl.glfw.GLFW;
-
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.*;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -36,6 +17,17 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
+import org.lwjgl.glfw.GLFW;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable, Selectable {
 	
@@ -545,16 +537,16 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	}
 	
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		if (isMouseOver(mouseX, mouseY)) {
 			int maxScroll = -Math.max(0, lines.size() * (int) (textRenderer.fontHeight * 1.5) + textRenderer.fontHeight + height / 3 - height);
-			if (amount < 0 && scroll > maxScroll) {
-				scroll += amount * 5;
+			if (verticalAmount < 0 && scroll > maxScroll) {
+				scroll += verticalAmount * 5;
 				if (scroll < maxScroll)
 					scroll = maxScroll;
 			}
-			if (amount > 0 && scroll < 0) {
-				scroll += amount * 5;
+			if (verticalAmount > 0 && scroll < 0) {
+				scroll += verticalAmount * 5;
 				if (scroll > 0)
 					scroll = 0;
 			}

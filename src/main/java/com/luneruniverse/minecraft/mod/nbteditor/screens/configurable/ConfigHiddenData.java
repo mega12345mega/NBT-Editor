@@ -1,8 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
-import java.util.function.BiFunction;
-
 import net.minecraft.client.util.math.MatrixStack;
+
+import java.util.function.BiFunction;
 
 public class ConfigHiddenData<S extends ConfigPath, D> implements ConfigPath {
 	
@@ -87,8 +87,8 @@ public class ConfigHiddenData<S extends ConfigPath, D> implements ConfigPath {
 		return visible.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
 	}
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-		return visible.mouseScrolled(mouseX, mouseY, amount);
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+		return visible.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 	@Override
 	public boolean isMouseOver(double mouseX, double mouseY) {

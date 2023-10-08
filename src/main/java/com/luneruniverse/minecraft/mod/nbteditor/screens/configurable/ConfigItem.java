@@ -1,15 +1,14 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 	
@@ -118,8 +117,8 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 		return value.mouseDragged(mouseX - valueOffsetX, mouseY - valueOffsetY, button, deltaX, deltaY);
 	}
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-		return value.mouseScrolled(mouseX - valueOffsetX, mouseY - valueOffsetY, amount);
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+		return value.mouseScrolled(mouseX - valueOffsetX, mouseY - valueOffsetY, horizontalAmount, verticalAmount);
 	}
 	
 	@Override

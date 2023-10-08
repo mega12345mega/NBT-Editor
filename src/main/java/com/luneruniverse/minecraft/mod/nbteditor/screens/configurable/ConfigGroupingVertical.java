@@ -1,14 +1,13 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 
 public abstract class ConfigGroupingVertical<K, T extends ConfigGroupingVertical<K, T>> extends ConfigGrouping<K, T> {
 	
@@ -130,15 +129,14 @@ public abstract class ConfigGroupingVertical<K, T extends ConfigGroupingVertical
 		return false;
 	}
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		int yOffset = getNameHeight();
 		
 		for (ConfigPath path : new ArrayList<>(paths.values())) {
-			if (path.mouseScrolled(mouseX - PADDING * 2, mouseY - yOffset, amount))
+			if (path.mouseScrolled(mouseX - PADDING * 2, mouseY - yOffset, horizontalAmount, verticalAmount))
 				return true;
 			yOffset += path.getSpacingHeight() + PADDING;
 		}
 		return false;
 	}
-	
 }

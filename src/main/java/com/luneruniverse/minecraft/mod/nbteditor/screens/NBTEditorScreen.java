@@ -1,18 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-
-import org.lwjgl.glfw.GLFW;
-
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
@@ -31,7 +18,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -39,6 +25,13 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
+import org.lwjgl.glfw.GLFW;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class NBTEditorScreen extends ItemEditorScreen {
 	
@@ -440,8 +433,8 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	}
 	
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-		boolean output = super.mouseScrolled(mouseX, mouseY, amount);
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+		boolean output = super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 		scrollPerFolder.put(realPath.toString(), editor.getScroll());
 		return output;
 	}

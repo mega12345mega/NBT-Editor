@@ -16,21 +16,18 @@
 
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands;
 
-import org.jetbrains.annotations.Nullable;
-
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Manages client-sided commands and provides some related helper methods.
@@ -116,9 +113,9 @@ public final class ClientCommandManager {
 		Object registryAccess = Version.newSwitch()
 				.range("1.19.3", null, () -> CommandRegistryAccess.of(MainUtil.client.getNetworkHandler().getRegistryManager(),
 						MainUtil.client.getNetworkHandler().getEnabledFeatures()))
-				.range("1.19.0", "1.19.2", () -> Reflection.newInstance("net.minecraft.class_7157",
+/*				.range("1.19.0", "1.19.2", () -> Reflection.newInstance("net.minecraft.class_7157",
 						new Class[] {Reflection.getClass("net.minecraft.class_5455")}, // DynamicRegistryManager.class
-						lastGamePacket.registryManager()))
+						lastGamePacket.registryManager()))*/ //TODO: In 1.20.2 this packet has no getter for the registrymanager anymore.
 				.range(null, "1.18.2", () -> null)
 				.get();
 		ClientCommandRegistrationCallback.EVENT.invoker().register(dispatcher, registryAccess);
