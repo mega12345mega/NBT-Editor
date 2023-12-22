@@ -1,6 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
@@ -92,14 +91,7 @@ public class MVTooltip {
 			return null;
 		
 		Tooltip output = Tooltip.of(combined);
-		// output.lines = lines
-		try {
-			Field field = Tooltip.class.getDeclaredField(Reflection.getFieldName(Tooltip.class, "field_41103", "Ljava/util/List;"));
-			field.setAccessible(true);
-			field.set(output, lines);
-		} catch (Exception e) {
-			throw new RuntimeException("Error setting tooltip lines", e);
-		}
+		Reflection.getField(Tooltip.class, "field_41103", "Ljava/util/List;").set(output, lines);
 		return output;
 	}
 	Object toOldTooltip() {

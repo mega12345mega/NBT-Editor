@@ -277,8 +277,8 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 			return value.mouseDragged(mouseX - indexTextOffset, mouseY, button, deltaX, deltaY);
 		}
 		@Override
-		public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-			return value.mouseScrolled(mouseX - indexTextOffset, mouseY, amount);
+		public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
+			return value.mouseScrolled(mouseX - indexTextOffset, mouseY, xAmount, yAmount);
 		}
 		
 		@Override

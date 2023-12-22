@@ -20,6 +20,7 @@ import java.util.zip.ZipException;
 import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 
@@ -48,10 +49,16 @@ public class MainUtil {
 	
 	public static final MinecraftClient client = MinecraftClient.getInstance();
 	
+	// Same as ClientPlayerInteractionManager#clickCreativeSlot, but without a feature flag check
+	public static void clickCreativeStack(ItemStack item, int slot) {
+		if (client.interactionManager.getCurrentGameMode().isCreative())
+			client.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot, item));
+	}
+	
 	public static void saveItem(Hand hand, ItemStack item) {
 		client.player.setStackInHand(hand, item.copy());
 		if (client.interactionManager.getCurrentGameMode().isCreative())
-			client.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(hand == Hand.OFF_HAND ? 45 : client.player.getInventory().selectedSlot + 36, item));
+			MVMisc.sendPacket(new CreativeInventoryActionC2SPacket(hand == Hand.OFF_HAND ? 45 : client.player.getInventory().selectedSlot + 36, item));
 	}
 	public static void saveItem(EquipmentSlot equipment, ItemStack item) {
 		if (equipment == EquipmentSlot.MAINHAND)
@@ -60,13 +67,13 @@ public class MainUtil {
 			saveItem(Hand.OFF_HAND, item);
 		else {
 			client.player.getInventory().armor.set(equipment.getEntitySlotId(), item.copy());
-			client.interactionManager.clickCreativeStack(item, 8 - equipment.getEntitySlotId());
+			clickCreativeStack(item, 8 - equipment.getEntitySlotId());
 		}
 	}
 	
 	public static void saveItem(int slot, ItemStack item) {
 		client.player.getInventory().setStack(slot == 45 ? 40 : slot, item.copy());
-		client.interactionManager.clickCreativeStack(item, slot < 9 ? slot + 36 : slot);
+		clickCreativeStack(item, slot < 9 ? slot + 36 : slot);
 	}
 	public static void saveItemInvSlot(int slot, ItemStack item) {
 		saveItem(slot == 45 ? 45 : (slot >= 36 ? slot - 36 : slot), item);
@@ -319,7 +326,7 @@ public class MainUtil {
 			nbt = NbtIo.readCompressed(resetableIn);
 		} catch (ZipException e) {
 			resetableIn.reset();
-			nbt = NbtIo.read(resetableIn);
+			nbt = NbtIo.readCompound(resetableIn);
 		}
 		return nbt;
 	}

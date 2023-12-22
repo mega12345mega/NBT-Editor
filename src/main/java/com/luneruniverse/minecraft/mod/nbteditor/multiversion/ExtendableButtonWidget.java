@@ -82,8 +82,8 @@ public class ExtendableButtonWidget extends PressableWidget {
 	private void super_renderButton(String intermediary, MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		try {
 			MethodHandles.lookup().findSpecial(ClickableWidget.class, intermediary,
-					MethodType.methodType(void.class, MatrixStack.class, int.class, int.class, float.class), ExtendableButtonWidget.class)
-					.invoke(this, matrices, mouseX, mouseY, delta);
+					MethodType.methodType(void.class, MatrixStack.class, int.class, int.class, float.class),
+					ExtendableButtonWidget.class).invoke(this, matrices, mouseX, mouseY, delta);
 		} catch (Throwable e) {
 			throw new RuntimeException("Error calling super.renderButton (" + intermediary + ")", e);
 		}

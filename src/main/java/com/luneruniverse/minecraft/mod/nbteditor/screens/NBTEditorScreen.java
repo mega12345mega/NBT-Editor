@@ -440,8 +440,8 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	}
 	
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-		boolean output = super.mouseScrolled(mouseX, mouseY, amount);
+	public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
+		boolean output = super.mouseScrolled(mouseX, mouseY, xAmount, yAmount);
 		scrollPerFolder.put(realPath.toString(), editor.getScroll());
 		return output;
 	}

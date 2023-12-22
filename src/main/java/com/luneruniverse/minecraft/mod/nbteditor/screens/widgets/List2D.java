@@ -117,8 +117,8 @@ public class List2D extends Panel<List2D.List2DValue> {
 	}
 	
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-		return super.mouseScrolled(mouseX, mouseY, amount) || finalEventHandler.mouseScrolled(mouseX, mouseY, amount);
+	public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
+		return super.mouseScrolled(mouseX, mouseY, xAmount, yAmount) || finalEventHandler.mouseScrolled(mouseX, mouseY, xAmount, yAmount);
 	}
 	@Override
 	protected int getPanelElementHeight(List2DValue element) {

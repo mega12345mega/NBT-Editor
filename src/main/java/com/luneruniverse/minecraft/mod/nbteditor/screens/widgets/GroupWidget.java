@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.function.Predicate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 
 import net.minecraft.client.gui.AbstractParentElement;
@@ -151,11 +154,30 @@ public class GroupWidget extends AbstractParentElement implements MVDrawable, MV
 	public void setFocused(boolean focused) {
 		MVElement.super.setFocused(focused);
 	}
-	
 	@SuppressWarnings("deprecation")
 	@Override
 	public boolean isFocused() {
 		return MVElement.super.isFocused();
+	}
+	public boolean method_25401(double mouseX, double mouseY, double amount) {
+		return Version.<Boolean>newSwitch()
+				.range("1.20.2", null, () -> MVElement.super.method_25401(mouseX, mouseY, amount))
+				.range(null, "1.20.1", () -> super_mouseScrolled(mouseX, mouseY, amount))
+				.get();
+	}
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
+		return super.mouseScrolled(mouseX, mouseY, xAmount, yAmount);
+	}
+	private boolean super_mouseScrolled(double mouseX, double mouseY, double amount) {
+		try {
+			return (boolean) MethodHandles.privateLookupIn(GroupWidget.class, MethodHandles.lookup())
+					.findSpecial(AbstractParentElement.class, "method_25401",
+					MethodType.methodType(boolean.class, double.class, double.class, double.class),
+					GroupWidget.class).invoke(this, mouseX, mouseY, amount);
+		} catch (Throwable e) {
+			throw new RuntimeException("Error calling super.mouseScrolled", e);
+		}
 	}
 	
 	

@@ -21,11 +21,7 @@ public class Reflection {
 	private static final Cache<String, Class<?>> classCache = CacheBuilder.newBuilder().build();
 	public static Class<?> getClass(String name) {
 		try {
-			return classCache.get(name, () -> {
-				synchronized (mappings) {
-					return Class.forName(mappings.mapClassName("intermediary", name));
-				}
-			});
+			return classCache.get(name, () -> Class.forName(mappings.mapClassName("intermediary", name)));
 		} catch (ExecutionException | UncheckedExecutionException e) {
 			throw new RuntimeException("Error getting class", e);
 		}
@@ -67,15 +63,14 @@ public class Reflection {
 		}
 	}
 	
-	public static String getFieldName(Class<?> clazz, String field, String descriptor) {
-		synchronized (mappings) {
-			return mappings.mapFieldName("intermediary",
-					mappings.unmapClassName("intermediary", clazz.getName()), field, descriptor);
-		}
+	private static String getFieldName(Class<?> clazz, String field, String descriptor) {
+		return mappings.mapFieldName("intermediary", mappings.unmapClassName("intermediary", clazz.getName()), field, descriptor);
 	}
 	public static FieldReference getField(Class<?> clazz, String field, String descriptor) {
 		try {
-			return new FieldReference(clazz.getField(getFieldName(clazz, field, descriptor)));
+			Field fieldObj = clazz.getDeclaredField(getFieldName(clazz, field, descriptor));
+			fieldObj.setAccessible(true);
+			return new FieldReference(fieldObj);
 		} catch (Exception e) {
 			throw new RuntimeException("Error getting field", e);
 		}
@@ -121,17 +116,14 @@ public class Reflection {
 			clazz = clazz.componentType();
 			typeStart++;
 		}
-		if (descriptor.charAt(typeStart) == 'L') {
-			synchronized (mappings) {
-				return arrays + "L" + mappings.unmapClassName("intermediary", clazz.getName()).replace('.', '/') + ";";
-			}
-		} else
+		if (descriptor.charAt(typeStart) == 'L')
+			return arrays + "L" + mappings.unmapClassName("intermediary", clazz.getName()).replace('.', '/') + ";";
+		else
 			return descriptor;
 	}
 	
 	public static String getMethodName(Class<?> clazz, String method, MethodType type) {
-		return mappings.mapMethodName("intermediary",
-				mappings.unmapClassName("intermediary", clazz.getName()), method, getIntermediaryDescriptor(type));
+		return mappings.mapMethodName("intermediary", mappings.unmapClassName("intermediary", clazz.getName()), method, getIntermediaryDescriptor(type));
 	}
 	public static MethodInvoker getMethod(Class<?> clazz, String method, MethodType type) {
 		try {

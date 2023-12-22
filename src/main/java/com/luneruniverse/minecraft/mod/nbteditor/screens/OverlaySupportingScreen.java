@@ -134,10 +134,10 @@ public class OverlaySupportingScreen extends TickableSupportingScreen {
 	}
 	
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
 		if (overlay != null)
-			return overlay.mouseScrolled(mouseX, mouseY, amount);
-		return super.mouseScrolled(mouseX, mouseY, amount);
+			return overlay.mouseScrolled(mouseX, mouseY, xAmount, yAmount);
+		return super.mouseScrolled(mouseX, mouseY, xAmount, yAmount);
 	}
 	
 	@Override

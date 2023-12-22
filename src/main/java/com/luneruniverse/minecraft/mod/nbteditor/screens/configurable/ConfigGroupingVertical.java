@@ -130,11 +130,11 @@ public abstract class ConfigGroupingVertical<K, T extends ConfigGroupingVertical
 		return false;
 	}
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
 		int yOffset = getNameHeight();
 		
 		for (ConfigPath path : new ArrayList<>(paths.values())) {
-			if (path.mouseScrolled(mouseX - PADDING * 2, mouseY - yOffset, amount))
+			if (path.mouseScrolled(mouseX - PADDING * 2, mouseY - yOffset, xAmount, yAmount))
 				return true;
 			yOffset += path.getSpacingHeight() + PADDING;
 		}

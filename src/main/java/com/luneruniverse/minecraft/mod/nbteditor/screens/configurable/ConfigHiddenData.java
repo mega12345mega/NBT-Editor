@@ -87,8 +87,8 @@ public class ConfigHiddenData<S extends ConfigPath, D> implements ConfigPath {
 		return visible.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
 	}
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-		return visible.mouseScrolled(mouseX, mouseY, amount);
+	public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
+		return visible.mouseScrolled(mouseX, mouseY, xAmount, yAmount);
 	}
 	@Override
 	public boolean isMouseOver(double mouseX, double mouseY) {
