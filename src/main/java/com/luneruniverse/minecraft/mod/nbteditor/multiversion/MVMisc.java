@@ -3,8 +3,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Field;
 import java.nio.FloatBuffer;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -19,6 +19,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.SharedConstants;
+import net.minecraft.block.SuspiciousStewIngredient.StewEffect;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -27,11 +28,16 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.ItemStackArgumentType;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.SuspiciousStewItem;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.resource.ResourceManager;
@@ -121,27 +127,26 @@ public class MVMisc {
 		return newButton(x, y, width, height, message, onPress, null);
 	}
 	
-	public static TexturedButtonWidget newTexturedButton(int x, int y, int width, int height, int hoveredVOffset, Identifier img, ButtonWidget.PressAction onPress, MVTooltip tooltip) {
-		TexturedButtonWidget output = new TexturedButtonWidget(x, y, width, height, 0, 0, hoveredVOffset, img, width, height + hoveredVOffset, onPress);
+	public static ButtonWidget newTexturedButton(int x, int y, int width, int height, int hoveredVOffset, Identifier img, ButtonWidget.PressAction onPress, MVTooltip tooltip) {
+		ButtonWidget output = Version.<ButtonWidget>newSwitch()
+				.range("1.20.2", null, () -> new MVTexturedButtonWidget_1_20_2(
+						x, y, width, height, 0, 0, hoveredVOffset, img, width, height + hoveredVOffset, onPress))
+				.range(null, "1.20.1", () -> Reflection.newInstance(TexturedButtonWidget.class,
+						new Class<?>[] {int.class, int.class, int.class, int.class, int.class, int.class, int.class, Identifier.class, int.class, int.class, ButtonWidget.PressAction.class},
+						x, y, width, height, 0, 0, hoveredVOffset, img, width, height + hoveredVOffset, onPress))
+				.get();
 		if (tooltip != null) {
 			Version.newSwitch()
 					.range("1.19.3", null, () -> output.setTooltip(tooltip.toNewTooltip()))
 					.range(null, "1.19.2", () -> {
-						try {
-							Object oldTooltip = tooltip.toOldTooltip();
-							Field field = ButtonWidget.class.getDeclaredField(Reflection.getFieldName(ButtonWidget.class,
-									"field_25036", "Lnet/minecraft/class_4185$class_5316;"));
-							field.setAccessible(true);
-							field.set(output, oldTooltip);
-						} catch (Exception e) {
-							throw new RuntimeException("Error creating old button", e);
-						}
+						Object oldTooltip = tooltip.toOldTooltip();
+						Reflection.getField(ButtonWidget.class, "field_25036", "Lnet/minecraft/class_4185$class_5316;").set(output, oldTooltip);
 					})
 					.run();
 		}
 		return output;
 	}
-	public static TexturedButtonWidget newTexturedButton(int x, int y, int width, int height, int hoveredVOffset, Identifier img, ButtonWidget.PressAction onPress) {
+	public static ButtonWidget newTexturedButton(int x, int y, int width, int height, int hoveredVOffset, Identifier img, ButtonWidget.PressAction onPress) {
 		return newTexturedButton(x, y, width, height, hoveredVOffset, img, onPress, null);
 	}
 	
@@ -252,6 +257,24 @@ public class MVMisc {
 					return output;
 				})
 				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> SuspiciousStewItem_addEffectToStew =
+			Reflection.getOptionalMethod(SuspiciousStewItem.class, "method_8021", MethodType.methodType(void.class, ItemStack.class, StatusEffect.class, int.class));
+	public static void addEffectToStew(ItemStack item, StatusEffect effect, int duration) {
+		Version.newSwitch()
+				.range("1.20.2", null, () -> SuspiciousStewItem.addEffectsToStew(item, List.of(new StewEffect(effect, duration))))
+				.range(null, "1.20.1", () -> SuspiciousStewItem_addEffectToStew.get().invoke(null, item, effect, duration))
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> ClientPlayNetworkHandler_sendPacket =
+			Reflection.getOptionalMethod(ClientPlayNetworkHandler.class, "method_2883", MethodType.methodType(void.class, Packet.class));
+	public static void sendPacket(Packet<?> packet) {
+		Version.newSwitch()
+				.range("1.20.2", null, () -> MainUtil.client.getNetworkHandler().sendPacket(packet))
+				.range(null, "1.20.1", () -> ClientPlayNetworkHandler_sendPacket.get().invoke(MainUtil.client.getNetworkHandler(), packet))
+				.run();
 	}
 	
 }

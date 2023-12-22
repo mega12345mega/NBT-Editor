@@ -96,7 +96,7 @@ public abstract class ConfigGrouping<K, T extends ConfigGrouping<K, T>> implemen
 	@Override
 	public abstract boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY);
 	@Override
-	public abstract boolean mouseScrolled(double mouseX, double mouseY, double amount);
+	public abstract boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount);
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {

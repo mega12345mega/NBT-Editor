@@ -1,23 +1,36 @@
 package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
+import java.util.function.Supplier;
+
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.util.Identifier;
 
 @Mixin(TextFieldWidget.class)
 public abstract class TextFieldWidgetMixin implements Tickable {
-	@ModifyArg(method = "renderButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;fill(IIIII)V", ordinal = 0), index = 4)
+	private static final Identifier TEXT_FIELD_INVALID = new Identifier("nbteditor", "widget/text_field_invalid");
+	@ModifyArg(method = "renderButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V", ordinal = 0), index = 0)
+	@Group(name = "renderButton", min = 1)
+	private Identifier drawGuiTexture(Identifier texture) {
+		TextFieldWidget source = (TextFieldWidget) (Object) this;
+		if (source instanceof NamedTextFieldWidget named && !named.isValid())
+			return TEXT_FIELD_INVALID;
+		return texture;
+	}
+	@ModifyArg(method = "method_48579", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_332;method_25294(IIIII)V", ordinal = 0), index = 4, remap = false)
 	@Group(name = "renderButton", min = 1)
 	private int fillDrawContext(int color) {
 		TextFieldWidget source = (TextFieldWidget) (Object) this;
@@ -42,10 +55,14 @@ public abstract class TextFieldWidgetMixin implements Tickable {
 		return MVMisc.vertex(buffer, NamedTextFieldWidget.matrix, (float) x, (float) y, (float) z);
 	}
 	
-	@Shadow
-	private int focusedTicks;
+	private static final Supplier<Reflection.FieldReference> TextFieldWidget_focusedTicks =
+			Reflection.getOptionalField(TextFieldWidget.class, "field_2107", "I");
 	@Override
 	public void tick() {
-		focusedTicks++;
+		TextFieldWidget source = (TextFieldWidget) (Object) this;
+		Version.newSwitch()
+				.range("1.20.2", null, () -> {})
+				.range(null, "1.20.1", () -> TextFieldWidget_focusedTicks.get().set(source, (int) TextFieldWidget_focusedTicks.get().get(source) + 1))
+				.run();
 	}
 }

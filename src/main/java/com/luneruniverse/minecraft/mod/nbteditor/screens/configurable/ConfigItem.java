@@ -118,8 +118,8 @@ public class ConfigItem<V extends ConfigValue<?, V>> implements ConfigPath {
 		return value.mouseDragged(mouseX - valueOffsetX, mouseY - valueOffsetY, button, deltaX, deltaY);
 	}
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-		return value.mouseScrolled(mouseX - valueOffsetX, mouseY - valueOffsetY, amount);
+	public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
+		return value.mouseScrolled(mouseX - valueOffsetX, mouseY - valueOffsetY, xAmount, yAmount);
 	}
 	
 	@Override

@@ -120,11 +120,11 @@ public abstract class ConfigGroupingHorizontal<K, T extends ConfigGroupingHorizo
 		return false;
 	}
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
 		int xOffset = getNameWidth();
 		
 		for (ConfigPath path : new ArrayList<>(paths.values())) {
-			if (path.mouseScrolled(mouseX - xOffset, mouseY, amount))
+			if (path.mouseScrolled(mouseX - xOffset, mouseY, xAmount, yAmount))
 				return true;
 			xOffset += path.getSpacingWidth() + PADDING;
 		}

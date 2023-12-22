@@ -203,19 +203,19 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 	}
 	
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
 		updateMousePos(mouseX, mouseY);
 		
 		boolean success = false;
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
-			if (pos.element().mouseScrolled(mouseX - pos.x() - x, mouseY - pos.y() - y, amount)) {
+			if (pos.element().mouseScrolled(mouseX - pos.x() - x, mouseY - pos.y() - y, xAmount, yAmount)) {
 				success = true;
 				if (!continueEvents())
 					break;
 			}
 		}
 		if (!success && scrollable)
-			success = scroll(amount * 5 * ConfigScreen.getScrollSpeed());
+			success = scroll(yAmount * 5 * ConfigScreen.getScrollSpeed());
 		return success;
 	}
 	protected boolean scroll(double amount) {

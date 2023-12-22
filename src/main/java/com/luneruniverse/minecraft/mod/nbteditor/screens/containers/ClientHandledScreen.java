@@ -56,7 +56,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 					SERVER_INV.setStack(i, clientStack.copy());
 					continue;
 				}
-				MainUtil.client.interactionManager.clickCreativeStack(clientStack, i == 40 ? 45 : (i < 9 ? i + 36 : i));
+				MainUtil.clickCreativeStack(clientStack, i == 40 ? 45 : (i < 9 ? i + 36 : i));
 				SERVER_INV.setStack(i, clientStack.copy());
 			}
 		}

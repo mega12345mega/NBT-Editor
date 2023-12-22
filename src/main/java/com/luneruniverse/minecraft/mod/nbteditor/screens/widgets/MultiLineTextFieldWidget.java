@@ -545,16 +545,16 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	}
 	
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
 		if (isMouseOver(mouseX, mouseY)) {
 			int maxScroll = -Math.max(0, lines.size() * (int) (textRenderer.fontHeight * 1.5) + textRenderer.fontHeight + height / 3 - height);
-			if (amount < 0 && scroll > maxScroll) {
-				scroll += amount * 5;
+			if (yAmount < 0 && scroll > maxScroll) {
+				scroll += yAmount * 5;
 				if (scroll < maxScroll)
 					scroll = maxScroll;
 			}
-			if (amount > 0 && scroll < 0) {
-				scroll += amount * 5;
+			if (yAmount > 0 && scroll < 0) {
+				scroll += yAmount * 5;
 				if (scroll > 0)
 					scroll = 0;
 			}

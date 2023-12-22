@@ -203,12 +203,16 @@ public class MVDrawableHelper {
 				.run();
 	}
 	
-	private static final Supplier<Reflection.MethodInvoker> Screen_renderBackground =
+	private static final Supplier<Reflection.MethodInvoker> Screen_renderBackground_MatrixStack =
 			Reflection.getOptionalMethod(Screen.class, "method_25420", MethodType.methodType(void.class, MatrixStack.class));
+	private static final Supplier<Reflection.MethodInvoker> Screen_renderBackground_DrawContext =
+			Reflection.getOptionalMethod(Screen.class, "method_25420", MethodType.methodType(void.class, DrawContext.class));
 	public static void renderBackground(Screen screen, MatrixStack matrices) {
+		int[] mousePos = MainUtil.getMousePos();
 		Version.newSwitch()
-				.range("1.20.0", null, () -> screen.renderBackground(MVDrawableHelper.getDrawContext(matrices)))
-				.range(null, "1.19.4", () -> Screen_renderBackground.get().invoke(screen, matrices))
+				.range("1.20.2", null, () -> screen.renderBackground(MVDrawableHelper.getDrawContext(matrices), mousePos[0], mousePos[1], MainUtil.client.getTickDelta()))
+				.range("1.20.0", "1.20.1", () -> Screen_renderBackground_DrawContext.get().invoke(screen, MVDrawableHelper.getDrawContext(matrices)))
+				.range(null, "1.19.4", () -> Screen_renderBackground_MatrixStack.get().invoke(screen, matrices))
 				.run();
 	}
 	

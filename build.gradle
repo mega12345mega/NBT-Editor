@@ -32,7 +32,7 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
 	
-	modImplementation "com.terraformersmc:modmenu:7.1.0"
+	modImplementation "com.terraformersmc:modmenu:8.0.0"
 	
 	
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.

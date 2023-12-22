@@ -11,7 +11,6 @@
     "ChatScreenAccessor",
     "SendPacketMixin",
     "ReceivePacketMixin",
-    "NetworkHandlerAccessor",
     "NbtStringMixin",
     "StringNbtWriterAccessor",
     "CreativeInventoryScreenMixin",

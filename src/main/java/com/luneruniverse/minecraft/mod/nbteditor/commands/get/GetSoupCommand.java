@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands.get;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.argument;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.StatusEffectArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -13,7 +14,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.SuspiciousStewItem;
 
 public class GetSoupCommand extends ClientCommand {
 	
@@ -28,7 +28,7 @@ public class GetSoupCommand extends ClientCommand {
 			int duration = getDefaultArg(context, "duration", 5, Integer.class);
 			
 			ItemStack item = new ItemStack(Items.SUSPICIOUS_STEW, 1);
-			SuspiciousStewItem.addEffectToStew(item, context.getArgument("effect", StatusEffect.class), duration * 20);
+			MVMisc.addEffectToStew(item, context.getArgument("effect", StatusEffect.class), duration * 20);
 			MainUtil.getWithMessage(item);
 			return Command.SINGLE_SUCCESS;
 		};

@@ -59,7 +59,10 @@ public class CreativeTab {
 			.range(null, "1.19.2", 28)
 			.get();
 	
-	private static final Identifier TEXTURE = new Identifier("textures/gui/container/creative_inventory/tabs.png");
+	private static final Identifier TEXTURE = Version.<Identifier>newSwitch()
+			.range("1.20.2", null, () -> new Identifier("nbteditor", "textures/gui/sprites/container/creative_inventory/tab_top_unselected.png"))
+			.range(null, "1.20.1", () -> new Identifier("textures/gui/container/creative_inventory/tabs.png"))
+			.get();
 	
 	private final Screen screen;
 	private final int x;
