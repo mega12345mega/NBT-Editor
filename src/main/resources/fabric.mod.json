@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nbteditor",
-  "version": "1.12.2",
+  "version": "1.12.2.1",
 
   "name": "NBT Editor",
   "description": "Lets you edit items' nbt ingame, store items in a client side chest, open containers in your inventory, and more!",
