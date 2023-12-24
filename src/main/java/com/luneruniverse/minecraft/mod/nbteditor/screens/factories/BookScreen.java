@@ -106,7 +106,7 @@ public class BookScreen extends ItemEditorScreen {
 	}
 	private void setPage(Text contents) {
 		NbtList pages = item.getOrCreateNbt().getList("pages", NbtElement.STRING_TYPE);
-		NbtString nbtContents = NbtString.of(Text.Serializer.toJson(contents));
+		NbtString nbtContents = NbtString.of(Text.Serialization.toJsonString(contents));
 		if (page < pages.size())
 			pages.set(page, nbtContents);
 		else {
@@ -173,7 +173,7 @@ public class BookScreen extends ItemEditorScreen {
 		NbtList pages = output.getNbt().getList("pages", NbtElement.STRING_TYPE);
 		List<Text> previewPages = new ArrayList<>();
 		for (int i = 0; i < pages.size(); i++)
-			previewPages.add(makePreviewText(Text.Serializer.fromJson(pages.getString(i))));
+			previewPages.add(makePreviewText(Text.Serialization.fromJson(pages.getString(i))));
 		return new Contents() {
 			@Override
 			public int getPageCount() {
@@ -200,7 +200,8 @@ public class BookScreen extends ItemEditorScreen {
 					() -> setOverlayScreen(preview, 200),
 					TextInst.translatable("nbteditor.book.preview.click.title"),
 					TextInst.of(""),
-					TextInst.translatable("nbteditor.book.preview.click.action", style.getClickEvent().getAction().getName()),
+					TextInst.translatable("nbteditor.book.preview.click.action",
+							MVMisc.getClickEventActionName(style.getClickEvent().getAction())),
 					TextInst.of(""),
 					TextInst.translatable("nbteditor.book.preview.click.value", style.getClickEvent().getValue())), 200);
 		});

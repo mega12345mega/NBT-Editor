@@ -165,7 +165,7 @@ public class TextUtil {
 	}
 	
 	public static boolean isTextFormatted(Text text, boolean allowNonNull) {
-		return isTextFormatted(Text.Serializer.toJsonTree(text).getAsJsonObject(), allowNonNull);
+		return isTextFormatted(Text.Serialization.toJsonTree(text).getAsJsonObject(), allowNonNull);
 	}
 	private static boolean isTextFormatted(JsonObject data, boolean allowNonNull) {
 		if (data.has("extra")) {

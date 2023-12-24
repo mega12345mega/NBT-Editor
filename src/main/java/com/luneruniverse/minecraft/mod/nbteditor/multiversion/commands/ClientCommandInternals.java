@@ -19,15 +19,19 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.argument;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
+import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Iterables;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection.MethodInvoker;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.mixin.HelpCommandAccessor;
@@ -47,7 +51,6 @@ import com.mojang.brigadier.tree.CommandNode;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.CommandException;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 
@@ -57,6 +60,9 @@ public final class ClientCommandInternals {
 	private static final String API_COMMAND_NAME;
 	private static final String SHORT_API_COMMAND_NAME = "fcc";
 	private static @Nullable CommandDispatcher<FabricClientCommandSource> activeDispatcher;
+	private static final Supplier<Class<?>> CommandException = () -> Reflection.getClass("net.minecraft.class_2164");
+	private static final Supplier<MethodInvoker> CommandException_getTextMessage =
+			Reflection.getOptionalMethod(CommandException, () -> "method_9199", () -> MethodType.methodType(Text.class));
 	static {
 		API_COMMAND_NAME = Version.<String>newSwitch()
 				.range("1.19.0", null, "fabric-command-api-v2:client")
@@ -110,14 +116,17 @@ public final class ClientCommandInternals {
 			LOGGER.warn("Syntax exception for client-sided command '{}'", command, e);
 			commandSource.sendError(getErrorMessage(e));
 			return true;
-		} catch (CommandException e) {
-			LOGGER.warn("Error while executing client-sided command '{}'", command, e);
-			commandSource.sendError(e.getTextMessage());
-			return true;
 		} catch (RuntimeException e) {
-			LOGGER.warn("Error while executing client-sided command '{}'", command, e);
-			commandSource.sendError(TextInst.of(e.getMessage()));
-			return true;
+			if (Version.<Boolean>newSwitch().range("1.20.3", null, false).range(null, "1.20.2", true).get() &&
+					CommandException.get().isInstance(e)) {
+				LOGGER.warn("Error while executing client-sided command '{}'", command, e);
+				commandSource.sendError(CommandException_getTextMessage.get().invoke(e));
+				return true;
+			} else {
+				LOGGER.warn("Error while executing client-sided command '{}'", command, e);
+				commandSource.sendError(TextInst.of(e.getMessage()));
+				return true;
+			}
 		} finally {
 			client.getProfiler().pop();
 		}

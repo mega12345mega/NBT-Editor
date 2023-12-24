@@ -19,7 +19,6 @@
     "TextFieldWidgetMixin",
     "MinecraftClientMixin",
     "StringNbtReaderMixin",
-    "TextSerializerMixin",
     "ScreenMixin",
     "ParentElementMixin",
     "BookScreenMixin",

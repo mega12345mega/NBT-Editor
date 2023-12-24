@@ -16,7 +16,8 @@ public class TextInst {
 	}
 	public static EditableText translatable(String key, Object... args) {
 		return new EditableText(Version.<MutableText>newSwitch()
-				.range("1.19.0", null, () -> Text.translatable(key, args))
+				.range("1.20.3", null, () -> Text.stringifiedTranslatable(key, args))
+				.range("1.19.0", "1.20.2", () -> Text.translatable(key, args))
 				.range(null, "1.18.2", () -> Reflection.newInstance("net.minecraft.class_2588", new Class[] {String.class, Object[].class}, key, args)) // new TranslatableText(key, args)
 				.get());
 	}

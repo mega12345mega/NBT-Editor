@@ -10,6 +10,7 @@ import org.lwjgl.glfw.GLFW;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
@@ -19,6 +20,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
+import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -65,7 +67,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				public String toString() {
 					if (this == NONE)
 						return "none";
-					return value.getName();
+					return MVMisc.getClickEventActionName(value);
 				}
 			}
 			public enum HoverAction {
@@ -89,14 +91,17 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				public HoverEvent toEvent(String value) {
 					if (this == NONE)
 						return null;
-					return this.value.buildHoverEvent(new Gson().fromJson(value, JsonElement.class));
+					JsonObject json = new JsonObject();
+					json.addProperty("action", MVMisc.getHoverEventActionName(this.value));
+					json.add("contents", new Gson().fromJson(value, JsonElement.class));
+					return HoverEvent.CODEC.parse(JsonOps.INSTANCE, json).result().orElseThrow();
 				}
 				
 				@Override
 				public String toString() {
 					if (this == NONE)
 						return "none";
-					return value.getName();
+					return MVMisc.getHoverEventActionName(value);
 				}
 			}
 			public interface EventPairCallback {
@@ -118,8 +123,9 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				ClickEvent.Action clickAction = (clickEvent == null ? null : clickEvent.getAction());
 				String clickValue = (clickEvent == null ? "" : clickEvent.getValue());
 				HoverEvent.Action<?> hoverAction = (hoverEvent == null ? null : hoverEvent.getAction());
-				String hoverValue = (hoverEvent == null ? "" : hoverEvent.getAction()
-						.contentsToJson(hoverEvent.getValue(hoverEvent.getAction())).toString());
+				String hoverValue = (hoverEvent == null ? "" : new Gson().toJson(
+						HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, hoverEvent)
+						.result().orElseThrow().getAsJsonObject().get("contents")));
 				
 				TextRenderer textRenderer = MainUtil.client.textRenderer;
 				
@@ -574,13 +580,13 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		
 		@Override
 		protected String onCopy(String text, int pos, int len) {
-			return Text.Serializer.toJson(TextUtil.substring(this.text, pos, pos + len));
+			return Text.Serialization.toJsonString(TextUtil.substring(this.text, pos, pos + len));
 		}
 		
 		@Override
 		protected String onPaste(String text, int pos, int overwrittenLen) {
 			try {
-				Text textValue = pasteFilter(Text.Serializer.fromJson(text));
+				Text textValue = pasteFilter(Text.Serialization.fromJson(text));
 				String textValueStr = textValue.getString();
 				int textLen = textValueStr.length();
 				

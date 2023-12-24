@@ -105,18 +105,18 @@ public class Lore {
 	}
 	
 	public List<Text> getLore() {
-		return lore.stream().map(element -> (Text) Text.Serializer.fromJson(((NbtString) element).asString()))
+		return lore.stream().map(element -> (Text) Text.Serialization.fromJson(((NbtString) element).asString()))
 				.collect(Collectors.toList());
 	}
 	public Text getLine(int pos) {
 		if (pos < 0)
 			pos = lore.size() + pos;
 		
-		return Text.Serializer.fromJson(((NbtString) lore.get(pos)).asString());
+		return Text.Serialization.fromJson(((NbtString) lore.get(pos)).asString());
 	}
 	
 	public void addLine(Text text, int pos) {
-		NbtString line = NbtString.of(Text.Serializer.toJson(text));
+		NbtString line = NbtString.of(Text.Serialization.toJsonString(text));
 		if (pos < 0)
 			lore.add(lore.size() + pos + 1, line);
 		else
@@ -136,7 +136,7 @@ public class Lore {
 	}
 	
 	public void setLine(Text text, int pos) {
-		NbtString line = NbtString.of(Text.Serializer.toJson(text));
+		NbtString line = NbtString.of(Text.Serialization.toJsonString(text));
 		if (pos < 0)
 			lore.set(lore.size() + pos, line);
 		else

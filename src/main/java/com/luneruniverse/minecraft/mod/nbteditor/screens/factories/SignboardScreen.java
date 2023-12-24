@@ -147,11 +147,11 @@ public class SignboardScreen extends ItemEditorScreen {
 		if (newFeatures) {
 			NbtList messages = new NbtList();
 			for (Text line : lines)
-				messages.add(NbtString.of(Text.Serializer.toJson(fixEditable(fixClickEvent(line)))));
+				messages.add(NbtString.of(Text.Serialization.toJsonString(fixEditable(fixClickEvent(line)))));
 			sideTag.put("messages", messages);
 		} else {
 			for (int i = 0; i < 4; i++)
-				sideTag.putString("Text" + (i + 1), Text.Serializer.toJson(fixClickEvent(lines.get(i))));
+				sideTag.putString("Text" + (i + 1), Text.Serialization.toJsonString(fixClickEvent(lines.get(i))));
 		}
 		checkSave();
 	}
@@ -162,11 +162,11 @@ public class SignboardScreen extends ItemEditorScreen {
 			if (newFeatures) {
 				NbtList messages = sideTag.getList("messages", NbtElement.STRING_TYPE);
 				for (int i = 0; i < messages.size() && i < 4; i++)
-					output.add(Text.Serializer.fromJson(messages.getString(i)));
+					output.add(Text.Serialization.fromJson(messages.getString(i)));
 			} else {
 				for (int i = 1; i <= 4; i++) {
 					if (sideTag.contains("Text" + i, NbtElement.STRING_TYPE))
-						output.add(Text.Serializer.fromJson(sideTag.getString("Text" + i)));
+						output.add(Text.Serialization.fromJson(sideTag.getString("Text" + i)));
 					else
 						output.add(TextInst.of(""));
 				}

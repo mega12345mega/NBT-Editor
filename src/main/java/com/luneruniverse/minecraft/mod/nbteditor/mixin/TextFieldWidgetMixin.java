@@ -22,7 +22,7 @@ import net.minecraft.util.Identifier;
 @Mixin(TextFieldWidget.class)
 public abstract class TextFieldWidgetMixin implements Tickable {
 	private static final Identifier TEXT_FIELD_INVALID = new Identifier("nbteditor", "widget/text_field_invalid");
-	@ModifyArg(method = "renderButton", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V", ordinal = 0), index = 0)
+	@ModifyArg(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V", ordinal = 0), index = 0)
 	@Group(name = "renderButton", min = 1)
 	private Identifier drawGuiTexture(Identifier texture) {
 		TextFieldWidget source = (TextFieldWidget) (Object) this;

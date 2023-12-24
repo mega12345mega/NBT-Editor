@@ -67,7 +67,7 @@ public class UpdateCheckerThread extends Thread {
 				UPDATE_AVAILABLE = true;
 				NBTEditor.LOGGER.warn("NBT Editor is outdated! (" + highestVersion + " > " + VERSION + ")");
 				if (versionDiff[1] <= ConfigScreen.getCheckUpdates().getLevel()) {
-					MainUtil.client.getToastManager().add(new SystemToast(SystemToast.Type.TUTORIAL_HINT,
+					MainUtil.client.getToastManager().add(new SystemToast(SystemToast.Type.PACK_LOAD_FAILURE,
 							TextInst.translatable("nbteditor.outdated.title"),
 							TextInst.translatable("nbteditor.outdated.desc")));
 				}
