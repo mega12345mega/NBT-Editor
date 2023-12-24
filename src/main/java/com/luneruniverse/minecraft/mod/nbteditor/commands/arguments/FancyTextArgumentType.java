@@ -12,6 +12,7 @@ import java.util.stream.StreamSupport;
 import com.google.gson.JsonElement;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -48,7 +49,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	
 	public static String stringifyFancyText(Text text, boolean jsonAllowed, boolean printErrors) {
 		if (jsonAllowed && ConfigScreen.isJsonText())
-			return Text.Serializer.toJson(text);
+			return Text.Serialization.toJsonString(text);
 		
 		StringBuilder output = new StringBuilder();
 		if (stringifyFancyText(text, output) && printErrors)
@@ -63,7 +64,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 		HoverEvent hover = text.getStyle().getHoverEvent();
 		if (click != null) {
 			numEvents++;
-			output.append("[" + click.getAction().getName() + "]");
+			output.append("[" + MVMisc.getClickEventActionName(click.getAction()) + "]");
 			output.append("{");
 			output.append(click.getValue().replace("\\", "\\\\").replace("{", "\\{").replace("}", "\\}"));
 			output.append("}");
@@ -71,7 +72,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 		}
 		if (hover != null) {
 			numEvents++;
-			output.append("[" + hover.getAction().getName() + "]");
+			output.append("[" + MVMisc.getHoverEventActionName(hover.getAction()) + "]");
 			if (hover.getAction() == HoverEvent.Action.SHOW_TEXT) {
 				StringBuilder buffer = new StringBuilder();
 				errors |= stringifyFancyText(hover.getValue(HoverEvent.Action.SHOW_TEXT), buffer);
@@ -88,7 +89,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 		StringBuilder color = new StringBuilder();
 		StringBuilder formats = new StringBuilder();
 		boolean needsReset = false;
-		for (Map.Entry<String, JsonElement> entry : Text.Serializer.toJsonTree(text).getAsJsonObject().entrySet()) {
+		for (Map.Entry<String, JsonElement> entry : Text.Serialization.toJsonTree(text).getAsJsonObject().entrySet()) {
 			switch (entry.getKey()) {
 				case "color" -> {
 					Formatting colorFormatting = Formatting.byName(text.getStyle().getColor().getName());
@@ -176,7 +177,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 				case "open_url", "run_command", "suggest_command", "change_page", "copy_to_clipboard" -> {
 					reader.expect('{');
 					String value = readUntilClosed(reader, '{', '}');
-					eventAdder = style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.byName(eventType), value));
+					eventAdder = style -> style.withClickEvent(new ClickEvent(MVMisc.getClickEventAction(eventType), value));
 				}
 				case "show_text" -> {
 					reader.expect('{');

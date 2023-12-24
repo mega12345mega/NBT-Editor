@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutionException;
@@ -28,16 +29,18 @@ public class Reflection {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
-	public static <T> T newInstance(Class<?> clazz, Class<?>[] parameters, Object... args) {
+	public static <T> T newInstance(Class<T> clazz, Class<?>[] parameters, Object... args) {
 		try {
-			return (T) clazz.getConstructor(parameters).newInstance(args);
+			Constructor<T> constructor = clazz.getDeclaredConstructor(parameters);
+			constructor.setAccessible(true);
+			return constructor.newInstance(args);
 		} catch (Exception e) {
 			throw new RuntimeException("Error creating new instance of class", e);
 		}
 	}
+	@SuppressWarnings("unchecked")
 	public static <T> T newInstance(String clazz, Class<?>[] parameters, Object... args) {
-		return newInstance(getClass(clazz), parameters, args);
+		return (T) newInstance(getClass(clazz), parameters, args);
 	}
 	
 	
@@ -83,7 +86,8 @@ public class Reflection {
 	public static class MethodInvoker {
 		private final Method method;
 		public MethodInvoker(Class<?> clazz, String method, MethodType type) throws Exception {
-			this.method = clazz.getMethod(method, type.parameterArray());
+			this.method = clazz.getDeclaredMethod(method, type.parameterArray());
+			this.method.setAccessible(true);
 			if (!type.returnType().isAssignableFrom(this.method.getReturnType())) {
 				throw new NoSuchMethodException("Mismatched return types! Expected " + type.returnType().getName() +
 						" but found " + this.method.getReturnType().getName());

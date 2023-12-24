@@ -59,7 +59,7 @@ public class ExtendableButtonWidget extends PressableWidget {
 	
 	public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		Version.newSwitch()
-				.range("1.20.0", null, () -> super.renderButton(MVDrawableHelper.getDrawContext(matrices), mouseX, mouseY, delta))
+				.range("1.20.0", null, () -> super.renderWidget(MVDrawableHelper.getDrawContext(matrices), mouseX, mouseY, delta))
 				.range("1.19.4", "1.19.4", () -> super_renderButton("method_48579", matrices, mouseX, mouseY, delta))
 				.range("1.19.3", "1.19.3", () -> super_renderButton("method_25359", matrices, mouseX, mouseY, delta))
 				.range(null, "1.19.2", () -> {
@@ -70,7 +70,7 @@ public class ExtendableButtonWidget extends PressableWidget {
 				.run();
 	}
 	@Override
-	protected final void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+	protected final void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
 		renderButton(MVDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
 	}
 	public final void method_48579(MatrixStack matrices, int mouseX, int mouseY, float delta) {

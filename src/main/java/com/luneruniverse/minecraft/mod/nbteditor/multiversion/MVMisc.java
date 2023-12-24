@@ -1,8 +1,11 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Optional;
@@ -37,31 +40,29 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SuspiciousStewItem;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
-import net.minecraft.resource.ResourceManager;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class MVMisc {
 	
-	private static final Reflection.MethodInvoker ResourceManager_getResource =
-			Reflection.getMethod(Version.<Class<?>>newSwitch()
-					.range("1.19.0", null, () -> ResourceFactory.class)
-					.range(null, "1.18.2", () -> ResourceManager.class)
-					.get(),
-					"method_14486",
+	private static final Reflection.MethodInvoker ResourceFactory_getResource =
+			Reflection.getMethod(ResourceFactory.class, "method_14486",
 					MethodType.methodType(Version.<Class<?>>newSwitch()
 							.range("1.19.0", null, () -> Optional.class)
-							.range(null, "1.18.2", () -> Reflection.getClass("net.minecraft.class_3298"))
+							.range(null, "1.18.2", () -> Resource.class)
 							.get(),
 							Identifier.class));
-	private static final Supplier<Reflection.MethodInvoker> Resource_getInputStream =
-			Reflection.getOptionalMethod(Reflection.getClass("net.minecraft.class_3298"), "method_14482", MethodType.methodType(InputStream.class));
 	@SuppressWarnings("unchecked")
 	public static Optional<InputStream> getResource(Identifier id) throws IOException {
-		Object output = ResourceManager_getResource.invoke(MinecraftClient.getInstance().getResourceManager(), id);
+		Object output = ResourceFactory_getResource.invoke(MinecraftClient.getInstance().getResourceManager(), id);
 		if (output instanceof Optional) {
 			if (((Optional<Resource>) output).isEmpty())
 				return Optional.empty();
@@ -69,7 +70,7 @@ public class MVMisc {
 		}
 		if (output == null)
 			return Optional.empty();
-		return Optional.of(Resource_getInputStream.get().invoke(output));
+		return Optional.of(((Resource) output).getInputStream());
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> ItemStackArgumentType_itemStack =
@@ -275,6 +276,97 @@ public class MVMisc {
 				.range("1.20.2", null, () -> MainUtil.client.getNetworkHandler().sendPacket(packet))
 				.range(null, "1.20.1", () -> ClientPlayNetworkHandler_sendPacket.get().invoke(MainUtil.client.getNetworkHandler(), packet))
 				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> NbtIo_read =
+			Reflection.getOptionalMethod(NbtIo.class, "method_10633", MethodType.methodType(NbtCompound.class, File.class));
+	private static final Supplier<Reflection.MethodInvoker> NbtIo_readCompressed =
+			Reflection.getOptionalMethod(NbtIo.class, "method_10629", MethodType.methodType(NbtCompound.class, InputStream.class));
+	private static final Supplier<Reflection.MethodInvoker> NbtIo_write =
+			Reflection.getOptionalMethod(NbtIo.class, "method_10630", MethodType.methodType(void.class, NbtCompound.class, File.class));
+	private static final Supplier<Reflection.MethodInvoker> NbtIo_writeCompressed =
+			Reflection.getOptionalMethod(NbtIo.class, "method_30614", MethodType.methodType(void.class, NbtCompound.class, File.class));
+	public static NbtCompound nbtInternal(Supplier<NbtCompound> newWrite, Supplier<NbtCompound> oldWrite) throws IOException {
+		try {
+			return Version.<NbtCompound>newSwitch()
+					.range("1.20.3", null, newWrite)
+					.range(null, "1.20.2", () -> {
+						try {
+							return oldWrite.get();
+						} catch (RuntimeException e) {
+							if (e.getCause() instanceof InvocationTargetException invocationException) {
+								if (invocationException.getCause() instanceof IOException ioException)
+									throw new UncheckedIOException(ioException);
+							}
+							throw e;
+						}
+					})
+					.get();
+		} catch (UncheckedIOException e) {
+			throw e.getCause();
+		}
+	}
+	public static void nbtInternal(Runnable newWrite, Runnable oldWrite) throws IOException {
+		nbtInternal(() -> {
+			newWrite.run();
+			return null;
+		}, () -> {
+			oldWrite.run();
+			return null;
+		});
+	}
+	public static NbtCompound readNbt(File file) throws IOException {
+		return nbtInternal(() -> {
+			try {
+				return NbtIo.read(file.toPath());
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}, () -> NbtIo_read.get().invoke(null, file));
+	}
+	public static NbtCompound readCompressedNbt(InputStream stream) throws IOException {
+		return nbtInternal(() -> {
+			try {
+				return NbtIo.readCompressed(stream, NbtSizeTracker.ofUnlimitedBytes());
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}, () -> NbtIo_readCompressed.get().invoke(null, stream));
+	}
+	public static void writeNbt(NbtCompound nbt, File file) throws IOException {
+		nbtInternal(() -> {
+			try {
+				NbtIo.write(nbt, file.toPath());
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}, () -> NbtIo_write.get().invoke(null, nbt, file));
+	}
+	public static void writeCompressedNbt(NbtCompound nbt, File file) throws IOException {
+		nbtInternal(() -> {
+			try {
+				NbtIo.writeCompressed(nbt, file.toPath());
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}, () -> NbtIo_writeCompressed.get().invoke(null, nbt, file));
+	}
+	
+	public static String getClickEventActionName(ClickEvent.Action action) {
+		// Should be #getName() until 1.20.2 and #asString() at and after 1.20.3
+		// But this seems to be equivalent (at least currently)
+		return action.name().toLowerCase();
+	}
+	public static String getHoverEventActionName(HoverEvent.Action<?> action) {
+		// Should be #getName() until 1.20.2 and #asString() at and after 1.20.3
+		// But this seems to be equivalent (at least currently)
+		String str = action.toString();
+		return str.substring("<action ".length(), str.length() - ">".length());
+	}
+	public static ClickEvent.Action getClickEventAction(String name) {
+		// Should be .byName() until 1.20.2 and doesn't have a clear replacement at and after 1.20.3
+		// But this seems to be equivalent (at least currently)
+		return ClickEvent.Action.valueOf(name.toUpperCase());
 	}
 	
 }

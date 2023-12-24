@@ -7,13 +7,13 @@ import java.nio.file.Files;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.ClickEvent;
 
@@ -40,7 +40,7 @@ public abstract class ClientChest {
 			return null;
 		}
 		
-		NbtList pageNbt = NbtIo.read(file).getList("items", NbtElement.COMPOUND_TYPE);
+		NbtList pageNbt = MVMisc.readNbt(file).getList("items", NbtElement.COMPOUND_TYPE);
 		ItemStack[] items = new ItemStack[54];
 		boolean empty = true;
 		int i = -1;
@@ -120,7 +120,7 @@ public abstract class ClientChest {
 			pageNbt.add((items[i] == null ? ItemStack.EMPTY : items[i]).writeNbt(new NbtCompound()));
 		nbt.put("items", pageNbt);
 		try {
-			MixinLink.throwHiddenException(() -> NbtIo.write(nbt, file));
+			MixinLink.throwHiddenException(() -> MVMisc.writeNbt(nbt, file));
 		} catch (Throwable e) {
 			throw new IOException("Error saving client chest page", e);
 		}

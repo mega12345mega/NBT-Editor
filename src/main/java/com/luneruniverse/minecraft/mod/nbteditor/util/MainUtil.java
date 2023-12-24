@@ -52,7 +52,7 @@ public class MainUtil {
 	// Same as ClientPlayerInteractionManager#clickCreativeSlot, but without a feature flag check
 	public static void clickCreativeStack(ItemStack item, int slot) {
 		if (client.interactionManager.getCurrentGameMode().isCreative())
-			client.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(slot, item));
+			MVMisc.sendPacket(new CreativeInventoryActionC2SPacket(slot, item));
 	}
 	
 	public static void saveItem(Hand hand, ItemStack item) {
@@ -233,7 +233,7 @@ public class MainUtil {
 		NbtCompound nbt = item.getSubNbt(ItemStack.DISPLAY_KEY);
         if (nbt != null && nbt.contains(ItemStack.NAME_KEY, NbtElement.STRING_TYPE)) {
             try {
-                MutableText text = Text.Serializer.fromJson(nbt.getString(ItemStack.NAME_KEY));
+                MutableText text = Text.Serialization.fromJson(nbt.getString(ItemStack.NAME_KEY));
                 if (text != null)
                     return text;
             } catch (JsonParseException text) {}
@@ -323,7 +323,7 @@ public class MainUtil {
 		DataInputStream resetableIn = new DataInputStream(new ByteArrayInputStream(data));
 		NbtCompound nbt;
 		try {
-			nbt = NbtIo.readCompressed(resetableIn);
+			nbt = MVMisc.readCompressedNbt(resetableIn);
 		} catch (ZipException e) {
 			resetableIn.reset();
 			nbt = NbtIo.readCompound(resetableIn);
