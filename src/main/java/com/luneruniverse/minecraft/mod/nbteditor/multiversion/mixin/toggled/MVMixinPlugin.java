@@ -13,6 +13,10 @@ public class MVMixinPlugin extends BasicMixinPlugin {
 				.range("1.19.3", null, () -> output.add("toggled.ScreenMixin"))
 				.range(null, "1.19.2", () -> {})
 				.run();
+		Version.newSwitch()
+				.range("1.20.2", null, () -> {})
+				.range(null, "1.20.1", () -> output.add("toggled.ElementMixin"))
+				.run();
 	}
 	
 }
