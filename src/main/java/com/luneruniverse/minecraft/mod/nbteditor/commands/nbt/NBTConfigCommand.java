@@ -15,7 +15,12 @@ public class NBTConfigCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "c";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.executes(context -> {
 			MainUtil.client.setScreen(new ConfigScreen(null));
 			return Command.SINGLE_SUCCESS;

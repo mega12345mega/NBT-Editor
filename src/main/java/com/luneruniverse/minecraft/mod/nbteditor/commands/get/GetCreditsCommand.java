@@ -14,7 +14,12 @@ public class GetCreditsCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return null;
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.executes(context -> {
 			context.getSource().sendFeedback(TextUtil.getLongTranslatableText("nbteditor.credits"));
 			return Command.SINGLE_SUCCESS;

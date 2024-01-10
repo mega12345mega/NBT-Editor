@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.SystemUtils;
 
@@ -110,6 +109,8 @@ public class ConfigScreen extends TickableSupportingScreen {
 		}
 	}
 	
+	public static record Alias(String original, String alias) {}
+	
 	private static EnchantLevelMax enchantLevelMax;
 	private static boolean enchantNumberTypeArabic;
 	private static double keyTextSize;
@@ -129,6 +130,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 	private static boolean noArmorRestriction;
 	private static boolean hideFormatButtons;
 	private static boolean specialNumbers;
+	private static List<Alias> aliases;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -138,7 +140,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		chatLimitExtended = false;
 		singleQuotesAllowed = false;
 		macScrollPatch = MinecraftClient.IS_SYSTEM_MAC;
-		scrollSpeed = 1;
+		scrollSpeed = 5;
 		airEditable = false;
 		jsonText = false;
 		shortcuts = new ArrayList<>();
@@ -149,6 +151,11 @@ public class ConfigScreen extends TickableSupportingScreen {
 		noArmorRestriction = false;
 		hideFormatButtons = false;
 		specialNumbers = true;
+		aliases = new ArrayList<>(List.of(
+				new Alias("nbteditor", "nbt"),
+				new Alias("clientchest", "chest"),
+				new Alias("clientchest", "storage"),
+				new Alias("itemfactory signature", "sign")));
 		
 		try {
 			// Many config options use the old names
@@ -165,7 +172,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 			scrollSpeed = settings.get("scrollSpeed").getAsDouble();
 			airEditable = settings.get("airEditable").getAsBoolean();
 			jsonText = settings.get("jsonText").getAsBoolean();
-			shortcuts = StreamSupport.stream(settings.get("shortcuts").getAsJsonArray().spliterator(), false)
+			shortcuts = settings.get("shortcuts").getAsJsonArray().asList().stream()
 					.map(cmd -> cmd.getAsString()).collect(Collectors.toList());
 			JsonPrimitive checkUpdatesLegacy = settings.get("checkUpdates").getAsJsonPrimitive();
 			checkUpdates = checkUpdatesLegacy.isBoolean() ?
@@ -177,6 +184,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 			noArmorRestriction = settings.get("noArmorRestriction").getAsBoolean();
 			hideFormatButtons = settings.get("hideFormatButtons").getAsBoolean();
 			specialNumbers = settings.get("specialNumbers").getAsBoolean();
+			aliases = settings.get("aliases").getAsJsonArray().asList().stream()
+					.map(alias -> new Alias(alias.getAsJsonObject().get("original").getAsString(),
+							alias.getAsJsonObject().get("alias").getAsString())).collect(Collectors.toList());
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -205,6 +215,12 @@ public class ConfigScreen extends TickableSupportingScreen {
 		settings.addProperty("noArmorRestriction", noArmorRestriction);
 		settings.addProperty("hideFormatButtons", hideFormatButtons);
 		settings.addProperty("specialNumbers", specialNumbers);
+		settings.add("aliases", aliases.stream().map(alias -> {
+			JsonObject obj = new JsonObject();
+			obj.addProperty("original", alias.original);
+			obj.addProperty("alias", alias.alias);
+			return obj;
+		}).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -276,6 +292,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 	}
 	public static boolean isSpecialNumbers() {
 		return specialNumbers;
+	}
+	public static List<Alias> getAliases() {
+		return aliases;
 	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
@@ -365,7 +384,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		// ---------- GUIs ----------
 		
 		guis.setConfigurable("scrollSpeed", new ConfigItem<>(TextInst.translatable("nbteditor.config.scroll_speed"),
-				ConfigValueSlider.forDouble(100, scrollSpeed, 1, 0.5, 2, 0.05, value -> TextInst.literal(String.format("%.2f", value)))
+				ConfigValueSlider.forDouble(100, scrollSpeed, 1, 0.5, 10, 0.05, value -> TextInst.literal(String.format("%.2f", value)))
 				.addValueListener(value -> scrollSpeed = value.getValidValue()))
 				.setTooltip("nbteditor.config.scroll_speed.desc"));
 		
@@ -399,6 +418,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 		
 		functional.setConfigurable("shortcuts", new ConfigButton(100, TextInst.translatable("nbteditor.config.shortcuts"),
 				btn -> client.setScreen(new ShortcutsScreen(this)), new MVTooltip("nbteditor.config.shortcuts.desc")));
+		
+		functional.setConfigurable("aliases", new ConfigButton(100, TextInst.translatable("nbteditor.config.aliases"),
+				btn -> client.setScreen(new AliasesScreen(this)), new MVTooltip("nbteditor.config.aliases.desc")));
 		
 		functional.setConfigurable("largeClientChest", new ConfigItem<>(TextInst.translatable("nbteditor.config.client_chest_size"),
 				new ConfigValueBoolean(largeClientChest, false, 100, TextInst.translatable("nbteditor.config.client_chest_size.large"), TextInst.translatable("nbteditor.config.client_chest_size.small"))

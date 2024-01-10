@@ -16,7 +16,12 @@ public class EnchantmentsCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "e";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.executes(context -> {
 			MainUtil.client.setScreen(new EnchantmentsScreen(ItemReference.getHeldItem()));
 			return Command.SINGLE_SUCCESS;

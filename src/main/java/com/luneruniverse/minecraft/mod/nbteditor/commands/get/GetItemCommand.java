@@ -21,7 +21,12 @@ public class GetItemCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "i";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		Command<FabricClientCommandSource> getItem = context -> {
 			int count = getDefaultArg(context, "count", 1, Integer.class);
 			ItemStack item = context.getArgument("item", ItemStackArgument.class).createStack(count, false);

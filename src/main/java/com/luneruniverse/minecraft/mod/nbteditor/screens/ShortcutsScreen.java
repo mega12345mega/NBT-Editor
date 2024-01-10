@@ -19,11 +19,12 @@ import net.minecraft.client.util.math.MatrixStack;
 
 public class ShortcutsScreen extends TickableSupportingScreen {
 	
-	private static final ConfigItem<ConfigValueText> SHORTCUT_ENTRY = new ConfigItem<>(TextInst.of(""), new ConfigValueText("", ""));
+	private static final ConfigItem<ConfigValueText> SHORTCUT_ENTRY = new ConfigItem<>(TextInst.of(""), new ConfigValueText(200, "", ""));
 	
 	private final Screen parent;
 	private final ConfigList config;
 	private ConfigPanel panel;
+	private boolean cancel;
 	
 	public ShortcutsScreen(Screen parent) {
 		super(TextInst.translatable("nbteditor.config.shortcuts"));
@@ -45,6 +46,10 @@ public class ShortcutsScreen extends TickableSupportingScreen {
 		panel = newPanel;
 		
 		this.addDrawableChild(MVMisc.newButton(this.width - 134, this.height - 36, 100, 20, ScreenTexts.DONE, btn -> close()));
+		this.addDrawableChild(MVMisc.newButton(this.width - 134 - 108, this.height - 36, 100, 20, ScreenTexts.CANCEL, btn -> {
+			cancel = true;
+			close();
+		}));
 	}
 	
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -59,6 +64,8 @@ public class ShortcutsScreen extends TickableSupportingScreen {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void removed() {
+		if (cancel)
+			return;
 		Set<String> newShortcuts = new LinkedHashSet<>();
 		for (ConfigPath entry : this.config.getConfigurables().values())
 			newShortcuts.add(((ConfigItem<ConfigValueText>) entry).getValue().getValidValue());

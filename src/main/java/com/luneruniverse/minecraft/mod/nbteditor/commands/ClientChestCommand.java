@@ -1,7 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands;
 
-import java.util.List;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.mojang.brigadier.Command;
@@ -21,12 +19,12 @@ public class ClientChestCommand extends ClientCommand {
 	}
 	
 	@Override
-	public List<String> getAliases() {
-		return List.of("chest", "storage");
+	public String getExtremeAlias() {
+		return "cc";
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.executes(context -> {
 			ClientChestScreen.show();
 			return Command.SINGLE_SUCCESS;

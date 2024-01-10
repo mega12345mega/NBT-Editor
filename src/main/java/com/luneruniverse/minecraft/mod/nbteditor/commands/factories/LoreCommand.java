@@ -31,7 +31,12 @@ public class LoreCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "l";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		Command<FabricClientCommandSource> add = context -> {
 			Text line = context.getArgument("text", Text.class);
 			int pos = -1;

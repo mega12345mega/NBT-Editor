@@ -21,7 +21,12 @@ public class NBTNewCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "n";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(argument("item", MVMisc.getItemStackArg()).executes(context -> {
 			ItemReference ref = ItemReference.getHeldAir();
 			ref.saveItem(context.getArgument("item", ItemStackArgument.class).createStack(1, true));

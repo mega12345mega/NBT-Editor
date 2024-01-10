@@ -31,7 +31,12 @@ public class GetHdbCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "h";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(literal("search").then(argument("query", StringArgumentType.greedyString()).executes(context -> {
 					HeadAPI.openSearchDatabase(context.getArgument("query", String.class));
 					return Command.SINGLE_SUCCESS;

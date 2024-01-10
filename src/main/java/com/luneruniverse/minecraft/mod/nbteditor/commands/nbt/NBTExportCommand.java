@@ -67,7 +67,12 @@ public class NBTExportCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "x";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(
 			literal("give").executes(context -> {
 				exportToClipboard("/give @p " + getItemToExportStr());

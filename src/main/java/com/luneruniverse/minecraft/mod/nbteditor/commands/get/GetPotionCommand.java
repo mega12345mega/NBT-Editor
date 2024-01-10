@@ -42,9 +42,14 @@ public class GetPotionCommand extends ClientCommand {
 		return "potion";
 	}
 	
+	@Override
+	public String getExtremeAlias() {
+		return "p";
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(argument("type", EnumArgumentType.options(PotionType.class)).then(argument("effects", EffectListArgumentType.effectList()).executes(context -> {
 			ItemStack item = new ItemStack(context.getArgument("type", PotionType.class).item, 1);
 			List<StatusEffectInstance> effects = new ArrayList<>(context.getArgument("effects", Collection.class));

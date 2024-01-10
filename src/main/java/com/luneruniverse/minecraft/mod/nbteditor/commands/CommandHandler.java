@@ -21,7 +21,7 @@ public class CommandHandler {
 	public static void registerCommands() {
 		MVMisc.registerCommands(dispatcher -> {
 			for (ClientCommand cmd : COMMANDS.values())
-				cmd.registerAll(dispatcher::register);
+				cmd.registerAll(dispatcher::register, cmd.getName());
 			
 			for (String shortcut : ConfigScreen.getShortcuts()) {
 				List<String> path = Arrays.asList(shortcut.split(" "));
@@ -33,7 +33,7 @@ public class CommandHandler {
 				cmd = cmd.getShortcut(path, 1);
 				if (cmd != null) {
 					LiteralArgumentBuilder<FabricClientCommandSource> builder = literal(path.get(path.size() - 1));
-					cmd.register(builder);
+					cmd.register(builder, shortcut);
 					dispatcher.register(builder);
 				}
 			}

@@ -28,6 +28,11 @@ public class GetCommand extends ClientCommandGroup {
 	}
 	
 	@Override
+	public String getExtremeAlias() {
+		return "g";
+	}
+	
+	@Override
 	public boolean allowShortcuts() {
 		return true;
 	}

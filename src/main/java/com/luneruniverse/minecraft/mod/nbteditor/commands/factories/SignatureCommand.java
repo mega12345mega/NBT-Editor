@@ -6,7 +6,6 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
@@ -46,12 +45,12 @@ public class SignatureCommand extends ClientCommand {
 	}
 	
 	@Override
-	public List<String> getAliases() {
-		return List.of("sign");
+	public String getExtremeAlias() {
+		return null;
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		Command<FabricClientCommandSource> addSignature = context -> {
 			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();

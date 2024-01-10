@@ -24,7 +24,12 @@ public class SignboardCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "s";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(literal("new").then(argument("sign", SignboardArgumentType.signboard()).executes(context -> {
 			ItemReference ref = ItemReference.getHeldAir();
 			ref.saveItem(new ItemStack(context.getArgument("sign", SignItem.class)));

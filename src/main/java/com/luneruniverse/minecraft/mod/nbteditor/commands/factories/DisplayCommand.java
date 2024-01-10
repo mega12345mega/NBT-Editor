@@ -25,13 +25,18 @@ public class DisplayCommand extends ClientCommandGroup {
 	}
 	
 	@Override
+	public String getExtremeAlias() {
+		return "d";
+	}
+	
+	@Override
 	public boolean allowShortcuts() {
 		return true;
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
-		super.register(builder);
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
+		super.register(builder, path);
 		builder.executes(context -> {
 			MainUtil.client.setScreen(new DisplayScreen(ItemReference.getHeldItem()));
 			return Command.SINGLE_SUCCESS;

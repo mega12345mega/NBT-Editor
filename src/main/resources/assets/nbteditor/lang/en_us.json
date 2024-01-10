@@ -208,7 +208,7 @@
 	"nbteditor.config.category.functional": "Functional",
 	"nbteditor.config.shortcuts": "Group Shortcuts",
 	"nbteditor.config.shortcuts.desc": "Create command shortcuts like calling\n/lore instead of /itemfactory display lore",
-	"nbteditor.config.shortcuts.example": "Example: \"get hdb\" creates the shortcut /hdb",
+	"nbteditor.config.shortcuts.example": "Example: \"get hdb\" creates the shortcut \"/hdb\"",
 	"nbteditor.config.enchant_level_max": "Max Enchant Level Display",
 	"nbteditor.config.enchant_level_max.desc": "Toggle showing the maximum enchantment\nlevel after the enchantment",
 	"nbteditor.config.enchant_level_max.never": "Never",
@@ -282,6 +282,11 @@
 	"nbteditor.config.special_numbers.desc": "Allow entering §6NaN§cd§r, §6Infinity§cf§r, §6-Infinity§cd§r, etc.\ninto the nbt editor\nThis is not consistent with /data (MC-200070)",
 	"nbteditor.config.special_numbers.enabled": "Enabled",
 	"nbteditor.config.special_numbers.disabled": "Disabled",
+	"nbteditor.config.aliases": "Aliases",
+	"nbteditor.config.aliases.desc": "Create command aliases like calling\n/if instead of /itemfactory",
+	"nbteditor.config.aliases.example": "Example: \"nbteditor export | x\" creates the alias \"/nbteditor x\"",
+	"nbteditor.config.aliases.extreme": "+ Extreme Aliases",
+	"nbteditor.config.aliases.extreme.desc": "Add the default \"extreme\" aliases,\nmost being a single character long\n§oFor the most dedicated NBT Editor users",
 	
 	
 	"nbteditor.configurable.list.move": "Move",

@@ -21,7 +21,12 @@ public class GetSkullCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "sk";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(argument("player", StringArgumentType.word()).executes(context -> {
 			ItemStack item = new ItemStack(Items.PLAYER_HEAD, 1);
 			NbtCompound nbt = item.getOrCreateNbt();
