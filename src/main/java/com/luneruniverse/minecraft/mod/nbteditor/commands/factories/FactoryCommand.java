@@ -26,6 +26,7 @@ public class FactoryCommand extends ClientCommandGroup {
 				new SignatureCommand(),
 				new SignboardCommand(),
 				new UnbindSkullCommand(),
+				new UnbreakableCommand(),
 				new UnstackableCommand())));
 	}
 	

@@ -157,6 +157,9 @@
 	"nbteditor.enchantments.level": "Level",
 	"nbteditor.enchantments.tip": "You can Ctrl+Click enchanted books onto items in supported inventories",
 	
+	"nbteditor.unbreakable.enabled": "§aItem toggled to §9unbreakable§a!",
+	"nbteditor.unbreakable.disabled": "§aItem toggled to §7breakable§a!",
+	
 	"nbteditor.unstackable.msg": "§aItem is now unstackable! [Hover for more info]",
 	"nbteditor.unstackable.hover_msg": "A random UUID was added.\nWhen cloning the item, make\nsure to re-run this command\nfor all the individual items.",
 	
