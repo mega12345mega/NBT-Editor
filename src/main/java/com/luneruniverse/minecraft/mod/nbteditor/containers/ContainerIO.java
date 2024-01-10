@@ -26,6 +26,10 @@ public abstract class ContainerIO {
 	public static final ContainerIO LECTERN = new SingleItemContainerIO(Target.BLOCK_ENTITY, "Book");
 	public static final ContainerIO ITEM_FRAME = new SingleItemContainerIO(Target.ENTITY, "Item");
 	public static final ContainerIO BUNDLE = new DynamicSizeContainerIO(Target.ITEM);
+	public static final ContainerIO CHISELED_BOOKSHELF = new ChiseledBookshelfContainerIO();
+	public static final ContainerIO SUSPICIOUS_SAND = new SingleItemContainerIO(Target.BLOCK_ENTITY, "item");
+	public static final ContainerIO SUSPICIOUS_GRAVEL = new SingleItemContainerIO(Target.BLOCK_ENTITY, "item");
+	public static final ContainerIO DECORATED_POT = new SingleItemContainerIO(Target.BLOCK_ENTITY, "item");
 	
 	private static final Map<Item, ContainerIO> CONTAINERS;
 	static {
@@ -62,6 +66,10 @@ public abstract class ContainerIO {
 		CONTAINERS.put(Items.ITEM_FRAME, ITEM_FRAME);
 		CONTAINERS.put(Items.GLOW_ITEM_FRAME, ITEM_FRAME);
 		CONTAINERS.put(Items.BUNDLE, BUNDLE);
+		CONTAINERS.put(Items.CHISELED_BOOKSHELF, CHISELED_BOOKSHELF);
+		CONTAINERS.put(Items.SUSPICIOUS_SAND, SUSPICIOUS_SAND);
+		CONTAINERS.put(Items.SUSPICIOUS_GRAVEL, SUSPICIOUS_GRAVEL);
+		CONTAINERS.put(Items.DECORATED_POT, DECORATED_POT);
 	}
 	public static void registerContainer(Item item, ContainerIO container) {
 		CONTAINERS.put(item, container);
