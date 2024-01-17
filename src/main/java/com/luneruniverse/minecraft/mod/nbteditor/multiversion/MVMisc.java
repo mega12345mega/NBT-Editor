@@ -243,7 +243,8 @@ public class MVMisc {
 			MethodType.methodType(Vector2ic.class, Screen.class, int.class, int.class, int.class, int.class));
 	public static Vector2ic getPosition(Object positioner, Screen screen, int x, int y, int width, int height) {
 		return Version.<Vector2ic>newSwitch()
-				.range("1.20.0", null, () -> ((TooltipPositioner) positioner).getPosition(screen.width, screen.height, x, y, width, height))
+				.range("1.20.0", null, () -> ((TooltipPositioner) positioner).getPosition(
+						MainUtil.client.getWindow().getScaledWidth(), MainUtil.client.getWindow().getScaledHeight(), x, y, width, height))
 				.range("1.19.3", "1.19.4", () -> TooltipPositioner_getPosition.get().invoke(positioner, screen, x, y, width, height))
 				.get();
 	}

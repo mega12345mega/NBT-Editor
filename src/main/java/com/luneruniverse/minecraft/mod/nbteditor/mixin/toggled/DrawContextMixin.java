@@ -31,8 +31,8 @@ public abstract class DrawContextMixin {
 		
 		int[] size = MixinLink.getTooltipSize(tooltip);
 		Vector2ic pos = MVMisc.getPosition(positioner, MainUtil.client.currentScreen, x, y, size[0], size[1]);
-		int screenWidth = MainUtil.client.currentScreen.width;
-		int screenHeight = MainUtil.client.currentScreen.height;
+		int screenWidth = MainUtil.client.getWindow().getScaledWidth();
+		int screenHeight = MainUtil.client.getWindow().getScaledHeight();
 		
 		MixinLink.renderTooltipFromComponents(getMatrices(), pos.x(), pos.y(), size[0], size[1], screenWidth, screenHeight);
 	}
