@@ -126,6 +126,8 @@
 	"nbteditor.hide_flags.misc": "Misc",
 	"nbteditor.hide_flags.dyed_color": "Dyed Armor Color",
 	
+	"nbteditor.item_size.uncompressed": "§6NBT Size: %s",
+	"nbteditor.item_size.compressed": "§6NBT Size (Compressed): %s",
 	"nbteditor.keybind.enchant": "§6§lCtrl + Click§r§6 to apply!",
 	"nbteditor.keybind.edit": "§6§lSpace§r§6 to edit!",
 	"nbteditor.keybind.container": "§6§lCtrl + Space§r§6 to open container!",
@@ -290,6 +292,19 @@
 	"nbteditor.config.aliases.example": "Example: \"nbteditor export | x\" creates the alias \"/nbteditor x\"",
 	"nbteditor.config.aliases.extreme": "+ Extreme Aliases",
 	"nbteditor.config.aliases.extreme.desc": "Add the default \"extreme\" aliases,\nmost being a single character long\n§oFor the most dedicated NBT Editor users",
+	"nbteditor.config.item_size": "Item Size",
+	"nbteditor.config.item_size.desc": "Display the item size in bytes, kb, etc.\non the tooltip",
+	"nbteditor.config.item_size.hidden": "Hidden",
+	"nbteditor.config.item_size.auto": "Auto",
+	"nbteditor.config.item_size.byte": "Byte",
+	"nbteditor.config.item_size.kilobyte": "Kilobyte",
+	"nbteditor.config.item_size.megabyte": "Megabyte",
+	"nbteditor.config.item_size.gigabyte": "Gigabyte",
+	"nbteditor.config.item_size.auto_compressed": "Auto (Compressed)",
+	"nbteditor.config.item_size.byte_compressed": "Byte (Compressed)",
+	"nbteditor.config.item_size.kilobyte_compressed": "Kilobyte (Compressed)",
+	"nbteditor.config.item_size.megabyte_compressed": "Megabyte (Compressed)",
+	"nbteditor.config.item_size.gigabyte_compressed": "Gigabyte (Compressed)",
 	
 	
 	"nbteditor.configurable.list.move": "Move",

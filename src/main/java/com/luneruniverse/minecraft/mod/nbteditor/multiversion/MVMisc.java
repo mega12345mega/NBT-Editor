@@ -1,8 +1,15 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
@@ -279,13 +286,13 @@ public class MVMisc {
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> NbtIo_read =
-			Reflection.getOptionalMethod(NbtIo.class, "method_10633", MethodType.methodType(NbtCompound.class, File.class));
+			Reflection.getOptionalMethod(NbtIo.class, "method_10627", MethodType.methodType(NbtCompound.class, DataInput.class));
 	private static final Supplier<Reflection.MethodInvoker> NbtIo_readCompressed =
 			Reflection.getOptionalMethod(NbtIo.class, "method_10629", MethodType.methodType(NbtCompound.class, InputStream.class));
 	private static final Supplier<Reflection.MethodInvoker> NbtIo_write =
-			Reflection.getOptionalMethod(NbtIo.class, "method_10630", MethodType.methodType(void.class, NbtCompound.class, File.class));
+			Reflection.getOptionalMethod(NbtIo.class, "method_10628", MethodType.methodType(void.class, NbtCompound.class, DataOutput.class));
 	private static final Supplier<Reflection.MethodInvoker> NbtIo_writeCompressed =
-			Reflection.getOptionalMethod(NbtIo.class, "method_30614", MethodType.methodType(void.class, NbtCompound.class, File.class));
+			Reflection.getOptionalMethod(NbtIo.class, "method_10634", MethodType.methodType(void.class, NbtCompound.class, OutputStream.class));
 	public static NbtCompound nbtInternal(Supplier<NbtCompound> newWrite, Supplier<NbtCompound> oldWrite) throws IOException {
 		try {
 			return Version.<NbtCompound>newSwitch()
@@ -315,14 +322,14 @@ public class MVMisc {
 			return null;
 		});
 	}
-	public static NbtCompound readNbt(File file) throws IOException {
+	public static NbtCompound readNbt(InputStream stream) throws IOException {
 		return nbtInternal(() -> {
 			try {
-				return NbtIo.read(file.toPath());
+				return NbtIo.readCompound(new DataInputStream(stream), NbtSizeTracker.ofUnlimitedBytes());
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			}
-		}, () -> NbtIo_read.get().invoke(null, file));
+		}, () -> NbtIo_read.get().invoke(null, new DataInputStream(stream)));
 	}
 	public static NbtCompound readCompressedNbt(InputStream stream) throws IOException {
 		return nbtInternal(() -> {
@@ -333,23 +340,43 @@ public class MVMisc {
 			}
 		}, () -> NbtIo_readCompressed.get().invoke(null, stream));
 	}
-	public static void writeNbt(NbtCompound nbt, File file) throws IOException {
+	public static void writeNbt(NbtCompound nbt, OutputStream stream) throws IOException {
 		nbtInternal(() -> {
 			try {
-				NbtIo.write(nbt, file.toPath());
+				NbtIo.write(nbt, new DataOutputStream(stream));
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			}
-		}, () -> NbtIo_write.get().invoke(null, nbt, file));
+		}, () -> NbtIo_write.get().invoke(null, nbt, new DataOutputStream(stream)));
+	}
+	public static void writeCompressedNbt(NbtCompound nbt, OutputStream stream) throws IOException {
+		nbtInternal(() -> {
+			try {
+				NbtIo.writeCompressed(nbt, stream);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}, () -> NbtIo_writeCompressed.get().invoke(null, nbt, stream));
+	}
+	public static NbtCompound readNbt(File file) throws IOException {
+		try (FileInputStream stream = new FileInputStream(file)) {
+			return readNbt(stream);
+		}
+	}
+	public static NbtCompound readCompressedNbt(File file) throws IOException {
+		try (FileInputStream stream = new FileInputStream(file)) {
+			return readCompressedNbt(stream);
+		}
+	}
+	public static void writeNbt(NbtCompound nbt, File file) throws IOException {
+		try (FileOutputStream stream = new FileOutputStream(file)) {
+			writeNbt(nbt, stream);
+		}
 	}
 	public static void writeCompressedNbt(NbtCompound nbt, File file) throws IOException {
-		nbtInternal(() -> {
-			try {
-				NbtIo.writeCompressed(nbt, file.toPath());
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
-		}, () -> NbtIo_writeCompressed.get().invoke(null, nbt, file));
+		try (FileOutputStream stream = new FileOutputStream(file)) {
+			writeCompressedNbt(nbt, stream);
+		}
 	}
 	
 	public static String getClickEventActionName(ClickEvent.Action action) {
