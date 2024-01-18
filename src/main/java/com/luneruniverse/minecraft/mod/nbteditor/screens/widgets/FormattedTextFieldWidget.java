@@ -394,10 +394,8 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		}
 		private void showCustomColor() {
 			Style initialStyle = getInitialCustomStyle();
-			OverlaySupportingScreen.setOverlayStatic(new StringInputWidget(
-					initialStyle.getColor() == null ? "#FFFFFF" : initialStyle.getColor().getHexCode(), str -> {
-				int rgb = Integer.parseInt(str.substring(1), 16);
-				
+			OverlaySupportingScreen.setOverlayStatic(new InputOverlay<>(new ColorSelectorWidget.ColorSelectorInput(
+					initialStyle.getColor() == null ? -1 : initialStyle.getColor().getRgb()), rgb -> {
 				int start = getSelStart();
 				int end = getSelEnd();
 				
@@ -423,7 +421,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				onEdit("", start, 0);
 				generateLines();
 				onChange.accept(text);
-			}, str -> str.matches("#[0-9a-fA-F]{6}"), widget -> OverlaySupportingScreen.setOverlayStatic(null)));
+			}, () -> OverlaySupportingScreen.setOverlayStatic(null)));
 		}
 		private void showEvents() {
 			Style initialStyle = getInitialCustomStyle();

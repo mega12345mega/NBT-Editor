@@ -207,6 +207,7 @@
 	"nbteditor.formatted_text.click_event_value": "Click Event Value",
 	"nbteditor.formatted_text.hover_event_value": "Hover Event Value",
 	"nbteditor.formatted_text.tip": "Use Ctrl+Shift+C for custom colors & Ctrl+Shift+E for events",
+	"nbteditor.color_selector.hue": "Hue: %d°",
 	
 	"nbteditor.config": "NBT Editor Config",
 	"nbteditor.config.category.mc": "Minecraft Tweaks",
