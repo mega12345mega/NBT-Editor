@@ -63,8 +63,9 @@ public class ButtonDropdownWidget extends GroupWidget {
 	private boolean open;
 	
 	public ButtonDropdownWidget(int x, int y, int btnWidth, int btnHeight, Text msg, MVTooltip tooltip, int gridWidth, int gridHeight) {
-		grid = new ButtonGrid(x, y + btnHeight, gridWidth, gridHeight, grid2 -> setOpen(false));
-		addWidget(MVMisc.newButton(x, y, btnWidth, btnHeight, msg, btn -> setOpen(!open), tooltip));
+		grid = new ButtonGrid(x, y + (msg == null ? 0 : btnHeight), gridWidth, gridHeight, grid2 -> setOpen(false));
+		if (msg != null)
+			addWidget(MVMisc.newButton(x, y, btnWidth, btnHeight, msg, btn -> setOpen(!open), tooltip));
 	}
 	public ButtonDropdownWidget(int x, int y, int btnWidth, int btnHeight, Text msg, int gridWidth, int gridHeight) {
 		this(x, y, btnWidth, btnHeight, msg, null, gridWidth, gridHeight);

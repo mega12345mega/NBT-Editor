@@ -191,6 +191,7 @@
 	"nbteditor.signboard.wax.disabled": "☐ Waxed",
 	"nbteditor.signboard.glowing.enabled": "☑ Glowing",
 	"nbteditor.signboard.glowing.disabled": "☐ Glowing",
+	"nbteditor.signboard.glowing.desc": "Use shift to open color selector",
 	"nbteditor.signboard.import.success": "§aSign updated to %s",
 	"nbteditor.signboard.import.fail": "§cSign is already %s",
 	
