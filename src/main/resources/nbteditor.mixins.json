@@ -29,7 +29,8 @@
     "KeyboardMixin",
     "AbstractParentElementMixin",
     "PlayerScreenHandler1Mixin",
-    "WrittenBookItemMixin"
+    "WrittenBookItemMixin",
+    "GameRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

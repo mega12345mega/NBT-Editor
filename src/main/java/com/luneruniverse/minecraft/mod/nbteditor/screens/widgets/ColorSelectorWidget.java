@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
@@ -55,13 +56,12 @@ public class ColorSelectorWidget extends GroupWidget {
 		
 	}
 	
-	private static final Identifier COLORS = new Identifier("nbteditor", "textures/colors.png");
 	private static final Identifier HUES = new Identifier("nbteditor", "textures/hues.png");
 	
 	private class ColorArea implements MVDrawable, MVElement {
 		@Override
 		public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-			MVDrawableHelper.drawTexture(matrices, COLORS, x, y, (hueValue % 20) * areaSize, (hueValue / 20) * areaSize, areaSize, areaSize, areaSize * 20, areaSize * 18);
+			MainUtil.fillShader(matrices, Shaders.POSITION_HSV, vertex -> vertex.light(hueValue), x, y, areaSize, areaSize);
 		}
 		@Override
 		public boolean mouseClicked(double mouseX, double mouseY, int button) {

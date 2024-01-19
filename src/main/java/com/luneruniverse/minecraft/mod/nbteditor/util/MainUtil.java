@@ -7,27 +7,39 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Proxy;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.zip.ZipException;
 
+import org.joml.Matrix4f;
+
 import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerInventory;
@@ -398,6 +410,51 @@ public class MainUtil {
 		} catch (NumberFormatException e) {
 			return null;
 		}
+	}
+	
+	
+	private static final Supplier<Reflection.MethodInvoker> BufferRenderer_draw =
+			Reflection.getOptionalMethod(BufferRenderer.class, "method_1309", MethodType.methodType(void.class, BufferBuilder.class));
+	public static void fillShader(MatrixStack matrices, MVShader shader, Consumer<VertexConsumer> data, int x, int y, int width, int height) {
+		int x1 = x;
+		int y1 = y;
+		int x2 = x + width;
+		int y2 = y + height;
+		
+		Matrix4f matrix = matrices.peek().getPositionMatrix();
+		VertexConsumer vertex = Version.<VertexConsumer>newSwitch()
+				.range("1.19.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().getBuffer(shader.layer()))
+				.range(null, "1.18.2", () -> {
+					RenderSystem.setShader(shader.shader());
+					return Tessellator.getInstance().getBuffer();
+				})
+				.get();
+		
+		vertex.vertex(matrix, x1, y1, 0).texture(0, 0);
+		data.accept(vertex);
+		vertex.next();
+		
+		vertex.vertex(matrix, x1, y2, 0).texture(0, 1);
+		data.accept(vertex);
+		vertex.next();
+		
+		vertex.vertex(matrix, x2, y2, 0).texture(1, 1);
+		data.accept(vertex);
+		vertex.next();
+		
+		vertex.vertex(matrix, x2, y1, 0).texture(1, 0);
+		data.accept(vertex);
+		vertex.next();
+		
+		RenderSystem.disableDepthTest();
+		Version.newSwitch()
+				.range("1.19.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().draw())
+				.range(null, "1.18.2", () -> {
+					((BufferBuilder) vertex).end();
+					BufferRenderer_draw.get().invoke(null, vertex);
+				})
+				.run();
+		RenderSystem.enableDepthTest();
 	}
 	
 }

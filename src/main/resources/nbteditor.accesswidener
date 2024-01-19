@@ -26,5 +26,8 @@ accessible field net/minecraft/text/Style obfuscated Ljava/lang/Boolean;
 
 extendable method net/minecraft/client/gui/widget/ClickableWidget render (Lnet/minecraft/client/gui/DrawContext;IIF)V
 
+accessible class net/minecraft/client/render/RenderLayer$MultiPhaseParameters
+accessible class net/minecraft/client/render/RenderPhase$ShaderProgram
+
 # Private in older versions
 accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;
