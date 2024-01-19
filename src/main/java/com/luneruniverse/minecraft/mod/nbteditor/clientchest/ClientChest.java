@@ -1,9 +1,18 @@
 package com.luneruniverse.minecraft.mod.nbteditor.clientchest;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
@@ -20,6 +29,57 @@ import net.minecraft.text.ClickEvent;
 public abstract class ClientChest {
 	
 	protected static final File CLIENT_CHEST_FOLDER = new File(NBTEditorClient.SETTINGS_FOLDER, "client_chest");
+	private static final File PAGE_NAMES = new File(CLIENT_CHEST_FOLDER, "page_names.json");
+	
+	private final Map<String, Integer> nameToPage;
+	private final Map<Integer, String> pageToName;
+	
+	@SuppressWarnings("serial")
+	public ClientChest() {
+		if (PAGE_NAMES.exists()) {
+			try (FileReader reader = new FileReader(PAGE_NAMES, Charset.forName("UTF-8"))) {
+				nameToPage = new Gson().fromJson(reader, new TypeToken<Map<String, Integer>>() {}.getType());
+			} catch (Exception e) {
+				throw new RuntimeException("Unable to read page names!", e);
+			}
+			pageToName = new HashMap<>();
+			nameToPage.forEach((name, page) -> pageToName.put(page, name));
+		} else {
+			nameToPage = new HashMap<>();
+			pageToName = new HashMap<>();
+		}
+	}
+	
+	public Integer getPageFromName(String name) {
+		Integer page = nameToPage.get(name);
+		if (page != null && page >= getPageCount())
+			return null;
+		return page;
+	}
+	public String getNameFromPage(int page) {
+		if (page >= getPageCount())
+			return "";
+		return pageToName.getOrDefault(page, "");
+	}
+	public Set<String> getAllPageNames() {
+		return nameToPage.entrySet().stream().filter(entry -> entry.getValue() < getPageCount())
+				.map(Map.Entry::getKey).collect(Collectors.toUnmodifiableSet());
+	}
+	@SuppressWarnings("serial")
+	public void setNameOfPage(int page, String name) throws IOException {
+		if (name == null || name.isEmpty()) {
+			nameToPage.remove(pageToName.remove(page));
+		} else {
+			nameToPage.remove(pageToName.get(page));
+			Integer oldPage = nameToPage.put(name, page);
+			if (oldPage != null && oldPage != page)
+				pageToName.remove(oldPage);
+			pageToName.put(page, name);
+		}
+		try (FileWriter writer = new FileWriter(PAGE_NAMES, Charset.forName("UTF-8"))) {
+			new Gson().toJson(nameToPage, new TypeToken<Map<Integer, String>>() {}.getType(), writer);
+		}
+	}
 	
 	public void loadAync() {
 		Thread loader = new Thread(() -> {
@@ -129,6 +189,18 @@ public abstract class ClientChest {
 	protected abstract void cachePage(int page, ItemStack[] items);
 	protected abstract void cacheEmptyPage(int page);
 	
-	public abstract int[] getNearestItems(int page);
+	public int[] getNearestPOIs(int page) {
+		int[] output = getNearestItems(page);
+		for (int namedPage : pageToName.keySet()) {
+			if (namedPage >= getPageCount())
+				continue;
+			if (namedPage < page && namedPage > output[0])
+				output[0] = namedPage;
+			if (namedPage > page && (namedPage < output[1] || output[1] == -1))
+				output[1] = namedPage;
+		}
+		return output;
+	}
+	protected abstract int[] getNearestItems(int page);
 	
 }

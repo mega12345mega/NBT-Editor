@@ -77,6 +77,8 @@
 	"nbteditor.client_chest.slots.unlock": "Unlock Slots",
 	"nbteditor.client_chest.reload_page": "Reload Page",
 	"nbteditor.client_chest.clear_page": "Clear Page",
+	"nbteditor.client_chest.page_name": "Page Name",
+	"nbteditor.client_chest.name_not_found": "There isn't any page with that name!",
 	
 	"nbteditor.client_chest.clear_page.title": "Are you sure?",
 	"nbteditor.client_chest.clear_page.desc": "This will permanently delete all 54 items in this page!",
