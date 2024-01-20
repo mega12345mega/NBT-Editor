@@ -83,7 +83,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 		super.init();
 		x += 87 / 2;
 		
-		nameField = new NamedTextFieldWidget(textRenderer, this.x - 87, this.y, 83, 16, TextInst.of("")) {
+		nameField = new NamedTextFieldWidget(this.x - 87, this.y, 83, 16) {
 			@Override
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				boolean output = super.mouseClicked(mouseX, mouseY, button);

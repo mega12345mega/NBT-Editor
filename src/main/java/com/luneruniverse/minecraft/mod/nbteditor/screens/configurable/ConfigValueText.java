@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 public class ConfigValueText extends NamedTextFieldWidget implements ConfigValue<String, ConfigValueText> {
 	
@@ -14,7 +13,7 @@ public class ConfigValueText extends NamedTextFieldWidget implements ConfigValue
 	private final List<ConfigValueListener<ConfigValueText>> onChanged;
 	
 	public ConfigValueText(int width, String value, String defaultValue) {
-		super(MainUtil.client.textRenderer, 0, 0, width, 20, TextInst.of(value == null ? "" : value));
+		super(0, 0, width, 20);
 		setMaxLength(Integer.MAX_VALUE);
 		name(TextInst.of(defaultValue));
 		setText(value == null ? "" : value);

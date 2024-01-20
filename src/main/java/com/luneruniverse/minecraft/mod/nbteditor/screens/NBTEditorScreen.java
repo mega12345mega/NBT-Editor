@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.integrations.NBTAutocompleteIntegration;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
@@ -31,8 +32,10 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.client.gui.screen.ConfirmScreen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -182,7 +185,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		
 		
 		
-		type = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8 + 32, 208, 16, TextInst.of("")).name(TextInst.translatable("nbteditor.nbt.identifier"));
+		type = new NamedTextFieldWidget(16 + (32 + 8) * 2, 16 + 8 + 32, 208, 16).name(TextInst.translatable("nbteditor.nbt.identifier"));
 		type.setMaxLength(Integer.MAX_VALUE);
 		type.setText(MVRegistry.ITEM.getId(item.getItem()).toString());
 		type.setChangedListener(str -> {
@@ -206,7 +209,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		});
 		this.addDrawableChild(type);
 		
-		count = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32, 72, 16, TextInst.of("")).name(TextInst.translatable("nbteditor.nbt.count"));
+		count = new NamedTextFieldWidget(16, 16 + 8 + 32, 72, 16).name(TextInst.translatable("nbteditor.nbt.count"));
 		count.setMaxLength(Integer.MAX_VALUE);
 		count.setText((ConfigScreen.isAirEditable() ? Math.max(1, item.getCount()) : item.getCount()) + "");
 		count.setChangedListener(str -> {
@@ -218,7 +221,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		count.setTextPredicate(MainUtil.intPredicate(1, Integer.MAX_VALUE, true));
 		this.addDrawableChild(count);
 		
-		path = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + 16 + 8, 288, 16, TextInst.translatable("nbteditor.nbt.path")).name(TextInst.translatable("nbteditor.nbt.path"));
+		path = new NamedTextFieldWidget(16, 16 + 8 + 32 + 16 + 8, 288, 16).name(TextInst.translatable("nbteditor.nbt.path"));
 		path.setMaxLength(Integer.MAX_VALUE);
 		path.setText(realPath.toString());
 		path.setChangedListener(str -> {
@@ -238,7 +241,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		});
 		this.addDrawableChild(path);
 		
-		value = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16, TextInst.translatable("nbteditor.nbt.value")).name(TextInst.translatable("nbteditor.nbt.value"));
+		value = new NamedTextFieldWidget(16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16).name(TextInst.translatable("nbteditor.nbt.value"));
 		value.setRenderTextProvider((str, index) -> {
 			return TextUtil.substring(NbtFormatter.FORMATTER.formatSafely(value.getText()).text(), index, index + str.length()).asOrderedText();
 		});
@@ -369,13 +372,21 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			selectedValue = null;
 			value.setText("");
 			value.setEditable(false);
-			path.setText(realPath.toString());
+			path.text = realPath.toString();
+			path.setSelectionStart(path.getText().length());
+			path.setSelectionEnd(path.getText().length());
 			genEditor();
 		} else {
 			selectedValue = key;
 			value.setText(key.getValueText());
 			value.setEditable(true);
 		}
+	}
+	
+	@Override
+	protected void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		if (NBTAutocompleteIntegration.INSTANCE.isEmpty())
+			renderTip(matrices, "nbteditor.nbt_ac.tip");
 	}
 	
 	@Override
@@ -538,7 +549,11 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	
 	
 	public void getKey(String defaultValue, Consumer<String> keyConsumer) {
-		new StringInputScreen(this, keyConsumer, str -> !str.isEmpty()).show(defaultValue);
+		new StringInputScreen(this, keyConsumer, str -> !str.isEmpty())
+				.suggest(str -> NBTAutocompleteIntegration.INSTANCE
+						.map(ac -> ac.getSuggestions(item, realPath, str, null))
+						.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture()))
+				.show(defaultValue);
 	}
 	public void getKey(Consumer<String> keyConsumer) {
 		getKey(null, keyConsumer);

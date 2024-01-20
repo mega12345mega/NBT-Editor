@@ -53,9 +53,9 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		public FindAndReplaceWidget() {
 			super(MainUtil.client.getWindow().getScaledWidth() / 2 - 100,
 					MainUtil.client.getWindow().getScaledHeight() / 2 - 30, 200);
-			find = addWidget(new NamedTextFieldWidget(textRenderer, 0, 0, 176, 16, TextInst.of(""))
+			find = addWidget(new NamedTextFieldWidget(0, 0, 176, 16)
 					.name(TextInst.translatable("nbteditor.multi_line_text.find")));
-			replace = addWidget(new NamedTextFieldWidget(textRenderer, 0, 20, 200, 16, TextInst.of(""))
+			replace = addWidget(new NamedTextFieldWidget(0, 20, 200, 16)
 					.name(TextInst.translatable("nbteditor.multi_line_text.replace")));
 			regexBtn = addWidget(MVMisc.newButton(180, -2, 20, 20,
 					TextInst.translatable("nbteditor.multi_line_text.regex." + (regex ? "on" : "off")), btn -> {

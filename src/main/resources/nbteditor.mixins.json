@@ -30,7 +30,8 @@
     "AbstractParentElementMixin",
     "PlayerScreenHandler1Mixin",
     "WrittenBookItemMixin",
-    "GameRendererMixin"
+    "GameRendererMixin",
+    "ChatInputSuggestorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

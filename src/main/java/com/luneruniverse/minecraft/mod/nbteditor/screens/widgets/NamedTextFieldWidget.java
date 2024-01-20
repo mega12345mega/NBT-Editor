@@ -3,9 +3,10 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.TextFieldWidgetMixin;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -23,14 +24,12 @@ public class NamedTextFieldWidget extends TextFieldWidget implements Tickable {
 	protected Text name;
 	protected boolean valid;
 	
-	public NamedTextFieldWidget(TextRenderer textRenderer, int x, int y, int width, int height, Text text) {
-		super(textRenderer, x, y, width, height, text);
+	public NamedTextFieldWidget(int x, int y, int width, int height, TextFieldWidget copyFrom) {
+		super(MainUtil.client.textRenderer, x, y, width, height, copyFrom, TextInst.of(""));
 		valid = true;
 	}
-	
-	public NamedTextFieldWidget(TextRenderer textRenderer, int x, int y, int width, int height, TextFieldWidget copyFrom, Text text) {
-		super(textRenderer, x, y, width, height, copyFrom, text);
-		valid = true;
+	public NamedTextFieldWidget(int x, int y, int width, int height) {
+		this(x, y, width, height, null);
 	}
 	
 	public NamedTextFieldWidget name(Text name) {
@@ -48,8 +47,8 @@ public class NamedTextFieldWidget extends TextFieldWidget implements Tickable {
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		if (name != null)
-			this.setSuggestion(this.getText().isEmpty() ? name.getString() : null);
+		if (name != null && shouldShowName())
+			this.setSuggestion(text.isEmpty() ? name.getString() : null);
 		
 		try {
 			matrix = MVMisc.copyMatrix(MVMisc.getPositionMatrix(matrices.peek()));
@@ -64,6 +63,10 @@ public class NamedTextFieldWidget extends TextFieldWidget implements Tickable {
 	@Override
 	public final void render(DrawContext context, int mouseX, int mouseY, float delta) {
 		render(MVDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
+	}
+	
+	protected boolean shouldShowName() {
+		return true;
 	}
 	
 }

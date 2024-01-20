@@ -30,7 +30,6 @@ import tsp.headdb.ported.HeadAPI;
 
 public class NBTEditorClient implements ClientModInitializer {
 	
-	public static boolean CLIENT_LOADED = false;
 	public static final File SETTINGS_FOLDER = new File("nbteditor");
 	public static ClientChest CLIENT_CHEST;
 	

@@ -20,6 +20,9 @@ repositories {
 	maven {
 		url = "https://maven.terraformersmc.com/releases"
 	}
+	maven {
+		url = "https://cursemaven.com"
+	}
 }
 
 loom {
@@ -41,6 +44,7 @@ dependencies {
 	// modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
 	
 	modImplementation "com.terraformersmc:modmenu:9.0.0"
+	modImplementation "curse.maven:nbt-autocomplete-813557:4945781"
 }
 
 processResources {

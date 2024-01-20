@@ -214,13 +214,13 @@ public class BookScreen extends ItemEditorScreen {
 		group = new GroupWidget();
 		addDrawableChild(group);
 		
-		title = group.addWidget(new NamedTextFieldWidget(textRenderer, 16, 64 + 2, 100, 16, TextInst.of(""))
+		title = group.addWidget(new NamedTextFieldWidget(16, 64 + 2, 100, 16)
 				.name(TextInst.translatable("nbteditor.book.title")));
 		title.setMaxLength(32);
 		title.setText(getBookTitle());
 		title.setChangedListener(this::setBookTitle);
 		
-		author = group.addWidget(new NamedTextFieldWidget(textRenderer, 16 + 108, 64 + 2, 100, 16, TextInst.of(""))
+		author = group.addWidget(new NamedTextFieldWidget(16 + 108, 64 + 2, 100, 16)
 				.name(TextInst.translatable("nbteditor.book.author")));
 		author.setMaxLength(Integer.MAX_VALUE);
 		author.setText(getAuthor());

@@ -22,7 +22,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -127,12 +126,10 @@ public class FormattedTextFieldWidget extends GroupWidget {
 						HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, hoverEvent)
 						.result().orElseThrow().getAsJsonObject().get("contents")));
 				
-				TextRenderer textRenderer = MainUtil.client.textRenderer;
-				
 				clickActionDropdown = new ConfigValueDropdownEnum<>(ClickAction.get(clickAction), ClickAction.NONE, ClickAction.class);
 				clickActionDropdown.setWidth(150);
 				clickActionField = addElement(TranslatedGroupWidget.forWidget(clickActionDropdown, 0, 0, 0));
-				clickValueField = addWidget(new NamedTextFieldWidget(textRenderer, 0, 0, 150, 16, TextInst.of("")))
+				clickValueField = addWidget(new NamedTextFieldWidget(0, 0, 150, 16))
 						.name(TextInst.translatable("nbteditor.formatted_text.click_event_value"));
 				clickValueField.setMaxLength(Integer.MAX_VALUE);
 				clickValueField.setText(clickValue);
@@ -141,7 +138,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				hoverActionDropdown.setWidth(150);
 				hoverActionDropdown.addValueListener(value -> updateOk());
 				hoverActionField = addElement(TranslatedGroupWidget.forWidget(hoverActionDropdown, 0, 0, 0));
-				hoverValueField = addWidget(new NamedTextFieldWidget(textRenderer, 0, 0, 150, 16, TextInst.of("")))
+				hoverValueField = addWidget(new NamedTextFieldWidget(0, 0, 150, 16))
 						.name(TextInst.translatable("nbteditor.formatted_text.hover_event_value"));
 				hoverValueField.setMaxLength(Integer.MAX_VALUE);
 				hoverValueField.setText(hoverValue);

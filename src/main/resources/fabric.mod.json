@@ -43,6 +43,9 @@
     "minecraft": ">=1.17-",
     "java": ">=16"
   },
+  "suggests": {
+    "nbt_ac": ">=1.1"
+  },
   
   "custom": {
     "modmenu": {

@@ -1,6 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.util;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.lwjgl.glfw.GLFW;
@@ -8,11 +10,12 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.TickableSupportingScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.SuggestingTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.brigadier.suggestion.Suggestions;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 
 public class StringInputScreen extends TickableSupportingScreen {
@@ -20,7 +23,8 @@ public class StringInputScreen extends TickableSupportingScreen {
 	private final Screen parent;
 	private final Consumer<String> valueConsumer;
 	private final Predicate<String> valueValidator;
-	private TextFieldWidget value;
+	private Function<String, CompletableFuture<Suggestions>> suggestions;
+	private SuggestingTextFieldWidget value;
 	private ButtonWidget ok;
 	private String defaultValue;
 	
@@ -30,6 +34,13 @@ public class StringInputScreen extends TickableSupportingScreen {
 		this.parent = screen;
 		this.valueConsumer = valueConsumer;
 		this.valueValidator = valueValidator;
+	}
+	
+	public StringInputScreen suggest(Function<String, CompletableFuture<Suggestions>> suggestions) {
+		this.suggestions = suggestions;
+		if (value != null)
+			value.suggest(suggestions);
+		return this;
 	}
 	
 	public void show(String defaultValue) {
@@ -47,9 +58,10 @@ public class StringInputScreen extends TickableSupportingScreen {
 		this.clearChildren();
 		
 		String prevValue = value == null ? (defaultValue == null ? "" : defaultValue) : value.getText();
-		value = new TextFieldWidget(textRenderer, width / 2 - 104, height / 2 - 20, 208, 16, TextInst.of(""));
+		value = new SuggestingTextFieldWidget(this, width / 2 - 104, height / 2 - 20, 208, 16);
 		value.setMaxLength(Integer.MAX_VALUE);
 		value.setText(prevValue);
+		value.suggest(suggestions);
 		this.addSelectableChild(value);
 		setInitialFocus(value);
 		
