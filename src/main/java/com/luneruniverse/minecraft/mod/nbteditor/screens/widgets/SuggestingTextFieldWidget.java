@@ -2,8 +2,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
 import java.lang.invoke.MethodType;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
@@ -21,12 +21,13 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements MVElement {
 	
 	private final ChatInputSuggestor suggestor;
-	private Function<String, CompletableFuture<Suggestions>> suggestions;
+	private BiFunction<String, Integer, CompletableFuture<Suggestions>> suggestions;
 	
 	public SuggestingTextFieldWidget(Screen screen, int x, int y, int width, int height, TextFieldWidget copyFrom) {
 		super(x, y, width, height, copyFrom);
@@ -42,7 +43,7 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 					if (suggestions == null)
 						this.pendingSuggestions = new SuggestionsBuilder("", 0).buildFuture();
 					else
-						this.pendingSuggestions = suggestions.apply(SuggestingTextFieldWidget.this.text);
+						this.pendingSuggestions = suggestions.apply(SuggestingTextFieldWidget.this.text, SuggestingTextFieldWidget.this.getCursor());
 					this.pendingSuggestions.thenRun(() -> {
 						if (!this.pendingSuggestions.isDone())
 							return;
@@ -76,7 +77,13 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 		});
 	}
 	
-	public SuggestingTextFieldWidget suggest(Function<String, CompletableFuture<Suggestions>> suggestions) {
+	@Override
+	public SuggestingTextFieldWidget name(Text name) {
+		super.name(name);
+		return this;
+	}
+	
+	public SuggestingTextFieldWidget suggest(BiFunction<String, Integer, CompletableFuture<Suggestions>> suggestions) {
 		this.suggestions = suggestions;
 		suggestor.refresh();
 		return this;

@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.integrations;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -32,17 +33,30 @@ public class NBTAutocompleteIntegration extends Integration {
 		return "nbt_ac";
 	}
 	
-	public CompletableFuture<Suggestions> getSuggestions(ItemStack item, List<String> path, String key, String value) {
+	public CompletableFuture<Suggestions> getSuggestions(ItemStack item, List<String> path, String key, String value, int cursor, Collection<String> otherTags) {
+		if (value != null && otherTags != null)
+			throw new IllegalArgumentException("Both value and otherTags can't be non-null at the same time!");
+		
+		boolean nextTagAllowed;
+		if (value == null) {
+			key = key.substring(0, cursor);
+			nextTagAllowed = false;
+		} else {
+			nextTagAllowed = (cursor < value.length());
+			value = value.substring(0, cursor);
+		}
+		
 		if (key.contains(":") || key.contains("{") || key.contains("["))
 			return new SuggestionsBuilder("", 0).buildFuture();
 		
-		StringBuilder pathBuilder = new StringBuilder("{");
+		StringBuilder pathBuilder = new StringBuilder();
 		NbtElement nbt = item.getNbt();
 		if (nbt != null) {
 			for (String piece : path) {
 				if (nbt instanceof NbtCompound compound) {
+					pathBuilder.append('{');
 					pathBuilder.append(piece);
-					pathBuilder.append(":{");
+					pathBuilder.append(':');
 					nbt = compound.get(piece);
 				} else if (nbt instanceof NbtList list) {
 					pathBuilder.append('[');
@@ -51,7 +65,9 @@ public class NBTAutocompleteIntegration extends Integration {
 					return new SuggestionsBuilder("", 0).buildFuture();
 			}
 		}
-		if (!(nbt instanceof NbtCompound))
+		if (nbt instanceof NbtCompound)
+			pathBuilder.append('{');
+		else
 			return new SuggestionsBuilder("", 0).buildFuture();
 		int fieldStart = pathBuilder.length();
 		pathBuilder.append(key);
@@ -60,18 +76,30 @@ public class NBTAutocompleteIntegration extends Integration {
 			fieldStart = pathBuilder.length();
 			pathBuilder.append(value);
 		}
-		final int fieldStartFinal = fieldStart;
 		String pathStr = pathBuilder.toString();
 		
 		String suggestionId = "item/" + MVRegistry.ITEM.getId(item.getItem());
 		SuggestionsBuilder builder = new SuggestionsBuilder(pathStr, 0);
+		final int fieldStartFinal = fieldStart;
+		final String valueFinal = value;
 		return NbtSuggestionManager.loadFromName(suggestionId, pathStr, builder, false).thenApply(suggestions -> {
-			List<Suggestion> movedSuggestions = suggestions.getList().stream()
-					.filter(suggestion -> value == null && !suggestion.getText().contains(":"))
-					.map(suggestion -> new Suggestion(shiftRange(suggestion.getRange(), -fieldStartFinal), suggestion.getText()))
+			List<Suggestion> shiftedSuggestions = suggestions.getList().stream()
+					.filter(suggestion ->
+							!suggestion.getText().isEmpty() &&
+							!(valueFinal == null && suggestion.getText().contains(":")) &&
+							!(!nextTagAllowed && (suggestion.getText().contains(",") || suggestion.getText().contains("}"))) &&
+							!(otherTags != null && otherTags.contains(suggestion.getText())))
+					.map(suggestion -> {
+						Suggestion shiftedSuggestion = new Suggestion(shiftRange(suggestion.getRange(), -fieldStartFinal), suggestion.getText());
+						NbtSuggestionManager.subtextMap.put(shiftedSuggestion, NbtSuggestionManager.subtextMap.remove(suggestion));
+						return shiftedSuggestion;
+					})
 					.collect(Collectors.toList());
-			return new Suggestions(shiftRange(suggestions.getRange(), -fieldStartFinal), movedSuggestions);
+			return new Suggestions(shiftRange(suggestions.getRange(), -fieldStartFinal), shiftedSuggestions);
 		});
+	}
+	public CompletableFuture<Suggestions> getSuggestions(ItemStack item, List<String> path, String key, String value, int cursor) {
+		return getSuggestions(item, path, key, value, cursor, null);
 	}
 	
 }

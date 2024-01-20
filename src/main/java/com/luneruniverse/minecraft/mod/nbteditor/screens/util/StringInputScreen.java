@@ -1,8 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.util;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.lwjgl.glfw.GLFW;
@@ -23,7 +23,7 @@ public class StringInputScreen extends TickableSupportingScreen {
 	private final Screen parent;
 	private final Consumer<String> valueConsumer;
 	private final Predicate<String> valueValidator;
-	private Function<String, CompletableFuture<Suggestions>> suggestions;
+	private BiFunction<String, Integer, CompletableFuture<Suggestions>> suggestions;
 	private SuggestingTextFieldWidget value;
 	private ButtonWidget ok;
 	private String defaultValue;
@@ -36,7 +36,7 @@ public class StringInputScreen extends TickableSupportingScreen {
 		this.valueValidator = valueValidator;
 	}
 	
-	public StringInputScreen suggest(Function<String, CompletableFuture<Suggestions>> suggestions) {
+	public StringInputScreen suggest(BiFunction<String, Integer, CompletableFuture<Suggestions>> suggestions) {
 		this.suggestions = suggestions;
 		if (value != null)
 			value.suggest(suggestions);
