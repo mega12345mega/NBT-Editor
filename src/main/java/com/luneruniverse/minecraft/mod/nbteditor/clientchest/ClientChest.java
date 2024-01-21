@@ -65,6 +65,10 @@ public abstract class ClientChest {
 		return nameToPage.entrySet().stream().filter(entry -> entry.getValue() < getPageCount())
 				.map(Map.Entry::getKey).collect(Collectors.toUnmodifiableSet());
 	}
+	public boolean isNameUsedByOther(String name, int page) {
+		Integer matchingPage = getPageFromName(name);
+		return matchingPage != null && matchingPage != page;
+	}
 	@SuppressWarnings("serial")
 	public void setNameOfPage(int page, String name) throws IOException {
 		if (name == null || name.isEmpty()) {

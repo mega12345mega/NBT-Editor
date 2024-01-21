@@ -64,7 +64,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 	private boolean saved;
 	
 	private boolean navigationClicked;
-	private TextFieldWidget nameField;
+	private NamedTextFieldWidget nameField;
 	private ButtonWidget prevPage;
 	private TextFieldWidget pageField;
 	private ButtonWidget nextPage;
@@ -91,14 +91,33 @@ public class ClientChestScreen extends ClientHandledScreen {
 					navigationClicked = true;
 				return output;
 			}
+			@Override
+			public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+				if (keyCode == GLFW.GLFW_KEY_ENTER && !nameField.isValid()) {
+					nameField.setValid(true);
+					try {
+						NBTEditorClient.CLIENT_CHEST.setNameOfPage(PAGE, nameField.getText());
+					} catch (IOException e) {
+						NBTEditor.LOGGER.error("Error while saving client chest", e);
+						client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
+					}
+					return true;
+				}
+				return super.keyPressed(keyCode, scanCode, modifiers);
+			}
 		}.name(TextInst.translatable("nbteditor.client_chest.page_name"));
 		nameField.setMaxLength(Integer.MAX_VALUE);
 		nameField.setChangedListener(name -> {
+			if (NBTEditorClient.CLIENT_CHEST.isNameUsedByOther(name, PAGE)) {
+				nameField.setValid(false);
+				return;
+			}
+			nameField.setValid(true);
 			try {
 				NBTEditorClient.CLIENT_CHEST.setNameOfPage(PAGE, name);
 			} catch (IOException e) {
 				NBTEditor.LOGGER.error("Error while saving client chest", e);
-				this.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
+				client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
 			}
 		});
 		this.addDrawableChild(nameField);
