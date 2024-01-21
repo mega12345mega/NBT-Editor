@@ -168,6 +168,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 	private static boolean specialNumbers;
 	private static List<Alias> aliases;
 	private static ItemSizeFormat itemSizeFormat;
+	private static boolean invertedPageKeybinds;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -194,6 +195,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 				new Alias("clientchest", "storage"),
 				new Alias("itemfactory signature", "sign")));
 		itemSizeFormat = ItemSizeFormat.HIDDEN;
+		invertedPageKeybinds = false;
 		
 		try {
 			// Many config options use the old names
@@ -226,6 +228,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 					.map(alias -> new Alias(alias.getAsJsonObject().get("original").getAsString(),
 							alias.getAsJsonObject().get("alias").getAsString())).collect(Collectors.toList());
 			itemSizeFormat = ItemSizeFormat.valueOf(settings.get("itemSize").getAsString());
+			invertedPageKeybinds = settings.get("invertedPageKeybinds").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -261,6 +264,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 			return obj;
 		}).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 		settings.addProperty("itemSize", itemSizeFormat.name());
+		settings.addProperty("invertedPageKeybinds", invertedPageKeybinds);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -338,6 +342,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 	}
 	public static ItemSizeFormat getItemSizeFormat() {
 		return itemSizeFormat;
+	}
+	public static boolean isInvertedPageKeybinds() {
+		return invertedPageKeybinds;
 	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
@@ -446,6 +453,11 @@ public class ConfigScreen extends TickableSupportingScreen {
 				new MVTooltip("nbteditor.keybind.edit", "nbteditor.keybind.item_factory", "nbteditor.keybind.container", "nbteditor.keybind.enchant"))
 				.addValueListener(value -> keybindsHidden = value.getValidValue()))
 				.setTooltip("nbteditor.config.keybinds.desc"));
+		
+		guis.setConfigurable("invertedPageKeybinds", new ConfigItem<>(TextInst.translatable("nbteditor.config.page_keybinds"),
+				new ConfigValueBoolean(invertedPageKeybinds, false, 100, TextInst.translatable("nbteditor.config.page_keybinds.inverted"), TextInst.translatable("nbteditor.config.page_keybinds.normal"))
+				.addValueListener(value -> invertedPageKeybinds = value.getValidValue()))
+				.setTooltip("nbteditor.config.page_keybinds.desc"));
 		
 		guis.setConfigurable("itemSize", new ConfigItem<>(TextInst.translatable("nbteditor.config.item_size"),
 				new ConfigValueDropdownEnum<>(itemSizeFormat, ItemSizeFormat.HIDDEN, ItemSizeFormat.class)

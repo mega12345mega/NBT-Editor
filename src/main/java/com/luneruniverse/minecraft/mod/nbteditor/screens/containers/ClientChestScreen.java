@@ -9,6 +9,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ClientChestItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
@@ -122,10 +123,19 @@ public class ClientChestScreen extends ClientHandledScreen {
 		});
 		this.addDrawableChild(nameField);
 		
+		EditableText prevKeybind = TextInst.translatable("nbteditor.keybind.page.down");
+		EditableText nextKeybind = TextInst.translatable("nbteditor.keybind.page.up");
+		if (ConfigScreen.isInvertedPageKeybinds()) {
+			EditableText temp = prevKeybind;
+			prevKeybind = nextKeybind;
+			nextKeybind = temp;
+		}
+		
 		this.addDrawableChild(prevPage = MVMisc.newButton(this.x - 87, this.y + 20, 20, 20, TextInst.of("<"), btn -> {
 			navigationClicked = true;
 			prevPage();
-		}));
+		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.literal("")
+				.append(prevKeybind).append(TextInst.translatable("nbteditor.keybind.page.prev")))));
 		
 		pageField = new TextFieldWidget(textRenderer, this.x - 63, this.y + 22, 35, 16, TextInst.of("")) {
 			@Override
@@ -154,17 +164,20 @@ public class ClientChestScreen extends ClientHandledScreen {
 		this.addDrawableChild(nextPage = MVMisc.newButton(this.x - 24, this.y + 20, 20, 20, TextInst.of(">"), btn -> {
 			navigationClicked = true;
 			nextPage();
-		}));
+		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.literal("")
+				.append(nextKeybind).append(TextInst.translatable("nbteditor.keybind.page.next")))));
 		
 		this.addDrawableChild(prevPageJump = MVMisc.newButton(this.x - 87, this.y + 46, 39, 20, TextInst.of("<<"), btn -> {
 			navigationClicked = true;
 			prevPageJump();
-		}));
+		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.translatable("nbteditor.keybind.page.shift")
+				.append(prevKeybind).append(TextInst.translatable("nbteditor.keybind.page.prev_jump")))));
 		
 		this.addDrawableChild(nextPageJump = MVMisc.newButton(this.x - 43, this.y + 46, 39, 20, TextInst.of(">>"), btn -> {
 			navigationClicked = true;
 			nextPageJump();
-		}));
+		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.translatable("nbteditor.keybind.page.shift")
+				.append(nextKeybind).append(TextInst.translatable("nbteditor.keybind.page.next_jump")))));
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 68, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
 			navigationClicked = true;
@@ -231,16 +244,22 @@ public class ClientChestScreen extends ClientHandledScreen {
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
 			close();
-		else if (keyCode == GLFW.GLFW_KEY_PAGE_UP) {
-			if (hasShiftDown())
-				prevPageJump();
-			else
-				prevPage();
-		} else if (keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
-			if (hasShiftDown())
-				nextPageJump();
-			else
-				nextPage();
+		else if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_DOWN);
+			if (ConfigScreen.isInvertedPageKeybinds())
+				prev = !prev;
+			boolean jump = hasShiftDown();
+			if (prev) {
+				if (jump)
+					prevPageJump();
+				else
+					prevPage();
+			} else {
+				if (jump)
+					nextPageJump();
+				else
+					nextPage();
+			}
 		}
 		
 		return !handleKeybind(keyCode, focusedSlot, slot -> new ClientChestItemReference(PAGE, slot.getIndex())) &&

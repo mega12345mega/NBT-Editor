@@ -136,6 +136,13 @@
 	"nbteditor.keybind.edit": "§6§lSpace§r§6 to edit!",
 	"nbteditor.keybind.container": "§6§lCtrl + Space§r§6 to open container!",
 	"nbteditor.keybind.item_factory": "§6§lShift + Space§r§6 to open the factory!",
+	"nbteditor.keybind.page.up": "§6§lPage Up",
+	"nbteditor.keybind.page.down": "§6§lPage Down",
+	"nbteditor.keybind.page.shift": "§6§lShift+",
+	"nbteditor.keybind.page.next": "§6 to the next page!",
+	"nbteditor.keybind.page.prev": "§6 to the previous page!",
+	"nbteditor.keybind.page.next_jump": "\n§6to jump to the next page!",
+	"nbteditor.keybind.page.prev_jump": "\n§6to jump to the previous page!",
 	
 	"nbteditor.unbind_skull.no_textures": "That head hasn't loaded any textures yet!",
 	"nbteditor.unbind_skull.unbound": "§aHead unbound!",
@@ -311,6 +318,10 @@
 	"nbteditor.config.item_size.kilobyte_compressed": "Kilobyte (Compressed)",
 	"nbteditor.config.item_size.megabyte_compressed": "Megabyte (Compressed)",
 	"nbteditor.config.item_size.gigabyte_compressed": "Gigabyte (Compressed)",
+	"nbteditor.config.page_keybinds": "Page Keybinds",
+	"nbteditor.config.page_keybinds.desc": "Whether Page Up increases the page number (Normal)\nor goes to the previous page (Inverted)\nin the client chest",
+	"nbteditor.config.page_keybinds.normal": "Normal",
+	"nbteditor.config.page_keybinds.inverted": "Inverted",
 	
 	
 	"nbteditor.configurable.list.move": "Move",
