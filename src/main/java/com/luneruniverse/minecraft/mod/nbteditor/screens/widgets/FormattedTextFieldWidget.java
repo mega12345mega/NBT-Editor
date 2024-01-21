@@ -3,7 +3,9 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import org.lwjgl.glfw.GLFW;
@@ -20,6 +22,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
+import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.gui.screen.Screen;
@@ -743,6 +746,15 @@ public class FormattedTextFieldWidget extends GroupWidget {
 	}
 	public FormattedTextFieldWidget setShadow(boolean shadow) {
 		field.setShadow(shadow);
+		return this;
+	}
+	public FormattedTextFieldWidget setOverscroll(boolean overscroll) {
+		field.setOverscroll(overscroll);
+		return this;
+	}
+	
+	public FormattedTextFieldWidget suggest(Screen screen, BiFunction<String, Integer, CompletableFuture<Suggestions>> suggestions) {
+		field.suggest(screen, suggestions);
 		return this;
 	}
 	

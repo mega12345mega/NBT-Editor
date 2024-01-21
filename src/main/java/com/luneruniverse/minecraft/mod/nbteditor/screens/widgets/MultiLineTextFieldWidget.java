@@ -238,6 +238,8 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		prev.generateLines();
 		if (prev.isMultiFocused())
 			prev.onFocusChange(false);
+		prev.scrollBar = new ScrollBarWidget(x + width - 8, y, height,
+				() -> prev.scroll, scroll -> prev.scroll = scroll, prev::getMaxScroll);
 		return prev;
 	}
 	public static MultiLineTextFieldWidget create(MultiLineTextFieldWidget prev, int x, int y, int width, int height,
@@ -268,7 +270,9 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	private int selEnd;
 	private int cursorBlinkTracker;
 	private int cursorX;
+	private boolean overscroll;
 	private int scroll;
+	private ScrollBarWidget scrollBar;
 	
 	private SuggestingTextFieldWidget suggestor;
 	
@@ -300,6 +304,9 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		this.undoPos = 0;
 		setCursor(text.length());
 		this.cursorX = -1;
+		this.overscroll = true;
+		this.scrollBar = new ScrollBarWidget(x + width - 8, y, height,
+				() -> scroll, scroll -> this.scroll = scroll, this::getMaxScroll);
 		
 		generateLines();
 	}
@@ -337,6 +344,10 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	}
 	public MultiLineTextFieldWidget setShadow(boolean shadow) {
 		this.shadow = shadow;
+		return this;
+	}
+	public MultiLineTextFieldWidget setOverscroll(boolean overscroll) {
+		this.overscroll = overscroll;
 		return this;
 	}
 	
@@ -442,6 +453,8 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		
 		matrices.pop();
 		
+		scrollBar.render(matrices, mouseX, mouseY, delta);
+		
 		if (suggestor != null) {
 			syncToSuggestor();
 			suggestor.render(matrices, mouseX, mouseY, delta);
@@ -522,6 +535,9 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		if (!isMouseOver(mouseX, mouseY))
 			return false;
 		
+		if (scrollBar.mouseClicked(mouseX, mouseY, button))
+			return true;
+		
 		setCursor(getCharPos(mouseX, mouseY - scroll), true);
 		cursorX = -1;
 		return true;
@@ -529,6 +545,8 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	
 	@Override
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+		if (scrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+			return true;
 		if (!isMouseOver(mouseX, mouseY))
 			return false;
 		
@@ -611,18 +629,11 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		if (!isMouseOver(mouseX, mouseY))
 			return false;
 		
-		int maxScroll = -Math.max(0, lines.size() * (int) (textRenderer.fontHeight * 1.5) + textRenderer.fontHeight + height / 3 - height);
-		if (yAmount < 0 && scroll > maxScroll) {
-			scroll += yAmount * 5;
-			if (scroll < maxScroll)
-				scroll = maxScroll;
-		}
-		if (yAmount > 0 && scroll < 0) {
-			scroll += yAmount * 5;
-			if (scroll > 0)
-				scroll = 0;
-		}
-		return true;
+		return scrollBar.mouseScrolled(mouseX, mouseY, xAmount, yAmount);
+	}
+	private int getMaxScroll() {
+		return -Math.max(0, lines.size() * (int) (textRenderer.fontHeight * 1.5) +
+				textRenderer.fontHeight + (overscroll ? height / 3 : 0) - height);
 	}
 	
 	@Override

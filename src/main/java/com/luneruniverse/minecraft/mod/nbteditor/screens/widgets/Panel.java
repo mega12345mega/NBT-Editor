@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
-import org.lwjgl.glfw.GLFW;
-
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -29,11 +26,8 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 	protected int height;
 	protected int renderPadding; // An area around the panel which elements can draw in, but events aren't passed - useful for borders
 	protected boolean scrollable;
-	
 	protected int scroll;
-	private int dragStartX = -1;
-	private int dragStartY = -1;
-	private int dragStartScroll;
+	protected final ScrollBarWidget scrollBar;
 	
 	protected Panel(int x, int y, int width, int height, int renderPadding, boolean scrollable) {
 		this.x = x;
@@ -44,6 +38,8 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 		
 		this.scrollable = scrollable;
 		this.scroll = 0;
+		this.scrollBar = new ScrollBarWidget(x + width + renderPadding - 8, y, height,
+				() -> scroll, scroll -> this.scroll = scroll, this::getMaxScroll);
 	}
 	private int getPaddedX() {
 		return x - renderPadding;
@@ -64,16 +60,6 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 		
 		checkOverScroll();
 		
-		boolean dragging = GLFW.glfwGetMouseButton(MainUtil.client.getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) != 0;
-		if (!dragging && dragStartX != -1) {
-			dragStartX = -1;
-			dragStartY = -1;
-			dragStartScroll = -1;
-		}
-		
-		if (dragging && dragStartX != -1)
-			globalMouseDragged(mouseX, mouseY, mouseX - dragStartX, mouseY - dragStartY);
-		
 		boolean scissor = shouldScissor();
 		if (scissor) {
 			double scale = MainUtil.client.getWindow().getScaleFactor();
@@ -92,35 +78,13 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 		if (scissor)
 			RenderSystem.disableScissor();
 		
-		double maxScroll = -Math.min(scroll - height, getMaxScroll() - height);
-		double scrollArea = height / maxScroll;
-		if (scrollArea < 1) {
-			double barY = y - scroll / (maxScroll + scrollArea) * height;
-			MVDrawableHelper.fill(matrices, x + width + renderPadding - 8, y, x + width + renderPadding, y + height, 0xFFAAAAAA);
-			MVDrawableHelper.fill(matrices, x + width + renderPadding - 8, (int) barY, x + width + renderPadding, (int) (barY + scrollArea * height + 1), 0xFF000000);
-		}
-		
-		if (dragging && dragStartX == -1) {
-			dragStartX = mouseX;
-			dragStartY = mouseY;
-			dragStartScroll = scroll;
-		}
+		scrollBar.render(matrices, mouseX, mouseY, delta);
 	}
 	
 	private void checkOverScroll() {
 		int maxScroll = getMaxScroll();
 		if (scroll < maxScroll)
 			scroll = maxScroll;
-	}
-	
-	private void globalMouseDragged(int mouseX, int mouseY, int deltaX, int deltaY) {
-		double maxScroll = -Math.min(scroll - height, getMaxScroll() - height);
-		double scrollArea = height / maxScroll;
-		if (scrollArea < 1 && mouseX >= x + width + renderPadding - 8 && mouseX <= x + width + renderPadding && mouseY >= y && mouseY <= y + height) {
-			scroll = dragStartScroll;
-			double barY = y - scroll / (maxScroll + scrollArea) * height;
-			scroll((y - barY - deltaY) * (maxScroll + scrollArea) / height - scroll);
-		}
 	}
 	
 	@Override
@@ -148,9 +112,7 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		updateMousePos(mouseX, mouseY);
 		
-		double maxScroll = -Math.min(scroll - height, getMaxScroll() - height);
-		double scrollArea = height / maxScroll;
-		if (scrollArea < 1 && mouseX >= x + width + renderPadding - 8 && mouseX <= x + width + renderPadding && mouseY >= y && mouseY <= y + height)
+		if (scrollBar.mouseClicked(mouseX, mouseY, button))
 			return true;
 		
 		boolean success = false;
@@ -191,6 +153,9 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
 		updateMousePos(mouseX, mouseY);
 		
+		if (scrollBar.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+			return true;
+		
 		boolean success = false;
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
 			if (pos.element().mouseDragged(mouseX - pos.x() - x, mouseY - pos.y() - y - scroll, button, deltaX, deltaY)) {
@@ -215,24 +180,8 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 			}
 		}
 		if (!success && scrollable)
-			success = scroll(yAmount * 5 * ConfigScreen.getScrollSpeed());
+			success = scrollBar.mouseScrolled(mouseX, mouseY, xAmount, yAmount);
 		return success;
-	}
-	protected boolean scroll(double amount) {
-		int maxScroll = getMaxScroll();
-		if (amount < 0 && scroll > maxScroll) {
-			scroll += amount;
-			if (scroll < maxScroll)
-				scroll = maxScroll;
-			return true;
-		}
-		if (amount > 0 && scroll < 0) {
-			scroll += amount;
-			if (scroll > 0)
-				scroll = 0;
-			return true;
-		}
-		return false;
 	}
 	public int getMaxScroll() {
 		return Math.min(0, height - getHighestY());
