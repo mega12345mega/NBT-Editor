@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
+import java.awt.Point;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,9 +19,13 @@ public class ChatInputSuggestorMixin {
 	TextFieldWidget textField;
 	@ModifyArgs(method = "show", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ChatInputSuggestor$SuggestionWindow;<init>(Lnet/minecraft/client/gui/screen/ChatInputSuggestor;IIILjava/util/List;Z)V"))
 	private void SuggestionWindow(Args args) {
-		if (textField instanceof SuggestingTextFieldWidget) {
-			args.set(1, textField.x + 1);
-			args.set(2, textField.y + textField.getHeight() + 2);
+		if (textField instanceof SuggestingTextFieldWidget suggestor) {
+			if (suggestor.isDropdownOnly()) {
+				Point pos = suggestor.getSpecialDropdownPos();
+				args.set(1, pos.x);
+				args.set(2, pos.y);
+			} else
+				args.set(2, textField.y + textField.getHeight() + 2);
 		}
 	}
 }

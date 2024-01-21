@@ -4,6 +4,8 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -25,6 +27,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.brigadier.suggestion.Suggestions;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
@@ -267,6 +270,8 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	private int cursorX;
 	private int scroll;
 	
+	private SuggestingTextFieldWidget suggestor;
+	
 	protected MultiLineTextFieldWidget(int x, int y, int width, int height, String text,
 			Function<String, Text> formatter, boolean newLines, Consumer<String> onChange) {
 		text = MVMisc.stripInvalidChars(text, newLines);
@@ -335,6 +340,44 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		return this;
 	}
 	
+	public MultiLineTextFieldWidget suggest(Screen screen, BiFunction<String, Integer, CompletableFuture<Suggestions>> suggestions) {
+		if (suggestor == null) {
+			suggestor = new SuggestingTextFieldWidget(screen, x, y, width, height) {
+				@Override
+				public boolean isDropdownOnly() {
+					return true;
+				}
+				@Override
+				public Point getSpecialDropdownPos() {
+					Point output = getXYPos(cursor);
+					output.y += textRenderer.fontHeight * 1.5 + scroll;
+					return output;
+				}
+			};
+			suggestor.setMaxLength(Integer.MAX_VALUE);
+		}
+		suggestor.suggest(suggestions);
+		return this;
+	}
+	private void syncToSuggestor() {
+		if (!suggestor.text.equals(text))
+			suggestor.setText(text);
+		
+		if (suggestor.getCursor() != cursor)
+			suggestor.setCursor(cursor, false);
+		
+		boolean focus = isMultiFocused();
+		if (suggestor.isMultiFocused() != focus)
+			suggestor.onFocusChange(focus);
+	}
+	private void syncFromSuggestor() {
+		if (!suggestor.text.equals(text))
+			setText(suggestor.text);
+		
+		if (suggestor.getCursor() != cursor)
+			setCursor(suggestor.getCursor());
+	}
+	
 	public int getX() {
 		return x;
 	}
@@ -372,6 +415,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 			MinecraftClient client = MainUtil.client;
 			RenderSystem.enableScissor((int) (x * client.getWindow().getScaleFactor()), client.getWindow().getHeight() - (int) ((y + height) * client.getWindow().getScaleFactor()), (int) (width * client.getWindow().getScaleFactor()), (int) (height * client.getWindow().getScaleFactor()));
 		}
+		
 		matrices.push();
 		matrices.translate(0.0, scroll, 0.0);
 		
@@ -397,6 +441,12 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		}
 		
 		matrices.pop();
+		
+		if (suggestor != null) {
+			syncToSuggestor();
+			suggestor.render(matrices, mouseX, mouseY, delta);
+		}
+		
 		if (scissor)
 			RenderSystem.disableScissor();
 	}
@@ -462,6 +512,13 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		if (suggestor != null) {
+			syncToSuggestor();
+			if (suggestor.mouseClicked(mouseX, mouseY, button)) {
+				syncFromSuggestor();
+				return true;
+			}
+		}
 		if (!isMouseOver(mouseX, mouseY))
 			return false;
 		
@@ -546,22 +603,26 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double xAmount, double yAmount) {
-		if (isMouseOver(mouseX, mouseY)) {
-			int maxScroll = -Math.max(0, lines.size() * (int) (textRenderer.fontHeight * 1.5) + textRenderer.fontHeight + height / 3 - height);
-			if (yAmount < 0 && scroll > maxScroll) {
-				scroll += yAmount * 5;
-				if (scroll < maxScroll)
-					scroll = maxScroll;
-			}
-			if (yAmount > 0 && scroll < 0) {
-				scroll += yAmount * 5;
-				if (scroll > 0)
-					scroll = 0;
-			}
-			
-			return true;
+		if (suggestor != null) {
+			syncToSuggestor();
+			if (suggestor.mouseScrolled(mouseX, mouseY, xAmount, yAmount))
+				return true;
 		}
-		return false;
+		if (!isMouseOver(mouseX, mouseY))
+			return false;
+		
+		int maxScroll = -Math.max(0, lines.size() * (int) (textRenderer.fontHeight * 1.5) + textRenderer.fontHeight + height / 3 - height);
+		if (yAmount < 0 && scroll > maxScroll) {
+			scroll += yAmount * 5;
+			if (scroll < maxScroll)
+				scroll = maxScroll;
+		}
+		if (yAmount > 0 && scroll < 0) {
+			scroll += yAmount * 5;
+			if (scroll > 0)
+				scroll = 0;
+		}
+		return true;
 	}
 	
 	@Override
@@ -628,6 +689,13 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (suggestor != null && (keyCode != GLFW.GLFW_KEY_UP && keyCode != GLFW.GLFW_KEY_DOWN || Screen.hasAltDown())) {
+			syncToSuggestor();
+			if (suggestor.keyPressed(keyCode, scanCode, modifiers)) {
+				syncFromSuggestor();
+				return true;
+			}
+		}
 		if (Screen.isSelectAll(keyCode)) {
 			onCursorMove(text.length(), 0, text.length());
 			selStart = 0;

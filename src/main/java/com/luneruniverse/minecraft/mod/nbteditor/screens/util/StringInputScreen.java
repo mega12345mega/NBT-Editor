@@ -61,7 +61,8 @@ public class StringInputScreen extends TickableSupportingScreen {
 		value = new SuggestingTextFieldWidget(this, width / 2 - 104, height / 2 - 20, 208, 16);
 		value.setMaxLength(Integer.MAX_VALUE);
 		value.setText(prevValue);
-		value.suggest(suggestions);
+		if (suggestions != null)
+			value.suggest(suggestions);
 		this.addSelectableChild(value);
 		setInitialFocus(value);
 		

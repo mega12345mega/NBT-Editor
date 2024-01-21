@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
+import java.awt.Point;
 import java.lang.invoke.MethodType;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
@@ -93,7 +94,8 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 			Reflection.getOptionalMethod(ChatInputSuggestor.class, "", MethodType.methodType(void.class, MatrixStack.class, int.class, int.class));
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		super.render(matrices, mouseX, mouseY, delta);
+		if (!isDropdownOnly())
+			super.render(matrices, mouseX, mouseY, delta);
 		matrices.push();
 		matrices.translate(0, 0, 1.0f);
 		Version.newSwitch()
@@ -106,20 +108,26 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 	protected boolean shouldShowName() {
 		return !suggestor.isOpen();
 	}
+	public boolean isDropdownOnly() {
+		return false;
+	}
+	public Point getSpecialDropdownPos() {
+		return null;
+	}
 	
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		return suggestor.mouseClicked(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
+		return suggestor.mouseClicked(mouseX, mouseY, button) || !isDropdownOnly() && super.mouseClicked(mouseX, mouseY, button);
 	}
 	
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-		return suggestor.mouseScrolled(verticalAmount) || super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+		return suggestor.mouseScrolled(verticalAmount) || !isDropdownOnly() && super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		return suggestor.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+		return suggestor.keyPressed(keyCode, scanCode, modifiers) || !isDropdownOnly() && super.keyPressed(keyCode, scanCode, modifiers);
 	}
 	
 	@Override
@@ -128,7 +136,7 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 			if (suggestor.window.area.contains((int) mouseX, (int) mouseY))
 				return true;
 		}
-		return super.isMouseOver(mouseX, mouseY);
+		return !isDropdownOnly() && super.isMouseOver(mouseX, mouseY);
 	}
 	
 	@Override

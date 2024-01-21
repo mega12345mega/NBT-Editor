@@ -288,9 +288,14 @@ public class NBTEditorScreen extends ItemEditorScreen {
 					} catch (CommandSyntaxException e) {
 						NBTEditor.LOGGER.error("Error parsing nbt from Expand", e);
 					}
-				}));
+				}).suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
+						.map(ac -> ac.getSuggestions(item, realPath, null, str, cursor))
+						.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture())));
 			} else
-				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter.FORMATTER, false, str -> value.setText(str)));
+				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter.FORMATTER,
+						false, str -> value.setText(str)).suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
+								.map(ac -> ac.getSuggestions(item, realPath, selectedValue.getKey(), str, cursor))
+								.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture())));
 		}));
 		
 		final int editorY = 16 + 8 + 32 + (16 + 8) * 3;

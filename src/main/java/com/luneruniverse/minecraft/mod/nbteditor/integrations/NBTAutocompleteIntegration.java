@@ -36,6 +36,8 @@ public class NBTAutocompleteIntegration extends Integration {
 	public CompletableFuture<Suggestions> getSuggestions(ItemStack item, List<String> path, String key, String value, int cursor, Collection<String> otherTags) {
 		if (value != null && otherTags != null)
 			throw new IllegalArgumentException("Both value and otherTags can't be non-null at the same time!");
+		if (key == null && value == null)
+			throw new IllegalArgumentException("Both key and value can't be null at the same time!");
 		
 		boolean nextTagAllowed;
 		if (value == null) {
@@ -46,7 +48,7 @@ public class NBTAutocompleteIntegration extends Integration {
 			value = value.substring(0, cursor);
 		}
 		
-		if (key.contains(":") || key.contains("{") || key.contains("["))
+		if (key != null && (key.contains(":") || key.contains("{") || key.contains("[")))
 			return new SuggestionsBuilder("", 0).buildFuture();
 		
 		StringBuilder pathBuilder = new StringBuilder();
@@ -65,17 +67,21 @@ public class NBTAutocompleteIntegration extends Integration {
 					return new SuggestionsBuilder("", 0).buildFuture();
 			}
 		}
-		if (nbt instanceof NbtCompound)
-			pathBuilder.append('{');
-		else
-			return new SuggestionsBuilder("", 0).buildFuture();
 		int fieldStart = pathBuilder.length();
-		pathBuilder.append(key);
-		if (value != null) {
-			pathBuilder.append(':');
+		if (key != null) {
+			if (nbt instanceof NbtCompound)
+				pathBuilder.append('{');
+			else
+				return new SuggestionsBuilder("", 0).buildFuture();
 			fieldStart = pathBuilder.length();
+			pathBuilder.append(key);
+			if (value != null) {
+				pathBuilder.append(':');
+				fieldStart = pathBuilder.length();
+				pathBuilder.append(value);
+			}
+		} else
 			pathBuilder.append(value);
-		}
 		String pathStr = pathBuilder.toString();
 		
 		String suggestionId = "item/" + MVRegistry.ITEM.getId(item.getItem());
