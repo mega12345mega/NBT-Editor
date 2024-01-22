@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.MultiTargetContainerIO.Target;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.item.BlockItem;
@@ -66,10 +67,15 @@ public abstract class ContainerIO {
 		CONTAINERS.put(Items.ITEM_FRAME, ITEM_FRAME);
 		CONTAINERS.put(Items.GLOW_ITEM_FRAME, ITEM_FRAME);
 		CONTAINERS.put(Items.BUNDLE, BUNDLE);
-		CONTAINERS.put(Items.CHISELED_BOOKSHELF, CHISELED_BOOKSHELF);
-		CONTAINERS.put(Items.SUSPICIOUS_SAND, SUSPICIOUS_SAND);
-		CONTAINERS.put(Items.SUSPICIOUS_GRAVEL, SUSPICIOUS_GRAVEL);
-		CONTAINERS.put(Items.DECORATED_POT, DECORATED_POT);
+		Version.newSwitch()
+				.range("1.20.0", null, () -> {
+					CONTAINERS.put(Items.CHISELED_BOOKSHELF, CHISELED_BOOKSHELF);
+					CONTAINERS.put(Items.SUSPICIOUS_SAND, SUSPICIOUS_SAND);
+					CONTAINERS.put(Items.SUSPICIOUS_GRAVEL, SUSPICIOUS_GRAVEL);
+					CONTAINERS.put(Items.DECORATED_POT, DECORATED_POT);
+				})
+				.range(null, "1.19.4", () -> {})
+				.run();
 	}
 	public static void registerContainer(Item item, ContainerIO container) {
 		CONTAINERS.put(item, container);

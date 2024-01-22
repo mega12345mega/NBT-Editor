@@ -123,20 +123,6 @@ public class ClientChestScreen extends ClientHandledScreen {
 		});
 		this.addDrawableChild(nameField);
 		
-		EditableText prevKeybind = TextInst.translatable("nbteditor.keybind.page.down");
-		EditableText nextKeybind = TextInst.translatable("nbteditor.keybind.page.up");
-		if (ConfigScreen.isInvertedPageKeybinds()) {
-			EditableText temp = prevKeybind;
-			prevKeybind = nextKeybind;
-			nextKeybind = temp;
-		}
-		
-		this.addDrawableChild(prevPage = MVMisc.newButton(this.x - 87, this.y + 20, 20, 20, TextInst.of("<"), btn -> {
-			navigationClicked = true;
-			prevPage();
-		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.literal("")
-				.append(prevKeybind).append(TextInst.translatable("nbteditor.keybind.page.prev")))));
-		
 		pageField = new TextFieldWidget(textRenderer, this.x - 63, this.y + 22, 35, 16, TextInst.of("")) {
 			@Override
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -160,6 +146,20 @@ public class ClientChestScreen extends ClientHandledScreen {
 		});
 		pageField.setTextPredicate(MainUtil.intPredicate(() -> 0, NBTEditorClient.CLIENT_CHEST::getPageCount, true));
 		this.addDrawableChild(pageField);
+		
+		EditableText prevKeybind = TextInst.translatable("nbteditor.keybind.page.down");
+		EditableText nextKeybind = TextInst.translatable("nbteditor.keybind.page.up");
+		if (ConfigScreen.isInvertedPageKeybinds()) {
+			EditableText temp = prevKeybind;
+			prevKeybind = nextKeybind;
+			nextKeybind = temp;
+		}
+		
+		this.addDrawableChild(prevPage = MVMisc.newButton(this.x - 87, this.y + 20, 20, 20, TextInst.of("<"), btn -> {
+			navigationClicked = true;
+			prevPage();
+		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.literal("")
+				.append(prevKeybind).append(TextInst.translatable("nbteditor.keybind.page.prev")))));
 		
 		this.addDrawableChild(nextPage = MVMisc.newButton(this.x - 24, this.y + 20, 20, 20, TextInst.of(">"), btn -> {
 			navigationClicked = true;

@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.SystemUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
@@ -212,7 +215,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 			scrollSpeed = settings.get("scrollSpeed").getAsDouble();
 			airEditable = settings.get("airEditable").getAsBoolean();
 			jsonText = settings.get("jsonText").getAsBoolean();
-			shortcuts = settings.get("shortcuts").getAsJsonArray().asList().stream()
+			shortcuts = getStream(settings.get("shortcuts").getAsJsonArray())
 					.map(cmd -> cmd.getAsString()).collect(Collectors.toList());
 			JsonPrimitive checkUpdatesLegacy = settings.get("checkUpdates").getAsJsonPrimitive();
 			checkUpdates = checkUpdatesLegacy.isBoolean() ?
@@ -224,7 +227,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 			noArmorRestriction = settings.get("noArmorRestriction").getAsBoolean();
 			hideFormatButtons = settings.get("hideFormatButtons").getAsBoolean();
 			specialNumbers = settings.get("specialNumbers").getAsBoolean();
-			aliases = settings.get("aliases").getAsJsonArray().asList().stream()
+			aliases = getStream(settings.get("aliases").getAsJsonArray())
 					.map(alias -> new Alias(alias.getAsJsonObject().get("original").getAsString(),
 							alias.getAsJsonObject().get("alias").getAsString())).collect(Collectors.toList());
 			itemSizeFormat = ItemSizeFormat.valueOf(settings.get("itemSize").getAsString());
@@ -271,6 +274,10 @@ public class ConfigScreen extends TickableSupportingScreen {
 		} catch (IOException e) {
 			NBTEditor.LOGGER.error("Error while saving settings", e);
 		}
+	}
+	// jsonArray.asList().stream() doesn't exist in 1.17
+	private static Stream<JsonElement> getStream(JsonArray jsonArray) {
+		return StreamSupport.stream(jsonArray.spliterator(), false);
 	}
 	
 	public static EnchantLevelMax getEnchantLevelMax() {

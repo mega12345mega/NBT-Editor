@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nbteditor",
-  "version": "1.12.3.999",
+  "version": "1.13.0",
 
   "name": "NBT Editor",
   "description": "Lets you edit items' nbt ingame, store items in a client side chest, open containers in your inventory, and more!",
@@ -38,7 +38,7 @@
   "accessWidener": "nbteditor.accesswidener",
 
   "depends": {
-    "fabricloader": ">=0.15",
+    "fabricloader": ">=0.11.3",
     "fabric": "*",
     "minecraft": ">=1.17-",
     "java": ">=16"

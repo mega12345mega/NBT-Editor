@@ -23,9 +23,11 @@ import org.joml.Matrix4f;
 import org.joml.Vector2ic;
 import org.joml.Vector3f;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.SharedConstants;
@@ -37,8 +39,12 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandRegistryAccess;
@@ -395,6 +401,40 @@ public class MVMisc {
 		// Should be .byName() until 1.20.2 and doesn't have a clear replacement at and after 1.20.3
 		// But this seems to be equivalent (at least currently)
 		return ClickEvent.Action.valueOf(name.toUpperCase());
+	}
+	
+	public static VertexConsumer beginDrawing(MatrixStack matrices, MVShader shader) {
+		return Version.<VertexConsumer>newSwitch()
+				.range("1.19.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().getBuffer(shader.layer()))
+				.range(null, "1.18.2", () -> {
+					RenderSystem.setShader(shader.shader());
+					BufferBuilder builder = Tessellator.getInstance().getBuffer();
+					builder.begin(shader.layer().getDrawMode(), shader.layer().getVertexFormat());
+					return builder;
+				})
+				.get();
+	}
+	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_end =
+			Reflection.getOptionalMethod(BufferBuilder.class, "method_1326", MethodType.methodType(void.class));
+	private static final Supplier<Reflection.MethodInvoker> BufferRenderer_draw =
+			Reflection.getOptionalMethod(BufferRenderer.class, "method_1309", MethodType.methodType(void.class, BufferBuilder.class));
+	public static void endDrawing(MatrixStack matrices, VertexConsumer vertexConsumer) {
+		Version.newSwitch()
+				.range("1.19.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().draw())
+				.range(null, "1.18.2", () -> {
+					BufferBuilder_end.get().invoke(vertexConsumer);
+					BufferRenderer_draw.get().invoke(null, vertexConsumer);
+				})
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> TextFieldWidget_setCursor =
+			Reflection.getOptionalMethod(TextFieldWidget.class, "method_1883", MethodType.methodType(void.class, int.class));
+	public static void setCursor(TextFieldWidget textField, int cursor) {
+		Version.newSwitch()
+				.range("1.20.2", null, () -> textField.setCursor(cursor, false))
+				.range(null, "1.20.1", () -> TextFieldWidget_setCursor.get().invoke(textField, cursor))
+				.run();
 	}
 	
 }

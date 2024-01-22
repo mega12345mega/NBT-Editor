@@ -18,9 +18,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.block.AbstractSignBlock;
-import net.minecraft.block.entity.SignText;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.render.block.entity.SignBlockEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.SignItem;
 import net.minecraft.nbt.NbtCompound;
@@ -33,6 +31,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
 
 public class SignboardScreen extends ItemEditorScreen {
 	
@@ -78,7 +77,13 @@ public class SignboardScreen extends ItemEditorScreen {
 	}
 	
 	private static int getRenderedColor(DyeColor color) {
-		return SignBlockEntityRenderer.getColor(new SignText().withColor(color).withGlowing(true));
+		if (color == DyeColor.BLACK)
+			return -988212;
+		int rgb = color.getSignColor();
+		int r = (int) (ColorHelper.Argb.getRed(rgb) * 0.4D);
+		int g = (int) (ColorHelper.Argb.getGreen(rgb) * 0.4D);
+		int b = (int) (ColorHelper.Argb.getBlue(rgb) * 0.4D);
+		return ColorHelper.Argb.getArgb(0, r, g, b);
 	}
 	
 	private boolean newFeatures;
@@ -233,7 +238,7 @@ public class SignboardScreen extends ItemEditorScreen {
 		int glowingBtnY = 64;
 		AtomicReference<ButtonWidget> glowingBtn = new AtomicReference<>();
 		
-		ButtonDropdownWidget colors = addDrawableChild(new ButtonDropdownWidget(glowingBtnX, glowingBtnY + 20, 20, 20, null, 20, 20) {
+		ButtonDropdownWidget colors = addSelectableChild(new ButtonDropdownWidget(glowingBtnX, glowingBtnY + 20, 20, 20, null, 20, 20) {
 			@Override
 			public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 				matrices.push();
@@ -272,6 +277,8 @@ public class SignboardScreen extends ItemEditorScreen {
 		lines.setMaxLines(4);
 		lines.setBackgroundColor(0);
 		lines.setShadow(false);
+		
+		addDrawable(colors); // Render on top of FormattedTextFieldWidget highlights
 	}
 	
 	@Override

@@ -19,7 +19,7 @@ public class ScreenMixin implements MVScreenParent {
 	public void renderBackground(MatrixStack matrices) {
 		MVScreenParent.super.renderBackground(matrices);
 	}
-	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;renderBackground(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
+	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;renderBackground(Lnet/minecraft/client/gui/DrawContext;IIF)V"), require = 0)
 	private void render_renderBackground(Screen screen, DrawContext context, int mouseX, int mouseY, float delta) {
 		if (!((Object) this instanceof MVScreen))
 			screen.renderBackground(context, mouseX, mouseY, delta);

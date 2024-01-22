@@ -91,13 +91,13 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> ChatInputSuggestor_render =
-			Reflection.getOptionalMethod(ChatInputSuggestor.class, "", MethodType.methodType(void.class, MatrixStack.class, int.class, int.class));
+			Reflection.getOptionalMethod(ChatInputSuggestor.class, "method_23923", MethodType.methodType(void.class, MatrixStack.class, int.class, int.class));
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		if (!isDropdownOnly())
 			super.render(matrices, mouseX, mouseY, delta);
 		matrices.push();
-		matrices.translate(0, 0, 1.0f);
+		matrices.translate(0, 0, 1.0);
 		Version.newSwitch()
 				.range("1.20.0", null, () -> suggestor.render(MVDrawableHelper.getDrawContext(matrices), mouseX, mouseY))
 				.range(null, "1.19.4", () -> ChatInputSuggestor_render.get().invoke(suggestor, matrices, mouseX, mouseY))
@@ -106,7 +106,7 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 	}
 	@Override
 	protected boolean shouldShowName() {
-		return !suggestor.isOpen();
+		return suggestor.window == null;
 	}
 	public boolean isDropdownOnly() {
 		return false;
@@ -144,6 +144,18 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 		MVElement.super.onFocusChange(focused);
 		suggestor.setWindowActive(focused);
 		suggestor.refresh();
+	}
+	
+	// Hides deprecation warning in Gradle when TextFieldWidget overrides MVElement's methods
+	@Deprecated
+	@Override
+	public void setFocused(boolean focused) {
+		super.setFocused(focused);
+	}
+	@Deprecated
+	@Override
+	public boolean isFocused() {
+		return super.isFocused();
 	}
 	
 }
