@@ -9,7 +9,8 @@
   "client": [
     "ScreenHandlerMixin",
     "DrawableMixin",
-    "ScreenMixin"
+    "ScreenMixin",
+    "AbstractParentElementMixin"
   ],
   "injectors": {
     "defaultRequire": 1

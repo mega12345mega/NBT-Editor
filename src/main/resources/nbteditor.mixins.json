@@ -27,7 +27,6 @@
     "ScreenshotRecorderMixin",
     "UtilMixin",
     "KeyboardMixin",
-    "AbstractParentElementMixin",
     "PlayerScreenHandler1Mixin",
     "WrittenBookItemMixin",
     "GameRendererMixin",

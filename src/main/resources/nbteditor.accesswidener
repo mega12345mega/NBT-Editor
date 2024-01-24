@@ -35,7 +35,6 @@ accessible field net/minecraft/client/gui/screen/ChatInputSuggestor window Lnet/
 accessible field net/minecraft/client/gui/screen/ChatInputSuggestor messages Ljava/util/List;
 accessible field net/minecraft/client/gui/screen/ChatInputSuggestor pendingSuggestions Ljava/util/concurrent/CompletableFuture;
 accessible method net/minecraft/client/gui/screen/ChatInputSuggestor showCommandSuggestions ()V
-extendable method net/minecraft/client/gui/screen/ChatInputSuggestor showUsages (Lnet/minecraft/util/Formatting;)Z
 extendable method net/minecraft/client/gui/screen/ChatInputSuggestor provideRenderText (Ljava/lang/String;I)Lnet/minecraft/text/OrderedText;
 accessible field net/minecraft/client/gui/screen/ChatInputSuggestor$SuggestionWindow area Lnet/minecraft/client/util/math/Rect2i;
 

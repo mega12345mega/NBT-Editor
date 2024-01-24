@@ -5,13 +5,18 @@ import java.awt.Point;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.SuggestingTextFieldWidget;
 
 import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.util.Formatting;
 
 @Mixin(ChatInputSuggestor.class)
 public class ChatInputSuggestorMixin {
@@ -27,5 +32,17 @@ public class ChatInputSuggestorMixin {
 			} else
 				args.set(2, textField.y + textField.getHeight() + 2);
 		}
+	}
+	
+	@Inject(method = "showUsages", at = @At("HEAD"), cancellable = true)
+	@Group(name = "showUsages", min = 1)
+	private void showUsages(Formatting formatting, CallbackInfoReturnable<Boolean> info) {
+		info.setReturnValue(true);
+	}
+	@Inject(method = "method_23929(Lnet/minecraft/class_124;)V", at = @At("HEAD"), cancellable = true)
+	@Group(name = "showUsages", min = 1)
+	@SuppressWarnings("target")
+	private void showUsages(Formatting formatting, CallbackInfo info) {
+		info.cancel();
 	}
 }

@@ -23,7 +23,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements MVElement {
 	
@@ -51,10 +50,6 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 						showCommandSuggestions();
 					});
 				}
-			}
-			@Override
-			protected boolean showUsages(Formatting formatting) {
-				return true;
 			}
 			@Override
 			protected OrderedText provideRenderText(String original, int firstCharacterIndex) {
@@ -127,6 +122,8 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (!isMultiFocused())
+			return false;
 		return suggestor.keyPressed(keyCode, scanCode, modifiers) || !isDropdownOnly() && super.keyPressed(keyCode, scanCode, modifiers);
 	}
 	
@@ -146,16 +143,21 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 		suggestor.refresh();
 	}
 	
-	// Hides deprecation warning in Gradle when TextFieldWidget overrides MVElement's methods
 	@Deprecated
 	@Override
 	public void setFocused(boolean focused) {
-		super.setFocused(focused);
+		onFocusChange(focused);
 	}
 	@Deprecated
 	@Override
 	public boolean isFocused() {
-		return super.isFocused();
+		return isMultiFocused();
+	}
+	
+	public boolean method_25407(boolean lookForwards) { // changeFocus <= 1.19.3
+		if (!this.active || !this.visible)
+			return false;
+		return isMultiFocused();
 	}
 	
 }

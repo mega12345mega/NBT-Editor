@@ -77,6 +77,13 @@ public class TextAreaScreen extends OverlaySupportingScreen {
 	}
 	
 	@Override
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (textArea.keyPressed(keyCode, scanCode, modifiers))
+			return true;
+		return super.keyPressed(keyCode, scanCode, modifiers);
+	}
+	
+	@Override
 	public boolean shouldCloseOnEsc() {
 		return false;
 	}
