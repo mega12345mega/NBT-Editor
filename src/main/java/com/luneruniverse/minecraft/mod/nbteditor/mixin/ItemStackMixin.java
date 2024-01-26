@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
 import java.awt.Color;
 import java.util.List;
-import java.util.OptionalInt;
+import java.util.OptionalLong;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,14 +40,14 @@ public class ItemStackMixin {
 		
 		ConfigScreen.ItemSizeFormat sizeConfig = ConfigScreen.getItemSizeFormat();
 		if (sizeConfig != ConfigScreen.ItemSizeFormat.HIDDEN) {
-			OptionalInt loadingSize = ItemSize.getItemSize(source, sizeConfig.isCompressed());
+			OptionalLong loadingSize = ItemSize.getItemSize(source, sizeConfig.isCompressed());
 			String displaySize;
 			Formatting sizeFormat;
 			if (loadingSize.isEmpty()) {
 				displaySize = "...";
 				sizeFormat = Formatting.GRAY;
 			} else {
-				int size = loadingSize.getAsInt();
+				long size = loadingSize.getAsLong();
 				int magnitude = sizeConfig.getMagnitude();
 				if (magnitude == 0) {
 					if (size < 1000)

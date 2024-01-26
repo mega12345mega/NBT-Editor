@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.async;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.WeakHashMap;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
@@ -14,8 +14,8 @@ import net.minecraft.nbt.NbtCompound;
 public class ItemSize {
 	
 	private static class ByteCountingOutputStream extends OutputStream {
-		private int count;
-		public int getCount() {
+		private long count;
+		public long getCount() {
 			return count;
 		}
 		@Override
@@ -32,26 +32,26 @@ public class ItemSize {
 		}
 	}
 	
-	private static final WeakHashMap<ItemStack, OptionalInt> uncompressedSizes = new WeakHashMap<>();
-	private static final WeakHashMap<ItemStack, OptionalInt> compressedSizes = new WeakHashMap<>();
+	private static final WeakHashMap<ItemStack, OptionalLong> uncompressedSizes = new WeakHashMap<>();
+	private static final WeakHashMap<ItemStack, OptionalLong> compressedSizes = new WeakHashMap<>();
 	
-	public static OptionalInt getItemSize(ItemStack stack, boolean compressed) {
+	public static OptionalLong getItemSize(ItemStack stack, boolean compressed) {
 		if (!stack.hasNbt()) {
-			return OptionalInt.of(calcItemSize(stack, compressed));
+			return OptionalLong.of(calcItemSize(stack, compressed));
 		}
-		WeakHashMap<ItemStack, OptionalInt> sizes = (compressed ? compressedSizes : uncompressedSizes);
-		OptionalInt size;
+		WeakHashMap<ItemStack, OptionalLong> sizes = (compressed ? compressedSizes : uncompressedSizes);
+		OptionalLong size;
 		synchronized (sizes) {
 			size = sizes.get(stack);
 			if (size != null)
 				return size;
-			size = OptionalInt.empty();
+			size = OptionalLong.empty();
 			sizes.put(stack, size);
 		}
 		Thread thread = new Thread(() -> {
-			int knownSize = calcItemSize(stack, compressed);
+			long knownSize = calcItemSize(stack, compressed);
 			synchronized (sizes) {
-				sizes.put(stack, OptionalInt.of(knownSize));
+				sizes.put(stack, OptionalLong.of(knownSize));
 			}
 		}, "Item Size Processor [" + MVRegistry.ITEM.getId(stack.getItem()) + "]");
 		thread.setDaemon(true);
@@ -59,7 +59,7 @@ public class ItemSize {
 		return size;
 	}
 	
-	private static int calcItemSize(ItemStack stack, boolean compressed) {
+	private static long calcItemSize(ItemStack stack, boolean compressed) {
 		ByteCountingOutputStream stream = new ByteCountingOutputStream();
 		try {
 			NbtCompound nbt = stack.writeNbt(new NbtCompound());
