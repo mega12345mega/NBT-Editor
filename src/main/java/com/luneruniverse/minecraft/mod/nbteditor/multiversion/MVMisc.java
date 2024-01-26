@@ -405,8 +405,8 @@ public class MVMisc {
 	
 	public static VertexConsumer beginDrawing(MatrixStack matrices, MVShader shader) {
 		return Version.<VertexConsumer>newSwitch()
-				.range("1.19.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().getBuffer(shader.layer()))
-				.range(null, "1.18.2", () -> {
+				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().getBuffer(shader.layer()))
+				.range(null, "1.19.4", () -> {
 					RenderSystem.setShader(shader.shader());
 					BufferBuilder builder = Tessellator.getInstance().getBuffer();
 					builder.begin(shader.layer().getDrawMode(), shader.layer().getVertexFormat());
@@ -420,7 +420,8 @@ public class MVMisc {
 			Reflection.getOptionalMethod(BufferRenderer.class, "method_1309", MethodType.methodType(void.class, BufferBuilder.class));
 	public static void endDrawing(MatrixStack matrices, VertexConsumer vertexConsumer) {
 		Version.newSwitch()
-				.range("1.19.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().draw())
+				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().draw())
+				.range("1.19.0", "1.19.4", () -> BufferRenderer.drawWithGlobalProgram(((BufferBuilder) vertexConsumer).end()))
 				.range(null, "1.18.2", () -> {
 					BufferBuilder_end.get().invoke(vertexConsumer);
 					BufferRenderer_draw.get().invoke(null, vertexConsumer);
