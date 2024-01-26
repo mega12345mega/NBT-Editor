@@ -1,8 +1,15 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
@@ -16,9 +23,11 @@ import org.joml.Matrix4f;
 import org.joml.Vector2ic;
 import org.joml.Vector3f;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.SharedConstants;
@@ -30,8 +39,12 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandRegistryAccess;
@@ -236,7 +249,8 @@ public class MVMisc {
 			MethodType.methodType(Vector2ic.class, Screen.class, int.class, int.class, int.class, int.class));
 	public static Vector2ic getPosition(Object positioner, Screen screen, int x, int y, int width, int height) {
 		return Version.<Vector2ic>newSwitch()
-				.range("1.20.0", null, () -> ((TooltipPositioner) positioner).getPosition(screen.width, screen.height, x, y, width, height))
+				.range("1.20.0", null, () -> ((TooltipPositioner) positioner).getPosition(
+						MainUtil.client.getWindow().getScaledWidth(), MainUtil.client.getWindow().getScaledHeight(), x, y, width, height))
 				.range("1.19.3", "1.19.4", () -> TooltipPositioner_getPosition.get().invoke(positioner, screen, x, y, width, height))
 				.get();
 	}
@@ -279,13 +293,13 @@ public class MVMisc {
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> NbtIo_read =
-			Reflection.getOptionalMethod(NbtIo.class, "method_10633", MethodType.methodType(NbtCompound.class, File.class));
+			Reflection.getOptionalMethod(NbtIo.class, "method_10627", MethodType.methodType(NbtCompound.class, DataInput.class));
 	private static final Supplier<Reflection.MethodInvoker> NbtIo_readCompressed =
 			Reflection.getOptionalMethod(NbtIo.class, "method_10629", MethodType.methodType(NbtCompound.class, InputStream.class));
 	private static final Supplier<Reflection.MethodInvoker> NbtIo_write =
-			Reflection.getOptionalMethod(NbtIo.class, "method_10630", MethodType.methodType(void.class, NbtCompound.class, File.class));
+			Reflection.getOptionalMethod(NbtIo.class, "method_10628", MethodType.methodType(void.class, NbtCompound.class, DataOutput.class));
 	private static final Supplier<Reflection.MethodInvoker> NbtIo_writeCompressed =
-			Reflection.getOptionalMethod(NbtIo.class, "method_30614", MethodType.methodType(void.class, NbtCompound.class, File.class));
+			Reflection.getOptionalMethod(NbtIo.class, "method_10634", MethodType.methodType(void.class, NbtCompound.class, OutputStream.class));
 	public static NbtCompound nbtInternal(Supplier<NbtCompound> newWrite, Supplier<NbtCompound> oldWrite) throws IOException {
 		try {
 			return Version.<NbtCompound>newSwitch()
@@ -315,14 +329,14 @@ public class MVMisc {
 			return null;
 		});
 	}
-	public static NbtCompound readNbt(File file) throws IOException {
+	public static NbtCompound readNbt(InputStream stream) throws IOException {
 		return nbtInternal(() -> {
 			try {
-				return NbtIo.read(file.toPath());
+				return NbtIo.readCompound(new DataInputStream(stream), NbtSizeTracker.ofUnlimitedBytes());
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			}
-		}, () -> NbtIo_read.get().invoke(null, file));
+		}, () -> NbtIo_read.get().invoke(null, new DataInputStream(stream)));
 	}
 	public static NbtCompound readCompressedNbt(InputStream stream) throws IOException {
 		return nbtInternal(() -> {
@@ -333,23 +347,43 @@ public class MVMisc {
 			}
 		}, () -> NbtIo_readCompressed.get().invoke(null, stream));
 	}
-	public static void writeNbt(NbtCompound nbt, File file) throws IOException {
+	public static void writeNbt(NbtCompound nbt, OutputStream stream) throws IOException {
 		nbtInternal(() -> {
 			try {
-				NbtIo.write(nbt, file.toPath());
+				NbtIo.write(nbt, new DataOutputStream(stream));
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			}
-		}, () -> NbtIo_write.get().invoke(null, nbt, file));
+		}, () -> NbtIo_write.get().invoke(null, nbt, new DataOutputStream(stream)));
+	}
+	public static void writeCompressedNbt(NbtCompound nbt, OutputStream stream) throws IOException {
+		nbtInternal(() -> {
+			try {
+				NbtIo.writeCompressed(nbt, stream);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}, () -> NbtIo_writeCompressed.get().invoke(null, nbt, stream));
+	}
+	public static NbtCompound readNbt(File file) throws IOException {
+		try (FileInputStream stream = new FileInputStream(file)) {
+			return readNbt(stream);
+		}
+	}
+	public static NbtCompound readCompressedNbt(File file) throws IOException {
+		try (FileInputStream stream = new FileInputStream(file)) {
+			return readCompressedNbt(stream);
+		}
+	}
+	public static void writeNbt(NbtCompound nbt, File file) throws IOException {
+		try (FileOutputStream stream = new FileOutputStream(file)) {
+			writeNbt(nbt, stream);
+		}
 	}
 	public static void writeCompressedNbt(NbtCompound nbt, File file) throws IOException {
-		nbtInternal(() -> {
-			try {
-				NbtIo.writeCompressed(nbt, file.toPath());
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
-		}, () -> NbtIo_writeCompressed.get().invoke(null, nbt, file));
+		try (FileOutputStream stream = new FileOutputStream(file)) {
+			writeCompressedNbt(nbt, stream);
+		}
 	}
 	
 	public static String getClickEventActionName(ClickEvent.Action action) {
@@ -367,6 +401,41 @@ public class MVMisc {
 		// Should be .byName() until 1.20.2 and doesn't have a clear replacement at and after 1.20.3
 		// But this seems to be equivalent (at least currently)
 		return ClickEvent.Action.valueOf(name.toUpperCase());
+	}
+	
+	public static VertexConsumer beginDrawing(MatrixStack matrices, MVShader shader) {
+		return Version.<VertexConsumer>newSwitch()
+				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().getBuffer(shader.layer()))
+				.range(null, "1.19.4", () -> {
+					RenderSystem.setShader(shader.shader());
+					BufferBuilder builder = Tessellator.getInstance().getBuffer();
+					builder.begin(shader.layer().getDrawMode(), shader.layer().getVertexFormat());
+					return builder;
+				})
+				.get();
+	}
+	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_end =
+			Reflection.getOptionalMethod(BufferBuilder.class, "method_1326", MethodType.methodType(void.class));
+	private static final Supplier<Reflection.MethodInvoker> BufferRenderer_draw =
+			Reflection.getOptionalMethod(BufferRenderer.class, "method_1309", MethodType.methodType(void.class, BufferBuilder.class));
+	public static void endDrawing(MatrixStack matrices, VertexConsumer vertexConsumer) {
+		Version.newSwitch()
+				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().draw())
+				.range("1.19.0", "1.19.4", () -> BufferRenderer.drawWithGlobalProgram(((BufferBuilder) vertexConsumer).end()))
+				.range(null, "1.18.2", () -> {
+					BufferBuilder_end.get().invoke(vertexConsumer);
+					BufferRenderer_draw.get().invoke(null, vertexConsumer);
+				})
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> TextFieldWidget_setCursor =
+			Reflection.getOptionalMethod(TextFieldWidget.class, "method_1883", MethodType.methodType(void.class, int.class));
+	public static void setCursor(TextFieldWidget textField, int cursor) {
+		Version.newSwitch()
+				.range("1.20.2", null, () -> textField.setCursor(cursor, false))
+				.range(null, "1.20.1", () -> TextFieldWidget_setCursor.get().invoke(textField, cursor))
+				.run();
 	}
 	
 }

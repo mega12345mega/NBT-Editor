@@ -30,7 +30,12 @@ public class GetHelpCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return null;
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(argument("feature", EnumArgumentType.options(HelpType.class)).executes(context -> {
 			context.getSource().sendFeedback(TextUtil.getLongTranslatableText(context.getArgument("feature", HelpType.class).msgKey));
 			return Command.SINGLE_SUCCESS;

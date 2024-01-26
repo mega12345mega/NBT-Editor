@@ -62,6 +62,8 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 	public static EffectListArgumentType effectList() {
 		return new EffectListArgumentType();
 	}
+	
+	private EffectListArgumentType() {}
 
 	@SuppressWarnings("unchecked")
 	public static Collection<StatusEffectInstance> getStatusEffectInstance(CommandContext<ServerCommandSource> context, String name) {

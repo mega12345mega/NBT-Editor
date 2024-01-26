@@ -23,7 +23,12 @@ public class GetSoupCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "s";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		Command<FabricClientCommandSource> getSoup = context -> {
 			int duration = getDefaultArg(context, "duration", 5, Integer.class);
 			

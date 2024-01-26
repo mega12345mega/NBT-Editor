@@ -2,19 +2,23 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ButtonDropdownWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.block.AbstractSignBlock;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.SignItem;
 import net.minecraft.nbt.NbtCompound;
@@ -24,8 +28,10 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
 
 public class SignboardScreen extends ItemEditorScreen {
 	
@@ -60,7 +66,7 @@ public class SignboardScreen extends ItemEditorScreen {
 		SignboardScreen screen = new SignboardScreen(ref);
 		screen.newFeatures = !NEW_FEATURES;
 		boolean glowing = screen.isGlowing();
-		Formatting color = screen.getColor();
+		DyeColor color = screen.getColor();
 		List<Text> lines = screen.getLines();
 		screen.newFeatures = NEW_FEATURES;
 		screen.setGlowing(glowing);
@@ -68,6 +74,16 @@ public class SignboardScreen extends ItemEditorScreen {
 		screen.setLines(lines);
 		ref.saveItem(screen.item, () -> MainUtil.client.player.sendMessage(
 				TextInst.translatable("nbteditor.signboard.import.success", version), false));
+	}
+	
+	private static int getRenderedColor(DyeColor color) {
+		if (color == DyeColor.BLACK)
+			return -988212;
+		int rgb = color.getSignColor();
+		int r = (int) (ColorHelper.Argb.getRed(rgb) * 0.4D);
+		int g = (int) (ColorHelper.Argb.getGreen(rgb) * 0.4D);
+		int b = (int) (ColorHelper.Argb.getBlue(rgb) * 0.4D);
+		return ColorHelper.Argb.getArgb(0, r, g, b);
 	}
 	
 	private boolean newFeatures;
@@ -127,17 +143,15 @@ public class SignboardScreen extends ItemEditorScreen {
 		return sideTag != null && sideTag.getBoolean(newFeatures ? "has_glowing_text" : "GlowingText");
 	}
 	
-	private void setColor(Formatting color) {
+	private void setColor(DyeColor color) {
 		getBlockSideTag(true).putString(newFeatures ? "color" : "Color", color.getName());
+		checkSave();
 	}
-	private Formatting getColor() {
+	private DyeColor getColor() {
 		NbtCompound sideTag = getBlockSideTag(false);
 		if (sideTag == null)
-			return Formatting.BLACK;
-		Formatting color = Formatting.byName(sideTag.getString(newFeatures ? "color" : "Color"));
-		if (color == null || !color.isColor())
-			return Formatting.BLACK;
-		return color;
+			return DyeColor.BLACK;
+		return DyeColor.byName(sideTag.getString(newFeatures ? "color" : "Color"), DyeColor.BLACK);
 	}
 	
 	private void setLines(List<Text> lines) {
@@ -219,18 +233,52 @@ public class SignboardScreen extends ItemEditorScreen {
 				btn.setMessage(TextInst.translatable("nbteditor.signboard.wax." + (prevWaxed ? "disabled" : "enabled")));
 			}));
 		}
-		addDrawableChild(MVMisc.newButton(16 + (newFeatures ? 104 * 2 : 0), 64, 100, 20,
-				TextInst.translatable("nbteditor.signboard.glowing." + (isGlowing() ? "enabled" : "disabled")), btn -> {
+		
+		int glowingBtnX = 16 + (newFeatures ? 104 * 2 : 0);
+		int glowingBtnY = 64;
+		AtomicReference<ButtonWidget> glowingBtn = new AtomicReference<>();
+		
+		ButtonDropdownWidget colors = addSelectableChild(new ButtonDropdownWidget(glowingBtnX, glowingBtnY + 20, 20, 20, null, 20, 20) {
+			@Override
+			public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+				matrices.push();
+				matrices.translate(0.0, 0.0, 2.0);
+				super.render(matrices, mouseX, mouseY, delta);
+				matrices.pop();
+			}
+		});
+		for (DyeColor color : DyeColor.values()) {
+			colors.addButton(TextInst.literal("⬛").styled(style -> style.withColor(getRenderedColor(color))), btn -> {
+				setColor(color);
+				colors.setOpen(false);
+				glowingBtn.get().setMessage(TextInst.translatable("nbteditor.signboard.glowing.enabled")
+						.styled(style -> style.withColor(getRenderedColor(getColor()))));
+			}, new MVTooltip(TextInst.of(color.getName())));
+		}
+		colors.build();
+		
+		glowingBtn.set(addDrawableChild(MVMisc.newButton(glowingBtnX, glowingBtnY, 100, 20,
+				TextInst.translatable("nbteditor.signboard.glowing." + (isGlowing() ? "enabled" : "disabled"))
+				.styled(style -> style.withColor(getRenderedColor(getColor()))), btn -> {
 			boolean prevGlowing = isGlowing();
+			if (prevGlowing && hasShiftDown()) {
+				colors.setOpen(true);
+				return;
+			}
 			setGlowing(!prevGlowing);
-			btn.setMessage(TextInst.translatable("nbteditor.signboard.glowing." + (prevGlowing ? "disabled" : "enabled")));
-		}));
+			btn.setMessage(TextInst.translatable("nbteditor.signboard.glowing." + (prevGlowing ? "disabled" : "enabled"))
+					.styled(style -> style.withColor(getRenderedColor(getColor()))));
+			if (!prevGlowing)
+				colors.setOpen(true);
+		}, new MVTooltip("nbteditor.signboard.glowing.desc"))));
 		
 		lines = addDrawableChild(FormattedTextFieldWidget.create(lines, 16, 64 + 24, width - 32, height - 80 - 24,
-				getLines(), Style.EMPTY.withColor(getColor()), this::setLines));
+				getLines(), Style.EMPTY.withColor(Formatting.BLACK), this::setLines));
 		lines.setMaxLines(4);
 		lines.setBackgroundColor(0);
 		lines.setShadow(false);
+		
+		addDrawable(colors); // Render on top of FormattedTextFieldWidget highlights
 	}
 	
 	@Override

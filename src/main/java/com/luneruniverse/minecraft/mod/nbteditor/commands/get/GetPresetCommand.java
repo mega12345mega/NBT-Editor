@@ -50,7 +50,12 @@ public class GetPresetCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return null;
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		presetItems.forEach((name, item) -> {
 			builder.then(literal(name).executes(context -> {
 				MainUtil.getWithMessage(item.get().copy());

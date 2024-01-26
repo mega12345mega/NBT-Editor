@@ -45,7 +45,12 @@ public class GetLostItemCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "li";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(literal("history").executes(context -> {
 			CursorHistoryScreen.show(history);
 			return Command.SINGLE_SUCCESS;

@@ -23,7 +23,12 @@ public class NameCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "n";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(argument("name", FancyTextArgumentType.fancyText()).executes(context -> {
 			Text name = context.getArgument("name", Text.class);
 			ItemReference ref = ItemReference.getHeldItem();

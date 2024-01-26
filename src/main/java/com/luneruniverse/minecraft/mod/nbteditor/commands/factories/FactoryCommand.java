@@ -26,6 +26,7 @@ public class FactoryCommand extends ClientCommandGroup {
 				new SignatureCommand(),
 				new SignboardCommand(),
 				new UnbindSkullCommand(),
+				new UnbreakableCommand(),
 				new UnstackableCommand())));
 	}
 	
@@ -35,13 +36,18 @@ public class FactoryCommand extends ClientCommandGroup {
 	}
 	
 	@Override
+	public String getExtremeAlias() {
+		return "if";
+	}
+	
+	@Override
 	public boolean allowShortcuts() {
 		return true;
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
-		super.register(builder);
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
+		super.register(builder, path);
 		builder.executes(context -> {
 			MainUtil.client.setScreen(new ItemFactoryScreen(ItemReference.getHeldItem()));
 			return Command.SINGLE_SUCCESS;

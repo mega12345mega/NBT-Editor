@@ -3,6 +3,8 @@
 	"nbteditor.outdated.title": "NBT Editor Outdated",
 	"nbteditor.outdated.desc": "A new update has been released!",
 	
+	"nbteditor.nbt_ac.tip": "Download NBT Autocomplete for suggestions",
+	
 	
 	"nbteditor.ok": "Ok",
 	"nbteditor.cancel": "Cancel",
@@ -77,6 +79,8 @@
 	"nbteditor.client_chest.slots.unlock": "Unlock Slots",
 	"nbteditor.client_chest.reload_page": "Reload Page",
 	"nbteditor.client_chest.clear_page": "Clear Page",
+	"nbteditor.client_chest.page_name": "Page Name",
+	"nbteditor.client_chest.name_not_found": "There isn't any page with that name!",
 	
 	"nbteditor.client_chest.clear_page.title": "Are you sure?",
 	"nbteditor.client_chest.clear_page.desc": "This will permanently delete all 54 items in this page!",
@@ -126,10 +130,19 @@
 	"nbteditor.hide_flags.misc": "Misc",
 	"nbteditor.hide_flags.dyed_color": "Dyed Armor Color",
 	
+	"nbteditor.item_size.uncompressed": "§6NBT Size: %s",
+	"nbteditor.item_size.compressed": "§6NBT Size (Compressed): %s",
 	"nbteditor.keybind.enchant": "§6§lCtrl + Click§r§6 to apply!",
 	"nbteditor.keybind.edit": "§6§lSpace§r§6 to edit!",
 	"nbteditor.keybind.container": "§6§lCtrl + Space§r§6 to open container!",
 	"nbteditor.keybind.item_factory": "§6§lShift + Space§r§6 to open the factory!",
+	"nbteditor.keybind.page.up": "§6§lPage Up",
+	"nbteditor.keybind.page.down": "§6§lPage Down",
+	"nbteditor.keybind.page.shift": "§6§lShift+",
+	"nbteditor.keybind.page.next": "§6 to the next page!",
+	"nbteditor.keybind.page.prev": "§6 to the previous page!",
+	"nbteditor.keybind.page.next_jump": "\n§6to jump to the next page!",
+	"nbteditor.keybind.page.prev_jump": "\n§6to jump to the previous page!",
 	
 	"nbteditor.unbind_skull.no_textures": "That head hasn't loaded any textures yet!",
 	"nbteditor.unbind_skull.unbound": "§aHead unbound!",
@@ -156,6 +169,9 @@
 	"nbteditor.enchantments.enchantment": "Enchantment",
 	"nbteditor.enchantments.level": "Level",
 	"nbteditor.enchantments.tip": "You can Ctrl+Click enchanted books onto items in supported inventories",
+	
+	"nbteditor.unbreakable.enabled": "§aItem toggled to §9unbreakable§a!",
+	"nbteditor.unbreakable.disabled": "§aItem toggled to §7breakable§a!",
 	
 	"nbteditor.unstackable.msg": "§aItem is now unstackable! [Hover for more info]",
 	"nbteditor.unstackable.hover_msg": "A random UUID was added.\nWhen cloning the item, make\nsure to re-run this command\nfor all the individual items.",
@@ -186,6 +202,7 @@
 	"nbteditor.signboard.wax.disabled": "☐ Waxed",
 	"nbteditor.signboard.glowing.enabled": "☑ Glowing",
 	"nbteditor.signboard.glowing.disabled": "☐ Glowing",
+	"nbteditor.signboard.glowing.desc": "Use shift to open color selector",
 	"nbteditor.signboard.import.success": "§aSign updated to %s",
 	"nbteditor.signboard.import.fail": "§cSign is already %s",
 	
@@ -201,6 +218,7 @@
 	"nbteditor.formatted_text.click_event_value": "Click Event Value",
 	"nbteditor.formatted_text.hover_event_value": "Hover Event Value",
 	"nbteditor.formatted_text.tip": "Use Ctrl+Shift+C for custom colors & Ctrl+Shift+E for events",
+	"nbteditor.color_selector.hue": "Hue: %d°",
 	
 	"nbteditor.config": "NBT Editor Config",
 	"nbteditor.config.category.mc": "Minecraft Tweaks",
@@ -208,7 +226,7 @@
 	"nbteditor.config.category.functional": "Functional",
 	"nbteditor.config.shortcuts": "Group Shortcuts",
 	"nbteditor.config.shortcuts.desc": "Create command shortcuts like calling\n/lore instead of /itemfactory display lore",
-	"nbteditor.config.shortcuts.example": "Example: \"get hdb\" creates the shortcut /hdb",
+	"nbteditor.config.shortcuts.example": "Example: \"get hdb\" creates the shortcut \"/hdb\"",
 	"nbteditor.config.enchant_level_max": "Max Enchant Level Display",
 	"nbteditor.config.enchant_level_max.desc": "Toggle showing the maximum enchantment\nlevel after the enchantment",
 	"nbteditor.config.enchant_level_max.never": "Never",
@@ -282,6 +300,28 @@
 	"nbteditor.config.special_numbers.desc": "Allow entering §6NaN§cd§r, §6Infinity§cf§r, §6-Infinity§cd§r, etc.\ninto the nbt editor\nThis is not consistent with /data (MC-200070)",
 	"nbteditor.config.special_numbers.enabled": "Enabled",
 	"nbteditor.config.special_numbers.disabled": "Disabled",
+	"nbteditor.config.aliases": "Aliases",
+	"nbteditor.config.aliases.desc": "Create command aliases like calling\n/if instead of /itemfactory",
+	"nbteditor.config.aliases.example": "Example: \"nbteditor export | x\" creates the alias \"/nbteditor x\"",
+	"nbteditor.config.aliases.extreme": "+ Extreme Aliases",
+	"nbteditor.config.aliases.extreme.desc": "Add the default \"extreme\" aliases,\nmost being a single character long\n§oFor the most dedicated NBT Editor users",
+	"nbteditor.config.item_size": "Item Size",
+	"nbteditor.config.item_size.desc": "Display the item size in bytes, kb, etc.\non the tooltip",
+	"nbteditor.config.item_size.hidden": "Hidden",
+	"nbteditor.config.item_size.auto": "Auto",
+	"nbteditor.config.item_size.byte": "Byte",
+	"nbteditor.config.item_size.kilobyte": "Kilobyte",
+	"nbteditor.config.item_size.megabyte": "Megabyte",
+	"nbteditor.config.item_size.gigabyte": "Gigabyte",
+	"nbteditor.config.item_size.auto_compressed": "Auto (Compressed)",
+	"nbteditor.config.item_size.byte_compressed": "Byte (Compressed)",
+	"nbteditor.config.item_size.kilobyte_compressed": "Kilobyte (Compressed)",
+	"nbteditor.config.item_size.megabyte_compressed": "Megabyte (Compressed)",
+	"nbteditor.config.item_size.gigabyte_compressed": "Gigabyte (Compressed)",
+	"nbteditor.config.page_keybinds": "Page Keybinds",
+	"nbteditor.config.page_keybinds.desc": "Whether Page Up increases the page number (Normal)\nor goes to the previous page (Inverted)\nin the client chest",
+	"nbteditor.config.page_keybinds.normal": "Normal",
+	"nbteditor.config.page_keybinds.inverted": "Inverted",
 	
 	
 	"nbteditor.configurable.list.move": "Move",

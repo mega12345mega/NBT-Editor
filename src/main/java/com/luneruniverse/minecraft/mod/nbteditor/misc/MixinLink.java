@@ -35,6 +35,8 @@ import net.minecraft.text.Style;
 // Non-mixin classes in the mixin package doesn't work well
 public class MixinLink {
 	
+	public static boolean CLIENT_LOADED = false;
+	
 	public static void addCreativeTabs(Screen source) {
 		int i = -1;
 		List<CreativeTab> tabs = new ArrayList<>();

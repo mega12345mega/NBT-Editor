@@ -18,9 +18,9 @@ public abstract class ClientCommandGroup extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		for (ClientCommand child : children)
-			child.registerAll(builder::then);
+			child.registerAll(builder::then, path + " " + child.getName());
 	}
 	
 	@Override
@@ -31,7 +31,7 @@ public abstract class ClientCommandGroup extends ClientCommand {
 		
 		if (path.size() > index) {
 			String next = path.get(index);
-			return children.stream().filter(cmd -> cmd.getName().equals(next) || (cmd.getAliases() != null && cmd.getAliases().contains(next)))
+			return children.stream().filter(cmd -> cmd.getName().equals(next))
 					.findFirst().map(cmd -> cmd.getShortcut(path, index + 1)).orElse(null);
 		}
 		return null;

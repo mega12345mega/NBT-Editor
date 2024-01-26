@@ -12,5 +12,5 @@ public interface MVDrawable extends Drawable {
 	public default void method_25394(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		render(matrices, mouseX, mouseY, delta);
 	}
-	public void render(MatrixStack context, int mouseX, int mouseY, float delta);
+	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta);
 }

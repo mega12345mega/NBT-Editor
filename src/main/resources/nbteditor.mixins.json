@@ -27,9 +27,10 @@
     "ScreenshotRecorderMixin",
     "UtilMixin",
     "KeyboardMixin",
-    "AbstractParentElementMixin",
     "PlayerScreenHandler1Mixin",
-    "WrittenBookItemMixin"
+    "WrittenBookItemMixin",
+    "GameRendererMixin",
+    "ChatInputSuggestorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

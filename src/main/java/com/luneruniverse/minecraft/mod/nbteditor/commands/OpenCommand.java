@@ -22,7 +22,12 @@ public class OpenCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "o";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.executes(context -> {
 			ContainerScreen.show(ItemReference.getHeldItem(ContainerIO::isContainer, TextInst.translatable("nbteditor.no_hand.no_item.container")));
 			return Command.SINGLE_SUCCESS;

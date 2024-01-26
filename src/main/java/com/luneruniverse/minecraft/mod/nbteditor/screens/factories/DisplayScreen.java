@@ -33,7 +33,7 @@ public class DisplayScreen extends ItemEditorScreen {
 				false, Style.EMPTY.withFormatting(Formatting.ITALIC, item.getRarity().formatting), text -> {
 			item.setCustomName(text);
 			checkSave();
-		});
+		}).setOverscroll(false);
 		int loreY = 64 + 24 + textRenderer.fontHeight * 3 + 4;
 		lore = FormattedTextFieldWidget.create(lore, 16, loreY, width - 32, height - 16 - 20 - 4 - loreY,
 				new Lore(item).getLore(), Style.EMPTY.withFormatting(Formatting.ITALIC, Formatting.DARK_PURPLE), lines -> {

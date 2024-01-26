@@ -66,18 +66,23 @@ public class NBTEditorAPI {
 	 * </code>
 	 * </pre>
 	 * @param name The name of the item factory (used in the itemfactory command)
+	 * @param extremeAlias The extreme alias
 	 * @param onRegister A consumer for the {@code /itemfactory <name>} argument builder
 	 * @see #registerItemFactory(String, Consumer)
 	 * @see #registerItemFactory(String, Text, Consumer)
 	 */
-	public static void registerAdvancedItemFactory(String name, Consumer<LiteralArgumentBuilder<FabricClientCommandSource>> onRegister) {
+	public static void registerAdvancedItemFactory(String name, String extremeAlias, Consumer<LiteralArgumentBuilder<FabricClientCommandSource>> onRegister) {
 		FactoryCommand.INSTANCE.getChildren().add(new ClientCommand() {
 			@Override
 			public String getName() {
 				return name;
 			}
 			@Override
-			public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+			public String getExtremeAlias() {
+				return extremeAlias;
+			}
+			@Override
+			public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 				onRegister.accept(builder);
 			}
 		});
@@ -86,12 +91,13 @@ public class NBTEditorAPI {
 	/**
 	 * Register a normal item factory
 	 * @param name The name of the item factory (used in the itemfactory command)
+	 * @param extremeAlias The extreme alias
 	 * @param factory A consumer for the {@link ItemReference} the factory is called on
 	 * @see #registerItemFactory(String, Text, Consumer)
 	 * @see #registerAdvancedItemFactory(String, Consumer)
 	 */
-	public static void registerItemFactory(String name, Consumer<ItemReference> factory) {
-		registerAdvancedItemFactory(name, builder -> builder.executes(context -> {
+	public static void registerItemFactory(String name, String extremeAlias, Consumer<ItemReference> factory) {
+		registerAdvancedItemFactory(name, extremeAlias, builder -> builder.executes(context -> {
 			factory.accept(ItemReference.getHeldItem());
 			return Command.SINGLE_SUCCESS;
 		}));
@@ -100,14 +106,15 @@ public class NBTEditorAPI {
 	/**
 	 * Register a normal item factory, adding it to the factory gui
 	 * @param name The name of the item factory (used in the itemfactory command)
+	 * @param extremeAlias The extreme alias
 	 * @param buttonMsg The text to display in the itemfactory gui
 	 * @param supported If the button should display for the current item
 	 * @param factory A consumer for the {@link ItemReference} the factory is called on
 	 * @see #registerItemFactory(String, Consumer)
 	 * @see #registerAdvancedItemFactory(String, Consumer)
 	 */
-	public static void registerItemFactory(String name, Text buttonMsg, Predicate<ItemReference> supported, Consumer<ItemReference> factory) {
-		registerItemFactory(name, factory);
+	public static void registerItemFactory(String name, String extremeAlias, Text buttonMsg, Predicate<ItemReference> supported, Consumer<ItemReference> factory) {
+		registerItemFactory(name, extremeAlias, factory);
 		ItemFactoryScreen.BASIC_FACTORIES.add(new ItemFactoryScreen.ItemFactoryReference(buttonMsg, supported, factory));
 	}
 	
@@ -116,18 +123,23 @@ public class NBTEditorAPI {
 	 * Keep in mind NBT Editor uses a modified version of Fabric's command API to support multiple Minecraft versions<br>
 	 * Refer to the {@link com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands} package<br>
 	 * @param name The name of the item that will be received (used in the get command)
+	 * @param extremeAlias The extreme alias
 	 * @param onRegister A consumer for the {@code /get <name>} argument builder
 	 * @see #registerAdvancedItemFactory(String, Consumer) An example of using onRegister
 	 * @see MainUtil#getWithMessage(ItemStack)
 	 */
-	public static void registerGetCommand(String name, Consumer<LiteralArgumentBuilder<FabricClientCommandSource>> onRegister) {
+	public static void registerGetCommand(String name, String extremeAlias, Consumer<LiteralArgumentBuilder<FabricClientCommandSource>> onRegister) {
 		GetCommand.INSTANCE.getChildren().add(new ClientCommand() {
 			@Override
 			public String getName() {
 				return name;
 			}
 			@Override
-			public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+			public String getExtremeAlias() {
+				return extremeAlias;
+			}
+			@Override
+			public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 				onRegister.accept(builder);
 			}
 		});

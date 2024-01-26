@@ -16,7 +16,12 @@ public class HideFlagsCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "hf";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.executes(context -> {
 			MainUtil.client.setScreen(new HideFlagsScreen(ItemReference.getHeldItem()));
 			return Command.SINGLE_SUCCESS;

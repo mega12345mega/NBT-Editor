@@ -29,13 +29,13 @@ public class NBTCommand extends ClientCommandGroup {
 	}
 	
 	@Override
-	public List<String> getAliases() {
-		return List.of("nbt");
+	public String getExtremeAlias() {
+		return "n";
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
-		super.register(builder);
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
+		super.register(builder, path);
 		builder.executes(context -> {
 			MainUtil.client.setScreen(new NBTEditorScreen(
 					ConfigScreen.isAirEditable() ? ItemReference.getHeldItemAirable() : ItemReference.getHeldItem()));

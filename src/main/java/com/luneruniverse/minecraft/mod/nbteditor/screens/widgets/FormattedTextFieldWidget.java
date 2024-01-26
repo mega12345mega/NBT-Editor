@@ -3,7 +3,9 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import org.lwjgl.glfw.GLFW;
@@ -20,9 +22,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
+import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -127,12 +129,10 @@ public class FormattedTextFieldWidget extends GroupWidget {
 						HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, hoverEvent)
 						.result().orElseThrow().getAsJsonObject().get("contents")));
 				
-				TextRenderer textRenderer = MainUtil.client.textRenderer;
-				
 				clickActionDropdown = new ConfigValueDropdownEnum<>(ClickAction.get(clickAction), ClickAction.NONE, ClickAction.class);
 				clickActionDropdown.setWidth(150);
 				clickActionField = addElement(TranslatedGroupWidget.forWidget(clickActionDropdown, 0, 0, 0));
-				clickValueField = addWidget(new NamedTextFieldWidget(textRenderer, 0, 0, 150, 16, TextInst.of("")))
+				clickValueField = addWidget(new NamedTextFieldWidget(0, 0, 150, 16))
 						.name(TextInst.translatable("nbteditor.formatted_text.click_event_value"));
 				clickValueField.setMaxLength(Integer.MAX_VALUE);
 				clickValueField.setText(clickValue);
@@ -141,7 +141,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				hoverActionDropdown.setWidth(150);
 				hoverActionDropdown.addValueListener(value -> updateOk());
 				hoverActionField = addElement(TranslatedGroupWidget.forWidget(hoverActionDropdown, 0, 0, 0));
-				hoverValueField = addWidget(new NamedTextFieldWidget(textRenderer, 0, 0, 150, 16, TextInst.of("")))
+				hoverValueField = addWidget(new NamedTextFieldWidget(0, 0, 150, 16))
 						.name(TextInst.translatable("nbteditor.formatted_text.hover_event_value"));
 				hoverValueField.setMaxLength(Integer.MAX_VALUE);
 				hoverValueField.setText(hoverValue);
@@ -394,10 +394,8 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		}
 		private void showCustomColor() {
 			Style initialStyle = getInitialCustomStyle();
-			OverlaySupportingScreen.setOverlayStatic(new StringInputWidget(
-					initialStyle.getColor() == null ? "#FFFFFF" : initialStyle.getColor().getHexCode(), str -> {
-				int rgb = Integer.parseInt(str.substring(1), 16);
-				
+			OverlaySupportingScreen.setOverlayStatic(new InputOverlay<>(new ColorSelectorWidget.ColorSelectorInput(
+					initialStyle.getColor() == null ? -1 : initialStyle.getColor().getRgb()), rgb -> {
 				int start = getSelStart();
 				int end = getSelEnd();
 				
@@ -423,7 +421,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				onEdit("", start, 0);
 				generateLines();
 				onChange.accept(text);
-			}, str -> str.matches("#[0-9a-fA-F]{6}"), widget -> OverlaySupportingScreen.setOverlayStatic(null)));
+			}, () -> OverlaySupportingScreen.setOverlayStatic(null)));
 		}
 		private void showEvents() {
 			Style initialStyle = getInitialCustomStyle();
@@ -748,6 +746,15 @@ public class FormattedTextFieldWidget extends GroupWidget {
 	}
 	public FormattedTextFieldWidget setShadow(boolean shadow) {
 		field.setShadow(shadow);
+		return this;
+	}
+	public FormattedTextFieldWidget setOverscroll(boolean overscroll) {
+		field.setOverscroll(overscroll);
+		return this;
+	}
+	
+	public FormattedTextFieldWidget suggest(Screen screen, BiFunction<String, Integer, CompletableFuture<Suggestions>> suggestions) {
+		field.suggest(screen, suggestions);
 		return this;
 	}
 	

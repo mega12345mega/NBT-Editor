@@ -23,7 +23,12 @@ public class BookCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "b";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(literal("new").executes(context -> {
 			ItemReference ref = ItemReference.getHeldAir();
 			ItemStack book = new ItemStack(Items.WRITTEN_BOOK);

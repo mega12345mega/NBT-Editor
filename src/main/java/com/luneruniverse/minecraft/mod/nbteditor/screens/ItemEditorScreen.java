@@ -64,7 +64,7 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 	protected final void init() {
 		super.init();
 		
-		name = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8, 100, 16, TextInst.of("")) {
+		name = new NamedTextFieldWidget(16 + (32 + 8) * 2, 16 + 8, 100, 16) {
 			@Override
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				if (isNameEditable())

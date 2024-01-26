@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.SystemUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
@@ -110,6 +112,44 @@ public class ConfigScreen extends TickableSupportingScreen {
 		}
 	}
 	
+	public static record Alias(String original, String alias) {}
+	
+	public enum ItemSizeFormat {
+		HIDDEN("nbteditor.config.item_size.hidden", -1, false),
+		AUTO("nbteditor.config.item_size.auto", 0, false),
+		AUTO_COMPRESSED("nbteditor.config.item_size.auto_compressed", 0, true),
+		BYTE("nbteditor.config.item_size.byte", 1, false),
+		KILOBYTE("nbteditor.config.item_size.kilobyte", 1000, false),
+		MEGABYTE("nbteditor.config.item_size.megabyte", 1000000, false),
+		GIGABYTE("nbteditor.config.item_size.gigabyte", 1000000000, false),
+		BYTE_COMPRESSED("nbteditor.config.item_size.byte_compressed", 1, true),
+		KILOBYTE_COMPRESSED("nbteditor.config.item_size.kilobyte_compressed", 1000, true),
+		MEGABYTE_COMPRESSED("nbteditor.config.item_size.megabyte_compressed", 1000000, true),
+		GIGABYTE_COMPRESSED("nbteditor.config.item_size.gigabyte_compressed", 1000000000, true);
+		
+		private final Text label;
+		private final int magnitude;
+		private final boolean compressed;
+		
+		private ItemSizeFormat(String key, int magnitude, boolean compressed) {
+			this.label = TextInst.translatable(key);
+			this.magnitude = magnitude;
+			this.compressed = compressed;
+		}
+		
+		public int getMagnitude() {
+			return magnitude;
+		}
+		public boolean isCompressed() {
+			return compressed;
+		}
+		
+		@Override
+		public String toString() {
+			return label.getString();
+		}
+	}
+	
 	private static EnchantLevelMax enchantLevelMax;
 	private static boolean enchantNumberTypeArabic;
 	private static double keyTextSize;
@@ -129,6 +169,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 	private static boolean noArmorRestriction;
 	private static boolean hideFormatButtons;
 	private static boolean specialNumbers;
+	private static List<Alias> aliases;
+	private static ItemSizeFormat itemSizeFormat;
+	private static boolean invertedPageKeybinds;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -138,7 +181,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		chatLimitExtended = false;
 		singleQuotesAllowed = false;
 		macScrollPatch = MinecraftClient.IS_SYSTEM_MAC;
-		scrollSpeed = 1;
+		scrollSpeed = 5;
 		airEditable = false;
 		jsonText = false;
 		shortcuts = new ArrayList<>();
@@ -149,6 +192,13 @@ public class ConfigScreen extends TickableSupportingScreen {
 		noArmorRestriction = false;
 		hideFormatButtons = false;
 		specialNumbers = true;
+		aliases = new ArrayList<>(List.of(
+				new Alias("nbteditor", "nbt"),
+				new Alias("clientchest", "chest"),
+				new Alias("clientchest", "storage"),
+				new Alias("itemfactory signature", "sign")));
+		itemSizeFormat = ItemSizeFormat.HIDDEN;
+		invertedPageKeybinds = false;
 		
 		try {
 			// Many config options use the old names
@@ -165,7 +215,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 			scrollSpeed = settings.get("scrollSpeed").getAsDouble();
 			airEditable = settings.get("airEditable").getAsBoolean();
 			jsonText = settings.get("jsonText").getAsBoolean();
-			shortcuts = StreamSupport.stream(settings.get("shortcuts").getAsJsonArray().spliterator(), false)
+			shortcuts = getStream(settings.get("shortcuts").getAsJsonArray())
 					.map(cmd -> cmd.getAsString()).collect(Collectors.toList());
 			JsonPrimitive checkUpdatesLegacy = settings.get("checkUpdates").getAsJsonPrimitive();
 			checkUpdates = checkUpdatesLegacy.isBoolean() ?
@@ -177,6 +227,11 @@ public class ConfigScreen extends TickableSupportingScreen {
 			noArmorRestriction = settings.get("noArmorRestriction").getAsBoolean();
 			hideFormatButtons = settings.get("hideFormatButtons").getAsBoolean();
 			specialNumbers = settings.get("specialNumbers").getAsBoolean();
+			aliases = getStream(settings.get("aliases").getAsJsonArray())
+					.map(alias -> new Alias(alias.getAsJsonObject().get("original").getAsString(),
+							alias.getAsJsonObject().get("alias").getAsString())).collect(Collectors.toList());
+			itemSizeFormat = ItemSizeFormat.valueOf(settings.get("itemSize").getAsString());
+			invertedPageKeybinds = settings.get("invertedPageKeybinds").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -205,12 +260,24 @@ public class ConfigScreen extends TickableSupportingScreen {
 		settings.addProperty("noArmorRestriction", noArmorRestriction);
 		settings.addProperty("hideFormatButtons", hideFormatButtons);
 		settings.addProperty("specialNumbers", specialNumbers);
+		settings.add("aliases", aliases.stream().map(alias -> {
+			JsonObject obj = new JsonObject();
+			obj.addProperty("original", alias.original);
+			obj.addProperty("alias", alias.alias);
+			return obj;
+		}).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+		settings.addProperty("itemSize", itemSizeFormat.name());
+		settings.addProperty("invertedPageKeybinds", invertedPageKeybinds);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
 		} catch (IOException e) {
 			NBTEditor.LOGGER.error("Error while saving settings", e);
 		}
+	}
+	// jsonArray.asList().stream() doesn't exist in 1.17
+	private static Stream<JsonElement> getStream(JsonArray jsonArray) {
+		return StreamSupport.stream(jsonArray.spliterator(), false);
 	}
 	
 	public static EnchantLevelMax getEnchantLevelMax() {
@@ -276,6 +343,15 @@ public class ConfigScreen extends TickableSupportingScreen {
 	}
 	public static boolean isSpecialNumbers() {
 		return specialNumbers;
+	}
+	public static List<Alias> getAliases() {
+		return aliases;
+	}
+	public static ItemSizeFormat getItemSizeFormat() {
+		return itemSizeFormat;
+	}
+	public static boolean isInvertedPageKeybinds() {
+		return invertedPageKeybinds;
 	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
@@ -365,7 +441,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		// ---------- GUIs ----------
 		
 		guis.setConfigurable("scrollSpeed", new ConfigItem<>(TextInst.translatable("nbteditor.config.scroll_speed"),
-				ConfigValueSlider.forDouble(100, scrollSpeed, 1, 0.5, 2, 0.05, value -> TextInst.literal(String.format("%.2f", value)))
+				ConfigValueSlider.forDouble(100, scrollSpeed, 5, 0.5, 10, 0.05, value -> TextInst.literal(String.format("%.2f", value)))
 				.addValueListener(value -> scrollSpeed = value.getValidValue()))
 				.setTooltip("nbteditor.config.scroll_speed.desc"));
 		
@@ -385,6 +461,16 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.addValueListener(value -> keybindsHidden = value.getValidValue()))
 				.setTooltip("nbteditor.config.keybinds.desc"));
 		
+		guis.setConfigurable("invertedPageKeybinds", new ConfigItem<>(TextInst.translatable("nbteditor.config.page_keybinds"),
+				new ConfigValueBoolean(invertedPageKeybinds, false, 100, TextInst.translatable("nbteditor.config.page_keybinds.inverted"), TextInst.translatable("nbteditor.config.page_keybinds.normal"))
+				.addValueListener(value -> invertedPageKeybinds = value.getValidValue()))
+				.setTooltip("nbteditor.config.page_keybinds.desc"));
+		
+		guis.setConfigurable("itemSize", new ConfigItem<>(TextInst.translatable("nbteditor.config.item_size"),
+				new ConfigValueDropdownEnum<>(itemSizeFormat, ItemSizeFormat.HIDDEN, ItemSizeFormat.class)
+				.addValueListener(value -> itemSizeFormat = value.getValidValue()))
+				.setTooltip("nbteditor.config.item_size.desc"));
+		
 		guis.setConfigurable("keyTextSize", new ConfigItem<>(TextInst.translatable("nbteditor.config.key_text_size"),
 				ConfigValueSlider.forDouble(100, keyTextSize, 0.5, 0.5, 1, 0.05, value -> TextInst.literal(String.format("%.2f", value)))
 				.addValueListener(value -> keyTextSize = value.getValidValue()))
@@ -396,6 +482,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.setTooltip("nbteditor.config.check_updates.desc"));
 		
 		// ---------- FUNCTIONAL ----------
+		
+		functional.setConfigurable("aliases", new ConfigButton(100, TextInst.translatable("nbteditor.config.aliases"),
+				btn -> client.setScreen(new AliasesScreen(this)), new MVTooltip("nbteditor.config.aliases.desc")));
 		
 		functional.setConfigurable("shortcuts", new ConfigButton(100, TextInst.translatable("nbteditor.config.shortcuts"),
 				btn -> client.setScreen(new ShortcutsScreen(this)), new MVTooltip("nbteditor.config.shortcuts.desc")));

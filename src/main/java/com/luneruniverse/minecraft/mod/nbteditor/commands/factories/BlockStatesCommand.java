@@ -19,7 +19,12 @@ public class BlockStatesCommand extends ClientCommand {
 	}
 	
 	@Override
-	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+	public String getExtremeAlias() {
+		return "bs";
+	}
+	
+	@Override
+	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.executes(context -> {
 			MainUtil.client.setScreen(new BlockStatesScreen(ItemReference.getHeldItem(
 					item -> item.getItem() instanceof BlockItem, TextInst.translatable("nbteditor.no_hand.no_item.block"))));

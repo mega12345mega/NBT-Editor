@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.integrations.NBTAutocompleteIntegration;
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
@@ -26,13 +27,16 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.TextAreaScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.SuggestingTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.client.gui.screen.ConfirmScreen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -107,7 +111,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	private NamedTextFieldWidget count;
 	
 	private NamedTextFieldWidget path;
-	private NamedTextFieldWidget value;
+	private SuggestingTextFieldWidget value;
 	private List2D editor;
 	private Map<String, Integer> scrollPerFolder;
 	
@@ -182,7 +186,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		
 		
 		
-		type = new NamedTextFieldWidget(textRenderer, 16 + (32 + 8) * 2, 16 + 8 + 32, 208, 16, TextInst.of("")).name(TextInst.translatable("nbteditor.nbt.identifier"));
+		type = new NamedTextFieldWidget(16 + (32 + 8) * 2, 16 + 8 + 32, 208, 16).name(TextInst.translatable("nbteditor.nbt.identifier"));
 		type.setMaxLength(Integer.MAX_VALUE);
 		type.setText(MVRegistry.ITEM.getId(item.getItem()).toString());
 		type.setChangedListener(str -> {
@@ -206,7 +210,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		});
 		this.addDrawableChild(type);
 		
-		count = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32, 72, 16, TextInst.of("")).name(TextInst.translatable("nbteditor.nbt.count"));
+		count = new NamedTextFieldWidget(16, 16 + 8 + 32, 72, 16).name(TextInst.translatable("nbteditor.nbt.count"));
 		count.setMaxLength(Integer.MAX_VALUE);
 		count.setText((ConfigScreen.isAirEditable() ? Math.max(1, item.getCount()) : item.getCount()) + "");
 		count.setChangedListener(str -> {
@@ -218,7 +222,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		count.setTextPredicate(MainUtil.intPredicate(1, Integer.MAX_VALUE, true));
 		this.addDrawableChild(count);
 		
-		path = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + 16 + 8, 288, 16, TextInst.translatable("nbteditor.nbt.path")).name(TextInst.translatable("nbteditor.nbt.path"));
+		path = new NamedTextFieldWidget(16, 16 + 8 + 32 + 16 + 8, 288, 16).name(TextInst.translatable("nbteditor.nbt.path"));
 		path.setMaxLength(Integer.MAX_VALUE);
 		path.setText(realPath.toString());
 		path.setChangedListener(str -> {
@@ -238,7 +242,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		});
 		this.addDrawableChild(path);
 		
-		value = new NamedTextFieldWidget(textRenderer, 16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16, TextInst.translatable("nbteditor.nbt.value")).name(TextInst.translatable("nbteditor.nbt.value"));
+		value = new SuggestingTextFieldWidget(this, 16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16).name(TextInst.translatable("nbteditor.nbt.value"));
 		value.setRenderTextProvider((str, index) -> {
 			return TextUtil.substring(NbtFormatter.FORMATTER.formatSafely(value.getText()).text(), index, index + str.length()).asOrderedText();
 		});
@@ -256,6 +260,10 @@ public class NBTEditorScreen extends ItemEditorScreen {
 				});
 			}
 		});
+		value.suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
+				.filter(ac -> selectedValue != null)
+				.map(ac -> ac.getSuggestions(item, realPath, selectedValue.getKey(), str, cursor))
+				.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture()));
 		this.addDrawableChild(value);
 		
 		this.addDrawableChild(MVMisc.newButton(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, TextInst.translatable("nbteditor.nbt.value_expand"), btn -> {
@@ -280,9 +288,14 @@ public class NBTEditorScreen extends ItemEditorScreen {
 					} catch (CommandSyntaxException e) {
 						NBTEditor.LOGGER.error("Error parsing nbt from Expand", e);
 					}
-				}));
+				}).suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
+						.map(ac -> ac.getSuggestions(item, realPath, null, str, cursor))
+						.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture())));
 			} else
-				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter.FORMATTER, false, str -> value.setText(str)));
+				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter.FORMATTER,
+						false, str -> value.setText(str)).suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
+								.map(ac -> ac.getSuggestions(item, realPath, selectedValue.getKey(), str, cursor))
+								.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture())));
 		}));
 		
 		final int editorY = 16 + 8 + 32 + (16 + 8) * 3;
@@ -297,7 +310,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 					}
 				});
 		genEditor();
-		this.addDrawableChild(editor);
+		this.addSelectableChild(editor);
 	}
 	private void genEditor() {
 		selectedValue = null;
@@ -369,13 +382,25 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			selectedValue = null;
 			value.setText("");
 			value.setEditable(false);
-			path.setText(realPath.toString());
+			path.text = realPath.toString();
+			path.setSelectionStart(path.getText().length());
+			path.setSelectionEnd(path.getText().length());
 			genEditor();
 		} else {
 			selectedValue = key;
 			value.setText(key.getValueText());
 			value.setEditable(true);
 		}
+	}
+	
+	@Override
+	protected void preRenderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		editor.render(matrices, mouseX, mouseY, delta); // So the tab completion renders on top correctly
+	}
+	@Override
+	protected void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		if (NBTAutocompleteIntegration.INSTANCE.isEmpty())
+			renderTip(matrices, "nbteditor.nbt_ac.tip");
 	}
 	
 	@Override
@@ -538,7 +563,12 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	
 	
 	public void getKey(String defaultValue, Consumer<String> keyConsumer) {
-		new StringInputScreen(this, keyConsumer, str -> !str.isEmpty()).show(defaultValue);
+		new StringInputScreen(this, keyConsumer, str -> !str.isEmpty())
+				.suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
+						.map(ac -> ac.getSuggestions(item, realPath, str, null, cursor,
+								currentGen.getElements(this, nbt).stream().map(NBTValue::getKey).toList()))
+						.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture()))
+				.show(defaultValue);
 	}
 	public void getKey(Consumer<String> keyConsumer) {
 		getKey(null, keyConsumer);

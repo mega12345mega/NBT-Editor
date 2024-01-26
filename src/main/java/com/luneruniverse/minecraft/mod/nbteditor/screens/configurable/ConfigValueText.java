@@ -6,15 +6,14 @@ import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 public class ConfigValueText extends NamedTextFieldWidget implements ConfigValue<String, ConfigValueText> {
 	
 	private final String defaultValue;
 	private final List<ConfigValueListener<ConfigValueText>> onChanged;
 	
-	public ConfigValueText(String value, String defaultValue) {
-		super(MainUtil.client.textRenderer, 0, 0, 200, 20, TextInst.of(value == null ? "" : value));
+	public ConfigValueText(int width, String value, String defaultValue) {
+		super(0, 0, width, 20);
 		setMaxLength(Integer.MAX_VALUE);
 		name(TextInst.of(defaultValue));
 		setText(value == null ? "" : value);
@@ -26,8 +25,8 @@ public class ConfigValueText extends NamedTextFieldWidget implements ConfigValue
 			onChanged.forEach(listener -> listener.onValueChanged(this));
 		});
 	}
-	private ConfigValueText(String value, String defaultValue, List<ConfigValueListener<ConfigValueText>> onChanged) {
-		this(value, defaultValue);
+	private ConfigValueText(int width, String value, String defaultValue, List<ConfigValueListener<ConfigValueText>> onChanged) {
+		this(width, value, defaultValue);
 		this.onChanged.addAll(onChanged);
 	}
 	
@@ -77,7 +76,7 @@ public class ConfigValueText extends NamedTextFieldWidget implements ConfigValue
 	
 	@Override
 	public ConfigValueText clone(boolean defaults) {
-		return new ConfigValueText(defaults ? defaultValue : getText(), defaultValue, onChanged);
+		return new ConfigValueText(width, defaults ? defaultValue : getText(), defaultValue, onChanged);
 	}
 	
 }
