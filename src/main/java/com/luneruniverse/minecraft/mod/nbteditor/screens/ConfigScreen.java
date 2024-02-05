@@ -300,7 +300,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		return lockSlots || isLockSlotsRequired();
 	}
 	public static boolean isLockSlotsRequired() {
-		return MainUtil.client.interactionManager != null && !MainUtil.client.interactionManager.getCurrentGameMode().isCreative();
+		return MainUtil.client.interactionManager != null && !NBTEditorClient.SERVER_CONN.isEditingAllowed();
 	}
 	public static boolean isChatLimitExtended() {
 		return chatLimitExtended;

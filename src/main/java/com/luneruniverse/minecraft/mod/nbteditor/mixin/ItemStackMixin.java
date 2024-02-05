@@ -10,17 +10,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.ItemSize;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -93,7 +93,8 @@ public class ItemStackMixin {
 			// Checking slots in your hotbar vs item selection is difficult, so the lore is just disabled in non-inventory tabs
 			boolean creativeInv = MVMisc.isCreativeInventoryTabSelected();
 			
-			if (creativeInv || MainUtil.client.currentScreen instanceof ClientChestScreen || MainUtil.client.currentScreen instanceof ContainerScreen) {
+			if (creativeInv || (!(MainUtil.client.currentScreen instanceof CreativeInventoryScreen) &&
+					NBTEditorClient.SERVER_CONN.isScreenEditable())) {
 				info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.edit"));
 				info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.item_factory"));
 				if (ContainerIO.isContainer(source))

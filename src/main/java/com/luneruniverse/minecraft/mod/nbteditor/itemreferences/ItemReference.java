@@ -9,7 +9,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 
@@ -44,6 +46,29 @@ public interface ItemReference {
 		throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.no_hand.all_item")).create();
 	}
 	
+	public static HandledScreenItemReference getInventoryOrArmorItem(int slot, boolean creative) {
+		if (creative) {
+			if (slot < 9)
+				return new ArmorItemReference(slot);
+			return new InventoryItemReference(slot == 45 ? 45 : (slot >= 36 ? slot - 36 : slot));
+		}
+		if (slot == 40)
+			return new InventoryItemReference(45);
+		if (slot >= 36)
+			return new ArmorItemReference(slot - 36);
+		return new InventoryItemReference(slot);
+	}
+	public static ItemReference getContainerItem(int slot, HandledScreen<?> screen) {
+		if (slot == -1)
+			return new ServerItemReference(-1, screen); // "CursorItemReference"
+		
+		Slot slotObj = screen.getScreenHandler().getSlot(slot);
+		if (slotObj.inventory == MainUtil.client.player.getInventory()) {
+			return getInventoryOrArmorItem(slotObj.getIndex(), false).withParent(screen);
+		}
+		return new ServerItemReference(slot, screen);
+	}
+	
 	public ItemStack getItem();
 	public void saveItem(ItemStack toSave, Runnable onFinished);
 	public default void saveItem(ItemStack toSave, Text msg) {
@@ -65,9 +90,12 @@ public interface ItemReference {
 	 */
 	public int getBlockedHotbarSlot();
 	public void showParent();
+	public default void escapeParent() {
+		MainUtil.client.setScreen(null);
+	}
 	public default boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
-			MainUtil.client.setScreen(null);
+			escapeParent();
 		else if (MainUtil.client.options.inventoryKey.matchesKey(keyCode, scanCode))
 			showParent();
 		else

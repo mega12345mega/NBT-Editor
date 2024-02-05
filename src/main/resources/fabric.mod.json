@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nbteditor",
-  "version": "1.13.0",
+  "version": "2.0.0.999",
 
   "name": "NBT Editor",
   "description": "Lets you edit items' nbt ingame, store items in a client side chest, open containers in your inventory, and more!",
@@ -17,7 +17,7 @@
   "license": "MIT",
   "icon": "assets/nbteditor/textures/logo.png",
 
-  "environment": "client",
+  "environment": "*",
   "entrypoints": {
     "main": [
       "com.luneruniverse.minecraft.mod.nbteditor.NBTEditor"

@@ -34,6 +34,8 @@ public class GetLostItemCommand extends ClientCommand {
 	
 	private static final LinkedList<ItemStack> history = new LinkedList<>();
 	public static void addToHistory(ItemStack item) {
+		if (!history.isEmpty() && ItemStack.areEqual(item, history.getFirst()))
+			return;
 		history.addFirst(item.copy());
 		if (history.size() > 54)
 			history.removeLast();

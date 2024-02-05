@@ -91,4 +91,9 @@ public class ContainerItemReference implements ItemReference {
 		ContainerScreen.show(container);
 	}
 	
+	@Override
+	public void escapeParent() {
+		container.escapeParent();
+	}
+	
 }

@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 import java.util.zip.ZipException;
 
 import com.google.gson.JsonParseException;
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
@@ -54,15 +55,19 @@ public class MainUtil {
 	public static final MinecraftClient client = MinecraftClient.getInstance();
 	
 	// Same as ClientPlayerInteractionManager#clickCreativeSlot, but without a feature flag check
+	// Also includes survival bypass
 	public static void clickCreativeStack(ItemStack item, int slot) {
-		if (client.interactionManager.getCurrentGameMode().isCreative())
+		if (NBTEditorClient.SERVER_CONN.isEditingAllowed())
 			MVMisc.sendPacket(new CreativeInventoryActionC2SPacket(slot, item));
+	}
+	public static void dropCreativeStack(ItemStack item) {
+		if (NBTEditorClient.SERVER_CONN.isEditingAllowed() && !item.isEmpty())
+			MVMisc.sendPacket(new CreativeInventoryActionC2SPacket(-1, item));
 	}
 	
 	public static void saveItem(Hand hand, ItemStack item) {
 		client.player.setStackInHand(hand, item.copy());
-		if (client.interactionManager.getCurrentGameMode().isCreative())
-			MVMisc.sendPacket(new CreativeInventoryActionC2SPacket(hand == Hand.OFF_HAND ? 45 : client.player.getInventory().selectedSlot + 36, item));
+		clickCreativeStack(item, hand == Hand.OFF_HAND ? 45 : client.player.getInventory().selectedSlot + 36);
 	}
 	public static void saveItem(EquipmentSlot equipment, ItemStack item) {
 		if (equipment == EquipmentSlot.MAINHAND)
@@ -94,7 +99,7 @@ public class MainUtil {
 			if (dropIfNoSpace) {
 				if (item.getCount() > item.getMaxCount())
 					item.setCount(item.getMaxCount());
-				client.interactionManager.dropCreativeStack(item);
+				dropCreativeStack(item);
 			}
 		} else {
 			item.setCount(item.getCount() + inv.getStack(slot).getCount());

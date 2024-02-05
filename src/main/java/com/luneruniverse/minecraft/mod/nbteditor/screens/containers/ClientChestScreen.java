@@ -181,7 +181,11 @@ public class ClientChestScreen extends ClientHandledScreen {
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 68, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
 			navigationClicked = true;
-			ConfigScreen.setLockSlots(!ConfigScreen.isLockSlots());
+			if (ConfigScreen.isLockSlotsRequired()) {
+				btn.active = false;
+				ConfigScreen.setLockSlots(true);
+			} else
+				ConfigScreen.setLockSlots(!ConfigScreen.isLockSlots());
 			btn.setMessage(ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"));
 		})).active = !ConfigScreen.isLockSlotsRequired();
 		
@@ -293,8 +297,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 		save();
 	}
 	@Override
-	public boolean lockSlots() {
-		return ConfigScreen.isLockSlots();
+	public SlotLockType getSlotLockType() {
+		return ConfigScreen.isLockSlots() ? SlotLockType.ITEMS_LOCKED : SlotLockType.UNLOCKED;
 	}
 	@Override
 	public ItemStack[] getPrevInventory() {

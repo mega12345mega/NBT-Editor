@@ -2,13 +2,16 @@ package com.luneruniverse.minecraft.mod.nbteditor.itemreferences;
 
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 
-public class ArmorItemReference implements ItemReference {
+public class ArmorItemReference implements HandledScreenItemReference {
 	
 	private final EquipmentSlot slot;
+	private Screen specialParent;
 	
 	public ArmorItemReference(EquipmentSlot slot) {
 		if (slot.getType() != EquipmentSlot.Type.ARMOR)
@@ -18,6 +21,10 @@ public class ArmorItemReference implements ItemReference {
 	}
 	public ArmorItemReference(int slot) {
 		this(switch (slot) {
+				case 0 -> EquipmentSlot.FEET;
+				case 1 -> EquipmentSlot.LEGS;
+				case 2 -> EquipmentSlot.CHEST;
+				case 3 -> EquipmentSlot.HEAD;
 				case 5 -> EquipmentSlot.HEAD;
 				case 6 -> EquipmentSlot.CHEST;
 				case 7 -> EquipmentSlot.LEGS;
@@ -63,7 +70,12 @@ public class ArmorItemReference implements ItemReference {
 	
 	@Override
 	public void showParent() {
-		MainUtil.client.setScreen(new InventoryScreen(MainUtil.client.player));
+		MainUtil.client.setScreen(specialParent == null ? new InventoryScreen(MainUtil.client.player) : specialParent);
+	}
+	
+	@Override
+	public void setParent(HandledScreen<?> screen) {
+		specialParent = screen;
 	}
 	
 }

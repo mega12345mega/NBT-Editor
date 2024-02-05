@@ -23,6 +23,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -32,6 +33,7 @@ public class NBTEditorClient implements ClientModInitializer {
 	
 	public static final File SETTINGS_FOLDER = new File("nbteditor");
 	public static ClientChest CLIENT_CHEST;
+	public static NBTEditorServerConn SERVER_CONN;
 	
 	private static final Map<String, NBTEditorAddon> addons = new HashMap<>();
 	public static NBTEditorAddon getAddon(String modId) {
@@ -61,11 +63,14 @@ public class NBTEditorClient implements ClientModInitializer {
 		CLIENT_CHEST.loadAync();
 		
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST)
-				.setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest")), ClientChestScreen::show);
-		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.BRICKS)
-				.setCustomName(TextInst.translatable("itemGroup.nbteditor.creative")),
+				.setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest")), ClientChestScreen::show,
+				screen -> screen instanceof CreativeInventoryScreen || (screen instanceof InventoryScreen && SERVER_CONN.isEditingExpanded()));
+		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.CHEST)
+				.setCustomName(TextInst.translatable("itemGroup.nbteditor.inventory")),
 				() -> MainUtil.client.setScreen(new InventoryScreen(MainUtil.client.player)),
 				screen -> screen instanceof ClientChestScreen);
+		
+		SERVER_CONN = new NBTEditorServerConn();
 		
 		for (EntrypointContainer<NBTEditorAddon> container : FabricLoader.getInstance()
 				.getEntrypointContainers("nbteditor", NBTEditorAddon.class)) {

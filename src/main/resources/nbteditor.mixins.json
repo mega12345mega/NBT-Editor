@@ -5,6 +5,12 @@
   "compatibilityLevel": "JAVA_16",
   "plugin": "com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled.NBTEditorMixinPlugin",
   "mixins": [
+    "ServerPlayNetworkHandlerMixin",
+    "ServerPlayerEntityMixin",
+    "ShulkerBoxSlotMixin",
+    "ShulkerBoxScreenHandlerMixin",
+    "HorseScreenHandlerMixin",
+    "HorseScreenHandler1and2Mixin"
   ],
   "client": [
     "ChatScreenMixin",
@@ -30,7 +36,8 @@
     "PlayerScreenHandler1Mixin",
     "WrittenBookItemMixin",
     "GameRendererMixin",
-    "ChatInputSuggestorMixin"
+    "ChatInputSuggestorMixin",
+    "ClientPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

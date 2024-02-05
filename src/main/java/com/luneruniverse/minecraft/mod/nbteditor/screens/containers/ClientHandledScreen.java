@@ -11,12 +11,14 @@ import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.InventoryItemRef
 import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
+import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -61,7 +63,8 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 			}
 		}
 		if (!ItemStack.areEqual(clientCursor, SERVER_CURSOR)) {
-//			client.interactionManager.clickCreativeStack(clientCursor, -1);
+			if (MainUtil.client.interactionManager.getCurrentGameMode().isSurvivalLike())
+				ClientPlayNetworking.send(new SetCursorC2SPacket(clientCursor));
 			SERVER_CURSOR = clientCursor.copy();
 		}
 	}
@@ -72,16 +75,16 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 				int slot = hoveredSlot.getIndex();
 				ItemReference ref = hoveredSlot.inventory == MainUtil.client.player.getInventory() ?
 						new InventoryItemReference(slot >= 36 ? slot - 36 : slot) : containerRef.apply(hoveredSlot);
-				handleKeybind(hoveredSlot, ref);
+				handleKeybind(hoveredSlot.getStack(), ref);
 				return true;
 			}
 		}
 		return false;
 	}
-	public static void handleKeybind(Slot hoveredSlot, ItemReference ref) {
-		boolean notAir = hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty();
+	public static void handleKeybind(ItemStack item, ItemReference ref) {
+		boolean notAir = item != null && !item.isEmpty();
 		if (hasControlDown()) {
-			if (notAir && ContainerIO.isContainer(hoveredSlot.getStack()))
+			if (notAir && ContainerIO.isContainer(item))
 				ContainerScreen.show(ref);
 		} else if (hasShiftDown()) {
 			if (notAir)
@@ -190,8 +193,13 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	
 	@Override
 	protected void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
-		if (slot != null)
+		SlotLockType lockType = getSlotLockType();
+		
+		if (slot != null) {
 			beforeClickItem = slot.getStack().copy();
+			if (slot.inventory != client.player.getInventory() && beforeClickItem.isEmpty() && lockType == SlotLockType.ALL_LOCKED)
+				return;
+		}
 		beforeClickCursor = this.handler.getCursorStack().copy();
 		
 		if (!beforeClickCursor.isEmpty() && !(this instanceof CursorHistoryScreen))
@@ -202,16 +210,19 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		else
 			super.onMouseClick(slot, slotId, button, actionType);
 		
+		ItemStack afterClickCursor = this.handler.getCursorStack();
+		if (!afterClickCursor.isEmpty() && !(this instanceof CursorHistoryScreen))
+			GetLostItemCommand.addToHistory(afterClickCursor);
+		
 		ItemStack[] prev = getPrevInventory();
 		if (prev == null)
 			return;
 		
 		boolean changed = false;
 		boolean lockRevertUsed = false;
-		boolean locked = lockSlots();
 		for (int i = 0; i < this.handler.getInventory().size(); i++) {
 			if (!ItemStack.areEqual(prev[i] == null ? ItemStack.EMPTY : prev[i], this.handler.getInventory().getStack(i))) {
-				if (locked) {
+				if (lockType != SlotLockType.UNLOCKED) {
 					if (prev[i] == null || prev[i].isEmpty())
 						changed = true;
 					else {
@@ -227,18 +238,18 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		if (changed)
 			onChange();
 		
-		if (lockRevertUsed && beforeClickCursor != null && !beforeClickCursor.isEmpty() && client.player.isCreative())
+		if (lockRevertUsed && beforeClickCursor != null && !beforeClickCursor.isEmpty())
 			GetLostItemCommand.loseItem(beforeClickCursor);
 	}
 	
 	public void throwCursor() {
-		client.interactionManager.dropCreativeStack(beforeClickCursor);
+		MainUtil.dropCreativeStack(beforeClickCursor);
 	}
 	public void throwSlot(int slot, boolean fullStack) {
 		ItemStack stack = beforeClickItem;
 		if (!fullStack)
 			stack.setCount(1);
-		client.interactionManager.dropCreativeStack(stack);
+		MainUtil.dropCreativeStack(stack);
 	}
 	
 	
@@ -273,8 +284,13 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	}
 	
 	
-	public boolean lockSlots() {
-		return false;
+	public enum SlotLockType {
+		UNLOCKED,
+		ITEMS_LOCKED,
+		ALL_LOCKED
+	}
+	public SlotLockType getSlotLockType() {
+		return SlotLockType.UNLOCKED;
 	}
 	public ItemStack[] getPrevInventory() {
 		return null; // Doesn't support slot locking or onChange calls

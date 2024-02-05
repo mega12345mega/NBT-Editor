@@ -9,12 +9,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.WeakHashMap;
 
+import org.lwjgl.glfw.GLFW;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ServerItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.ChatScreenAccessor;
+import com.luneruniverse.minecraft.mod.nbteditor.mixin.HandledScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -23,12 +36,20 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookScreen.WrittenBookContents;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 
@@ -168,5 +189,85 @@ public class MixinLink {
 			specialNumbers.remove(Thread.currentThread());
 		}
 	}
+	
+	
+	public static void onMouseClick(HandledScreen<?> source, Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo info) {
+		if (!source.getScreenHandler().getCursorStack().isEmpty())
+			GetLostItemCommand.addToHistory(source.getScreenHandler().getCursorStack());
+		
+		boolean creativeInv = (source instanceof CreativeInventoryScreen);
+		
+		if (!creativeInv && !NBTEditorClient.SERVER_CONN.isScreenEditable())
+			return;
+		
+		if (!Screen.hasControlDown())
+			return;
+		
+		if (actionType == SlotActionType.PICKUP && slot != null &&
+				(slot.inventory == MainUtil.client.player.getInventory() || !creativeInv) &&
+				(!(source instanceof InventoryScreen) || slot.id > 4)) {
+			ItemStack cursor = source.getScreenHandler().getCursorStack();
+			ItemStack item = slot.getStack();
+			if (cursor == null || cursor.isEmpty() || item == null || item.isEmpty())
+				return;
+			if (cursor.getItem() == Items.ENCHANTED_BOOK || item.getItem() == Items.ENCHANTED_BOOK) {
+				if (cursor.getItem() != Items.ENCHANTED_BOOK) { // Make sure the cursor is an enchanted book
+					ItemStack temp = cursor;
+					cursor = item;
+					item = temp;
+				}
+				
+				new Enchants(item).addEnchants(new Enchants(cursor).getEnchants());
+				
+				slotId = slot.id;
+				
+				if (creativeInv) {
+					boolean armor = false;
+					if (!MVMisc.isCreativeInventoryTabSelected())
+						slotId -= 9;
+					else if (slotId < 9)
+						armor = true;
+					
+					if (armor)
+						MainUtil.saveItem(EquipmentSlot.fromTypeIndex(EquipmentSlot.Type.ARMOR, 8 - slotId), item);
+					else
+						MainUtil.saveItemInvSlot(slotId, item);
+					source.getScreenHandler().setCursorStack(ItemStack.EMPTY);
+				} else {
+					ItemReference.getContainerItem(slotId, source).saveItem(item);
+					new ServerItemReference(-1, source).saveItem(ItemStack.EMPTY);
+				}
+				
+				info.cancel();
+			}
+		}
+	}
+	
+	public static void keyPressed(HandledScreen<?> source, int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> info) {
+		boolean creativeInv = (source instanceof CreativeInventoryScreen);
+		
+		if (keyCode == GLFW.GLFW_KEY_SPACE) {
+			Slot hoveredSlot = ((HandledScreenAccessor) source).getFocusedSlot();
+			if (hoveredSlot != null &&
+					((creativeInv && hoveredSlot.inventory == MainUtil.client.player.getInventory()) ||
+							(!creativeInv && NBTEditorClient.SERVER_CONN.isScreenEditable())) &&
+					(!(source instanceof InventoryScreen) || hoveredSlot.id > 4) &&
+					(ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
+				if (creativeInv) {
+					int slot = hoveredSlot.getIndex();
+					if (!MVMisc.isCreativeInventoryTabSelected())
+						slot += 36;
+					ClientHandledScreen.handleKeybind(hoveredSlot.getStack(), ItemReference.getInventoryOrArmorItem(slot, true));
+				} else {
+					ClientHandledScreen.handleKeybind(hoveredSlot.getStack(), ItemReference.getContainerItem(hoveredSlot.id, source));
+				}
+				info.setReturnValue(true);
+			}
+		}
+	}
+	
+	
+	public static final Map<Thread, PlayerEntity> SCREEN_HANDLER_OWNER = new HashMap<>();
+	public static final WeakHashMap<Slot, PlayerEntity> SLOT_OWNER = new WeakHashMap<>();
 	
 }

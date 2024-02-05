@@ -2,12 +2,15 @@ package com.luneruniverse.minecraft.mod.nbteditor.itemreferences;
 
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.ItemStack;
 
-public class InventoryItemReference implements ItemReference {
+public class InventoryItemReference implements HandledScreenItemReference {
 	
 	private final int slot;
+	private Screen specialParent;
 	
 	public InventoryItemReference(int slot) {
 		this.slot = slot;
@@ -58,7 +61,12 @@ public class InventoryItemReference implements ItemReference {
 	
 	@Override
 	public void showParent() {
-		MainUtil.client.setScreen(new InventoryScreen(MainUtil.client.player));
+		MainUtil.client.setScreen(specialParent == null ? new InventoryScreen(MainUtil.client.player) : specialParent);
+	}
+	
+	@Override
+	public void setParent(HandledScreen<?> screen) {
+		specialParent = screen;
 	}
 	
 }
