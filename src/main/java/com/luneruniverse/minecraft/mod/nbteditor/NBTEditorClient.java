@@ -15,12 +15,14 @@ import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.CommandHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -62,13 +64,18 @@ public class NBTEditorClient implements ClientModInitializer {
 		CLIENT_CHEST = ConfigScreen.isLargeClientChest() ? new LargeClientChest(5) : new SmallClientChest(100);
 		CLIENT_CHEST.loadAync();
 		
-		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST)
+		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.PURPLE_SHULKER_BOX)
 				.setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest")), ClientChestScreen::show,
 				screen -> screen instanceof CreativeInventoryScreen || (screen instanceof InventoryScreen && SERVER_CONN.isEditingExpanded()));
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.CHEST)
 				.setCustomName(TextInst.translatable("itemGroup.nbteditor.inventory")),
 				() -> MainUtil.client.setScreen(new InventoryScreen(MainUtil.client.player)),
 				screen -> screen instanceof ClientChestScreen);
+		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST), () -> {
+					MainUtil.client.player.closeHandledScreen();
+					ClientPlayNetworking.send(new OpenEnderChestC2SPacket());
+				}, screen -> (screen instanceof CreativeInventoryScreen || screen instanceof InventoryScreen || screen instanceof ClientChestScreen)
+						&& SERVER_CONN.isEditingExpanded());
 		
 		SERVER_CONN = new NBTEditorServerConn();
 		

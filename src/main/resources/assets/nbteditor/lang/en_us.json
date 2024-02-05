@@ -3,6 +3,7 @@
 	"nbteditor.outdated.title": "NBT Editor Outdated",
 	"nbteditor.outdated.desc": "A new update has been released!",
 	
+	"nbteditor.requires_server": "This requires NBT Editor to be installed on the server (and you must have level 2 OP)!",
 	"nbteditor.nbt_ac.tip": "Download NBT Autocomplete for suggestions",
 	
 	
