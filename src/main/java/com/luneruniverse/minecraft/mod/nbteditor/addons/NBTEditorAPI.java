@@ -11,9 +11,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.FactoryComma
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetPresetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;

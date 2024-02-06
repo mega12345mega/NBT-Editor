@@ -17,13 +17,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ServerItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.ChatScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.HandledScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ServerItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;

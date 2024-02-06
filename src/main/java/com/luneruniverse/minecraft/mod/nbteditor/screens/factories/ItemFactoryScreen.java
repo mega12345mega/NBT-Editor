@@ -7,8 +7,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton;

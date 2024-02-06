@@ -3,9 +3,9 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 import java.nio.file.Path;
 import java.util.List;
 
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidget;

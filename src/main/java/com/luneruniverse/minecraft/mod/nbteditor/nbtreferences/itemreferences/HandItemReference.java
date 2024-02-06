@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.itemreferences;
+package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 

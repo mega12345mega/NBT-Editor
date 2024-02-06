@@ -4,9 +4,9 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScreen;
 import com.mojang.brigadier.Command;

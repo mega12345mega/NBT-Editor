@@ -16,8 +16,7 @@ public class HeadRefreshThread extends Thread {
 			
 			try {
 				long sleepTime = HeadAPI.getDatabase().getTimeUntilLastUpdateOld() * 1000;
-				if (sleepTime > 0)
-					Thread.sleep(sleepTime);
+				Thread.sleep(Math.max(5000, sleepTime));
 			} catch (InterruptedException e) {
 				return;
 			}

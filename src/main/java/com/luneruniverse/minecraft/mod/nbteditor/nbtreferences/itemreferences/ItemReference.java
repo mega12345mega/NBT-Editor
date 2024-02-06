@@ -1,21 +1,26 @@
-package com.luneruniverse.minecraft.mod.nbteditor.itemreferences;
+package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 
-public interface ItemReference {
+public interface ItemReference extends NBTReference {
 	public static ItemReference getHeldItem(Predicate<ItemStack> isAllowed, Text failText) throws CommandSyntaxException {
 		ItemStack item = MainUtil.client.player.getMainHandStack();
 		Hand hand = Hand.MAIN_HAND;
@@ -101,5 +106,29 @@ public interface ItemReference {
 		else
 			return false;
 		return true;
+	}
+	
+	@Override
+	public default Identifier getId() {
+		return MVRegistry.ITEM.getId(getItem().getItem());
+	}
+	@Override
+	public default Set<Identifier> getIdOptions() {
+		return MVRegistry.ITEM.getIds();
+	}
+	@Override
+	public default NbtCompound getNBT() {
+		NbtCompound nbt = getItem().getNbt();
+		if (nbt != null)
+			return nbt;
+		return new NbtCompound();
+	}
+	@Override
+	public default void saveNBT(Identifier id, NbtCompound toSave, Runnable onFinished) {
+		ItemStack item = getItem();
+		if (!MVRegistry.ITEM.getId(item.getItem()).equals(id))
+			item = MainUtil.setType(MVRegistry.ITEM.get(id), item);
+		item.setNbt(toSave);
+		saveItem(item, onFinished);
 	}
 }

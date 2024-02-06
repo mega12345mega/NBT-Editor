@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.itemreferences;
+package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
@@ -30,6 +30,13 @@ public class ServerItemReference implements ItemReference {
 		if (slotObj.inventory == MainUtil.client.player.getInventory())
 			throw new IllegalArgumentException("The slot cannot be in the player's inventory!");
 		this.item = slotObj.getStack();
+	}
+	
+	public int getSlot() {
+		return slot;
+	}
+	public HandledScreen<?> getScreen() {
+		return screen;
 	}
 	
 	@Override

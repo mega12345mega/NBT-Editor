@@ -1,8 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
