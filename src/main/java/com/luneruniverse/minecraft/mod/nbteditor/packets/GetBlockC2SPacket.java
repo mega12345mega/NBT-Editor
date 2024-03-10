@@ -23,7 +23,7 @@ public class GetBlockC2SPacket implements FabricPacket {
 	}
 	public GetBlockC2SPacket(PacketByteBuf payload) {
 		this.requestId = payload.readInt();
-		this.world = payload.readRegistryKey(payload.readRegistryRefKey());
+		this.world = payload.readRegistryKey(payload.<World>readRegistryRefKey());
 		this.pos = payload.readBlockPos();
 	}
 	

@@ -25,7 +25,7 @@ public class SetBlockC2SPacket implements FabricPacket {
 		this.nbt = nbt;
 	}
 	public SetBlockC2SPacket(PacketByteBuf payload) {
-		this.world = payload.readRegistryKey(payload.readRegistryRefKey());
+		this.world = payload.readRegistryKey(payload.<World>readRegistryRefKey());
 		this.pos = payload.readBlockPos();
 		this.id = payload.readIdentifier();
 		this.nbt = payload.readNbt();

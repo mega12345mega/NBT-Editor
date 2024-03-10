@@ -24,7 +24,7 @@ public class GetEntityC2SPacket implements FabricPacket {
 	}
 	public GetEntityC2SPacket(PacketByteBuf payload) {
 		this.requestId = payload.readInt();
-		this.world = payload.readRegistryKey(payload.readRegistryRefKey());
+		this.world = payload.readRegistryKey(payload.<World>readRegistryRefKey());
 		this.uuid = payload.readUuid();
 	}
 	

@@ -24,7 +24,7 @@ public class SetEntityC2SPacket implements FabricPacket {
 		this.nbt = nbt;
 	}
 	public SetEntityC2SPacket(PacketByteBuf payload) {
-		this.world = payload.readRegistryKey(payload.readRegistryRefKey());
+		this.world = payload.readRegistryKey(payload.<World>readRegistryRefKey());
 		this.uuid = payload.readUuid();
 		this.nbt = payload.readNbt();
 	}
