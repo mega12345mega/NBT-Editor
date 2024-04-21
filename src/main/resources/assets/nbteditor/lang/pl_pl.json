@@ -93,7 +93,7 @@
 	"nbteditor.container": "Kontener",
 	"nbteditor.container.title": "Edytor NBT >> ",
 	
-	"nbteditor.item_factory": "Fabryka",
+	"nbteditor.factory": "Fabryka",
 	
 	"nbteditor.sign.added": "§aPodpis dodany!",
 	"nbteditor.sign.removed": "§aPodpis usunięty!",

@@ -240,14 +240,17 @@ public class MainUtil {
 	
 	public static Text getItemNameSafely(ItemStack item) {
 		NbtCompound nbt = item.getSubNbt(ItemStack.DISPLAY_KEY);
-        if (nbt != null && nbt.contains(ItemStack.NAME_KEY, NbtElement.STRING_TYPE)) {
+		return getNbtNameSafely(nbt, ItemStack.NAME_KEY, () -> item.getItem().getName(item));
+	}
+	public static Text getNbtNameSafely(NbtCompound nbt, String key, Supplier<Text> defaultName) {
+		if (nbt != null && nbt.contains(key, NbtElement.STRING_TYPE)) {
             try {
-                MutableText text = Text.Serialization.fromJson(nbt.getString(ItemStack.NAME_KEY));
+                MutableText text = Text.Serialization.fromJson(nbt.getString(key));
                 if (text != null)
                     return text;
-            } catch (JsonParseException text) {}
+            } catch (JsonParseException e) {}
         }
-        return item.getItem().getName(item);
+        return defaultName.get();
 	}
 	
 	

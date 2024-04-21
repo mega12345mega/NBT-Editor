@@ -9,18 +9,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.integrations.NBTAutocompleteIntegration;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
@@ -37,18 +39,16 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 
-public class NBTEditorScreen extends ItemEditorScreen {
+public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L, NBTReference<L>> {
 	
 	private class RecursiveMenuGenerator implements MenuGenerator {
 		@Override
-		public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source) {
+		public List<NBTValue> getElements(NBTEditorScreen<?> screen, NbtElement source) {
 			return currentGen.getElements(screen, source);
 		}
 		@Override
@@ -61,7 +61,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			recursiveUpdate(source);
 		}
 		@Override
-		public void addElement(NBTEditorScreen screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
+		public void addElement(NBTEditorScreen<?> screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
 			currentGen.addElement(screen, source, request -> {
 				if (request == null)
 					recursiveUpdate(source);
@@ -86,7 +86,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		}
 		private void recursiveUpdate(NbtElement source) {
 			List<NbtElement> path = new ArrayList<>();
-			NbtElement lastPart = item.getOrCreateNbt();
+			NbtElement lastPart = localNBT.getOrCreateNBT();
 			for (String part : realPath) {
 				MenuGenerator gen = MenuGenerator.TYPES.get(lastPart.getType());
 				if (gen == null)
@@ -122,7 +122,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	private NbtElement nbt;
 	
 	@SuppressWarnings("serial")
-	public NBTEditorScreen(ItemReference ref) {
+	public NBTEditorScreen(NBTReference<L> ref) {
 		super(TextInst.of("NBT Editor"), ref);
 		
 		this.scrollPerFolder = new HashMap<>();
@@ -133,7 +133,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			}
 		};
 		this.gen = new RecursiveMenuGenerator();
-		this.nbt = item.getOrCreateNbt();
+		this.nbt = localNBT.getOrCreateNBT();
 	}
 	
 	@Override
@@ -142,7 +142,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 			client.setScreen(new ConfirmScreen(value -> {
 				if (value) {
 					((NbtCompound) this.nbt).remove("");
-					item.setNbt((NbtCompound) this.nbt);
+					localNBT.setNBT((NbtCompound) this.nbt);
 					save();
 					client.setScreen(NBTEditorScreen.this);
 				} else
@@ -157,10 +157,10 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		MVMisc.setKeyboardRepeatEvents(true);
 		
 		name.setChangedListener(str -> {
-			if (str.equals(item.getItem().getName().getString()))
-				item.setCustomName(null);
+			if (str.equals(localNBT.getDefaultName()))
+				localNBT.setName(null);
 			else
-				item.setCustomName(TextInst.of(str));
+				localNBT.setName(TextInst.of(str));
 			
 			genEditor();
 		});
@@ -186,40 +186,48 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		
 		
 		
+		Set<Identifier> allTypes = localNBT.getIdOptions();
 		type = new NamedTextFieldWidget(16 + (32 + 8) * 2, 16 + 8 + 32, 208, 16).name(TextInst.translatable("nbteditor.nbt.identifier"));
 		type.setMaxLength(Integer.MAX_VALUE);
-		type.setText(MVRegistry.ITEM.getId(item.getItem()).toString());
-		type.setChangedListener(str -> {
-			try {
-				if (!MVRegistry.ITEM.containsId(new Identifier(str)))
+		type.setText(localNBT.getId().toString());
+		if (allTypes == null)
+			type.setEditable(false);
+		else {
+			type.setChangedListener(str -> {
+				Identifier id;
+				try {
+					id = new Identifier(str);
+				} catch (InvalidIdentifierException e) {
 					return;
-			} catch (InvalidIdentifierException e) {
-				return;
-			}
-			boolean airEditable = ConfigScreen.isAirEditable();
-			if (!airEditable && MVRegistry.ITEM.get(new Identifier(str)) == Items.AIR)
-				return;
-			
-			ItemStack editedItem = MainUtil.setType(MVRegistry.ITEM.get(new Identifier(str)), item,
-					count.getText().isEmpty() ? 1 : Integer.parseInt(count.getText()));
-			if (editedItem == ItemStack.EMPTY)
-				return;
-			
-			item = editedItem;
-			genEditor();
-		});
+				}
+				if (!allTypes.contains(id))
+					return;
+				if (!ConfigScreen.isAirEditable() && localNBT.isEmpty(id))
+					return;
+				
+				localNBT.setId(id);
+				if (localNBT instanceof LocalItem item)
+					item.setCount(count.getText().isEmpty() ? 1 : Integer.parseInt(count.getText()));
+				genEditor();
+			});
+		}
 		this.addDrawableChild(type);
 		
 		count = new NamedTextFieldWidget(16, 16 + 8 + 32, 72, 16).name(TextInst.translatable("nbteditor.nbt.count"));
 		count.setMaxLength(Integer.MAX_VALUE);
-		count.setText((ConfigScreen.isAirEditable() ? Math.max(1, item.getCount()) : item.getCount()) + "");
-		count.setChangedListener(str -> {
-			if (str.isEmpty())
-				return;
-			
-			item.setCount(Integer.parseInt(str));
-		});
-		count.setTextPredicate(MainUtil.intPredicate(1, Integer.MAX_VALUE, true));
+		if (localNBT instanceof LocalItem item) {
+			count.setText((ConfigScreen.isAirEditable() ? Math.max(1, item.getCount()) : item.getCount()) + "");
+			count.setChangedListener(str -> {
+				if (str.isEmpty())
+					return;
+				
+				item.setCount(Integer.parseInt(str));
+			});
+			count.setTextPredicate(MainUtil.intPredicate(1, Integer.MAX_VALUE, true));
+		} else {
+			count.setText("1");
+			count.setEditable(false);
+		}
 		this.addDrawableChild(count);
 		
 		path = new NamedTextFieldWidget(16, 16 + 8 + 32 + 16 + 8, 288, 16).name(TextInst.translatable("nbteditor.nbt.path"));
@@ -227,7 +235,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		path.setText(realPath.toString());
 		path.setChangedListener(str -> {
 			String[] parts = str.split("/");
-			NbtElement nbt = item.getOrCreateNbt();
+			NbtElement nbt = localNBT.getOrCreateNBT();
 			for (String part : parts) {
 				MenuGenerator gen = MenuGenerator.TYPES.get(nbt.getType());
 				if (gen == null)
@@ -262,7 +270,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		});
 		value.suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
 				.filter(ac -> selectedValue != null)
-				.map(ac -> ac.getSuggestions(item, realPath, selectedValue.getKey(), str, cursor))
+				.map(ac -> ac.getSuggestions(localNBT, realPath, selectedValue.getKey(), str, cursor))
 				.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture()));
 		this.addDrawableChild(value);
 		
@@ -278,7 +286,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 								nbt = new NbtCompound();
 								((NbtCompound) nbt).put("value", newNbt);
 							}
-							item.setNbt((NbtCompound) nbt);
+							localNBT.setNBT((NbtCompound) nbt);
 						} else {
 							String lastPathPart = realPath.remove(realPath.size() - 1);
 							genEditor();
@@ -289,12 +297,12 @@ public class NBTEditorScreen extends ItemEditorScreen {
 						NBTEditor.LOGGER.error("Error parsing nbt from Expand", e);
 					}
 				}).suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
-						.map(ac -> ac.getSuggestions(item, realPath, null, str, cursor))
+						.map(ac -> ac.getSuggestions(localNBT, realPath, null, str, cursor))
 						.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture())));
 			} else
 				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter.FORMATTER,
 						false, str -> value.setText(str)).suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
-								.map(ac -> ac.getSuggestions(item, realPath, selectedValue.getKey(), str, cursor))
+								.map(ac -> ac.getSuggestions(localNBT, realPath, selectedValue.getKey(), str, cursor))
 								.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture())));
 		}));
 		
@@ -321,7 +329,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		
 		editor.clearElements();
 		
-		this.nbt = item.getOrCreateNbt();
+		this.nbt = localNBT.getOrCreateNBT();
 		this.currentGen = MenuGenerator.TYPES.get(NbtElement.COMPOUND_TYPE);
 		Iterator<String> keys = realPath.iterator();
 		boolean removing = false;
@@ -361,7 +369,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 		editor.setScroll(Math.max(editor.getMaxScroll(), scrollPerFolder.computeIfAbsent(realPath.toString(), key -> 0)));
 	}
 	private void updateName() {
-		String newName = MainUtil.getItemNameSafely(item).getString();
+		String newName = localNBT.getName().getString();
 		if (!name.text.equals(newName)) {
 			name.text = newName;
 			name.setSelectionStart(name.getText().length());
@@ -415,7 +423,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	}
 	@Override
 	protected void save() {
-		if (!item.isEmpty() || item.getNbt() == null || item.getNbt().isEmpty()) {
+		if (!localNBT.isEmpty() || localNBT.getNBT() == null || localNBT.getNBT().isEmpty()) {
 			super.save();
 			return;
 		}
@@ -565,7 +573,7 @@ public class NBTEditorScreen extends ItemEditorScreen {
 	public void getKey(String defaultValue, Consumer<String> keyConsumer) {
 		new StringInputScreen(this, keyConsumer, str -> !str.isEmpty())
 				.suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
-						.map(ac -> ac.getSuggestions(item, realPath, str, null, cursor,
+						.map(ac -> ac.getSuggestions(localNBT, realPath, str, null, cursor,
 								currentGen.getElements(this, nbt).stream().map(NBTValue::getKey).toList()))
 						.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture()))
 				.show(defaultValue);

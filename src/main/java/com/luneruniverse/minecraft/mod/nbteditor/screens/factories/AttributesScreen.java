@@ -6,11 +6,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigBar;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
@@ -32,7 +33,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 
-public class AttributesScreen extends ItemEditorScreen {
+public class AttributesScreen extends LocalEditorScreen<LocalItem, ItemReference> {
 	
 	private static class MaxButton extends ConfigButton {
 		
@@ -175,7 +176,7 @@ public class AttributesScreen extends ItemEditorScreen {
 	public AttributesScreen(ItemReference ref) {
 		super(TextInst.of("Item Attributes"), ref);
 		
-		NbtCompound nbt = item.getOrCreateNbt();
+		NbtCompound nbt = localNBT.getOrCreateNBT();
 		NbtList attributesNbt = nbt.getList("AttributeModifiers", NbtElement.COMPOUND_TYPE);
 		this.attributes = new ConfigList(TextInst.translatable("nbteditor.attributes"), false, ATTRIBUTE_ENTRY);
 		

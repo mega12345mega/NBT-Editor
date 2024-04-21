@@ -14,7 +14,7 @@ import net.minecraft.nbt.NbtInt;
 public class CompoundMenuGenerator implements MenuGenerator {
 	
 	@Override
-	public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source) {
+	public List<NBTValue> getElements(NBTEditorScreen<?> screen, NbtElement source) {
 		NbtCompound nbt = (NbtCompound) source;
 		return nbt.getKeys().stream().map(key -> new NBTValue(screen, key, nbt.get(key))).collect(Collectors.toList());
 	}
@@ -30,7 +30,7 @@ public class CompoundMenuGenerator implements MenuGenerator {
 	}
 	
 	@Override
-	public void addElement(NBTEditorScreen screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
+	public void addElement(NBTEditorScreen<?> screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
 		Consumer<String> main = key -> {
 			NbtCompound nbt = (NbtCompound) source;
 			if (nbt.contains(key) && force == null)

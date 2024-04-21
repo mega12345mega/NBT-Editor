@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigList;
@@ -23,7 +24,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 
-public class EnchantmentsScreen extends ItemEditorScreen {
+public class EnchantmentsScreen extends LocalEditorScreen<LocalItem, ItemReference> {
 	
 	private static final Map<String, Enchantment> ENCHANTMENTS;
 	static {
@@ -66,7 +67,7 @@ public class EnchantmentsScreen extends ItemEditorScreen {
 		entry.setConfigurable("level", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.level"), ConfigValueNumber.forInt(1, 1, 1, 32767)));
 		config = new ConfigList(TextInst.translatable("nbteditor.enchantments"), false, entry);
 		
-		new Enchants(item).getEnchants().forEach(enchant -> {
+		new Enchants(localNBT.getItem()).getEnchants().forEach(enchant -> {
 			ConfigCategory enchantConfig = entry.clone(true);
 			getConfigEnchantment(enchantConfig).setValue(MVRegistry.ENCHANTMENT.getId(enchant.enchant()).toString());
 			getConfigLevel(enchantConfig).setValue(enchant.level());
@@ -79,7 +80,7 @@ public class EnchantmentsScreen extends ItemEditorScreen {
 				ConfigCategory enchant = (ConfigCategory) path;
 				newEnchants.add(new Enchants.EnchantWithLevel(ENCHANTMENTS.get(getConfigEnchantment(enchant).getValidValue()), getConfigLevel(enchant).getValidValue()));
 			}
-			new Enchants(item).replaceEnchants(newEnchants);
+			new Enchants(localNBT.getItem()).replaceEnchants(newEnchants);
 			checkSave();
 		});
 	}

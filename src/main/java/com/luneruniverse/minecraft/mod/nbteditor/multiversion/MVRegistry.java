@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
@@ -56,6 +57,7 @@ public class MVRegistry<T> implements Iterable<T> {
 	public static final MVRegistry<ScreenHandlerType<?>> SCREEN_HANDLER = getRegistry("field_17429", "field_41187", false);
 	public static final MVRegistry<Item> ITEM = getRegistry("field_11142", "field_41178", true);
 	public static final MVRegistry<Block> BLOCK = getRegistry("field_11146", "field_41175", true);
+	public static final MVRegistry<EntityType<?>> ENTITY_TYPE = getRegistry("field_11145", "field_41177", true);
 	public static final MVRegistry<Enchantment> ENCHANTMENT = getRegistry("field_11160", "field_41176", false);
 	public static final MVRegistry<EntityAttribute> ATTRIBUTE = getRegistry("field_23781", "field_41190", false);
 	public static final MVRegistry<Potion> POTION = getRegistry("field_11143", "field_41179", true);

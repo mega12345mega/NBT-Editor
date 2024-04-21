@@ -13,12 +13,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetPresetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
@@ -47,14 +47,14 @@ public class NBTEditorAPI {
 	}
 	
 	/**
-	 * Register an advanced item factory<br>
+	 * Register an advanced factory<br>
 	 * Allows for inputting arguments<br>
 	 * Keep in mind NBT Editor uses a modified version of Fabric's command API to support multiple Minecraft versions<br>
 	 * Refer to the {@link com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands} package<br>
 	 * Example usage:<br>
 	 * <pre>
 	 * <code>
-	 * NBTEditorAPI.registerAdvancedItemFactory("myfactory", builder -> {
+	 * NBTEditorAPI.registerAdvancedFactory("myfactory", builder -> {
 	 * 	builder.executes(context -> {
 	 * 		ItemReference ref = MainUtil.getHeldItem();
 	 * 		ItemStack item = ref.getItem();
@@ -65,13 +65,13 @@ public class NBTEditorAPI {
 	 * });
 	 * </code>
 	 * </pre>
-	 * @param name The name of the item factory (used in the itemfactory command)
+	 * @param name The name of the factory (used in the factory command)
 	 * @param extremeAlias The extreme alias
-	 * @param onRegister A consumer for the {@code /itemfactory <name>} argument builder
-	 * @see #registerItemFactory(String, Consumer)
-	 * @see #registerItemFactory(String, Text, Consumer)
+	 * @param onRegister A consumer for the {@code /factory <name>} argument builder
+	 * @see #registerFactory(String, Consumer)
+	 * @see #registerFactory(String, Text, Consumer)
 	 */
-	public static void registerAdvancedItemFactory(String name, String extremeAlias, Consumer<LiteralArgumentBuilder<FabricClientCommandSource>> onRegister) {
+	public static void registerAdvancedFactory(String name, String extremeAlias, Consumer<LiteralArgumentBuilder<FabricClientCommandSource>> onRegister) {
 		FactoryCommand.INSTANCE.getChildren().add(new ClientCommand() {
 			@Override
 			public String getName() {
@@ -89,33 +89,40 @@ public class NBTEditorAPI {
 	}
 	
 	/**
-	 * Register a normal item factory
-	 * @param name The name of the item factory (used in the itemfactory command)
+	 * Register a normal factory
+	 * @param name The name of the factory (used in the factory command)
 	 * @param extremeAlias The extreme alias
-	 * @param factory A consumer for the {@link ItemReference} the factory is called on
-	 * @see #registerItemFactory(String, Text, Consumer)
-	 * @see #registerAdvancedItemFactory(String, Consumer)
+	 * @param factory A consumer for the {@link NBTReference} the factory is called on
+	 * @see #registerFactory(String, Text, Consumer)
+	 * @see #registerAdvancedFactory(String, Consumer)
 	 */
-	public static void registerItemFactory(String name, String extremeAlias, Consumer<ItemReference> factory) {
-		registerAdvancedItemFactory(name, extremeAlias, builder -> builder.executes(context -> {
-			factory.accept(ItemReference.getHeldItem());
+	public static void registerFactory(String name, String extremeAlias, Consumer<NBTReference<?>> factory) {
+		registerAdvancedFactory(name, extremeAlias, builder -> builder.executes(context -> {
+			NBTReference.getAnyReference(false, factory);
 			return Command.SINGLE_SUCCESS;
 		}));
 	}
 	
 	/**
-	 * Register a normal item factory, adding it to the factory gui
-	 * @param name The name of the item factory (used in the itemfactory command)
+	 * Register a normal factory, adding it to the factory gui
+	 * @param name The name of the factory (used in the factory command)
 	 * @param extremeAlias The extreme alias
-	 * @param buttonMsg The text to display in the itemfactory gui
-	 * @param supported If the button should display for the current item
-	 * @param factory A consumer for the {@link ItemReference} the factory is called on
-	 * @see #registerItemFactory(String, Consumer)
-	 * @see #registerAdvancedItemFactory(String, Consumer)
+	 * @param buttonMsg The text to display in the factory gui
+	 * @param supported If the factory supports the particular reference (item vs. entity, etc.)
+	 * @param unsupportedMsg The message to show in chat if the command is called on an unsupported reference
+	 * @param factory A consumer for the {@link NBTReference} the factory is called on
+	 * @see #registerFactory(String, Consumer)
+	 * @see #registerAdvancedFactory(String, Consumer)
 	 */
-	public static void registerItemFactory(String name, String extremeAlias, Text buttonMsg, Predicate<ItemReference> supported, Consumer<ItemReference> factory) {
-		registerItemFactory(name, extremeAlias, factory);
-		ItemFactoryScreen.BASIC_FACTORIES.add(new ItemFactoryScreen.ItemFactoryReference(buttonMsg, supported, factory));
+	public static void registerFactory(String name, String extremeAlias, Text buttonMsg,
+			Predicate<NBTReference<?>> supported, Text unsupportedMsg, Consumer<NBTReference<?>> factory) {
+		registerFactory(name, extremeAlias, ref -> {
+			if (supported.test(ref))
+				factory.accept(ref);
+			else if (MainUtil.client.player != null)
+				MainUtil.client.player.sendMessage(unsupportedMsg, false);
+		});
+		LocalFactoryScreen.BASIC_FACTORIES.add(new LocalFactoryScreen.LocalFactoryReference(buttonMsg, supported, factory));
 	}
 	
 	/**

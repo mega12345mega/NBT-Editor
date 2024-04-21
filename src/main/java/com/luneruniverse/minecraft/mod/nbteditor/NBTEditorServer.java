@@ -17,9 +17,9 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
@@ -78,7 +78,7 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 			BlockEntity block = world.getBlockEntity(packet.getPos());
 			if (block != null) {
 				sender.sendPacket(new ViewBlockS2CPacket(packet.getRequestId(),
-						BlockEntityType.getId(block.getType()), block.createNbt()));
+						MVRegistry.BLOCK.getId(block.getCachedState().getBlock()), block.createNbt()));
 				return;
 			}
 		}
@@ -91,7 +91,7 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
 		if (world != null) {
 			Entity entity = world.getEntity(packet.getUUID());
-			if (entity != null) {
+			if (entity != null && !(entity instanceof PlayerEntity)) {
 				sender.sendPacket(new ViewEntityS2CPacket(packet.getRequestId(),
 						EntityType.getId(entity.getType()), entity.writeNbt(new NbtCompound())));
 				return;
@@ -124,6 +124,7 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		Entity entity = world.getEntity(packet.getUUID());
 		if (entity == null)
 			return;
+		entity.getDataTracker().reset();
 		entity.readNbt(packet.getNbt());
 	}
 	

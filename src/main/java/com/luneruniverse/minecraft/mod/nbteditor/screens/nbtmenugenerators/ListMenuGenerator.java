@@ -29,7 +29,7 @@ public class ListMenuGenerator<T extends NbtElement, L extends AbstractNbtList<?
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source) {
+	public List<NBTValue> getElements(NBTEditorScreen<?> screen, NbtElement source) {
 		AbstractNbtList<? extends NbtElement> nbt = (AbstractNbtList<T>) source;
 		List<NBTValue> output = new ArrayList<>();
 		for (int i = 0; i < nbt.size(); i++)
@@ -66,7 +66,7 @@ public class ListMenuGenerator<T extends NbtElement, L extends AbstractNbtList<?
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void addElement(NBTEditorScreen screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
+	public void addElement(NBTEditorScreen<?> screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
 		((AbstractNbtList<T>) source).add((T) defaultValue.copy());
 		requestOverwrite.accept(null);
 	}

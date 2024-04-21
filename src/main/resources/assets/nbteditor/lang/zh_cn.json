@@ -90,7 +90,7 @@
 	"nbteditor.container": "容器",
 	"nbteditor.container.title": "Nbt Editor >> ",
 	
-	"nbteditor.item_factory": "高级编辑器",
+	"nbteditor.factory": "高级编辑器",
 	
 	"nbteditor.sign.added": "§a已添加签名",
 	"nbteditor.sign.removed": "§a已移除签名",

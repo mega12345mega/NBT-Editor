@@ -10,6 +10,7 @@
 	"nbteditor.ok": "Ok",
 	"nbteditor.cancel": "Cancel",
 	
+	"nbteditor.no_ref": "§cYou must be looking at an entity/block or holding an item to edit!",
 	"nbteditor.no_hand.no_item.to_edit": "You must be holding an item to edit!",
 	"nbteditor.no_hand.no_item.to_view": "You must be holding an item to view!",
 	"nbteditor.no_hand.no_item.to_export": "You must be holding an item to export!",
@@ -94,7 +95,7 @@
 	"nbteditor.container": "Container",
 	"nbteditor.container.title": "Nbt Editor >> ",
 	
-	"nbteditor.item_factory": "Factory",
+	"nbteditor.factory": "Factory",
 	
 	"nbteditor.sign.added": "§aSignature added!",
 	"nbteditor.sign.removed": "§aSignature removed!",

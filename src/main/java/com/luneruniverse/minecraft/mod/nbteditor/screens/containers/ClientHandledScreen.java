@@ -14,7 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.It
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -88,9 +88,9 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 				ContainerScreen.show(ref);
 		} else if (hasShiftDown()) {
 			if (notAir)
-				MainUtil.client.setScreen(new ItemFactoryScreen(ref));
+				MainUtil.client.setScreen(new LocalFactoryScreen<>(ref));
 		} else
-			MainUtil.client.setScreen(new NBTEditorScreen(ref));
+			MainUtil.client.setScreen(new NBTEditorScreen<>(ref));
 	}
 	
 	

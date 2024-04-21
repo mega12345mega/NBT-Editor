@@ -48,6 +48,7 @@ public class SetBlockC2SPacket implements FabricPacket {
 	public void write(PacketByteBuf payload) {
 		payload.writeIdentifier(world.getRegistry());
 		payload.writeRegistryKey(world);
+		payload.writeBlockPos(pos);
 		payload.writeIdentifier(id);
 		payload.writeNbt(nbt);
 	}

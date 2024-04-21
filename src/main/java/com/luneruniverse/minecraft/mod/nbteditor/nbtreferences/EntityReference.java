@@ -1,14 +1,15 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.nbt.NbtCompound;
@@ -16,7 +17,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
-public class EntityReference implements NBTReference {
+public class EntityReference implements NBTReference<LocalEntity> {
 	
 	public static CompletableFuture<Optional<EntityReference>> getEntity(RegistryKey<World> world, UUID uuid) {
 		return NBTEditorClient.SERVER_CONN
@@ -45,19 +46,14 @@ public class EntityReference implements NBTReference {
 	}
 	
 	@Override
-	public Identifier getId() {
-		return id;
-	}
-	@Override
-	public Set<Identifier> getIdOptions() {
-		return null;
+	public LocalEntity getLocalNBT() {
+		return new LocalEntity(id, nbt);
 	}
 	
 	@Override
 	public NbtCompound getNBT() {
 		return nbt;
 	}
-	
 	@Override
 	public void saveNBT(Identifier id, NbtCompound toSave, Runnable onFinished) {
 		if (!this.id.equals(id))
@@ -65,6 +61,11 @@ public class EntityReference implements NBTReference {
 		nbt = toSave;
 		ClientPlayNetworking.send(new SetEntityC2SPacket(world, uuid, toSave));
 		onFinished.run();
+	}
+	
+	@Override
+	public void showParent() {
+		MainUtil.client.setScreen(null);
 	}
 	
 }

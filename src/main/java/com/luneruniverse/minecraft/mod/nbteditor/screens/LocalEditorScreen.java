@@ -4,13 +4,13 @@ import java.util.function.Function;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -19,31 +19,30 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
-public abstract class ItemEditorScreen extends OverlaySupportingScreen {
+public abstract class LocalEditorScreen<L extends LocalNBT, R extends NBTReference<L>> extends OverlaySupportingScreen {
 	
-	protected static record FactoryLink(String langName, Function<ItemReference, Screen> factory) {
-		public FactoryLink(String langName, Function<ItemReference, Screen> factory) {
+	protected static record FactoryLink<T extends NBTReference<?>>(String langName, Function<T, Screen> factory) {
+		public FactoryLink(String langName, Function<T, Screen> factory) {
 			this.langName = langName;
 			this.factory = factory;
 		}
 	}
 	
-	protected final ItemReference ref;
-	protected ItemStack item;
-	protected ItemStack savedItem;
+	protected final R ref;
+	protected L localNBT;
+	protected L savedLocalNBT;
 	private boolean saved;
 	
 	protected NamedTextFieldWidget name;
 	private ButtonWidget saveBtn;
 	
-	protected ItemEditorScreen(Text title, ItemReference ref) {
+	protected LocalEditorScreen(Text title, R ref) {
 		super(title);
 		this.ref = ref;
-		this.savedItem = MainUtil.copyAirable(ref.getItem());
-		this.item = MainUtil.copyAirable(savedItem);
+		this.savedLocalNBT = LocalNBT.copy(ref.getLocalNBT());
+		this.localNBT = LocalNBT.copy(savedLocalNBT);
 		this.saved = true;
 	}
 	
@@ -55,8 +54,8 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 		return true;
 	}
 	
-	protected FactoryLink getFactoryLink() {
-		return new FactoryLink("nbteditor.item_factory", ItemFactoryScreen::new);
+	protected FactoryLink<R> getFactoryLink() {
+		return new FactoryLink<>("nbteditor.factory", LocalFactoryScreen::new);
 	}
 	
 	
@@ -74,7 +73,7 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 			}
 		}.name(TextInst.translatable("nbteditor.editor.name"));
 		name.setMaxLength(Integer.MAX_VALUE);
-		name.setText(MainUtil.getItemNameSafely(item).getString());
+		name.setText(localNBT.getName().getString());
 		name.setEditable(isNameEditable());
 		addDrawableChild(name);
 		
@@ -85,10 +84,10 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 			saveBtn.active = !saved;
 		}
 		
-		FactoryLink link = getFactoryLink();
+		FactoryLink<R> link = getFactoryLink();
 		if (link != null) {
 			addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
-					ItemFactoryScreen.FACTORY_ICON,
+					LocalFactoryScreen.FACTORY_ICON,
 					btn -> closeSafely(() -> client.setScreen(link.factory().apply(ref))),
 					new MVTooltip(link.langName())));
 		}
@@ -104,9 +103,9 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 		super.renderMain(matrices, mouseX, mouseY, delta);
 		renderEditor(matrices, mouseX, mouseY, delta);
 		MainUtil.renderLogo(matrices);
-		renderItemPreview(matrices);
+		renderPreview(matrices);
 	}
-	private void renderItemPreview(MatrixStack matrices) {
+	private void renderPreview(MatrixStack matrices) {
 		int x = 16 + 32 + 8;
 		int y = 16;
 		int scaleX = 2;
@@ -128,7 +127,7 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 		if (oldMatrix)
 			RenderSystem.applyModelViewMatrix();
 		
-		MVDrawableHelper.renderItem(matrices, 200.0F, true, item, x, y);
+		localNBT.renderIcon(matrices, x, y);
 		
 		matrices.pop();
 		if (oldMatrix)
@@ -167,17 +166,17 @@ public abstract class ItemEditorScreen extends OverlaySupportingScreen {
 		return saved;
 	}
 	protected void save() {
-		savedItem = item.copy();
+		savedLocalNBT = LocalNBT.copy(localNBT);
 		saveBtn.setMessage(TextInst.translatable("nbteditor.editor.saving"));
 		setSaved(true);
-		ref.saveItem(savedItem, () -> {
+		ref.saveLocalNBT(savedLocalNBT, () -> {
 			saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
 		});
 	}
 	protected void checkSave() {
-		item.getOrCreateNbt(); // Make sure both items have NBT defined, so no NBT and empty NBT comes out equal
-		savedItem.getOrCreateNbt();
-		setSaved(ItemStack.areEqual(item, savedItem));
+		localNBT.getOrCreateNBT(); // Make sure both items have NBT defined, so no NBT and empty NBT comes out equal
+		savedLocalNBT.getOrCreateNBT();
+		setSaved(localNBT.equals(savedLocalNBT));
 	}
 	
 	@Override

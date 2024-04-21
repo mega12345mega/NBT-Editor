@@ -30,7 +30,7 @@ public class NBTNewCommand extends ClientCommand {
 		builder.then(argument("item", MVMisc.getItemStackArg()).executes(context -> {
 			ItemReference ref = ItemReference.getHeldAir();
 			ref.saveItem(context.getArgument("item", ItemStackArgument.class).createStack(1, true));
-			MainUtil.client.setScreen(new NBTEditorScreen(ref));
+			MainUtil.client.setScreen(new NBTEditorScreen<>(ref));
 			return Command.SINGLE_SUCCESS;
 		}));
 	}

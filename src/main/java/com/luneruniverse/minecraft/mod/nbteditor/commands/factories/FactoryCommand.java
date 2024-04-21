@@ -6,7 +6,7 @@ import java.util.List;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommandGroup;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -49,7 +49,7 @@ public class FactoryCommand extends ClientCommandGroup {
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		super.register(builder, path);
 		builder.executes(context -> {
-			MainUtil.client.setScreen(new ItemFactoryScreen(ItemReference.getHeldItem()));
+			MainUtil.client.setScreen(new LocalFactoryScreen<>(ItemReference.getHeldItem()));
 			return Command.SINGLE_SUCCESS;
 		});
 	}

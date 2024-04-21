@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
@@ -11,7 +12,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ButtonDropdownWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -33,7 +34,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 
-public class SignboardScreen extends ItemEditorScreen {
+public class SignboardScreen extends LocalEditorScreen<LocalItem, ItemReference> {
 	
 	// Double sided & waxable
 	private static boolean NEW_FEATURES = Version.<Boolean>newSwitch()
@@ -72,7 +73,7 @@ public class SignboardScreen extends ItemEditorScreen {
 		screen.setGlowing(glowing);
 		screen.setColor(color);
 		screen.setLines(lines);
-		ref.saveItem(screen.item, () -> MainUtil.client.player.sendMessage(
+		ref.saveLocalNBT(screen.localNBT, () -> MainUtil.client.player.sendMessage(
 				TextInst.translatable("nbteditor.signboard.import.success", version), false));
 	}
 	
@@ -96,7 +97,7 @@ public class SignboardScreen extends ItemEditorScreen {
 		newFeatures = NEW_FEATURES;
 		if (newFeatures) {
 			this.texture = new Identifier("minecraft", "textures/block/" +
-					AbstractSignBlock.getWoodType(((SignItem) item.getItem()).getBlock()).name() + "_planks.png");
+					AbstractSignBlock.getWoodType(((SignItem) localNBT.getItem().getItem()).getBlock()).name() + "_planks.png");
 		} else {
 			this.texture = new Identifier("minecraft", "textures/block/" +
 					MVRegistry.ITEM.getId(ref.getItem().getItem()).getPath().replace("_sign", "_planks") + ".png");
@@ -104,10 +105,10 @@ public class SignboardScreen extends ItemEditorScreen {
 	}
 	
 	private NbtCompound getBlockTag(boolean create) {
-		NbtCompound blockTag = item.getSubNbt("BlockEntityTag");
+		NbtCompound blockTag = localNBT.getItem().getSubNbt("BlockEntityTag");
 		if (blockTag != null || !create)
 			return blockTag;
-		return item.getOrCreateSubNbt("BlockEntityTag");
+		return localNBT.getItem().getOrCreateSubNbt("BlockEntityTag");
 	}
 	private NbtCompound getBlockSideTag(boolean create) {
 		NbtCompound blockTag = getBlockTag(create);

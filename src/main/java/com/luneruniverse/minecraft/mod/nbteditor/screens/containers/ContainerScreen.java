@@ -9,7 +9,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ContainerItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.entity.player.PlayerInventory;
@@ -77,9 +77,9 @@ public class ContainerScreen extends ClientHandledScreen {
 		}
 		
 		addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
-				ItemFactoryScreen.FACTORY_ICON,
-				btn -> client.setScreen(new ItemFactoryScreen(ref)),
-				new MVTooltip("nbteditor.item_factory")));
+				LocalFactoryScreen.FACTORY_ICON,
+				btn -> client.setScreen(new LocalFactoryScreen<>(ref)),
+				new MVTooltip("nbteditor.factory")));
 	}
 	
 	@Override

@@ -1,10 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
-import java.util.Set;
 import java.util.function.Predicate;
 
-import org.lwjgl.glfw.GLFW;
-
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
@@ -20,7 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 
-public interface ItemReference extends NBTReference {
+public interface ItemReference extends NBTReference<LocalItem> {
 	public static ItemReference getHeldItem(Predicate<ItemStack> isAllowed, Text failText) throws CommandSyntaxException {
 		ItemStack item = MainUtil.client.player.getMainHandStack();
 		Hand hand = Hand.MAIN_HAND;
@@ -74,6 +72,15 @@ public interface ItemReference extends NBTReference {
 		return new ServerItemReference(slot, screen);
 	}
 	
+	@Override
+	public default LocalItem getLocalNBT() {
+		return new LocalItem(getItem());
+	}
+	@Override
+	public default void saveLocalNBT(LocalItem nbt, Runnable onFinished) {
+		saveItem(nbt.getItem(), onFinished);
+	}
+	
 	public ItemStack getItem();
 	public void saveItem(ItemStack toSave, Runnable onFinished);
 	public default void saveItem(ItemStack toSave, Text msg) {
@@ -82,8 +89,10 @@ public interface ItemReference extends NBTReference {
 	public default void saveItem(ItemStack toSave) {
 		saveItem(toSave, () -> {});
 	}
+	
 	public boolean isLocked();
 	public boolean isLockable();
+	
 	/**
 	 * Prevents a slot from being clicked while open in a container screen
 	 * @return The slot to block (0-26 inv, 27-35 hotbar) or -1 if no slot should be blocked
@@ -94,28 +103,7 @@ public interface ItemReference extends NBTReference {
 	 * @return The slot to block (0-8 hotbar, 40 offhand) or -1 if no slot should be blocked
 	 */
 	public int getBlockedHotbarSlot();
-	public void showParent();
-	public default void escapeParent() {
-		MainUtil.client.setScreen(null);
-	}
-	public default boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
-			escapeParent();
-		else if (MainUtil.client.options.inventoryKey.matchesKey(keyCode, scanCode))
-			showParent();
-		else
-			return false;
-		return true;
-	}
 	
-	@Override
-	public default Identifier getId() {
-		return MVRegistry.ITEM.getId(getItem().getItem());
-	}
-	@Override
-	public default Set<Identifier> getIdOptions() {
-		return MVRegistry.ITEM.getIds();
-	}
 	@Override
 	public default NbtCompound getNBT() {
 		NbtCompound nbt = getItem().getNbt();

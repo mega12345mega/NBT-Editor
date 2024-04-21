@@ -4,10 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
@@ -19,7 +20,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
 
-public class BlockStatesScreen extends ItemEditorScreen {
+public class BlockStatesScreen extends LocalEditorScreen<LocalItem, ItemReference> {
 	
 	private final ConfigCategory blockStates;
 	private final boolean hasBlockStates;
@@ -28,11 +29,11 @@ public class BlockStatesScreen extends ItemEditorScreen {
 	public BlockStatesScreen(ItemReference ref) {
 		super(TextInst.of("Block States"), ref);
 		
-		BlockState defaultState = ((BlockItem) item.getItem()).getBlock().getDefaultState();
+		BlockState defaultState = ((BlockItem) localNBT.getItem().getItem()).getBlock().getDefaultState();
 		this.hasBlockStates = !defaultState.getProperties().isEmpty();
 		this.blockStates = new ConfigCategory(this.hasBlockStates ? TextInst.translatable("nbteditor.block_states") : null);
 		
-		NbtCompound nbt = item.getOrCreateNbt();
+		NbtCompound nbt = localNBT.getOrCreateNBT();
 		NbtCompound blockStatesNbt = nbt.getCompound("BlockStateTag");
 		
 		for (Property<?> property : defaultState.getProperties()) {
