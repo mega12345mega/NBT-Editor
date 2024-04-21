@@ -49,8 +49,10 @@ public interface NBTReference<T extends LocalNBT> {
 	
 	public static void getAnyReference(boolean airable, Consumer<NBTReference<?>> consumer) {
 		NBTReference.getAnyReference(airable).thenAccept(ref -> ref.ifPresentOrElse(consumer, () -> {
-			if (MainUtil.client.player != null)
-				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.no_ref"), false);
+			if (MainUtil.client.player != null) {
+				MainUtil.client.player.sendMessage(TextInst.translatable(NBTEditorClient.SERVER_CONN.isEditingExpanded() ?
+						"nbteditor.no_ref.to_edit" : "nbteditor.no_hand.no_item.to_edit"), false);
+			}
 		}));
 	}
 	

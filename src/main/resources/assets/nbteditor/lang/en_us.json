@@ -10,8 +10,8 @@
 	"nbteditor.ok": "Ok",
 	"nbteditor.cancel": "Cancel",
 	
-	"nbteditor.no_ref": "§cYou must be looking at an entity/block or holding an item to edit!",
-	"nbteditor.no_hand.no_item.to_edit": "You must be holding an item to edit!",
+	"nbteditor.no_ref.to_edit": "§cYou must be looking at an entity/block or holding an item to edit!",
+	"nbteditor.no_hand.no_item.to_edit": "§cYou must be holding an item to edit!",
 	"nbteditor.no_hand.no_item.to_view": "You must be holding an item to view!",
 	"nbteditor.no_hand.no_item.to_export": "You must be holding an item to export!",
 	"nbteditor.no_hand.no_item.container": "You must be holding a container!",
@@ -21,7 +21,7 @@
 	"nbteditor.no_hand.no_item.signboard": "You must be holding a sign to edit!",
 	"nbteditor.no_hand.all_item": "You must be holding an empty slot to edit a new item!",
 	
-	"nbteditor.editor.save": "Save Item",
+	"nbteditor.editor.save": "Save",
 	"nbteditor.editor.saving": "Saving ...",
 	"nbteditor.editor.name": "Name",
 	

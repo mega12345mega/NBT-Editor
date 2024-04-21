@@ -10,7 +10,8 @@
     "ShulkerBoxSlotMixin",
     "ShulkerBoxScreenHandlerMixin",
     "HorseScreenHandlerMixin",
-    "HorseScreenHandler1and2Mixin"
+    "HorseScreenHandler1and2Mixin",
+    "DataTrackerMixin"
   ],
   "client": [
     "ChatScreenMixin",
@@ -37,8 +38,7 @@
     "WrittenBookItemMixin",
     "GameRendererMixin",
     "ChatInputSuggestorMixin",
-    "ClientPlayerEntityMixin",
-    "DataTrackerMixin"
+    "ClientPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
