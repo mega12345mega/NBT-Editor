@@ -113,6 +113,11 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		if (block == null)
 			return;
 		block.readNbt(packet.getNbt());
+		if (packet.isTriggerUpdate()) {
+			block.markDirty();
+			// Flags arg seems to be unused, and I don't know what it's supposed to be for this
+			world.updateListeners(packet.getPos(), block.getCachedState(), block.getCachedState(), 0);
+		}
 	}
 	
 	private void onSetEntityPacket(SetEntityC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {

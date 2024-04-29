@@ -14,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
@@ -98,7 +99,7 @@ public class NBTEditorAPI {
 	 */
 	public static void registerFactory(String name, String extremeAlias, Consumer<NBTReference<?>> factory) {
 		registerAdvancedFactory(name, extremeAlias, builder -> builder.executes(context -> {
-			NBTReference.getAnyReference(false, factory);
+			NBTReference.getReference(NBTReferenceFilter.ANY, false, factory);
 			return Command.SINGLE_SUCCESS;
 		}));
 	}

@@ -85,7 +85,7 @@ public class ListMenuGenerator<T extends NbtElement, L extends AbstractNbtList<?
 	@Override
 	public void pasteElement(NbtElement source, String key, NbtElement value) {
 		AbstractNbtList<T> list = (AbstractNbtList<T>) source;
-		if (list.getHeldType() == value.getType())
+		if (list.getHeldType() == 0 || list.getHeldType() == value.getType())
 			list.add((T) value);
 		else if (list.getHeldType() == NbtElement.STRING_TYPE)
 			list.add((T) NbtString.of(value.toString()));

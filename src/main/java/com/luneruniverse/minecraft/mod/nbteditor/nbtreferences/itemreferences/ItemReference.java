@@ -105,6 +105,10 @@ public interface ItemReference extends NBTReference<LocalItem> {
 	public int getBlockedHotbarSlot();
 	
 	@Override
+	public default Identifier getId() {
+		return MVRegistry.ITEM.getId(getItem().getItem());
+	}
+	@Override
 	public default NbtCompound getNBT() {
 		NbtCompound nbt = getItem().getNbt();
 		if (nbt != null)

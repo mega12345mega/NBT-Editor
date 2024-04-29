@@ -1,31 +1,36 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ButtonDropdownWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.SignSideTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.block.AbstractSignBlock;
+import net.minecraft.block.Block;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.SignItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -34,7 +39,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 
-public class SignboardScreen extends LocalEditorScreen<LocalItem, ItemReference> {
+public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L, NBTReference<L>> {
 	
 	// Double sided & waxable
 	private static boolean NEW_FEATURES = Version.<Boolean>newSwitch()
@@ -64,7 +69,7 @@ public class SignboardScreen extends LocalEditorScreen<LocalItem, ItemReference>
 			}
 		}
 		
-		SignboardScreen screen = new SignboardScreen(ref);
+		SignboardScreen<LocalItem> screen = new SignboardScreen<>(ref);
 		screen.newFeatures = !NEW_FEATURES;
 		boolean glowing = screen.isGlowing();
 		DyeColor color = screen.getColor();
@@ -92,101 +97,101 @@ public class SignboardScreen extends LocalEditorScreen<LocalItem, ItemReference>
 	private boolean back;
 	private FormattedTextFieldWidget lines;
 	
-	public SignboardScreen(ItemReference ref) {
+	public SignboardScreen(NBTReference<L> ref) {
 		super(TextInst.of("Signboard"), ref);
 		newFeatures = NEW_FEATURES;
 		if (newFeatures) {
+			Block block = null;
+			if (ref instanceof ItemReference itemRef)
+				block = ((SignItem) itemRef.getItem().getItem()).getBlock();
+			else if (ref instanceof BlockReference blockRef)
+				block = MVRegistry.BLOCK.get(blockRef.getId());
 			this.texture = new Identifier("minecraft", "textures/block/" +
-					AbstractSignBlock.getWoodType(((SignItem) localNBT.getItem().getItem()).getBlock()).name() + "_planks.png");
+					AbstractSignBlock.getWoodType(block).name() + "_planks.png");
 		} else {
 			this.texture = new Identifier("minecraft", "textures/block/" +
-					MVRegistry.ITEM.getId(ref.getItem().getItem()).getPath().replace("_sign", "_planks") + ".png");
+					ref.getId().getPath().replace("_sign", "_planks") + ".png");
 		}
 	}
 	
-	private NbtCompound getBlockTag(boolean create) {
-		NbtCompound blockTag = localNBT.getItem().getSubNbt("BlockEntityTag");
-		if (blockTag != null || !create)
-			return blockTag;
-		return localNBT.getItem().getOrCreateSubNbt("BlockEntityTag");
+	private NbtCompound getSideNbt(boolean create) {
+		NbtCompound nbt = localNBT.getOrCreateNBT();
+		
+		if (localNBT instanceof LocalItem) {
+			if (nbt.contains("BlockEntityTag", NbtElement.COMPOUND_TYPE))
+				nbt = nbt.getCompound("BlockEntityTag");
+			else if (!create)
+				return new NbtCompound();
+			else {
+				NbtCompound blockEntityTag = new NbtCompound();
+				nbt.put("BlockEntityTag", blockEntityTag);
+				nbt = blockEntityTag;
+			}
+		}
+		
+		if (newFeatures) {
+			String side = (back ? "back_text" : "front_text");
+			if (nbt.contains(side, NbtElement.COMPOUND_TYPE))
+				nbt = nbt.getCompound(side);
+			else if (!create)
+				return new NbtCompound();
+			else {
+				NbtCompound sideTag = new NbtCompound();
+				nbt.put(side, sideTag);
+				nbt = sideTag;
+			}
+		}
+		
+		return nbt;
 	}
-	private NbtCompound getBlockSideTag(boolean create) {
-		NbtCompound blockTag = getBlockTag(create);
-		if (blockTag == null || !newFeatures)
-			return blockTag;
-		String key = (back ? "back_text" : "front_text");
-		if (blockTag.contains(key, NbtElement.COMPOUND_TYPE))
-			return blockTag.getCompound(key);
-		if (!create)
-			return null;
-		NbtCompound sideTag = new NbtCompound();
-		blockTag.put(key, sideTag);
-		return sideTag;
+	private SignSideTagReference getSideTagRef() {
+		SignSideTagReference tagRef = new SignSideTagReference(newFeatures ? new int[] {1, 20, 0} : new int[] {1, 19, 4});
+		tagRef.load(getSideNbt(false));
+		return tagRef;
+	}
+	private void setSideTagRef(SignSideTagReference tagRef) {
+		tagRef.save(getSideNbt(true));
+	}
+	private void modifySideTagRef(Consumer<SignSideTagReference> tagRefConsumer) {
+		SignSideTagReference tagRef = getSideTagRef();
+		tagRefConsumer.accept(tagRef);
+		setSideTagRef(tagRef);
 	}
 	
 	private void setWaxed(boolean waxed) {
 		if (!newFeatures)
 			throw new IllegalStateException("Incorrect version!");
-		getBlockTag(true).putBoolean("is_waxed", waxed);
+		localNBT.getOrCreateNBT().putBoolean("is_waxed", waxed);
 		checkSave();
 	}
 	private boolean isWaxed() {
-		NbtCompound blockTag = getBlockTag(false);
+		NbtCompound blockTag = localNBT.getNBT();
 		return blockTag != null && blockTag.getBoolean("is_waxed");
 	}
 	
 	private void setGlowing(boolean glowing) {
-		getBlockSideTag(true).putBoolean(newFeatures ? "has_glowing_text" : "GlowingText", glowing);
+		modifySideTagRef(tagRef -> tagRef.glowing = glowing);
 		checkSave();
 	}
 	private boolean isGlowing() {
-		NbtCompound sideTag = getBlockSideTag(false);
-		return sideTag != null && sideTag.getBoolean(newFeatures ? "has_glowing_text" : "GlowingText");
+		return getSideTagRef().glowing;
 	}
 	
 	private void setColor(DyeColor color) {
-		getBlockSideTag(true).putString(newFeatures ? "color" : "Color", color.getName());
+		modifySideTagRef(tagRef -> tagRef.color = color.getName());
 		checkSave();
 	}
 	private DyeColor getColor() {
-		NbtCompound sideTag = getBlockSideTag(false);
-		if (sideTag == null)
-			return DyeColor.BLACK;
-		return DyeColor.byName(sideTag.getString(newFeatures ? "color" : "Color"), DyeColor.BLACK);
+		return DyeColor.byName(getSideTagRef().color, DyeColor.BLACK);
 	}
 	
 	private void setLines(List<Text> lines) {
-		NbtCompound sideTag = getBlockSideTag(true);
-		while (lines.size() < 4)
-			lines.add(TextInst.of(""));
-		if (newFeatures) {
-			NbtList messages = new NbtList();
-			for (Text line : lines)
-				messages.add(NbtString.of(Text.Serialization.toJsonString(fixEditable(fixClickEvent(line)))));
-			sideTag.put("messages", messages);
-		} else {
-			for (int i = 0; i < 4; i++)
-				sideTag.putString("Text" + (i + 1), Text.Serialization.toJsonString(fixClickEvent(lines.get(i))));
-		}
+		modifySideTagRef(tagRef -> tagRef.text = lines.stream().map(line -> fixClickEvent(line))
+				.map(line -> newFeatures ? fixEditable(line) : line).toArray(Text[]::new));
 		checkSave();
 	}
 	private List<Text> getLines() {
-		List<Text> output = new ArrayList<>();
-		NbtCompound sideTag = getBlockSideTag(false);
-		if (sideTag != null) {
-			if (newFeatures) {
-				NbtList messages = sideTag.getList("messages", NbtElement.STRING_TYPE);
-				for (int i = 0; i < messages.size() && i < 4; i++)
-					output.add(Text.Serialization.fromJson(messages.getString(i)));
-			} else {
-				for (int i = 1; i <= 4; i++) {
-					if (sideTag.contains("Text" + i, NbtElement.STRING_TYPE))
-						output.add(Text.Serialization.fromJson(sideTag.getString("Text" + i)));
-					else
-						output.add(TextInst.of(""));
-				}
-			}
-		}
+		List<Text> output = new ArrayList<>(Arrays.asList(getSideTagRef().text));
 		while (output.size() < 4)
 			output.add(TextInst.of(""));
 		return output;

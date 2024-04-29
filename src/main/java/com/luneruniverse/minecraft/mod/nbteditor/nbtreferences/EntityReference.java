@@ -51,6 +51,10 @@ public class EntityReference implements NBTReference<LocalEntity> {
 	}
 	
 	@Override
+	public Identifier getId() {
+		return id;
+	}
+	@Override
 	public NbtCompound getNBT() {
 		return nbt;
 	}

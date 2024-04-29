@@ -3,56 +3,69 @@ package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 
 public interface NBTReference<T extends LocalNBT> {
-	public static CompletableFuture<? extends Optional<? extends NBTReference<?>>> getAnyReference(boolean airable) {
+	public static CompletableFuture<? extends Optional<? extends NBTReference<?>>> getReference(NBTReferenceFilter filter, boolean airable) {
 		HitResult target = MainUtil.client.crosshairTarget;
-		if (target instanceof EntityHitResult entity) {
+		if (target instanceof EntityHitResult entity && filter.isEntityAllowed()) {
 			return EntityReference.getEntity(entity.getEntity().getWorld().getRegistryKey(), entity.getEntity().getUuid())
-					.thenApply(ref -> ref.isPresent() ? ref : getClientReference(airable));
+					.thenApply(ref -> ref.<NBTReference<?>>map(UnaryOperator.identity())
+							.filter(filter).or(() -> getClientReference(target, filter, airable)));
 		}
-		if (target instanceof BlockHitResult block) {
+		if (target instanceof BlockHitResult block && filter.isBlockAllowed()) {
 			return BlockReference.getBlock(MainUtil.client.world.getRegistryKey(), block.getBlockPos())
-					.thenApply(ref -> ref.isPresent() ? ref : getClientReference(airable));
+					.thenApply(ref -> ref.<NBTReference<?>>map(UnaryOperator.identity())
+							.filter(filter).or(() -> getClientReference(target, filter, airable)));
 		}
-		return CompletableFuture.completedFuture(getClientReference(airable));
+		return CompletableFuture.completedFuture(getClientReference(target, filter, airable));
 	}
-	private static Optional<? extends NBTReference<?>> getClientReference(boolean airable) {
-		try {
-			return Optional.of(airable ? ItemReference.getHeldItemAirable() : ItemReference.getHeldItem());
-		} catch (CommandSyntaxException e) {}
-		
-		if (NBTEditorClient.SERVER_CONN.isEditingExpanded()) {
-			HitResult target = MainUtil.client.crosshairTarget;
-			if (target instanceof BlockHitResult block && (block.getType() != HitResult.Type.MISS || airable))
-				return Optional.of(BlockReference.getBlockWithoutNBT(block.getBlockPos()));
+	private static Optional<? extends NBTReference<?>> getClientReference(HitResult target, NBTReferenceFilter filter, boolean airable) {
+		boolean heldItemDisallowed = false;
+		if (filter.isItemAllowed()) {
+			try {
+				ItemReference ref = ItemReference.getHeldItem();
+				if (filter.test(ref))
+					return Optional.of(ref);
+				heldItemDisallowed = true;
+			} catch (CommandSyntaxException e) {}
 		}
+		
+		if (filter.isBlockAllowed() && NBTEditorClient.SERVER_CONN.isEditingExpanded()) {
+			if (target instanceof BlockHitResult block && block.getType() != HitResult.Type.MISS) {
+				BlockReference ref = BlockReference.getBlockWithoutNBT(block.getBlockPos());
+				if (filter.test(ref))
+					return Optional.of(ref);
+			}
+		}
+		
+		if (airable && !heldItemDisallowed && filter.isItemAllowed())
+			return Optional.of(new HandItemReference(Hand.MAIN_HAND));
 		
 		return Optional.empty();
 	}
 	
-	public static void getAnyReference(boolean airable, Consumer<NBTReference<?>> consumer) {
-		NBTReference.getAnyReference(airable).thenAccept(ref -> ref.ifPresentOrElse(consumer, () -> {
-			if (MainUtil.client.player != null) {
-				MainUtil.client.player.sendMessage(TextInst.translatable(NBTEditorClient.SERVER_CONN.isEditingExpanded() ?
-						"nbteditor.no_ref.to_edit" : "nbteditor.no_hand.no_item.to_edit"), false);
-			}
+	public static void getReference(NBTReferenceFilter filter, boolean airable, Consumer<NBTReference<?>> consumer) {
+		NBTReference.getReference(filter, airable).thenAccept(ref -> ref.ifPresentOrElse(consumer, () -> {
+			if (MainUtil.client.player != null)
+				MainUtil.client.player.sendMessage(filter.getFailMessage(), false);
 		}));
 	}
 	
@@ -67,6 +80,7 @@ public interface NBTReference<T extends LocalNBT> {
 		saveLocalNBT(nbt, () -> {});
 	}
 	
+	public Identifier getId();
 	public NbtCompound getNBT();
 	public void saveNBT(Identifier id, NbtCompound toSave, Runnable onFinished);
 	public default void saveNBT(Identifier id, NbtCompound toSave, Text msg) {

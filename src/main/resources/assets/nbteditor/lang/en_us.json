@@ -11,6 +11,7 @@
 	"nbteditor.cancel": "Cancel",
 	
 	"nbteditor.no_ref.to_edit": "§cYou must be looking at an entity/block or holding an item to edit!",
+	"nbteditor.no_ref.signboard": "§cYou must be looking at or holding a sign to edit!",
 	"nbteditor.no_hand.no_item.to_edit": "§cYou must be holding an item to edit!",
 	"nbteditor.no_hand.no_item.to_view": "You must be holding an item to view!",
 	"nbteditor.no_hand.no_item.to_export": "You must be holding an item to export!",
@@ -263,7 +264,7 @@
 	"nbteditor.config.scroll_speed": "Scroll Speed",
 	"nbteditor.config.scroll_speed.desc": "Increase/decrease the speed\nof scrolling in NBT Editor menus",
 	"nbteditor.config.air_editable": "Air Editing",
-	"nbteditor.config.air_editable.desc": "Allow working with air in the nbt editor menu\n\n§eThis is an experimental feature!\n§cKeep a backup of important items.",
+	"nbteditor.config.air_editable.desc": "Allow working with air in the nbt editor menu\n\n§eThis is an experimental feature!",
 	"nbteditor.config.air_editable.yes": "Enabled",
 	"nbteditor.config.air_editable.no": "Disabled",
 	"nbteditor.config.json_text": "JSON Text",
@@ -324,6 +325,10 @@
 	"nbteditor.config.page_keybinds.desc": "Whether Page Up increases the page number (Normal)\nor goes to the previous page (Inverted)\nin the client chest",
 	"nbteditor.config.page_keybinds.normal": "Normal",
 	"nbteditor.config.page_keybinds.inverted": "Inverted",
+	"nbteditor.config.trigger_block_updates": "Block Updates",
+	"nbteditor.config.trigger_block_updates.desc": "Disable block updates when modifying blocks,\nallowing you to create unstable states\n\n§eThis is an experimental feature!",
+	"nbteditor.config.trigger_block_updates.yes": "Enabled",
+	"nbteditor.config.trigger_block_updates.no": "Disabled",
 	
 	
 	"nbteditor.configurable.list.move": "Move",

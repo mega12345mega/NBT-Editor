@@ -49,6 +49,9 @@
   
   "custom": {
     "modmenu": {
+      "links": {
+      	"modmenu.discord": "https://discord.gg/PzeYTbEZjn"
+      }
     },
     "loom:injected_interfaces": {
       "net/minecraft/class_4068": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVDrawableParent"],

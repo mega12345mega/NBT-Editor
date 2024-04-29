@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -12,25 +13,27 @@ import com.google.gson.JsonObject;
 
 public class Version {
 	public static class VersionSwitch<T> {
+		private final int[] version;
 		private Supplier<T> match;
-		private VersionSwitch() {}
+		private VersionSwitch(int[] version) {
+			this.version = version;
+		}
 		public VersionSwitch<T> range(String min, String max, Supplier<T> value) {
 			int[] minParts = min == null ? null : parseVersion(min);
 			int[] maxParts = max == null ? null : parseVersion(max);
-			int[] actualParts = Version.get();
 			boolean minMatch = (min != null);
 			boolean maxMatch = (max != null);
 			for (int i = 0; i < 3; i++) {
 				if (minMatch) {
-					if (minParts[i] < actualParts[i])
+					if (minParts[i] < version[i])
 						minMatch = false;
-					else if (minParts[i] > actualParts[i])
+					else if (minParts[i] > version[i])
 						return this;
 				}
 				if (maxMatch) {
-					if (actualParts[i] < maxParts[i])
+					if (version[i] < maxParts[i])
 						maxMatch = false;
-					else if (actualParts[i] > maxParts[i])
+					else if (version[i] > maxParts[i])
 						return this;
 				}
 			}
@@ -56,10 +59,23 @@ public class Version {
 		public void run() {
 			get();
 		}
+		public Optional<T> getOptionally() {
+			if (match == null)
+				return Optional.empty();
+			return Optional.of(match.get());
+		}
+		public Optional<Runnable> runOptionally() {
+			if (match == null)
+				return Optional.empty();
+			return Optional.of(() -> match.get());
+		}
 	}
 	
+	public static <T> VersionSwitch<T> newSwitch(int[] version) {
+		return new VersionSwitch<>(version);
+	}
 	public static <T> VersionSwitch<T> newSwitch() {
-		return new VersionSwitch<T>();
+		return new VersionSwitch<>(Version.get());
 	}
 	
 	private static volatile int[] CURRENT;

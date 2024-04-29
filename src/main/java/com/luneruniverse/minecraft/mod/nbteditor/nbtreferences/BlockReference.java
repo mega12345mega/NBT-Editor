@@ -9,6 +9,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewBlockS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -56,6 +57,10 @@ public class BlockReference implements NBTReference<LocalBlock> {
 	}
 	
 	@Override
+	public Identifier getId() {
+		return id;
+	}
+	@Override
 	public NbtCompound getNBT() {
 		return nbt;
 	}
@@ -63,7 +68,7 @@ public class BlockReference implements NBTReference<LocalBlock> {
 	public void saveNBT(Identifier id, NbtCompound toSave, Runnable onFinished) {
 		this.id = id;
 		this.nbt = toSave;
-		ClientPlayNetworking.send(new SetBlockC2SPacket(world, pos, id, toSave));
+		ClientPlayNetworking.send(new SetBlockC2SPacket(world, pos, id, toSave, ConfigScreen.isTriggerBlockUpdates()));
 		onFinished.run();
 	}
 	

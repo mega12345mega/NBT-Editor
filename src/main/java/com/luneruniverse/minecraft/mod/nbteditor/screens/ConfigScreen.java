@@ -172,6 +172,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 	private static List<Alias> aliases;
 	private static ItemSizeFormat itemSizeFormat;
 	private static boolean invertedPageKeybinds;
+	private static boolean triggerBlockUpdates;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -199,6 +200,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 				new Alias("itemfactory signature", "sign")));
 		itemSizeFormat = ItemSizeFormat.HIDDEN;
 		invertedPageKeybinds = false;
+		triggerBlockUpdates = true;
 		
 		try {
 			// Many config options use the old names
@@ -232,6 +234,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 							alias.getAsJsonObject().get("alias").getAsString())).collect(Collectors.toList());
 			itemSizeFormat = ItemSizeFormat.valueOf(settings.get("itemSize").getAsString());
 			invertedPageKeybinds = settings.get("invertedPageKeybinds").getAsBoolean();
+			triggerBlockUpdates = settings.get("triggerBlockUpdates").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -268,6 +271,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		}).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 		settings.addProperty("itemSize", itemSizeFormat.name());
 		settings.addProperty("invertedPageKeybinds", invertedPageKeybinds);
+		settings.addProperty("triggerBlockUpdates", triggerBlockUpdates);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -352,6 +356,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 	}
 	public static boolean isInvertedPageKeybinds() {
 		return invertedPageKeybinds;
+	}
+	public static boolean isTriggerBlockUpdates() {
+		return triggerBlockUpdates;
 	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
@@ -503,6 +510,11 @@ public class ConfigScreen extends TickableSupportingScreen {
 				new ConfigValueBoolean(specialNumbers, true, 100, TextInst.translatable("nbteditor.config.special_numbers.enabled"), TextInst.translatable("nbteditor.config.special_numbers.disabled"))
 				.addValueListener(value -> specialNumbers = value.getValidValue()))
 				.setTooltip("nbteditor.config.special_numbers.desc"));
+		
+		functional.setConfigurable("triggerBlockUpdates", new ConfigItem<>(TextInst.translatable("nbteditor.config.trigger_block_updates"),
+				new ConfigValueBoolean(triggerBlockUpdates, true, 100, TextInst.translatable("nbteditor.config.trigger_block_updates.yes"), TextInst.translatable("nbteditor.config.trigger_block_updates.no"))
+				.addValueListener(value -> triggerBlockUpdates = value.getValidValue()))
+				.setTooltip("nbteditor.config.trigger_block_updates.desc"));
 		
 		functional.setConfigurable("jsonText", new ConfigItem<>(TextInst.translatable("nbteditor.config.json_text"),
 				new ConfigValueBoolean(jsonText, false, 100, TextInst.translatable("nbteditor.config.json_text.yes"), TextInst.translatable("nbteditor.config.json_text.no"))
