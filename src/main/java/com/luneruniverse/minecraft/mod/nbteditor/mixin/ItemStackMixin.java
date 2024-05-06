@@ -96,7 +96,7 @@ public class ItemStackMixin {
 			if (creativeInv || (!(MainUtil.client.currentScreen instanceof CreativeInventoryScreen) &&
 					NBTEditorClient.SERVER_CONN.isScreenEditable())) {
 				info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.edit"));
-				info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.item_factory"));
+				info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.factory"));
 				if (ContainerIO.isContainer(source))
 					info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.container"));
 				if (source.getItem() == Items.ENCHANTED_BOOK)

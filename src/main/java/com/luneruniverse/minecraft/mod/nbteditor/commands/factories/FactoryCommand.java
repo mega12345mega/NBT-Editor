@@ -32,12 +32,12 @@ public class FactoryCommand extends ClientCommandGroup {
 	
 	@Override
 	public String getName() {
-		return "itemfactory";
+		return "factory";
 	}
 	
 	@Override
 	public String getExtremeAlias() {
-		return "if";
+		return "f";
 	}
 	
 	@Override

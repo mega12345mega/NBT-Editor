@@ -270,4 +270,7 @@ public class MixinLink {
 	public static final Map<Thread, PlayerEntity> SCREEN_HANDLER_OWNER = new HashMap<>();
 	public static final WeakHashMap<Slot, PlayerEntity> SLOT_OWNER = new WeakHashMap<>();
 	
+	
+	public static final List<ItemStack> ENCHANT_GLINT_FIX = new ArrayList<>();
+	
 }

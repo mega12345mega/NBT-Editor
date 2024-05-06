@@ -173,6 +173,8 @@ public class ConfigScreen extends TickableSupportingScreen {
 	private static ItemSizeFormat itemSizeFormat;
 	private static boolean invertedPageKeybinds;
 	private static boolean triggerBlockUpdates;
+	private static boolean warnIncompatibleProtocol;
+	private static boolean enchantGlintFix;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -197,10 +199,12 @@ public class ConfigScreen extends TickableSupportingScreen {
 				new Alias("nbteditor", "nbt"),
 				new Alias("clientchest", "chest"),
 				new Alias("clientchest", "storage"),
-				new Alias("itemfactory signature", "sign")));
+				new Alias("factory signature", "sign")));
 		itemSizeFormat = ItemSizeFormat.HIDDEN;
 		invertedPageKeybinds = false;
 		triggerBlockUpdates = true;
+		warnIncompatibleProtocol = true;
+		enchantGlintFix = false;
 		
 		try {
 			// Many config options use the old names
@@ -235,6 +239,8 @@ public class ConfigScreen extends TickableSupportingScreen {
 			itemSizeFormat = ItemSizeFormat.valueOf(settings.get("itemSize").getAsString());
 			invertedPageKeybinds = settings.get("invertedPageKeybinds").getAsBoolean();
 			triggerBlockUpdates = settings.get("triggerBlockUpdates").getAsBoolean();
+			warnIncompatibleProtocol = settings.get("warnIncompatibleProtocol").getAsBoolean();
+			enchantGlintFix = settings.get("enchantGlintFix").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -272,6 +278,8 @@ public class ConfigScreen extends TickableSupportingScreen {
 		settings.addProperty("itemSize", itemSizeFormat.name());
 		settings.addProperty("invertedPageKeybinds", invertedPageKeybinds);
 		settings.addProperty("triggerBlockUpdates", triggerBlockUpdates);
+		settings.addProperty("warnIncompatibleProtocol", warnIncompatibleProtocol);
+		settings.addProperty("enchantGlintFix", enchantGlintFix);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -360,6 +368,12 @@ public class ConfigScreen extends TickableSupportingScreen {
 	public static boolean isTriggerBlockUpdates() {
 		return triggerBlockUpdates;
 	}
+	public static boolean isWarnIncompatibleProtocol() {
+		return warnIncompatibleProtocol;
+	}
+	public static boolean isEnchantGlintFix() {
+		return enchantGlintFix;
+	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
 		EditableText output = TextInst.translatable(enchant.getTranslationKey());
@@ -445,6 +459,11 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.addValueListener(value -> screenshotOptions = value.getValidValue()))
 				.setTooltip(new MVTooltip(TextInst.translatable("nbteditor.config.screenshot_options.desc", TextInst.translatable("nbteditor.file_options.show"), TextInst.translatable("nbteditor.file_options.delete")))));
 		
+		mc.setConfigurable("enchantGlintFix", new ConfigItem<>(TextInst.translatable("nbteditor.config.enchant_glint_fix"),
+				new ConfigValueBoolean(enchantGlintFix, false, 100, TextInst.translatable("nbteditor.config.enchant_glint_fix.enabled"), TextInst.translatable("nbteditor.config.enchant_glint_fix.disabled"))
+				.addValueListener(value -> enchantGlintFix = value.getValidValue()))
+				.setTooltip("nbteditor.config.enchant_glint_fix.desc"));
+		
 		// ---------- GUIs ----------
 		
 		guis.setConfigurable("scrollSpeed", new ConfigItem<>(TextInst.translatable("nbteditor.config.scroll_speed"),
@@ -464,7 +483,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		
 		guis.setConfigurable("hideKeybinds", new ConfigItem<>(TextInst.translatable("nbteditor.config.keybinds"),
 				new ConfigValueBoolean(keybindsHidden, false, 100, TextInst.translatable("nbteditor.config.keybinds.hidden"), TextInst.translatable("nbteditor.config.keybinds.shown"),
-				new MVTooltip("nbteditor.keybind.edit", "nbteditor.keybind.item_factory", "nbteditor.keybind.container", "nbteditor.keybind.enchant"))
+				new MVTooltip("nbteditor.keybind.edit", "nbteditor.keybind.factory", "nbteditor.keybind.container", "nbteditor.keybind.enchant"))
 				.addValueListener(value -> keybindsHidden = value.getValidValue()))
 				.setTooltip("nbteditor.config.keybinds.desc"));
 		
@@ -487,6 +506,11 @@ public class ConfigScreen extends TickableSupportingScreen {
 				new ConfigValueDropdownEnum<>(checkUpdates, CheckUpdatesLevel.MINOR, CheckUpdatesLevel.class)
 				.addValueListener(value -> checkUpdates = value.getValidValue()))
 				.setTooltip("nbteditor.config.check_updates.desc"));
+		
+		guis.setConfigurable("warnIncompatibleProtocol", new ConfigItem<>(TextInst.translatable("nbteditor.config.warn_incompatible_protocol"),
+				new ConfigValueBoolean(warnIncompatibleProtocol, true, 100, TextInst.translatable("nbteditor.config.warn_incompatible_protocol.enabled"), TextInst.translatable("nbteditor.config.warn_incompatible_protocol.disabled"))
+				.addValueListener(value -> warnIncompatibleProtocol = value.getValidValue()))
+				.setTooltip("nbteditor.config.warn_incompatible_protocol.desc"));
 		
 		// ---------- FUNCTIONAL ----------
 		

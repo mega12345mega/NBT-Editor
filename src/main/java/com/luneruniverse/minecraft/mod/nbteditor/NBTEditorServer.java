@@ -5,6 +5,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.packets.ProtocolVersionS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetEntityC2SPacket;
@@ -37,6 +38,7 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 	
 	@Override
 	public void onPlayInit(ServerPlayNetworkHandler network, MinecraftServer server) {
+		ServerPlayNetworking.send(network.getPlayer(), new ProtocolVersionS2CPacket(NBTEditorServerConn.PROTOCOL_VERSION));
 		ServerPlayNetworking.registerReceiver(network, SetCursorC2SPacket.TYPE, this::onSetCursorPacket);
 		ServerPlayNetworking.registerReceiver(network, SetSlotC2SPacket.TYPE, this::onSetSlotPacket);
 		ServerPlayNetworking.registerReceiver(network, OpenEnderChestC2SPacket.TYPE, this::onOpenEnderChestPacket);

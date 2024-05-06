@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
@@ -32,7 +33,7 @@ public class SignatureCommand extends ClientCommand {
 		else {
 			try {
 				signature = Text.Serialization.fromJson(new String(Files.readAllBytes(SIGNATURE_FILE.toPath())));
-			} catch (IOException e) {
+			} catch (IOException | JsonParseException e) {
 				NBTEditor.LOGGER.error("Error while loading signature", e);
 				signature = TextInst.translatable("nbteditor.sign.load_error");
 			}

@@ -38,7 +38,8 @@
     "WrittenBookItemMixin",
     "GameRendererMixin",
     "ChatInputSuggestorMixin",
-    "ClientPlayerEntityMixin"
+    "ClientPlayerEntityMixin",
+    "BuiltinModelItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

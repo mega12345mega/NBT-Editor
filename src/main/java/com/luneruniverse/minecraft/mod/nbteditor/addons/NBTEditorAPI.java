@@ -133,7 +133,7 @@ public class NBTEditorAPI {
 	 * @param name The name of the item that will be received (used in the get command)
 	 * @param extremeAlias The extreme alias
 	 * @param onRegister A consumer for the {@code /get <name>} argument builder
-	 * @see #registerAdvancedItemFactory(String, Consumer) An example of using onRegister
+	 * @see #registerAdvancedFactory(String, Consumer) An example of using onRegister
 	 * @see MainUtil#getWithMessage(ItemStack)
 	 */
 	public static void registerGetCommand(String name, String extremeAlias, Consumer<LiteralArgumentBuilder<FabricClientCommandSource>> onRegister) {

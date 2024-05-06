@@ -13,6 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.CommandHandler;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
@@ -27,6 +28,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import tsp.headdb.ported.HeadAPI;
@@ -64,8 +66,11 @@ public class NBTEditorClient implements ClientModInitializer {
 		CLIENT_CHEST = ConfigScreen.isLargeClientChest() ? new LargeClientChest(5) : new SmallClientChest(100);
 		CLIENT_CHEST.loadAync();
 		
-		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.PURPLE_SHULKER_BOX)
-				.setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest")), ClientChestScreen::show,
+		ItemStack clientChestIcon = new ItemStack(Items.ENDER_CHEST)
+				.setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));
+		clientChestIcon.addEnchantment(Enchantments.LOYALTY, 1);
+		MixinLink.ENCHANT_GLINT_FIX.add(clientChestIcon);
+		NBTEditorAPI.registerInventoryTab(clientChestIcon, ClientChestScreen::show,
 				screen -> screen instanceof CreativeInventoryScreen || (screen instanceof InventoryScreen && SERVER_CONN.isEditingExpanded()));
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.CHEST)
 				.setCustomName(TextInst.translatable("itemGroup.nbteditor.inventory")),

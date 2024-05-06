@@ -8,13 +8,20 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 
 public class LocalBlock implements LocalNBT {
 	
@@ -76,11 +83,21 @@ public class LocalBlock implements LocalNBT {
 		matrices.push();
 		LocalNBT.makeRotatingIcon(matrices, x, y, 1);
 		matrices.translate(-0.5, -0.5, -0.5);
-		
 		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getDrawContext(matrices).getVertexConsumers();
-		MainUtil.client.getBlockRenderManager().renderBlockAsEntity(MVRegistry.BLOCK.get(id).getDefaultState(), matrices, provider, 255, OverlayTexture.DEFAULT_UV);
-		provider.draw();
 		
+		Block block = MVRegistry.BLOCK.get(id);
+		BlockState state = block.getDefaultState();
+		
+		MainUtil.client.getBlockRenderManager().renderBlock(state, new BlockPos(0, 1000, 0), MainUtil.client.world, matrices,
+				provider.getBuffer(RenderLayer.getCutout()), false, new Xoroshiro128PlusPlusRandom(0));
+		if (block instanceof BlockEntityProvider entityProvider) {
+			BlockEntity entity = entityProvider.createBlockEntity(new BlockPos(0, 1000, 0), state);
+			entity.setWorld(MainUtil.client.world);
+			entity.readNbt(nbt);
+			MainUtil.client.getBlockEntityRenderDispatcher().renderEntity(entity, matrices, provider, 0xF000F0, OverlayTexture.DEFAULT_UV);
+		}
+		
+		provider.draw();
 		matrices.pop();
 		
 		RenderSystem.enableCull();

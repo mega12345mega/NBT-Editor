@@ -9,6 +9,7 @@ import java.util.Map;
 import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.nbt.AbstractNbtList;
 import net.minecraft.nbt.AbstractNbtNumber;
@@ -105,7 +106,7 @@ public class TagReference {
 		
 		if (target.isAssignableFrom(Text.class)) {
 			try {
-				return (element instanceof NbtString str ? Text.Serialization.fromJson(str.value) : TextInst.of(""));
+				return (element instanceof NbtString str ? TextUtil.fromJsonSafely(str.value) : TextInst.of(""));
 			} catch (JsonParseException e) {
 				return TextInst.of("");
 			}

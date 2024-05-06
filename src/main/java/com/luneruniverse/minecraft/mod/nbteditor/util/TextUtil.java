@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
@@ -257,6 +258,15 @@ public class TextUtil {
 			return Optional.empty();
 		});
 		return output.getPlain();
+	}
+	
+	public static Text fromJsonSafely(String json) {
+		try {
+			Text output = Text.Serialization.fromJson(json);
+			if (output != null)
+				return output;
+		} catch (JsonParseException e) {}
+		return TextInst.of(json);
 	}
 	
 }

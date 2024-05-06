@@ -584,7 +584,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		@Override
 		protected String onPaste(String text, int pos, int overwrittenLen) {
 			try {
-				Text textValue = pasteFilter(Text.Serialization.fromJson(text));
+				Text textValue = pasteFilter(TextUtil.fromJsonSafely(text));
 				String textValueStr = textValue.getString();
 				int textLen = textValueStr.length();
 				

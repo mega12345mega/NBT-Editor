@@ -30,7 +30,7 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 		DURATION("-duration", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), Integer.parseInt(str) * 20, effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), false),
 		AMPLIFIER("-amplifier", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), Integer.parseInt(str), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), false),
 		AMBIENT("-ambient", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), effect.getAmplifier(), parseBoolean(str), effect.shouldShowParticles(), effect.shouldShowIcon()), true),
-		PERMANENT("-permanent", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), Integer.MAX_VALUE, effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), true),
+		PERMANENT("-permanent", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), -1, effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), true),
 		SHOW_PARTICLES("-showparticles", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), parseBoolean(str), effect.shouldShowIcon()), true),
 		SHOW_ICON("-showicon", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), parseBoolean(str)), true);
 		
@@ -54,7 +54,7 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 		}
 	}
 	
-	private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:blindness duration:1 showparticles:false", "minecraft:jump_boost");
+	private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:blindness -duration:1 -showparticles:false", "minecraft:jump_boost");
 	public static final DynamicCommandExceptionType INVALID_EFFECT_EXCEPTION = new DynamicCommandExceptionType((id) -> {
 		return TextInst.translatable("effect.effectNotFound", new Object[]{id});
 	});

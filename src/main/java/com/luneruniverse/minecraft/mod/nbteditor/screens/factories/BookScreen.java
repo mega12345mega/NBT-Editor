@@ -25,6 +25,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidg
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.TranslatedGroupWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore.LoreConsumer;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.client.gui.screen.ingame.BookScreen.Contents;
 import net.minecraft.client.util.math.MatrixStack;
@@ -174,7 +175,7 @@ public class BookScreen extends LocalEditorScreen<LocalItem, ItemReference> {
 		NbtList pages = output.getNbt().getList("pages", NbtElement.STRING_TYPE);
 		List<Text> previewPages = new ArrayList<>();
 		for (int i = 0; i < pages.size(); i++)
-			previewPages.add(makePreviewText(Text.Serialization.fromJson(pages.getString(i))));
+			previewPages.add(makePreviewText(TextUtil.fromJsonSafely(pages.getString(i))));
 		return new Contents() {
 			@Override
 			public int getPageCount() {

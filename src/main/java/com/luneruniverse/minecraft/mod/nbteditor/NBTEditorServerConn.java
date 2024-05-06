@@ -1,22 +1,23 @@
 package com.luneruniverse.minecraft.mod.nbteditor;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ContainerScreenS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.packets.ProtocolVersionS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ResponsePacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewBlockS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.fabricmc.fabric.api.client.networking.v1.C2SPlayChannelEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
@@ -27,16 +28,19 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.toast.SystemToast;
 import net.minecraft.world.GameMode;
 
-public class NBTEditorServerConn implements ClientPlayConnectionEvents.Init, ClientPlayConnectionEvents.Disconnect, C2SPlayChannelEvents.Register {
+public class NBTEditorServerConn implements ClientPlayConnectionEvents.Init, ClientPlayConnectionEvents.Disconnect {
 	
 	public enum Status {
 		DISCONNECTED,
 		CLIENT_ONLY,
+		INCOMPATIBLE,
 		BOTH
 	}
+	
+	public static final int PROTOCOL_VERSION = 0;
 	
 	private Status status;
 	private boolean containerScreen;
@@ -51,7 +55,6 @@ public class NBTEditorServerConn implements ClientPlayConnectionEvents.Init, Cli
 		
 		ClientPlayConnectionEvents.INIT.register(this);
 		ClientPlayConnectionEvents.DISCONNECT.register(this);
-		C2SPlayChannelEvents.REGISTER.register(this);
 	}
 	
 	public Status getStatus() {
@@ -106,6 +109,7 @@ public class NBTEditorServerConn implements ClientPlayConnectionEvents.Init, Cli
 	@Override
 	public void onPlayInit(ClientPlayNetworkHandler network, MinecraftClient client) {
 		status = Status.CLIENT_ONLY;
+		ClientPlayNetworking.registerReceiver(ProtocolVersionS2CPacket.TYPE, this::onProtocolVersionPacket);
 		ClientPlayNetworking.registerReceiver(ContainerScreenS2CPacket.TYPE, this::onContainerScreenPacket);
 		ClientPlayNetworking.registerReceiver(ViewBlockS2CPacket.TYPE, this::receiveRequest);
 		ClientPlayNetworking.registerReceiver(ViewEntityS2CPacket.TYPE, this::receiveRequest);
@@ -116,11 +120,17 @@ public class NBTEditorServerConn implements ClientPlayConnectionEvents.Init, Cli
 		status = Status.DISCONNECTED;
 	}
 	
-	@Override
-	public void onChannelRegister(ClientPlayNetworkHandler network, PacketSender sender,
-			MinecraftClient client, List<Identifier> channels) {
-		if (channels.stream().anyMatch(channel -> channel.getNamespace().equals("nbteditor")))
+	private void onProtocolVersionPacket(ProtocolVersionS2CPacket packet, ClientPlayerEntity player, PacketSender sender) {
+		if (packet.getVersion() == PROTOCOL_VERSION)
 			status = Status.BOTH;
+		else {
+			status = Status.INCOMPATIBLE;
+			if (ConfigScreen.isWarnIncompatibleProtocol()) {
+				MainUtil.client.getToastManager().add(new SystemToast(SystemToast.Type.PACK_LOAD_FAILURE,
+						TextInst.translatable("nbteditor.incompatible_protocol.title"),
+						TextInst.translatable("nbteditor.incompatible_protocol.desc")));
+			}
+		}
 	}
 	
 	private void onContainerScreenPacket(ContainerScreenS2CPacket packet, ClientPlayerEntity player, PacketSender sender) {
