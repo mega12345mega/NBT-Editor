@@ -1,46 +1,36 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Arrays;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 
-public class DynamicSizeContainerIO extends MultiTargetContainerIO {
+public class DynamicSizeContainerIO implements NBTContainerIO {
 	
-	public DynamicSizeContainerIO(Target target) {
-		super(target);
+	private final int maxNumItems;
+	
+	public DynamicSizeContainerIO(int maxNumItems) {
+		this.maxNumItems = maxNumItems;
 	}
 	
 	@Override
-	public boolean isReadable(ItemStack container) {
-		return target.getItemsParent(container.copy()).getList("Items", NbtElement.COMPOUND_TYPE).size() <= 27;
+	public boolean isNBTReadable(NbtCompound nbt) {
+		return nbt.getList("Items", NbtElement.COMPOUND_TYPE).size() <= maxNumItems;
 	}
 	
 	@Override
-	public ItemStack[] readItems(ItemStack container) {
-		List<ItemStack> output = target.getItemsParent(container).getList("Items", NbtElement.COMPOUND_TYPE).stream()
-				.map(item -> ItemStack.fromNbt((NbtCompound) item)).collect(Collectors.toList());
-		while (output.size() < 27)
-			output.add(ItemStack.EMPTY);
-		return output.toArray(ItemStack[]::new);
+	public ItemStack[] readNBT(NbtCompound container) {
+		return container.getList("Items", NbtElement.COMPOUND_TYPE).stream().limit(maxNumItems)
+				.map(item -> ItemStack.fromNbt((NbtCompound) item)).toArray(ItemStack[]::new);
 	}
 	
 	@Override
-	public void writeItems(ItemStack container, ItemStack[] contents) {
-		target.getItemsParent(container).put("Items", Stream.of(contents)
-				.filter(item -> item != null && !item.isEmpty())
-				.map(item -> item.writeNbt(new NbtCompound()))
-				.reduce(new NbtList(), (list, item) -> {
-					list.add(item);
-					return list;
-				}, (list1, list2) -> {
-					list1.addAll(list2);
-					return list1;
-				}));
+	public void writeNBT(NbtCompound container, ItemStack[] contents) {
+		container.put("Items", Arrays.stream(contents).limit(maxNumItems)
+				.filter(item -> item != null && !item.isEmpty()).map(item -> item.writeNbt(new NbtCompound()))
+				.collect(NbtList::new, NbtList::add, NbtList::addAll));
 	}
 	
 }

@@ -13,6 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.CommandHandler;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -60,6 +61,7 @@ public class NBTEditorClient implements ClientModInitializer {
 		} catch (IOException e) {
 			NBTEditor.LOGGER.error("Error while loading HeadDB favorites", e);
 		}
+		ContainerIO.loadClass();
 		new HeadRefreshThread().start();
 		ConfigScreen.loadSettings();
 		

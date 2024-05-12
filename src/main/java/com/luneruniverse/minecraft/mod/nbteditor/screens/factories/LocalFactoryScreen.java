@@ -6,8 +6,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import com.luneruniverse.minecraft.mod.nbteditor.commands.OpenCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.SignboardCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
@@ -48,8 +48,7 @@ public class LocalFactoryScreen<L extends LocalNBT, R extends NBTReference<L>> e
 	static {
 		addFactory("nbteditor", ref -> new NBTEditorScreen<>(ref));
 		BASIC_FACTORIES.add(new LocalFactoryReference(TextInst.translatable("nbteditor.container"),
-				ref -> ref instanceof ItemReference item && ContainerIO.isContainer(item.getItem()),
-				ref -> ContainerScreen.show((ItemReference) ref)));
+				OpenCommand.CONTAINER_FILTER, ref -> ContainerScreen.show(ref)));
 		addFactory("nbteditor.book", ref -> ref.getItem().getItem() == Items.WRITTEN_BOOK, BookScreen::new, ItemReference.class);
 		addFactory("nbteditor.display", DisplayScreen::new, ItemReference.class);
 		addFactory("nbteditor.signboard", SignboardCommand.SIGNBOARD_FILTER, ref -> new SignboardScreen<>(ref));

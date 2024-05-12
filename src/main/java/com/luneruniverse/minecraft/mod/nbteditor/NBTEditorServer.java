@@ -1,5 +1,12 @@
 package com.luneruniverse.minecraft.mod.nbteditor;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
@@ -19,9 +26,12 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.Entity.RemovalReason;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.screen.slot.Slot;
@@ -29,6 +39,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 
 public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 	
@@ -109,8 +120,11 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		if (world == null)
 			return;
 		BlockState state = world.getBlockState(packet.getPos());
-		if (!MVRegistry.BLOCK.getId(state.getBlock()).equals(packet.getId()))
+		if (!MVRegistry.BLOCK.getId(state.getBlock()).equals(packet.getId())) {
+			world.removeBlockEntity(packet.getPos());
 			world.setBlockState(packet.getPos(), MVRegistry.BLOCK.get(packet.getId()).getDefaultState());
+		} else if (packet.isRecreate())
+			world.removeBlockEntity(packet.getPos());
 		BlockEntity block = world.getBlockEntity(packet.getPos());
 		if (block == null)
 			return;
@@ -131,8 +145,74 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		Entity entity = world.getEntity(packet.getUUID());
 		if (entity == null)
 			return;
-		entity.getDataTracker().reset();
-		entity.readNbt(packet.getNbt());
+		UUID newUUID = packet.getUUID();
+		if (packet.getNbt().containsUuid("UUID")) {
+			newUUID = packet.getNbt().getUuid("UUID");
+			if (!packet.getUUID().equals(newUUID) && world.getEntity(newUUID) != null) {
+				newUUID = packet.getUUID();
+				packet.getNbt().putUuid("UUID", newUUID);
+			}
+		} else
+			packet.getNbt().putUuid("UUID", packet.getUUID());
+		if (packet.isRecreate() || !packet.getUUID().equals(newUUID)) {
+			Entity vehicle = entity.getVehicle();
+			entity.streamPassengersAndSelf().forEach(passengerOrSelf -> {
+				passengerOrSelf.stopRiding();
+				passengerOrSelf.remove(RemovalReason.DISCARDED);
+			});
+			entity = entity.getType().create(world);
+			entity.setUuid(newUUID);
+			world.spawnEntity(entity);
+			readEntityNbtWithPassengers(world, entity, packet.getNbt());
+			if (vehicle != null)
+				entity.startRiding(vehicle, true);
+		} else {
+			entity.getDataTracker().reset();
+			readEntityNbtWithPassengers(world, entity, packet.getNbt());
+		}
+	}
+	private void readEntityNbtWithPassengers(ServerWorld world, Entity entity, NbtCompound nbt) {
+		entity.readNbt(nbt);
+		
+		Map<UUID, Entity> passengers = entity.getPassengerList().stream().collect(Collectors.toMap(Entity::getUuid, Function.identity()));
+		NbtList passengersNbt = nbt.getList("Passengers", NbtElement.COMPOUND_TYPE);
+		Set<UUID> passengerUUIDs = new HashSet<>();
+		
+		for (NbtElement passengerNbtElement : passengersNbt) {
+			NbtCompound passengerNbt = (NbtCompound) passengerNbtElement;
+			if (!passengerNbt.containsUuid("UUID"))
+				passengerNbt.putUuid("UUID", UUID.randomUUID());
+			UUID passengerUUID = passengerNbt.getUuid("UUID");
+			if (!passengerUUIDs.add(passengerUUID)) {
+				passengerUUID = UUID.randomUUID();
+				passengerNbt.putUuid("UUID", passengerUUID);
+			}
+			Entity passenger = passengers.get(passengerUUID);
+			
+			if (passenger == null) {
+				EntityType<?> passengerType = MVRegistry.ENTITY_TYPE.get(new Identifier(passengerNbt.getString("id")));
+				if (passengerType == null)
+					continue;
+				if (world.getEntity(passengerUUID) != null) {
+					passengerUUID = UUID.randomUUID();
+					passengerNbt.putUuid("UUID", passengerUUID);
+				}
+				passenger = passengerType.create(world);
+				passenger.setUuid(passengerUUID);
+				passenger.startRiding(entity, true);
+				world.spawnEntity(passenger);
+			}
+			
+			readEntityNbtWithPassengers(world, passenger, passengerNbt);
+		}
+		
+		passengers.keySet().removeAll(passengerUUIDs);
+		for (Entity passenger : passengers.values()) {
+			passenger.streamPassengersAndSelf().forEach(passengerOrSelf -> {
+				passengerOrSelf.stopRiding();
+				passengerOrSelf.remove(RemovalReason.DISCARDED);
+			});
+		}
 	}
 	
 }

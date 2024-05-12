@@ -3,27 +3,29 @@ package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
 
 import net.minecraft.item.ItemStack;
 
-public class ContainerItemReference implements ItemReference {
+public class ContainerItemReference<L extends LocalNBT> implements ItemReference {
 	
-	private final ItemReference container;
+	private final NBTReference<L> container;
 	private final int slot;
 	private final SaveQueue save;
 	
-	public ContainerItemReference(ItemReference container, int slot) {
+	public ContainerItemReference(NBTReference<L> container, int slot) {
 		this.container = container;
 		this.slot = slot;
 		
 		this.save = new SaveQueue("Container", (ItemStack toSave) -> {
-			ItemStack containerItem = container.getItem().copy();
-			ItemStack[] contents = ContainerIO.read(containerItem);
+			L containerValue = LocalNBT.copy(container.getLocalNBT());
+			ItemStack[] contents = ContainerIO.read(containerValue);
 			contents[slot] = toSave;
-			ContainerIO.write(containerItem, contents);
+			ContainerIO.write(containerValue, contents);
 			
 			// The recursive nature causes parent containers to also write items to the screen, hence the check
 			if (MainUtil.client.currentScreen instanceof ContainerScreen screen && screen.getReference() == container)
@@ -31,7 +33,7 @@ public class ContainerItemReference implements ItemReference {
 			
 			AtomicBoolean done = new AtomicBoolean();
 			Object lock = new Object();
-			container.saveItem(containerItem, () -> {
+			container.saveLocalNBT(containerValue, () -> {
 				done.set(true);
 				synchronized (lock) {
 					lock.notify();
@@ -49,7 +51,7 @@ public class ContainerItemReference implements ItemReference {
 		}, true);
 	}
 	
-	public ItemReference getContainer() {
+	public NBTReference<L> getContainer() {
 		return container;
 	}
 	public int getSlot() {
@@ -58,7 +60,7 @@ public class ContainerItemReference implements ItemReference {
 	
 	@Override
 	public ItemStack getItem() {
-		return ContainerIO.read(container.getItem())[slot];
+		return ContainerIO.read(container.getLocalNBT())[slot];
 	}
 	
 	@Override
@@ -68,22 +70,22 @@ public class ContainerItemReference implements ItemReference {
 	
 	@Override
 	public boolean isLocked() {
-		return container.isLocked();
+		return container instanceof ItemReference item && item.isLocked();
 	}
 	
 	@Override
 	public boolean isLockable() {
-		return container.isLockable();
+		return container instanceof ItemReference item && item.isLockable();
 	}
 	
 	@Override
 	public int getBlockedInvSlot() {
-		return container.getBlockedInvSlot();
+		return container instanceof ItemReference item ? item.getBlockedInvSlot() : -1;
 	}
 	
 	@Override
 	public int getBlockedHotbarSlot() {
-		return container.getBlockedHotbarSlot();
+		return container instanceof ItemReference item ? item.getBlockedHotbarSlot() : -1;
 	}
 	
 	@Override

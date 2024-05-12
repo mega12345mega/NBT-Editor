@@ -175,6 +175,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 	private static boolean triggerBlockUpdates;
 	private static boolean warnIncompatibleProtocol;
 	private static boolean enchantGlintFix;
+	private static boolean recreateBlocksAndEntities;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -205,6 +206,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		triggerBlockUpdates = true;
 		warnIncompatibleProtocol = true;
 		enchantGlintFix = false;
+		recreateBlocksAndEntities = false;
 		
 		try {
 			// Many config options use the old names
@@ -241,6 +243,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 			triggerBlockUpdates = settings.get("triggerBlockUpdates").getAsBoolean();
 			warnIncompatibleProtocol = settings.get("warnIncompatibleProtocol").getAsBoolean();
 			enchantGlintFix = settings.get("enchantGlintFix").getAsBoolean();
+			recreateBlocksAndEntities = settings.get("recreateBlocksAndEntities").getAsBoolean();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -280,6 +283,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		settings.addProperty("triggerBlockUpdates", triggerBlockUpdates);
 		settings.addProperty("warnIncompatibleProtocol", warnIncompatibleProtocol);
 		settings.addProperty("enchantGlintFix", enchantGlintFix);
+		settings.addProperty("recreateBlocksAndEntities", recreateBlocksAndEntities);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -373,6 +377,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 	}
 	public static boolean isEnchantGlintFix() {
 		return enchantGlintFix;
+	}
+	public static boolean isRecreateBlocksAndEntities() {
+		return recreateBlocksAndEntities;
 	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
@@ -519,6 +526,11 @@ public class ConfigScreen extends TickableSupportingScreen {
 		
 		functional.setConfigurable("shortcuts", new ConfigButton(100, TextInst.translatable("nbteditor.config.shortcuts"),
 				btn -> client.setScreen(new ShortcutsScreen(this)), new MVTooltip("nbteditor.config.shortcuts.desc")));
+		
+		functional.setConfigurable("recreateBlocksAndEntities", new ConfigItem<>(TextInst.translatable("nbteditor.config.recreate_blocks_and_entities"),
+				new ConfigValueBoolean(recreateBlocksAndEntities, false, 100, TextInst.translatable("nbteditor.config.recreate_blocks_and_entities.enabled"), TextInst.translatable("nbteditor.config.recreate_blocks_and_entities.disabled"))
+				.addValueListener(value -> recreateBlocksAndEntities = value.getValidValue()))
+				.setTooltip("nbteditor.config.recreate_blocks_and_entities.desc"));
 		
 		functional.setConfigurable("largeClientChest", new ConfigItem<>(TextInst.translatable("nbteditor.config.client_chest_size"),
 				new ConfigValueBoolean(largeClientChest, false, 100, TextInst.translatable("nbteditor.config.client_chest_size.large"), TextInst.translatable("nbteditor.config.client_chest_size.small"))

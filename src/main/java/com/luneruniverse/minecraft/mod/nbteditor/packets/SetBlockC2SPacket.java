@@ -17,13 +17,15 @@ public class SetBlockC2SPacket implements FabricPacket {
 	private final BlockPos pos;
 	private final Identifier id;
 	private final NbtCompound nbt;
+	private final boolean recreate;
 	private final boolean triggerUpdate;
 	
-	public SetBlockC2SPacket(RegistryKey<World> world, BlockPos pos, Identifier id, NbtCompound nbt, boolean triggerUpdate) {
+	public SetBlockC2SPacket(RegistryKey<World> world, BlockPos pos, Identifier id, NbtCompound nbt, boolean recreate, boolean triggerUpdate) {
 		this.world = world;
 		this.pos = pos;
 		this.id = id;
 		this.nbt = nbt;
+		this.recreate = recreate;
 		this.triggerUpdate = triggerUpdate;
 	}
 	public SetBlockC2SPacket(PacketByteBuf payload) {
@@ -31,6 +33,7 @@ public class SetBlockC2SPacket implements FabricPacket {
 		this.pos = payload.readBlockPos();
 		this.id = payload.readIdentifier();
 		this.nbt = payload.readNbt();
+		this.recreate = payload.readBoolean();
 		this.triggerUpdate = payload.readBoolean();
 	}
 	
@@ -46,6 +49,9 @@ public class SetBlockC2SPacket implements FabricPacket {
 	public NbtCompound getNbt() {
 		return nbt;
 	}
+	public boolean isRecreate() {
+		return recreate;
+	}
 	public boolean isTriggerUpdate() {
 		return triggerUpdate;
 	}
@@ -57,6 +63,7 @@ public class SetBlockC2SPacket implements FabricPacket {
 		payload.writeBlockPos(pos);
 		payload.writeIdentifier(id);
 		payload.writeNbt(nbt);
+		payload.writeBoolean(recreate);
 		payload.writeBoolean(triggerUpdate);
 	}
 	

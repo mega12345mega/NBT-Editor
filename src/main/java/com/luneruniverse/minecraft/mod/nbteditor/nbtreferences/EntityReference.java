@@ -9,6 +9,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -63,7 +64,7 @@ public class EntityReference implements NBTReference<LocalEntity> {
 		if (!this.id.equals(id))
 			throw new IllegalArgumentException("Entities cannot change their type!");
 		nbt = toSave;
-		ClientPlayNetworking.send(new SetEntityC2SPacket(world, uuid, toSave));
+		ClientPlayNetworking.send(new SetEntityC2SPacket(world, uuid, toSave, ConfigScreen.isRecreateBlocksAndEntities()));
 		onFinished.run();
 	}
 	

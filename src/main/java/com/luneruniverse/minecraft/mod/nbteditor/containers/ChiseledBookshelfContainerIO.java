@@ -8,29 +8,29 @@ import net.minecraft.nbt.NbtList;
 /**
  * Patches MC-48453
  */
-public class ChiseledBookshelfContainerIO extends ConstSizeContainerIO {
+public class ChiseledBookshelfContainerIO extends BlockEntityTagContainerIO {
 	
 	public ChiseledBookshelfContainerIO() {
-		super(Target.BLOCK_ENTITY, 6);
+		super(new ConstSizeContainerIO(6));
 	}
 	
 	@Override
-	public void writeItems(ItemStack container, ItemStack[] contents) {
-		super.writeItems(container, contents);
+	public void writeItem(ItemStack container, ItemStack[] contents) {
+		super.writeItem(container, contents);
 		
-		NbtList items = target.getItemsParent(container).getList("Items", NbtElement.COMPOUND_TYPE);
-		NbtCompound blockStates = container.getNbt().getCompound("BlockStateTag");
+		NbtList itemsNbt = container.getSubNbt("BlockEntityTag").getList("Items", NbtElement.COMPOUND_TYPE);
+		NbtCompound blockStatesNbt = container.getNbt().getCompound("BlockStateTag");
+		boolean[] filledSlots = new boolean[6];
+		for (NbtElement itemNbtElement : itemsNbt)
+			filledSlots[((NbtCompound) itemNbtElement).getInt("Slot")] = true;
 		for (int i = 0; i < 6; i++) {
-			final int finalI = i;
-			boolean filled = items.stream().anyMatch(item -> ((NbtCompound) item).getInt("Slot") == finalI);
 			String state = "slot_" + i + "_occupied";
-			
-			if (filled)
-				blockStates.putString(state, "true");
+			if (filledSlots[i])
+				blockStatesNbt.putString(state, "true");
 			else
-				blockStates.remove(state);
+				blockStatesNbt.remove(state);
 		}
-		container.getNbt().put("BlockStateTag", blockStates);
+		container.getNbt().put("BlockStateTag", blockStatesNbt);
 	}
 	
 }

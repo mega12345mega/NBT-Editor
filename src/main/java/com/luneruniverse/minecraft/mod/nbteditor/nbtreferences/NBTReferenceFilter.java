@@ -64,6 +64,12 @@ public interface NBTReferenceFilter extends Predicate<NBTReference<?>> {
 		return create(itemFilter, blockFilter, entityFilter,
 				() -> NBTEditorClient.SERVER_CONN.isEditingExpanded() ? expandedFailMsg : nonExpandedFailMsg);
 	}
+	public static NBTReferenceFilter create(Predicate<NBTReference<?>> filter, Supplier<Text> failMsg) {
+		return create(filter::test, filter::test, filter::test, failMsg);
+	}
+	public static NBTReferenceFilter create(Predicate<NBTReference<?>> filter, Text expandedFailMsg, Text nonExpandedFailMsg) {
+		return create(filter::test, filter::test, filter::test, expandedFailMsg, nonExpandedFailMsg);
+	}
 	
 	public Text getFailMessage();
 	

@@ -6,7 +6,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScreen;
 import com.mojang.brigadier.Command;
@@ -18,6 +19,11 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 public class OpenCommand extends ClientCommand {
 	
 	public static final OpenCommand INSTANCE = new OpenCommand();
+	
+	public static final NBTReferenceFilter CONTAINER_FILTER = NBTReferenceFilter.create(
+			ref -> ContainerIO.isContainer(ref.getLocalNBT()),
+			TextInst.translatable("nbteditor.no_ref.container"),
+			TextInst.translatable("nbteditor.no_hand.no_item.container"));
 	
 	private OpenCommand() {
 		
@@ -42,7 +48,7 @@ public class OpenCommand extends ClientCommand {
 				throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.requires_server")).create();
 			return Command.SINGLE_SUCCESS;
 		})).executes(context -> {
-			ContainerScreen.show(ItemReference.getHeldItem(ContainerIO::isContainer, TextInst.translatable("nbteditor.no_hand.no_item.container")));
+			NBTReference.getReference(CONTAINER_FILTER, false, ContainerScreen::show);
 			return Command.SINGLE_SUCCESS;
 		});
 	}

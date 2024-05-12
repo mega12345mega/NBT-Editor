@@ -21,7 +21,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
+import net.minecraft.util.math.random.Random;
 
 public class LocalBlock implements LocalNBT {
 	
@@ -89,7 +89,7 @@ public class LocalBlock implements LocalNBT {
 		BlockState state = block.getDefaultState();
 		
 		MainUtil.client.getBlockRenderManager().renderBlock(state, new BlockPos(0, 1000, 0), MainUtil.client.world, matrices,
-				provider.getBuffer(RenderLayer.getCutout()), false, new Xoroshiro128PlusPlusRandom(0));
+				provider.getBuffer(RenderLayer.getCutout()), false, Random.create());
 		if (block instanceof BlockEntityProvider entityProvider) {
 			BlockEntity entity = entityProvider.createBlockEntity(new BlockPos(0, 1000, 0), state);
 			entity.setWorld(MainUtil.client.world);

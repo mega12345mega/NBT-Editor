@@ -17,16 +17,19 @@ public class SetEntityC2SPacket implements FabricPacket {
 	private final RegistryKey<World> world;
 	private final UUID uuid;
 	private final NbtCompound nbt;
+	private final boolean recreate;
 	
-	public SetEntityC2SPacket(RegistryKey<World> world, UUID uuid, NbtCompound nbt) {
+	public SetEntityC2SPacket(RegistryKey<World> world, UUID uuid, NbtCompound nbt, boolean recreate) {
 		this.world = world;
 		this.uuid = uuid;
 		this.nbt = nbt;
+		this.recreate = recreate;
 	}
 	public SetEntityC2SPacket(PacketByteBuf payload) {
 		this.world = payload.readRegistryKey(payload.<World>readRegistryRefKey());
 		this.uuid = payload.readUuid();
 		this.nbt = payload.readNbt();
+		this.recreate = payload.readBoolean();
 	}
 	
 	public RegistryKey<World> getWorld() {
@@ -38,6 +41,9 @@ public class SetEntityC2SPacket implements FabricPacket {
 	public NbtCompound getNbt() {
 		return nbt;
 	}
+	public boolean isRecreate() {
+		return recreate;
+	}
 	
 	@Override
 	public void write(PacketByteBuf payload) {
@@ -45,6 +51,7 @@ public class SetEntityC2SPacket implements FabricPacket {
 		payload.writeRegistryKey(world);
 		payload.writeUuid(uuid);
 		payload.writeNbt(nbt);
+		payload.writeBoolean(recreate);
 	}
 	
 	@Override

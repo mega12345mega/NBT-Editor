@@ -68,7 +68,8 @@ public class BlockReference implements NBTReference<LocalBlock> {
 	public void saveNBT(Identifier id, NbtCompound toSave, Runnable onFinished) {
 		this.id = id;
 		this.nbt = toSave;
-		ClientPlayNetworking.send(new SetBlockC2SPacket(world, pos, id, toSave, ConfigScreen.isTriggerBlockUpdates()));
+		ClientPlayNetworking.send(new SetBlockC2SPacket(world, pos, id, toSave,
+				ConfigScreen.isRecreateBlocksAndEntities(), ConfigScreen.isTriggerBlockUpdates()));
 		onFinished.run();
 	}
 	
