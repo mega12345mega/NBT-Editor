@@ -58,7 +58,7 @@ public class LocalEntity implements LocalNBT {
 	}
 	@Override
 	public Set<Identifier> getIdOptions() {
-		return null;
+		return MVRegistry.ENTITY_TYPE.getIds();
 	}
 	
 	@Override

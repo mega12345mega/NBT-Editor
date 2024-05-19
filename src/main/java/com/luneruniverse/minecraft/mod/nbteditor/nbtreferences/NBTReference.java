@@ -79,6 +79,17 @@ public interface NBTReference<T extends LocalNBT> {
 	public default void saveLocalNBT(T nbt) {
 		saveLocalNBT(nbt, () -> {});
 	}
+	public default void modifyLocalNBT(Consumer<T> nbtConsumer, Runnable onFinished) {
+		T nbt = getLocalNBT();
+		nbtConsumer.accept(nbt);
+		saveLocalNBT(nbt, onFinished);
+	}
+	public default void modifyLocalNBT(Consumer<T> nbtConsumer, Text msg) {
+		modifyLocalNBT(nbtConsumer, () -> MainUtil.client.player.sendMessage(msg, false));
+	}
+	public default void modifyLocalNBT(Consumer<T> nbtConsumer) {
+		modifyLocalNBT(nbtConsumer, () -> {});
+	}
 	
 	public Identifier getId();
 	public NbtCompound getNBT();

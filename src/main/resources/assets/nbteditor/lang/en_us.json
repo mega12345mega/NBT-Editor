@@ -12,8 +12,9 @@
 	"nbteditor.ok": "Ok",
 	"nbteditor.cancel": "Cancel",
 	
-	"nbteditor.no_ref.to_edit": "§cYou must be holding an item or looking at an entity/block to edit!",
-	"nbteditor.no_ref.to_export": "§cYou must be holding an item or looking at an entity/block to export!",
+	"nbteditor.no_ref.to_edit": "§cYou must be holding an item or looking at a block/entity to edit!",
+	"nbteditor.no_ref.to_edit_nbt": "§cYou must be holding an item or looking at a block-entity/entity to edit!",
+	"nbteditor.no_ref.to_export": "§cYou must be holding an item or looking at a block/entity to export!",
 	"nbteditor.no_ref.container": "§cYou must be holding or looking at a container!",
 	"nbteditor.no_ref.skull": "§cYou must be holding or looking at a player head to edit!",
 	"nbteditor.no_ref.block": "§cYou must be holding or looking at a block to edit!",
@@ -32,13 +33,13 @@
 	"nbteditor.editor.saving": "Saving ...",
 	"nbteditor.editor.name": "Name",
 	
-	"nbteditor.editor.unsaved.title": "Item Not Saved!",
-	"nbteditor.editor.unsaved.desc": "You haven't saved the item. Save changes?",
+	"nbteditor.editor.unsaved.title": "Subject Not Saved!",
+	"nbteditor.editor.unsaved.desc": "You haven't saved the subject. Save changes?",
 	"nbteditor.editor.unsaved.yes": "Save",
 	"nbteditor.editor.unsaved.no": "Discard Changes",
 	
-	"nbteditor.nbt.empty_key.title": "Unsupported Item!",
-	"nbteditor.nbt.empty_key.desc": "This nbt editor doesn't support items with an empty string (\"\") as a key. Remove that key-value pair?",
+	"nbteditor.nbt.empty_key.title": "Unsupported NBT!",
+	"nbteditor.nbt.empty_key.desc": "This nbt editor doesn't support nbt with an empty string (\"\") as a key. Remove that key-value pair?",
 	"nbteditor.nbt.empty_key.yes": "Fix & Edit",
 	"nbteditor.nbt.empty_key.no": "Cancel",
 	
@@ -172,7 +173,7 @@
 	"nbteditor.attributes.amount.autofill_keybinds": "Hold shift for infinity\nHold ctrl for minimum",
 	"nbteditor.attributes.slot": "Slot",
 	"nbteditor.attributes.new_uuids.success": "§aAttribute UUIDs randomized!",
-	"nbteditor.attributes.new_uuids.no_attributes": "§cThere are no attributes on this item!",
+	"nbteditor.attributes.new_uuids.no_attributes": "§cThere are no attributes on this subject!",
 	
 	"nbteditor.enchantments": "Enchantments",
 	"nbteditor.enchantments.enchantment": "Enchantment",
@@ -185,9 +186,11 @@
 	"nbteditor.unstackable.msg": "§aItem is now unstackable! [Hover for more info]",
 	"nbteditor.unstackable.hover_msg": "A random UUID was added.\nWhen cloning the item, make\nsure to re-run this command\nfor all the individual items.",
 	
-	"nbteditor.named": "§aItem name changed to: ",
+	"nbteditor.named": "§aSubject's name changed to: ",
 	
 	"nbteditor.display": "Display",
+	"nbteditor.display.custom_name_visible.enabled": "☑ Custom Name Visible",
+	"nbteditor.display.custom_name_visible.disabled": "☐ Custom Name Visible",
 	
 	"nbteditor.book": "Book",
 	"nbteditor.book.open": "Edit Book",

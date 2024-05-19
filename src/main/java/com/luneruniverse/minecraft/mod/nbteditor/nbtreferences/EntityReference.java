@@ -29,7 +29,7 @@ public class EntityReference implements NBTReference<LocalEntity> {
 	
 	private final RegistryKey<World> world;
 	private final UUID uuid;
-	private final Identifier id;
+	private Identifier id;
 	private NbtCompound nbt;
 	
 	public EntityReference(RegistryKey<World> world, UUID uuid, Identifier id, NbtCompound nbt) {
@@ -61,10 +61,10 @@ public class EntityReference implements NBTReference<LocalEntity> {
 	}
 	@Override
 	public void saveNBT(Identifier id, NbtCompound toSave, Runnable onFinished) {
-		if (!this.id.equals(id))
-			throw new IllegalArgumentException("Entities cannot change their type!");
-		nbt = toSave;
-		ClientPlayNetworking.send(new SetEntityC2SPacket(world, uuid, toSave, ConfigScreen.isRecreateBlocksAndEntities()));
+		this.id = id;
+		this.nbt = toSave;
+		ClientPlayNetworking.send(new SetEntityC2SPacket(world, uuid, id, toSave,
+				ConfigScreen.isRecreateBlocksAndEntities()));
 		onFinished.run();
 	}
 	

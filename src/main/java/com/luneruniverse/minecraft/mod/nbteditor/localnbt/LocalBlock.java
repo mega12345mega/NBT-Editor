@@ -33,6 +33,10 @@ public class LocalBlock implements LocalNBT {
 		this.nbt = nbt;
 	}
 	
+	public boolean isBlockEntity() {
+		return MVRegistry.BLOCK.get(id) instanceof BlockEntityProvider;
+	}
+	
 	@Override
 	public boolean isEmpty(Identifier id) {
 		return MVRegistry.BLOCK.get(id) == Blocks.AIR;

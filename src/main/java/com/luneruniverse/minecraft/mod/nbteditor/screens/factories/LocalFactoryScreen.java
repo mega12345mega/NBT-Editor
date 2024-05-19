@@ -50,7 +50,7 @@ public class LocalFactoryScreen<L extends LocalNBT, R extends NBTReference<L>> e
 		BASIC_FACTORIES.add(new LocalFactoryReference(TextInst.translatable("nbteditor.container"),
 				OpenCommand.CONTAINER_FILTER, ref -> ContainerScreen.show(ref)));
 		addFactory("nbteditor.book", ref -> ref.getItem().getItem() == Items.WRITTEN_BOOK, BookScreen::new, ItemReference.class);
-		addFactory("nbteditor.display", DisplayScreen::new, ItemReference.class);
+		addFactory("nbteditor.display", ref -> new DisplayScreen<>(ref));
 		addFactory("nbteditor.signboard", SignboardCommand.SIGNBOARD_FILTER, ref -> new SignboardScreen<>(ref));
 		addFactory("nbteditor.enchantments", EnchantmentsScreen::new, ItemReference.class);
 		addFactory("nbteditor.attributes", AttributesScreen::new, ItemReference.class);

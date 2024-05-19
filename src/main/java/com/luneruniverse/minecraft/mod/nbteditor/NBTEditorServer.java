@@ -40,6 +40,8 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
+import net.minecraft.util.math.Vec3d;
 
 public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 	
@@ -154,14 +156,16 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 			}
 		} else
 			packet.getNbt().putUuid("UUID", packet.getUUID());
-		if (packet.isRecreate() || !packet.getUUID().equals(newUUID)) {
+		if (packet.isRecreate() || !entity.getUuid().equals(newUUID) || !EntityType.getId(entity.getType()).equals(packet.getId())) {
 			Entity vehicle = entity.getVehicle();
+			Vec3d pos = entity.getPos();
 			entity.streamPassengersAndSelf().forEach(passengerOrSelf -> {
 				passengerOrSelf.stopRiding();
 				passengerOrSelf.remove(RemovalReason.DISCARDED);
 			});
-			entity = entity.getType().create(world);
+			entity = MVRegistry.ENTITY_TYPE.get(packet.getId()).create(world);
 			entity.setUuid(newUUID);
+			entity.setPosition(pos);
 			world.spawnEntity(entity);
 			readEntityNbtWithPassengers(world, entity, packet.getNbt());
 			if (vehicle != null)
@@ -189,10 +193,26 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 			}
 			Entity passenger = passengers.get(passengerUUID);
 			
+			Identifier passengerId = null;
+			if (passengerNbt.contains("id", NbtElement.STRING_TYPE)) {
+				try {
+					passengerId = new Identifier(passengerNbt.getString("id"));
+					if (!MVRegistry.ENTITY_TYPE.containsId(passengerId))
+						passengerId = null;
+				} catch (InvalidIdentifierException e) {}
+			}
+			if (passengerId != null && passenger != null && !EntityType.getId(passenger.getType()).equals(passengerId)) {
+				passenger.streamPassengersAndSelf().forEach(passengerOrSelf -> {
+					passengerOrSelf.stopRiding();
+					passengerOrSelf.remove(RemovalReason.DISCARDED);
+				});
+				passenger = null;
+			}
+			
 			if (passenger == null) {
-				EntityType<?> passengerType = MVRegistry.ENTITY_TYPE.get(new Identifier(passengerNbt.getString("id")));
-				if (passengerType == null)
+				if (passengerId == null)
 					continue;
+				EntityType<?> passengerType = MVRegistry.ENTITY_TYPE.get(passengerId);
 				if (world.getEntity(passengerUUID) != null) {
 					passengerUUID = UUID.randomUUID();
 					passengerNbt.putUuid("UUID", passengerUUID);

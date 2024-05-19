@@ -136,7 +136,7 @@ public class LoreCommand extends ClientCommand {
 				.then(literal("clear").executes(clear))
 				.then(literal("list").executes(list))
 			.executes(context -> {
-				MainUtil.client.setScreen(new DisplayScreen(ItemReference.getHeldItem()));
+				MainUtil.client.setScreen(new DisplayScreen<>(ItemReference.getHeldItem()));
 				return Command.SINGLE_SUCCESS;
 			});
 	}
