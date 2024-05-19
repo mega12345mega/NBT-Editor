@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
+
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.nbt.NbtCompound;
@@ -16,14 +18,17 @@ public class SetBlockC2SPacket implements FabricPacket {
 	private final RegistryKey<World> world;
 	private final BlockPos pos;
 	private final Identifier id;
+	private final BlockStateProperties state;
 	private final NbtCompound nbt;
 	private final boolean recreate;
 	private final boolean triggerUpdate;
 	
-	public SetBlockC2SPacket(RegistryKey<World> world, BlockPos pos, Identifier id, NbtCompound nbt, boolean recreate, boolean triggerUpdate) {
+	public SetBlockC2SPacket(RegistryKey<World> world, BlockPos pos, Identifier id,
+			BlockStateProperties state, NbtCompound nbt, boolean recreate, boolean triggerUpdate) {
 		this.world = world;
 		this.pos = pos;
 		this.id = id;
+		this.state = state;
 		this.nbt = nbt;
 		this.recreate = recreate;
 		this.triggerUpdate = triggerUpdate;
@@ -32,6 +37,7 @@ public class SetBlockC2SPacket implements FabricPacket {
 		this.world = payload.readRegistryKey(payload.<World>readRegistryRefKey());
 		this.pos = payload.readBlockPos();
 		this.id = payload.readIdentifier();
+		this.state = new BlockStateProperties(payload);
 		this.nbt = payload.readNbt();
 		this.recreate = payload.readBoolean();
 		this.triggerUpdate = payload.readBoolean();
@@ -45,6 +51,9 @@ public class SetBlockC2SPacket implements FabricPacket {
 	}
 	public Identifier getId() {
 		return id;
+	}
+	public BlockStateProperties getState() {
+		return state;
 	}
 	public NbtCompound getNbt() {
 		return nbt;
@@ -62,6 +71,7 @@ public class SetBlockC2SPacket implements FabricPacket {
 		payload.writeRegistryKey(world);
 		payload.writeBlockPos(pos);
 		payload.writeIdentifier(id);
+		state.writeToPayload(payload);
 		payload.writeNbt(nbt);
 		payload.writeBoolean(recreate);
 		payload.writeBoolean(triggerUpdate);

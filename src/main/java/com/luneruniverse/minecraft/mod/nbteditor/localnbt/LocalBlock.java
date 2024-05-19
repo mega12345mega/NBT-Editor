@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.localnbt;
 
 import java.util.Set;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -26,10 +27,12 @@ import net.minecraft.util.math.random.Random;
 public class LocalBlock implements LocalNBT {
 	
 	private Identifier id;
+	private BlockStateProperties state;
 	private NbtCompound nbt;
 	
-	public LocalBlock(Identifier id, NbtCompound nbt) {
+	public LocalBlock(Identifier id, BlockStateProperties state, NbtCompound nbt) {
 		this.id = id;
+		this.state = state;
 		this.nbt = nbt;
 	}
 	
@@ -65,10 +68,18 @@ public class LocalBlock implements LocalNBT {
 	@Override
 	public void setId(Identifier id) {
 		this.id = id;
+		this.state = this.state.mapTo(MVRegistry.BLOCK.get(id).getDefaultState());
 	}
 	@Override
 	public Set<Identifier> getIdOptions() {
 		return MVRegistry.BLOCK.getIds();
+	}
+	
+	public BlockStateProperties getState() {
+		return state;
+	}
+	public void setState(BlockStateProperties state) {
+		this.state = state;
 	}
 	
 	@Override
@@ -90,7 +101,7 @@ public class LocalBlock implements LocalNBT {
 		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getDrawContext(matrices).getVertexConsumers();
 		
 		Block block = MVRegistry.BLOCK.get(id);
-		BlockState state = block.getDefaultState();
+		BlockState state = this.state.applyTo(block.getDefaultState());
 		
 		MainUtil.client.getBlockRenderManager().renderBlock(state, new BlockPos(0, 1000, 0), MainUtil.client.world, matrices,
 				provider.getBuffer(RenderLayer.getCutout()), false, Random.create());
@@ -109,13 +120,13 @@ public class LocalBlock implements LocalNBT {
 	
 	@Override
 	public LocalBlock copy() {
-		return new LocalBlock(id, nbt.copy());
+		return new LocalBlock(id, state.copy(), nbt.copy());
 	}
 	
 	@Override
 	public boolean equals(Object nbt) {
 		if (nbt instanceof LocalBlock block)
-			return this.id.equals(block.id) && this.nbt.equals(block.nbt);
+			return this.id.equals(block.id) && this.state.equals(block.state) && this.nbt.equals(block.nbt);
 		return false;
 	}
 	

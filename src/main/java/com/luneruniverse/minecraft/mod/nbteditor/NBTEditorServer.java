@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
@@ -93,11 +94,12 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 			BlockEntity block = world.getBlockEntity(packet.getPos());
 			if (block != null) {
 				sender.sendPacket(new ViewBlockS2CPacket(packet.getRequestId(),
-						MVRegistry.BLOCK.getId(block.getCachedState().getBlock()), block.createNbt()));
+						MVRegistry.BLOCK.getId(block.getCachedState().getBlock()),
+						new BlockStateProperties(block.getCachedState()), block.createNbt()));
 				return;
 			}
 		}
-		sender.sendPacket(new ViewBlockS2CPacket(packet.getRequestId(), null, null));
+		sender.sendPacket(new ViewBlockS2CPacket(packet.getRequestId(), null, null, null));
 	}
 	
 	private void onGetEntityPacket(GetEntityC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {
@@ -124,9 +126,14 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		BlockState state = world.getBlockState(packet.getPos());
 		if (!MVRegistry.BLOCK.getId(state.getBlock()).equals(packet.getId())) {
 			world.removeBlockEntity(packet.getPos());
-			world.setBlockState(packet.getPos(), MVRegistry.BLOCK.get(packet.getId()).getDefaultState());
-		} else if (packet.isRecreate())
-			world.removeBlockEntity(packet.getPos());
+			world.setBlockState(packet.getPos(),
+					packet.getState().applyToSafely(MVRegistry.BLOCK.get(packet.getId()).getDefaultState()));
+		} else {
+			if (!new BlockStateProperties(state).equals(packet.getState()))
+				world.setBlockState(packet.getPos(), packet.getState().applyTo(state));
+			if (packet.isRecreate())
+				world.removeBlockEntity(packet.getPos());
+		}
 		BlockEntity block = world.getBlockEntity(packet.getPos());
 		if (block == null)
 			return;

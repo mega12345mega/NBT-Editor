@@ -1,5 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -18,19 +21,34 @@ public class ChiseledBookshelfContainerIO extends BlockEntityTagContainerIO {
 	public void writeItem(ItemStack container, ItemStack[] contents) {
 		super.writeItem(container, contents);
 		
-		NbtList itemsNbt = container.getSubNbt("BlockEntityTag").getList("Items", NbtElement.COMPOUND_TYPE);
-		NbtCompound blockStatesNbt = container.getNbt().getCompound("BlockStateTag");
-		boolean[] filledSlots = new boolean[6];
-		for (NbtElement itemNbtElement : itemsNbt)
-			filledSlots[((NbtCompound) itemNbtElement).getInt("Slot")] = true;
+		boolean[] filledSlots = getFilledSlots(container.getSubNbt("BlockEntityTag"));
+		NbtCompound blockStatesTag = container.getNbt().getCompound("BlockStateTag");
 		for (int i = 0; i < 6; i++) {
 			String state = "slot_" + i + "_occupied";
 			if (filledSlots[i])
-				blockStatesNbt.putString(state, "true");
+				blockStatesTag.putString(state, "true");
 			else
-				blockStatesNbt.remove(state);
+				blockStatesTag.remove(state);
 		}
-		container.getNbt().put("BlockStateTag", blockStatesNbt);
+		container.getNbt().put("BlockStateTag", blockStatesTag);
+	}
+	
+	@Override
+	public void writeBlock(LocalBlock container, ItemStack[] contents) {
+		super.writeBlock(container, contents);
+		
+		boolean[] filledSlots = getFilledSlots(container.getOrCreateNBT());
+		BlockStateProperties state = container.getState();
+		for (int i = 0; i < 6; i++)
+			state.setValue("slot_" + i + "_occupied", filledSlots[i] ? "true" : "false");
+	}
+	
+	private boolean[] getFilledSlots(NbtCompound blockEntityTag) {
+		NbtList itemsNbt = blockEntityTag.getList("Items", NbtElement.COMPOUND_TYPE);
+		boolean[] filledSlots = new boolean[6];
+		for (NbtElement itemNbtElement : itemsNbt)
+			filledSlots[((NbtCompound) itemNbtElement).getInt("Slot")] = true;
+		return filledSlots;
 	}
 	
 }

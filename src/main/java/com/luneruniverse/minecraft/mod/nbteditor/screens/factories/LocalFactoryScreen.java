@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.OpenCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.BlockStatesCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.SignboardCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -21,7 +22,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScr
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -54,7 +54,7 @@ public class LocalFactoryScreen<L extends LocalNBT, R extends NBTReference<L>> e
 		addFactory("nbteditor.signboard", SignboardCommand.SIGNBOARD_FILTER, ref -> new SignboardScreen<>(ref));
 		addFactory("nbteditor.enchantments", EnchantmentsScreen::new, ItemReference.class);
 		addFactory("nbteditor.attributes", AttributesScreen::new, ItemReference.class);
-		addFactory("nbteditor.block_states", ref -> ref.getItem().getItem() instanceof BlockItem, BlockStatesScreen::new, ItemReference.class);
+		addFactory("nbteditor.block_states", BlockStatesCommand.BLOCK_FILTER, ref -> new BlockStatesScreen<>(ref));
 	}
 	
 	private final ConfigCategory config;

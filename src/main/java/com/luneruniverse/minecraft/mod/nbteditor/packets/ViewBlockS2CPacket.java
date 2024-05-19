@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
+
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -11,23 +13,27 @@ public class ViewBlockS2CPacket implements ResponsePacket {
 	
 	private final int requestId;
 	private final Identifier id;
+	private final BlockStateProperties state;
 	private final NbtCompound nbt;
 	
-	public ViewBlockS2CPacket(int requestId, Identifier id, NbtCompound nbt) {
-		if ((id == null) != (nbt == null))
-			throw new IllegalArgumentException("id and nbt have to be null together!");
+	public ViewBlockS2CPacket(int requestId, Identifier id, BlockStateProperties state, NbtCompound nbt) {
+		if ((id == null) != (state == null) || (id == null) != (nbt == null))
+			throw new IllegalArgumentException("id, state, and nbt have to be null together!");
 		
 		this.requestId = requestId;
 		this.id = id;
+		this.state = state;
 		this.nbt = nbt;
 	}
 	public ViewBlockS2CPacket(PacketByteBuf payload) {
 		this.requestId = payload.readInt();
 		if (payload.readBoolean()) {
 			this.id = payload.readIdentifier();
+			this.state = new BlockStateProperties(payload);
 			this.nbt = payload.readNbt();
 		} else {
 			this.id = null;
+			this.state = null;
 			this.nbt = null;
 		}
 	}
@@ -41,6 +47,9 @@ public class ViewBlockS2CPacket implements ResponsePacket {
 	public Identifier getId() {
 		return id;
 	}
+	public BlockStateProperties getState() {
+		return state;
+	}
 	public NbtCompound getNbt() {
 		return nbt;
 	}
@@ -53,6 +62,7 @@ public class ViewBlockS2CPacket implements ResponsePacket {
 		} else {
 			payload.writeBoolean(true);
 			payload.writeIdentifier(id);
+			state.writeToPayload(payload);
 			payload.writeNbt(nbt);
 		}
 	}
