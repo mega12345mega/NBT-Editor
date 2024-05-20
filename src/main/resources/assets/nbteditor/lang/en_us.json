@@ -77,8 +77,6 @@
 	"nbteditor.file_options.delete.error": "§cError while deleting %s",
 	"nbteditor.file_options.delete.missing": "§c%s §cis already deleted!",
 	
-	"nbteditor.img2lore": "Import Image(s)",
-	
 	"itemGroup.nbteditor.client_chest": "Client Chest",
 	"itemGroup.nbteditor.inventory": "Inventory",
 	"nbteditor.client_chest": "Nbt Editor >> Client Chest",
@@ -118,6 +116,7 @@
 	"nbteditor.lore.edited": "§aLore edited!",
 	"nbteditor.lore.none": "§cThere is no lore.",
 	
+	"nbteditor.img_to_lore": "Import Image(s)",
 	"nbteditor.img_to_lore.width": "Width",
 	"nbteditor.img_to_lore.height": "Height",
 	
@@ -154,7 +153,7 @@
 	"nbteditor.keybind.page.next_jump": "\n§6to jump to the next page!",
 	"nbteditor.keybind.page.prev_jump": "\n§6to jump to the previous page!",
 	
-	"nbteditor.unbind_skull.no_textures": "That head hasn't loaded any textures yet!",
+	"nbteditor.unbind_skull.no_textures": "§cThat head hasn't loaded any textures yet!",
 	"nbteditor.unbind_skull.unbound": "§aHead unbound!",
 	
 	"nbteditor.maxed": "§aEnchantments maxed!",

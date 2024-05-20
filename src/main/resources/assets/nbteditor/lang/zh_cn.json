@@ -66,8 +66,6 @@
 	"nbteditor.file_options.delete.error": "§c删除 %s 时出现错误",
 	"nbteditor.file_options.delete.missing": "§c%s§c 不存在，可能已被删除。",
 	
-	"nbteditor.img2lore": "导入图片",
-	
 	"itemGroup.nbteditor.client_chest": "客户端物品栏",
 	"itemGroup.nbteditor.creative": "创造模式物品栏",
 	"nbteditor.client_chest": "Nbt Editor >> 客户端物品栏",
@@ -105,6 +103,7 @@
 	"nbteditor.lore.edited": "§a附加信息已编辑！",
 	"nbteditor.lore.none": "§c没有附加信息！",
 	
+	"nbteditor.img_to_lore": "导入图片",
 	"nbteditor.img_to_lore.width": "宽度",
 	"nbteditor.img_to_lore.height": "高度",
 	
