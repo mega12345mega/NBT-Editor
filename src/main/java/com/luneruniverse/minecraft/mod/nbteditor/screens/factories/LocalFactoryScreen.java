@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.OpenCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.AttributesCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.BlockStatesCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.SignboardCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
@@ -53,7 +54,7 @@ public class LocalFactoryScreen<L extends LocalNBT, R extends NBTReference<L>> e
 		addFactory("nbteditor.display", ref -> new DisplayScreen<>(ref));
 		addFactory("nbteditor.signboard", SignboardCommand.SIGNBOARD_FILTER, ref -> new SignboardScreen<>(ref));
 		addFactory("nbteditor.enchantments", EnchantmentsScreen::new, ItemReference.class);
-		addFactory("nbteditor.attributes", AttributesScreen::new, ItemReference.class);
+		addFactory("nbteditor.attributes", AttributesCommand.ATTRIBUTES_FILTER, ref -> new AttributesScreen<>(ref));
 		addFactory("nbteditor.block_states", BlockStatesCommand.BLOCK_FILTER, ref -> new BlockStatesScreen<>(ref));
 	}
 	

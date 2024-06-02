@@ -2,6 +2,8 @@
 	"nbteditor": "Edytor NBT",
 	"nbteditor.outdated.title": "Edytor NBT jest przestarzały",
 	"nbteditor.outdated.desc": "Dostępna jest nowa aktualizacja!",
+	"nbteditor.incompatible_protocol.title": "Niezgodny protokół edytora NBT",
+	"nbteditor.incompatible_protocol.desc": "Opcje po stronie serwera nie są włączone.",
 	
 	"nbteditor.requires_server": "Wymaga to zainstalowania na serwerze NBT Editor (dodatkowo musisz mieć OP poziomu 2)!",
 	"nbteditor.nbt_ac.tip": "Pobierz NBT Autocomplete, aby uzyskać sugestie",
@@ -10,29 +12,34 @@
 	"nbteditor.ok": "Ok",
 	"nbteditor.cancel": "Anuluj",
 	
-	"nbteditor.no_ref.to_edit": "§cMusisz patrzeć na stworzenie/blok lub trzymać przedmiot, aby go edytować!",
-	"nbteditor.no_ref.signboard": "§cAby edytować, musisz patrzeć na tabliczkę lub ją trzymać!",
+	"nbteditor.no_ref.to_edit": "§cMusisz trzymać przedmiot lub patrzeć na stworzenie/blok aby go edytować!",
+	"nbteditor.no_ref.to_edit_nbt": "§cMusisz trzymać przedmiot lub patrzeć na stworzenie/blok aby go edytować!",
+	"nbteditor.no_ref.to_export": "§cMusisz trzymać przedmiot lub patrzeć na stworzenie/blok, aby go wyeksportować!",
+	"nbteditor.no_ref.container": "§cMusisz trzymać lub patrzeć na kontener! (np. skrzynkę)",
+	"nbteditor.no_ref.skull": "§cMusisz trzymać lub patrzeć na głowę gracza, aby ją edytować!",
+	"nbteditor.no_ref.block": "§cMusisz trzymać lub patrzeć na blok, aby go edytować!",
+	"nbteditor.no_ref.signboard": "§cMusisz trzymać lub patrzeć na tabliczkę aby ją edytować!",
 	"nbteditor.no_hand.no_item.to_edit": "§cMusisz trzymać przedmiot, aby go edytować!",
-	"nbteditor.no_hand.no_item.to_view": "Musisz trzymać przedmiot, aby go przeglądać!",
-	"nbteditor.no_hand.no_item.to_export": "Musisz trzymać przedmiot, aby go wyeksportować!",
-	"nbteditor.no_hand.no_item.container": "Musisz trzymać kontener!",
-	"nbteditor.no_hand.no_item.skull": "Musisz trzymać głowę gracza, aby ją edytować!",
-	"nbteditor.no_hand.no_item.block": "Musisz trzymać blok, aby go edytować!",
-	"nbteditor.no_hand.no_item.book": "Musisz trzymać podpisaną książkę, aby ją edytować!",
-	"nbteditor.no_hand.no_item.signboard": "Musisz trzymać tabliczkę, aby ją edytować!",
-	"nbteditor.no_hand.all_item": "Musisz trzymać pusty slot, aby edytować nowy przedmiot!",
+	"nbteditor.no_hand.no_item.to_view": "§cMusisz trzymać przedmiot, aby go przeglądać!",
+	"nbteditor.no_hand.no_item.to_export": "§cMusisz trzymać przedmiot, aby go wyeksportować!",
+	"nbteditor.no_hand.no_item.container": "§cMusisz trzymać kontener! (np. skrzynkę)",
+	"nbteditor.no_hand.no_item.skull": "§cMusisz trzymać głowę gracza, aby ją edytować!",
+	"nbteditor.no_hand.no_item.block": "§cMusisz trzymać blok, aby go edytować!",
+	"nbteditor.no_hand.no_item.book": "§cMusisz trzymać podpisaną książkę, aby ją edytować!",
+	"nbteditor.no_hand.no_item.signboard": "§cMusisz trzymać tabliczkę, aby ją edytować!",
+	"nbteditor.no_hand.all_item": "§cMusisz trzymać pusty slot, aby edytować nowy przedmiot!",
 	
 	"nbteditor.editor.save": "Zapisz",
 	"nbteditor.editor.saving": "Trwa Zapisywanie...",
 	"nbteditor.editor.name": "Nazwa",
 	
-	"nbteditor.editor.unsaved.title": "Przedmiot nie został zapisany!",
-	"nbteditor.editor.unsaved.desc": "Nie zapisałeś zmian w przedmiocie. Czy chcesz zapisać zmiany?",
+	"nbteditor.editor.unsaved.title": "NBT nie zostało zapisane!",
+	"nbteditor.editor.unsaved.desc": "Nie zapisałeś zmian w NBT. Czy chcesz zapisać zmiany?",
 	"nbteditor.editor.unsaved.yes": "Zapisz",
 	"nbteditor.editor.unsaved.no": "Odrzuć Zmiany",
 	
-	"nbteditor.nbt.empty_key.title": "Niewspierany Przedmiot!",
-	"nbteditor.nbt.empty_key.desc": "Ten edytor NBT nie obsługuje przedmiotów z pustym ciągiem znaków (\"\") jako kluczem. Czy chcesz usunąć tę parę klucz-wartość?",
+	"nbteditor.nbt.empty_key.title": "Niewspierany NBT!",
+	"nbteditor.nbt.empty_key.desc": "Ten edytor nie obsługuje NBT z pustym ciągiem znaków (\"\") jako kluczem. Czy chcesz usunąć tę parę klucz-wartość?",
 	"nbteditor.nbt.empty_key.yes": "Napraw i Edytuj",
 	"nbteditor.nbt.empty_key.no": "Anuluj",
 	
@@ -69,8 +76,6 @@
 	"nbteditor.file_options.delete.success": "§aUsunięto %s",
 	"nbteditor.file_options.delete.error": "§cBłąd podczas usuwania %s",
 	"nbteditor.file_options.delete.missing": "§c%s §cjuż został usunięty!",
-	
-	"nbteditor.img2lore": "Importuj Obraz(y)",
 	
 	"itemGroup.nbteditor.client_chest": "Skrzynia Klienta",
 	"itemGroup.nbteditor.inventory": "Ekwipunek",
@@ -111,6 +116,7 @@
 	"nbteditor.lore.edited": "§aOpis edytowany!",
 	"nbteditor.lore.none": "§cBrak opisu.",
 	
+	"nbteditor.img_to_lore": "Importuj Obraz(y)",
 	"nbteditor.img_to_lore.width": "Szerokość",
 	"nbteditor.img_to_lore.height": "Wysokość",
 	
@@ -147,7 +153,7 @@
 	"nbteditor.keybind.page.next_jump": "\n§6aby przejść do następnej strony!",
 	"nbteditor.keybind.page.prev_jump": "\n§6aby przejść do poprzedniej strony!",
 	
-	"nbteditor.unbind_skull.no_textures": "Ta głowa jeszcze nie załadowała tekstur!",
+	"nbteditor.unbind_skull.no_textures": "§cTa głowa jeszcze nie załadowała tekstur!",
 	"nbteditor.unbind_skull.unbound": "§aGłowa odblokowana!",
 	
 	"nbteditor.maxed": "§aZaklęcia osiągnęły maksimum!",
@@ -166,7 +172,7 @@
 	"nbteditor.attributes.amount.autofill_keybinds": "Przytrzymaj Shift dla nieskończoności\nPrzytrzymaj Ctrl dla minimum",
 	"nbteditor.attributes.slot": "Slot",
 	"nbteditor.attributes.new_uuids.success": "§aUUID atrybutów zrandomizowane!",
-	"nbteditor.attributes.new_uuids.no_attributes": "§cTen przedmiot nie ma atrybutów!",
+	"nbteditor.attributes.new_uuids.no_attributes": "§cTen NBT nie ma atrybutów!",
 	
 	"nbteditor.enchantments": "Zaklęcia",
 	"nbteditor.enchantments.enchantment": "Zaklęcie",
@@ -179,9 +185,11 @@
 	"nbteditor.unstackable.msg": "§aPrzedmiot jest teraz niestakowalny! [Najedź, aby uzyskać więcej informacji]",
 	"nbteditor.unstackable.hover_msg": "Dodano losowy UUID.\nPrzy klonowaniu przedmiotu upewnij się,\nże ponownie uruchamiasz to polecenie\ndla wszystkich pojedyńczych przedmiotów.",
 	
-	"nbteditor.named": "§aZmieniono nazwę przedmiotu na: ",
+	"nbteditor.named": "§aZmieniono nazwę NBT na: ",
 	
 	"nbteditor.display": "Wyświetlanie",
+	"nbteditor.display.custom_name_visible.enabled": "☑ Niestandardowa Nazwa Widoczna",
+	"nbteditor.display.custom_name_visible.disabled": "☐ Niestandardowa Nazwa Widoczna",
 	
 	"nbteditor.book": "Książka",
 	"nbteditor.book.open": "Edytuj Książkę",
@@ -329,6 +337,18 @@
 	"nbteditor.config.trigger_block_updates.desc": "Wyłącz aktualizacje bloków podczas modyfikowania ich,\numożliwiając tworzenie niestabilnych stanów bloku.\n\n§eTo jest funkcja eksperymentalna!",
 	"nbteditor.config.trigger_block_updates.yes": "Włączone",
 	"nbteditor.config.trigger_block_updates.no": "Wyłączone",
+	"nbteditor.config.warn_incompatible_protocol": "Niekompatybilny protokół",
+	"nbteditor.config.warn_incompatible_protocol.desc": "Czy powinno pojawić się ostrzeżenie, jeśli\nserwer i klient mają niekompatybilne wersje edytora NBT?",
+	"nbteditor.config.warn_incompatible_protocol.enabled": "Włączone",
+	"nbteditor.config.warn_incompatible_protocol.disabled": "Wyłączone",
+	"nbteditor.config.enchant_glint_fix": "Naprawa Błyszczenia Zaklęć",
+	"nbteditor.config.enchant_glint_fix.desc": "Enchantowane przedmioty obiektów blokowych nie pokazują błyszczenia ze względu na MC-69683.",
+	"nbteditor.config.enchant_glint_fix.enabled": "Włączone",
+	"nbteditor.config.enchant_glint_fix.disabled": "Wyłączone",
+	"nbteditor.config.recreate_blocks_and_entities": "Odtwórz Bloki i Stworzenia",
+	"nbteditor.config.recreate_blocks_and_entities.desc": "Gdy usuwasz niektóre tagi NBT, nie muszą one faktycznie\nzostać usunięte z powodu MC-128225, ponieważ blok/stworzenie\nnie usuwa aktywnie swoich danych, gdy brakuje tagu.\nWłączenie tego powoduje całkowitą zmianę/zrespawnowanie bloku/stworzenia\nzamiast edytowania, co ma inne efekty uboczne.",
+	"nbteditor.config.recreate_blocks_and_entities.enabled": "Włączone",
+	"nbteditor.config.recreate_blocks_and_entities.disabled": "Wyłączone",
 	
 	
 	"nbteditor.configurable.list.move": "Przenieś",
@@ -357,7 +377,7 @@
 	"nbteditor.help_5": "§6/open: §7Otwórz kontener, który trzymasz w ręce. Możesz umieścić shulkery wewnątrz innych shulkerów!",
 	"nbteditor.help_6": "§6/get <item | potion | soup | skull | hdb | colorcodes | lostitem | help | credits> [<args>]: §7Zdobądź przedmiot lub informacje.",
 	"nbteditor.help_7": "§6/sign [<add | remove | edit <nowy podpis>>]: §7Podpisz przedmiot.",
-	"nbteditor.help_8": "§6/factory <typ> [<args>]: §7Narzędzia do przedmiotów, takie jak zaklęcia, atrybuty, itp.",
+	"nbteditor.help_8": "§6/factory <typ> [<args>]: §7Narzędzia do zaklęć, atrybutów, itp.",
 	"nbteditor.help_9": "",
 	"nbteditor.help_10": "§7Pomoc w konkretnej funkcji: §b/get help <nbteditor | clientchest | itemfactories | textformat>",
 	"nbteditor.help_11": "§7Zgłoś problem:",
