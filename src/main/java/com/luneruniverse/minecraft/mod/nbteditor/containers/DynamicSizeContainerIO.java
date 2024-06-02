@@ -16,18 +16,18 @@ public class DynamicSizeContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
-	public boolean isNBTReadable(NbtCompound nbt) {
+	public boolean isNBTReadable(NbtCompound nbt, SourceContainerType source) {
 		return nbt.getList("Items", NbtElement.COMPOUND_TYPE).size() <= maxNumItems;
 	}
 	
 	@Override
-	public ItemStack[] readNBT(NbtCompound container) {
+	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
 		return container.getList("Items", NbtElement.COMPOUND_TYPE).stream().limit(maxNumItems)
 				.map(item -> ItemStack.fromNbt((NbtCompound) item)).toArray(ItemStack[]::new);
 	}
 	
 	@Override
-	public void writeNBT(NbtCompound container, ItemStack[] contents) {
+	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
 		container.put("Items", Arrays.stream(contents).limit(maxNumItems)
 				.filter(item -> item != null && !item.isEmpty()).map(item -> item.writeNbt(new NbtCompound()))
 				.collect(NbtList::new, NbtList::add, NbtList::addAll));

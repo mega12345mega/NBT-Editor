@@ -32,6 +32,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.minecraft.block.entity.LecternBlockEntity;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -48,6 +49,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.screen.LecternScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.ClickEvent;
@@ -272,5 +274,13 @@ public class MixinLink {
 	
 	
 	public static final List<ItemStack> ENCHANT_GLINT_FIX = new ArrayList<>();
+	
+	
+	public static final Map<Thread, LecternBlockEntity> getLecternRequests = new HashMap<>();
+	public static LecternBlockEntity getLectern(LecternScreenHandler handler, PlayerEntity player) {
+		getLecternRequests.put(Thread.currentThread(), null);
+		handler.canUse(player);
+		return getLecternRequests.remove(Thread.currentThread());
+	}
 	
 }

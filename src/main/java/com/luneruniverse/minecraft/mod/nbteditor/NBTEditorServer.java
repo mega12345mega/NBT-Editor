@@ -8,10 +8,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.packets.GetLecternBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ProtocolVersionS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetBlockC2SPacket;
@@ -26,6 +28,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.LecternBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.Entity.RemovalReason;
 import net.minecraft.entity.EntityType;
@@ -34,6 +37,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.GenericContainerScreenHandler;
+import net.minecraft.screen.LecternScreenHandler;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.MinecraftServer;
@@ -57,6 +61,7 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		ServerPlayNetworking.registerReceiver(network, SetSlotC2SPacket.TYPE, this::onSetSlotPacket);
 		ServerPlayNetworking.registerReceiver(network, OpenEnderChestC2SPacket.TYPE, this::onOpenEnderChestPacket);
 		ServerPlayNetworking.registerReceiver(network, GetBlockC2SPacket.TYPE, this::onGetBlockPacket);
+		ServerPlayNetworking.registerReceiver(network, GetLecternBlockC2SPacket.TYPE, this::onGetLecternBlockPacket);
 		ServerPlayNetworking.registerReceiver(network, GetEntityC2SPacket.TYPE, this::onGetEntityPacket);
 		ServerPlayNetworking.registerReceiver(network, SetBlockC2SPacket.TYPE, this::onSetBlockPacket);
 		ServerPlayNetworking.registerReceiver(network, SetEntityC2SPacket.TYPE, this::onSetEntityPacket);
@@ -93,13 +98,28 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		if (world != null) {
 			BlockEntity block = world.getBlockEntity(packet.getPos());
 			if (block != null) {
-				sender.sendPacket(new ViewBlockS2CPacket(packet.getRequestId(),
-						MVRegistry.BLOCK.getId(block.getCachedState().getBlock()),
-						new BlockStateProperties(block.getCachedState()), block.createNbt()));
+				sendViewBlockPacket(packet.getRequestId(), block, sender);
 				return;
 			}
 		}
-		sender.sendPacket(new ViewBlockS2CPacket(packet.getRequestId(), null, null, null));
+		sender.sendPacket(new ViewBlockS2CPacket(packet.getRequestId(), packet.getWorld(), packet.getPos(), null, null, null));
+	}
+	private void onGetLecternBlockPacket(GetLecternBlockC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {
+		if (!player.hasPermissionLevel(2))
+			return;
+		if (player.currentScreenHandler instanceof LecternScreenHandler handler) {
+			LecternBlockEntity lectern = MixinLink.getLectern(handler, player);
+			if (lectern != null) {
+				sendViewBlockPacket(packet.getRequestId(), lectern, sender);
+				return;
+			}
+		}
+		sender.sendPacket(new ViewBlockS2CPacket(packet.getRequestId(), null, null, null, null, null));
+	}
+	private void sendViewBlockPacket(int requestId, BlockEntity block, PacketSender sender) {
+		sender.sendPacket(new ViewBlockS2CPacket(requestId, block.getWorld().getRegistryKey(), block.getPos(),
+				MVRegistry.BLOCK.getId(block.getCachedState().getBlock()),
+				new BlockStateProperties(block.getCachedState()), block.createNbt()));
 	}
 	
 	private void onGetEntityPacket(GetEntityC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {

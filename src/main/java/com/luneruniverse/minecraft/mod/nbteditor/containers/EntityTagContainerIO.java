@@ -18,18 +18,18 @@ public class EntityTagContainerIO implements ItemContainerIO, EntityContainerIO 
 		NbtCompound entityTag = item.getSubNbt("EntityTag");
 		if (entityTag == null)
 			entityTag = new NbtCompound();
-		return nbtIO.isNBTReadable(entityTag);
+		return nbtIO.isNBTReadable(entityTag, SourceContainerType.ITEM);
 	}
 	@Override
 	public ItemStack[] readItem(ItemStack container) {
 		NbtCompound blockEntityTag = container.getSubNbt("EntityTag");
 		if (blockEntityTag == null)
 			blockEntityTag = new NbtCompound();
-		return nbtIO.readNBT(blockEntityTag);
+		return nbtIO.readNBT(blockEntityTag, SourceContainerType.ITEM);
 	}
 	@Override
 	public void writeItem(ItemStack container, ItemStack[] contents) {
-		nbtIO.writeNBT(container.getOrCreateSubNbt("EntityTag"), contents);
+		nbtIO.writeNBT(container.getOrCreateSubNbt("EntityTag"), contents, SourceContainerType.ITEM);
 	}
 	
 	@Override
@@ -37,18 +37,18 @@ public class EntityTagContainerIO implements ItemContainerIO, EntityContainerIO 
 		NbtCompound entityTag = entity.getNBT();
 		if (entityTag == null)
 			entityTag = new NbtCompound();
-		return nbtIO.isNBTReadable(entityTag);
+		return nbtIO.isNBTReadable(entityTag, SourceContainerType.ENTITY);
 	}
 	@Override
 	public ItemStack[] readEntity(LocalEntity container) {
 		NbtCompound entityTag = container.getNBT();
 		if (entityTag == null)
 			entityTag = new NbtCompound();
-		return nbtIO.readNBT(entityTag);
+		return nbtIO.readNBT(entityTag, SourceContainerType.ENTITY);
 	}
 	@Override
 	public void writeEntity(LocalEntity container, ItemStack[] contents) {
-		nbtIO.writeNBT(container.getOrCreateNBT(), contents);
+		nbtIO.writeNBT(container.getOrCreateNBT(), contents, SourceContainerType.ENTITY);
 	}
 	
 }

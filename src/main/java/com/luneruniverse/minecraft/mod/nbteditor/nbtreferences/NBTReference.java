@@ -63,9 +63,11 @@ public interface NBTReference<T extends LocalNBT> {
 	}
 	
 	public static void getReference(NBTReferenceFilter filter, boolean airable, Consumer<NBTReference<?>> consumer) {
-		NBTReference.getReference(filter, airable).thenAccept(ref -> ref.ifPresentOrElse(consumer, () -> {
-			if (MainUtil.client.player != null)
-				MainUtil.client.player.sendMessage(filter.getFailMessage(), false);
+		NBTReference.getReference(filter, airable).thenAccept(ref -> MainUtil.client.execute(() -> {
+			ref.ifPresentOrElse(consumer, () -> {
+				if (MainUtil.client.player != null)
+					MainUtil.client.player.sendMessage(filter.getFailMessage(), false);
+			});
 		}));
 	}
 	

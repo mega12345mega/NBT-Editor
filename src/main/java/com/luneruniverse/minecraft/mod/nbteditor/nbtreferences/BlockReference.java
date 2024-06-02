@@ -2,18 +2,21 @@ package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.packets.GetLecternBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewBlockS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryKey;
@@ -24,11 +27,18 @@ import net.minecraft.world.World;
 
 public class BlockReference implements NBTReference<LocalBlock> {
 	
-	public static CompletableFuture<Optional<BlockReference>> getBlock(RegistryKey<World> world, BlockPos pos) {
+	private static CompletableFuture<Optional<BlockReference>> getBlock(Function<Integer, FabricPacket> packetFactory) {
 		return NBTEditorClient.SERVER_CONN
-				.sendRequest(requestId -> new GetBlockC2SPacket(requestId, world, pos), ViewBlockS2CPacket.class)
+				.sendRequest(packetFactory, ViewBlockS2CPacket.class)
 				.thenApply(optional -> optional.filter(ViewBlockS2CPacket::foundBlock)
-						.map(packet -> new BlockReference(world, pos, packet.getId(), packet.getState(), packet.getNbt())));
+						.map(packet -> new BlockReference(packet.getWorld(), packet.getPos(),
+								packet.getId(), packet.getState(), packet.getNbt())));
+	}
+	public static CompletableFuture<Optional<BlockReference>> getBlock(RegistryKey<World> world, BlockPos pos) {
+		return getBlock(requestId -> new GetBlockC2SPacket(requestId, world, pos));
+	}
+	public static CompletableFuture<Optional<BlockReference>> getLecternBlock() {
+		return getBlock(GetLecternBlockC2SPacket::new);
 	}
 	public static BlockReference getBlockWithoutNBT(BlockPos pos) {
 		BlockState state = MainUtil.client.world.getBlockState(pos);

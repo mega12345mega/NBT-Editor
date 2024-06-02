@@ -166,12 +166,15 @@ public class TextUtil {
 	}
 	
 	public static boolean isTextFormatted(Text text, boolean allowNonNull) {
-		return isTextFormatted(Text.Serialization.toJsonTree(text).getAsJsonObject(), allowNonNull);
+		return isTextFormatted(Text.Serialization.toJsonTree(text), allowNonNull);
 	}
-	private static boolean isTextFormatted(JsonObject data, boolean allowNonNull) {
+	private static boolean isTextFormatted(JsonElement dataElement, boolean allowNonNull) {
+		if (!(dataElement instanceof JsonObject data))
+			return false;
+		
 		if (data.has("extra")) {
 			for (JsonElement part : data.get("extra").getAsJsonArray()) {
-				if (isTextFormatted(part.getAsJsonObject(), allowNonNull))
+				if (isTextFormatted(part, allowNonNull))
 					return true;
 			}
 		}

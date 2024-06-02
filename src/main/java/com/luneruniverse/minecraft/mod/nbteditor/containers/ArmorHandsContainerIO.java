@@ -8,7 +8,7 @@ import net.minecraft.nbt.NbtList;
 public class ArmorHandsContainerIO implements NBTContainerIO {
 	
 	@Override
-	public ItemStack[] readNBT(NbtCompound container) {
+	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
 		ItemStack[] items = new ItemStack[6];
 		
 		NbtList armorItemsNbt = container.getList("ArmorItems", NbtElement.COMPOUND_TYPE);
@@ -23,7 +23,7 @@ public class ArmorHandsContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
-	public void writeNBT(NbtCompound container, ItemStack[] contents) {
+	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
 		NbtList armorItemsNbt = new NbtList();
 		for (int i = 0; i < 4; i++)
 			armorItemsNbt.add(contents[3 - i].writeNbt(new NbtCompound()));

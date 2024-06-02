@@ -13,17 +13,20 @@ public class SingleItemContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
-	public ItemStack[] readNBT(NbtCompound container) {
+	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
 		if (!container.contains(key, NbtElement.COMPOUND_TYPE))
 			return new ItemStack[] {null};
 		return new ItemStack[] {ItemStack.fromNbt(container.getCompound(key))};
 	}
 	
 	@Override
-	public void writeNBT(NbtCompound container, ItemStack[] contents) {
-		if (contents.length == 0 || contents[0] == null || contents[0].isEmpty())
-			container.remove(key);
-		else
+	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
+		if (contents.length == 0 || contents[0] == null || contents[0].isEmpty()) {
+			if (source == SourceContainerType.ITEM)
+				container.remove(key);
+			else
+				container.put(key, ItemStack.EMPTY.writeNbt(new NbtCompound()));
+		} else
 			container.put(key, contents[0].writeNbt(new NbtCompound()));
 	}
 	

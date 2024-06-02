@@ -14,7 +14,7 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
-	public ItemStack[] readNBT(NbtCompound container) {
+	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
 		ItemStack[] items = new ItemStack[numItems];
 		NbtList itemsNbt = container.getList("Items", NbtElement.COMPOUND_TYPE);
 		for (NbtElement itemNbtElement : itemsNbt) {
@@ -28,7 +28,7 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
-	public void writeNBT(NbtCompound container, ItemStack[] contents) {
+	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
 		NbtList itemsNbt = new NbtList();
 		for (int i = 0; i < contents.length; i++) {
 			ItemStack item = contents[i];
