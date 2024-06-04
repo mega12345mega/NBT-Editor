@@ -1,14 +1,26 @@
 package com.luneruniverse.minecraft.mod.nbteditor.localnbt;
 
+import java.util.Optional;
 import java.util.Set;
 
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 
 public interface LocalNBT {
+	public static Optional<LocalNBT> deserialize(NbtCompound nbt) {
+		return Optional.ofNullable(switch (nbt.contains("type", NbtElement.STRING_TYPE) ? nbt.getString("type") : "item") {
+			case "item" -> LocalItem.deserialize(nbt);
+			case "block" -> LocalBlock.deserialize(nbt);
+			case "entity" -> LocalEntity.deserialize(nbt);
+			default -> null;
+		});
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <T extends LocalNBT> T copy(T localNBT) {
 		return (T) localNBT.copy();
@@ -48,6 +60,10 @@ public interface LocalNBT {
 	}
 	
 	public void renderIcon(MatrixStack matrices, int x, int y);
+	
+	public Optional<ItemStack> toItem();
+	public NbtCompound serialize();
+	public Text toHoverableText();
 	
 	public LocalNBT copy();
 	public boolean equals(Object nbt);

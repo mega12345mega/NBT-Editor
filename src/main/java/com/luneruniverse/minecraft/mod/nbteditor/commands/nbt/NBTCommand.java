@@ -21,7 +21,8 @@ public class NBTCommand extends ClientCommandGroup {
 		super(new ArrayList<>(List.of(
 				new NBTConfigCommand(),
 				new NBTNewCommand(),
-				new NBTExportCommand())));
+				new NBTExportCommand(),
+				new NBTImportCommand())));
 	}
 	
 	@Override

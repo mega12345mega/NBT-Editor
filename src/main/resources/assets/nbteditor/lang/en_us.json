@@ -5,7 +5,7 @@
 	"nbteditor.incompatible_protocol.title": "Incompatible NBT Editor Protocol",
 	"nbteditor.incompatible_protocol.desc": "Server-side features are not enabled",
 	
-	"nbteditor.requires_server": "This requires NBT Editor to be installed on the server (and you must have level 2 OP)!",
+	"nbteditor.requires_server": "§cThis requires NBT Editor to be installed on the server (and you must have level 2 OP)!",
 	"nbteditor.nbt_ac.tip": "Download NBT Autocomplete for suggestions",
 	
 	
@@ -16,6 +16,7 @@
 	"nbteditor.no_ref.to_edit": "§cYou must be holding an item or looking at a block/entity to edit!",
 	"nbteditor.no_ref.to_edit_nbt": "§cYou must be holding an item or looking at a block-entity/entity to edit!",
 	"nbteditor.no_ref.to_export": "§cYou must be holding an item or looking at a block/entity to export!",
+	"nbteditor.no_ref.to_export_item": "§cYou must be looking at a block/entity to export to an item!",
 	"nbteditor.no_ref.container": "§cYou must be holding or looking at a container!",
 	"nbteditor.no_ref.skull": "§cYou must be holding or looking at a player head to edit!",
 	"nbteditor.no_ref.attributes": "§cYou must be holding an item or looking at a mob edit!",
@@ -69,8 +70,28 @@
 	"nbteditor.nbt.saving_air.no": "Cancel",
 	
 	"nbteditor.nbt.export.copied": "§aCommand copied to clipboard!",
-	"nbteditor.nbt.export.file.success": "Saved item as %s",
-	"nbteditor.nbt.export.file.error": "Couldn't save item: %s",
+	"nbteditor.nbt.export.item.error": "§cThe subject cannot be converted into an item",
+	"nbteditor.nbt.export.file.success": "Saved subject as %s",
+	"nbteditor.nbt.export.file.error": "Couldn't save subject: %s",
+	
+	"nbteditor.nbt.import_1": "Import Files",
+	"nbteditor.nbt.import_2": "",
+	"nbteditor.nbt.import_3": "Drag files to import onto this screen",
+	"nbteditor.nbt.import_4": "",
+	"nbteditor.nbt.import_5": ".nbt files from /nbt export will give/place/summon the subject",
+	"nbteditor.nbt.import_6": "Images will create a painting with the image being the lore",
+	"nbteditor.nbt.import_7": "",
+	"nbteditor.nbt.import_8": "You can also drag files onto the esc menu or your inventory",
+	"nbteditor.nbt.import_9": "instead of opening this screen",
+	
+	"nbteditor.img_to_lore": "Import Image(s)",
+	"nbteditor.img_to_lore.width": "Width",
+	"nbteditor.img_to_lore.height": "Height",
+	
+	"nbteditor.nbt.import.pos": "Import Block/Entity(s)",
+	"nbteditor.nbt.import.pos.x": "x",
+	"nbteditor.nbt.import.pos.y": "y",
+	"nbteditor.nbt.import.pos.z": "z",
 	
 	"nbteditor.file_options.show": "§a[Open Folder]",
 	"nbteditor.file_options.delete": "§c[Delete]",
@@ -120,11 +141,9 @@
 	"nbteditor.lore.edited": "§aLore edited!",
 	"nbteditor.lore.none": "§cThere is no lore.",
 	
-	"nbteditor.img_to_lore": "Import Image(s)",
-	"nbteditor.img_to_lore.width": "Width",
-	"nbteditor.img_to_lore.height": "Height",
-	
 	"nbteditor.get.item": "§aReceived: ",
+	"nbteditor.get.block": "§aPlaced: ",
+	"nbteditor.get.entity": "§aSummoned: ",
 	"nbteditor.get.lost_item": "§cYou may have lost an item - ",
 	"nbteditor.get.lost_item.hover": "Click to execute",
 	"nbteditor.get.lost_item.none": "§cThere are no lost items saved!",

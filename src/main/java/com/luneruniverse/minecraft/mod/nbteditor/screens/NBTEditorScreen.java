@@ -218,7 +218,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L, NB
 		if (localNBT instanceof LocalItem item) {
 			count.setText((ConfigScreen.isAirEditable() ? Math.max(1, item.getCount()) : item.getCount()) + "");
 			count.setChangedListener(str -> {
-				if (str.isEmpty())
+				if (str.isEmpty() || str.equals("+"))
 					return;
 				
 				item.setCount(Integer.parseInt(str));

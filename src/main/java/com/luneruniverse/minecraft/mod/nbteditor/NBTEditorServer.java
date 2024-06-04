@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
@@ -20,6 +21,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.SetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetSlotC2SPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewBlockS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
 
@@ -34,6 +36,7 @@ import net.minecraft.entity.Entity.RemovalReason;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.GenericContainerScreenHandler;
@@ -65,11 +68,13 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		ServerPlayNetworking.registerReceiver(network, GetEntityC2SPacket.TYPE, this::onGetEntityPacket);
 		ServerPlayNetworking.registerReceiver(network, SetBlockC2SPacket.TYPE, this::onSetBlockPacket);
 		ServerPlayNetworking.registerReceiver(network, SetEntityC2SPacket.TYPE, this::onSetEntityPacket);
+		ServerPlayNetworking.registerReceiver(network, SummonEntityC2SPacket.TYPE, this::onSummonEntityPacket);
 	}
 	
 	private void onSetCursorPacket(SetCursorC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {
 		if (!player.hasPermissionLevel(2))
 			return;
+		
 		player.currentScreenHandler.setCursorStack(packet.getItem());
 	}
 	
@@ -78,15 +83,18 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 			return;
 		if (player.currentScreenHandler == player.playerScreenHandler)
 			return;
+		
 		Slot slot = player.currentScreenHandler.getSlot(packet.getSlot());
 		if (slot.inventory == player.getInventory())
 			return;
+		
 		slot.setStack(packet.getItem());
 	}
 	
 	private void onOpenEnderChestPacket(OpenEnderChestC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {
 		if (!player.hasPermissionLevel(2))
 			return;
+		
 		player.openHandledScreen(new SimpleNamedScreenHandlerFactory((syncId, inventory, player2) ->
 				GenericContainerScreenHandler.createGeneric9x3(syncId, inventory, player.getEnderChestInventory()), TextInst.translatable("container.enderchest")));
 	}
@@ -94,6 +102,7 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 	private void onGetBlockPacket(GetBlockC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {
 		if (!player.hasPermissionLevel(2))
 			return;
+		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
 		if (world != null) {
 			BlockEntity block = world.getBlockEntity(packet.getPos());
@@ -102,11 +111,13 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 				return;
 			}
 		}
+		
 		sender.sendPacket(new ViewBlockS2CPacket(packet.getRequestId(), packet.getWorld(), packet.getPos(), null, null, null));
 	}
 	private void onGetLecternBlockPacket(GetLecternBlockC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {
 		if (!player.hasPermissionLevel(2))
 			return;
+		
 		if (player.currentScreenHandler instanceof LecternScreenHandler handler) {
 			LecternBlockEntity lectern = MixinLink.getLectern(handler, player);
 			if (lectern != null) {
@@ -114,6 +125,7 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 				return;
 			}
 		}
+		
 		sender.sendPacket(new ViewBlockS2CPacket(packet.getRequestId(), null, null, null, null, null));
 	}
 	private void sendViewBlockPacket(int requestId, BlockEntity block, PacketSender sender) {
@@ -125,24 +137,29 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 	private void onGetEntityPacket(GetEntityC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {
 		if (!player.hasPermissionLevel(2))
 			return;
+		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
 		if (world != null) {
 			Entity entity = world.getEntity(packet.getUUID());
 			if (entity != null && !(entity instanceof PlayerEntity)) {
 				sender.sendPacket(new ViewEntityS2CPacket(packet.getRequestId(),
+						entity.getWorld().getRegistryKey(), entity.getUuid(),
 						EntityType.getId(entity.getType()), entity.writeNbt(new NbtCompound())));
 				return;
 			}
 		}
-		sender.sendPacket(new ViewEntityS2CPacket(packet.getRequestId(), null, null));
+		
+		sender.sendPacket(new ViewEntityS2CPacket(packet.getRequestId(), packet.getWorld(), packet.getUUID(), null, null));
 	}
 	
 	private void onSetBlockPacket(SetBlockC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {
 		if (!player.hasPermissionLevel(2))
 			return;
+		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
 		if (world == null)
 			return;
+		
 		BlockState state = world.getBlockState(packet.getPos());
 		if (!MVRegistry.BLOCK.getId(state.getBlock()).equals(packet.getId())) {
 			world.removeBlockEntity(packet.getPos());
@@ -154,10 +171,13 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 			if (packet.isRecreate())
 				world.removeBlockEntity(packet.getPos());
 		}
+		
 		BlockEntity block = world.getBlockEntity(packet.getPos());
 		if (block == null)
 			return;
+		
 		block.readNbt(packet.getNbt());
+		
 		if (packet.isTriggerUpdate()) {
 			block.markDirty();
 			// Flags arg seems to be unused, and I don't know what it's supposed to be for this
@@ -168,12 +188,15 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 	private void onSetEntityPacket(SetEntityC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {
 		if (!player.hasPermissionLevel(2))
 			return;
+		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
 		if (world == null)
 			return;
+		
 		Entity entity = world.getEntity(packet.getUUID());
 		if (entity == null)
 			return;
+		
 		UUID newUUID = packet.getUUID();
 		if (packet.getNbt().containsUuid("UUID")) {
 			newUUID = packet.getNbt().getUuid("UUID");
@@ -183,6 +206,7 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 			}
 		} else
 			packet.getNbt().putUuid("UUID", packet.getUUID());
+		
 		if (packet.isRecreate() || !entity.getUuid().equals(newUUID) || !EntityType.getId(entity.getType()).equals(packet.getId())) {
 			Entity vehicle = entity.getVehicle();
 			Vec3d pos = entity.getPos();
@@ -202,6 +226,38 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 			readEntityNbtWithPassengers(world, entity, packet.getNbt());
 		}
 	}
+	
+	private void onSummonEntityPacket(SummonEntityC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {
+		if (!player.hasPermissionLevel(2))
+			return;
+		
+		ServerWorld world = player.getServer().getWorld(packet.getWorld());
+		if (world == null) {
+			sender.sendPacket(new ViewEntityS2CPacket(packet.getRequestId(), null, null, null, null));
+			return;
+		}
+		
+		UUID uuid = UUID.randomUUID();
+		if (packet.getNbt().containsUuid("UUID")) {
+			UUID nbtUUID = packet.getNbt().getUuid("UUID");
+			if (world.getEntity(nbtUUID) == null)
+				uuid = nbtUUID;
+			else
+				packet.getNbt().putUuid("UUID", uuid);
+		}
+		
+		Entity entity = MVRegistry.ENTITY_TYPE.get(packet.getId()).create(world);
+		entity.setUuid(uuid);
+		entity.setPosition(packet.getPos());
+		packet.getNbt().put("Pos", Stream.of(packet.getPos().x, packet.getPos().y, packet.getPos().z)
+				.map(NbtDouble::of).collect(NbtList::new, NbtList::add, NbtList::addAll));
+		world.spawnEntity(entity);
+		readEntityNbtWithPassengers(world, entity, packet.getNbt());
+		
+		sender.sendPacket(new ViewEntityS2CPacket(packet.getRequestId(), entity.getWorld().getRegistryKey(), entity.getUuid(),
+				EntityType.getId(entity.getType()), entity.writeNbt(new NbtCompound())));
+	}
+	
 	private void readEntityNbtWithPassengers(ServerWorld world, Entity entity, NbtCompound nbt) {
 		entity.readNbt(nbt);
 		

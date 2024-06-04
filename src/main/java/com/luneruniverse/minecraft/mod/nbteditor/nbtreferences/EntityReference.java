@@ -24,7 +24,8 @@ public class EntityReference implements NBTReference<LocalEntity> {
 		return NBTEditorClient.SERVER_CONN
 				.sendRequest(requestId -> new GetEntityC2SPacket(requestId, world, uuid), ViewEntityS2CPacket.class)
 				.thenApply(optional -> optional.filter(ViewEntityS2CPacket::foundEntity)
-						.map(packet -> new EntityReference(world, uuid, packet.getId(), packet.getNbt())));
+						.map(packet -> new EntityReference(packet.getWorld(), packet.getUUID(),
+								packet.getId(), packet.getNbt())));
 	}
 	
 	private final RegistryKey<World> world;

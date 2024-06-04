@@ -135,7 +135,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 		pageField.setMaxLength((NBTEditorClient.CLIENT_CHEST.getPageCount() + "").length());
 		pageField.setText((PAGE + 1) + "");
 		pageField.setChangedListener(str -> {
-			if (str.isEmpty())
+			if (str.isEmpty() || str.equals("+"))
 				return;
 			
 			int intVal = Integer.parseInt(str);

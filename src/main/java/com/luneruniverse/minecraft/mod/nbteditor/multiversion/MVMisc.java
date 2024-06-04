@@ -48,6 +48,7 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemGroup;
@@ -86,13 +87,21 @@ public class MVMisc {
 		return Optional.of(((Resource) output).getInputStream());
 	}
 	
+	public static Object registryAccess;
 	private static final Supplier<Reflection.MethodInvoker> ItemStackArgumentType_itemStack =
 			Reflection.getOptionalMethod(ItemStackArgumentType.class, "method_9776", MethodType.methodType(ItemStackArgumentType.class));
-	public static Object registryAccess;
 	public static ItemStackArgumentType getItemStackArg() {
 		return Version.<ItemStackArgumentType>newSwitch()
 				.range("1.19.0", null, () -> ItemStackArgumentType.itemStack((CommandRegistryAccess) registryAccess))
 				.range(null, "1.18.2", () -> ItemStackArgumentType_itemStack.get().invoke(null)) // ItemStackArgumentType.itemStack()
+				.get();
+	}
+	private static final Supplier<Reflection.MethodInvoker> BlockStateArgumentType_blockState =
+			Reflection.getOptionalMethod(BlockStateArgumentType.class, "method_9653", MethodType.methodType(BlockStateArgumentType.class));
+	public static BlockStateArgumentType getBlockStateArg() {
+		return Version.<BlockStateArgumentType>newSwitch()
+				.range("1.19.0", null, () -> BlockStateArgumentType.blockState((CommandRegistryAccess) registryAccess))
+				.range(null, "1.18.2", () -> BlockStateArgumentType_blockState.get().invoke(null)) // BlockStateArgumentType.blockState()
 				.get();
 	}
 	

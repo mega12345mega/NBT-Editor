@@ -40,6 +40,8 @@ accessible field net/minecraft/client/gui/screen/ChatInputSuggestor$SuggestionWi
 
 accessible field net/minecraft/entity/data/DataTracker$Entry initialValue Ljava/lang/Object;
 
+accessible field net/minecraft/command/argument/BlockStateArgument data Lnet/minecraft/nbt/NbtCompound;
+
 # Private in older versions
 accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;
 accessible method net/minecraft/client/render/RenderLayer of (Ljava/lang/String;Lnet/minecraft/client/render/VertexFormat;Lnet/minecraft/client/render/VertexFormat$DrawMode;ILnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;)Lnet/minecraft/client/render/RenderLayer$MultiPhase;

@@ -108,7 +108,7 @@ public class MainUtil {
 				overflow = item.getCount() - item.getMaxCount();
 				item.setCount(item.getMaxCount());
 			}
-			saveItem(slot, item);
+			saveItem(slot == 40 ? 45 : slot, item);
 			if (overflow != 0) {
 				item.setCount(overflow);
 				get(item, false);
@@ -387,7 +387,7 @@ public class MainUtil {
 	
 	public static Predicate<String> intPredicate(Supplier<Integer> min, Supplier<Integer> max, boolean allowEmpty) {
 		return str -> {
-			if (str.isEmpty())
+			if (str.isEmpty() || str.equals("+") || str.equals("-"))
 				return allowEmpty;
 			try {
 				int value = Integer.parseInt(str);
@@ -410,6 +410,12 @@ public class MainUtil {
 		} catch (NumberFormatException e) {
 			return null;
 		}
+	}
+	public static int parseDefaultInt(String str, int defaultValue) {
+		Integer output = parseOptionalInt(str);
+		if (output == null)
+			return defaultValue;
+		return output;
 	}
 	
 	

@@ -111,6 +111,12 @@ public class BlockStateProperties {
 		return mapTo(state).applyTo(state);
 	}
 	
+	public NbtCompound getValues() {
+		NbtCompound output = new NbtCompound();
+		for (Map.Entry<String, BlockStateProperty> property : properties.entrySet())
+			output.putString(property.getKey(), property.getValue().value);
+		return output;
+	}
 	public Set<String> setValues(NbtCompound blockStateTag) {
 		Set<String> unset = new HashSet<>(properties.keySet());
 		for (String tag : blockStateTag.getKeys()) {
@@ -147,6 +153,11 @@ public class BlockStateProperties {
 		if (obj instanceof BlockStateProperties state)
 			return this.properties.equals(state.properties);
 		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return "[" + properties.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue().value).reduce((a, b) -> a + "," + b).orElse("") + "]";
 	}
 	
 }

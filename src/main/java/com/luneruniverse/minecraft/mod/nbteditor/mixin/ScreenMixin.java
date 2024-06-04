@@ -1,7 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -11,25 +9,20 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidget;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore.LoreConsumer;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ImportScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
-import net.minecraft.util.Formatting;
 
 @Mixin(Screen.class)
 public class ScreenMixin {
@@ -47,35 +40,9 @@ public class ScreenMixin {
 	
 	@Inject(method = "filesDragged", at = @At("HEAD"))
 	private void filesDragged(List<Path> paths, CallbackInfo info) {
-		if (((Object) this) instanceof HandledScreen) {
-			for (Path path : paths) {
-				File file = path.toFile();
-				if (!file.isFile())
-					continue;
-				
-				if (file.getName().endsWith(".nbt")) {
-					try (FileInputStream in = new FileInputStream(file)) {
-						ItemStack item = ItemStack.fromNbt(MainUtil.readNBT(in));
-						if (!item.isEmpty())
-							MainUtil.getWithMessage(item);
-					} catch (Exception e) {
-						NBTEditor.LOGGER.error("Error while importing a .nbt file", e);
-						MainUtil.client.player.sendMessage(TextInst.literal(e.getClass().getName() + ": " + e.getMessage()).formatted(Formatting.RED), false);
-					}
-					continue;
-				}
-			}
-			ImageToLoreWidget.openImportFiles(paths, file -> {
-				String name = file.getName();
-				int nameDot = name.lastIndexOf('.');
-				if (nameDot != -1)
-					name = name.substring(0, nameDot);
-				
-				ItemStack painting = new ItemStack(Items.PAINTING);
-				painting.setCustomName(TextInst.literal(name).styled(style -> style.withItalic(false).withColor(Formatting.GOLD)));
-				return LoreConsumer.createReceiveItem(painting);
-			}, () -> {});
-		}
+		Screen source = (Screen) (Object) this;
+		if (source instanceof HandledScreen || source instanceof GameMenuScreen)
+			ImportScreen.importFiles(paths);
 	}
 	
 	@Inject(method = "handleTextClick", at = @At("HEAD"), cancellable = true)

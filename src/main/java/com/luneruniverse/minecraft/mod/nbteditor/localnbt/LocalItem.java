@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.localnbt;
 
+import java.util.Optional;
 import java.util.Set;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
@@ -14,6 +15,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class LocalItem implements LocalNBT {
+	
+	public static LocalItem deserialize(NbtCompound nbt) {
+		return new LocalItem(ItemStack.fromNbt(nbt));
+	}
 	
 	private ItemStack item;
 	
@@ -83,6 +88,28 @@ public class LocalItem implements LocalNBT {
 	@Override
 	public void renderIcon(MatrixStack matrices, int x, int y) {
 		MVDrawableHelper.renderItem(matrices, 200.0F, true, item, x, y);
+	}
+	
+	@Override
+	public Optional<ItemStack> toItem() {
+		return Optional.of(item.copy());
+	}
+	@Override
+	public NbtCompound serialize() {
+		NbtCompound output = item.writeNbt(new NbtCompound());
+		output.putString("type", "item");
+		return output;
+	}
+	@Override
+	public Text toHoverableText() {
+		return item.toHoverableText();
+	}
+	
+	public boolean receive() {
+		if (item.isEmpty())
+			return false;
+		MainUtil.getWithMessage(item);
+		return true;
 	}
 	
 	@Override
