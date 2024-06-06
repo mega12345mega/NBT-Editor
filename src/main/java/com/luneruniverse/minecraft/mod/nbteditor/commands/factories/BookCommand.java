@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
@@ -34,7 +33,7 @@ public class BookCommand extends ClientCommand {
 	public static final NBTReferenceFilter BOOK_FILTER = NBTReferenceFilter.create(
 			ref -> ref.getItem().getItem() == Items.WRITTEN_BOOK,
 			ref -> {
-				if (MVRegistry.BLOCK.get(ref.getId()) != Blocks.LECTERN)
+				if (ref.getBlock() != Blocks.LECTERN)
 					return false;
 				LocalNBT nbt = ref.getLocalNBT();
 				if (!ContainerIO.isContainer(nbt))

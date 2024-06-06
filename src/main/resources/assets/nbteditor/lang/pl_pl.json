@@ -5,19 +5,23 @@
 	"nbteditor.incompatible_protocol.title": "Niezgodny protokół edytora NBT",
 	"nbteditor.incompatible_protocol.desc": "Opcje po stronie serwera nie są włączone.",
 	
-	"nbteditor.requires_server": "Wymaga to zainstalowania na serwerze NBT Editor (dodatkowo musisz mieć OP poziomu 2)!",
+	"nbteditor.requires_server": "§cWymaga to zainstalowania na serwerze NBT Editor (dodatkowo musisz mieć OP poziomu 2)!",
 	"nbteditor.nbt_ac.tip": "Pobierz NBT Autocomplete, aby uzyskać sugestie",
 	
 	
 	"nbteditor.ok": "Ok",
 	"nbteditor.cancel": "Anuluj",
 	
+	"nbteditor.no_ref.unknown": "§cNie udało się znaleźć tego, co próbujesz edytować!",
 	"nbteditor.no_ref.to_edit": "§cMusisz trzymać przedmiot lub patrzeć na stworzenie/blok aby go edytować!",
 	"nbteditor.no_ref.to_edit_nbt": "§cMusisz trzymać przedmiot lub patrzeć na stworzenie/blok aby go edytować!",
 	"nbteditor.no_ref.to_export": "§cMusisz trzymać przedmiot lub patrzeć na stworzenie/blok, aby go wyeksportować!",
+	"nbteditor.no_ref.to_export_item": "§cMusisz patrzeć na blok/stworzenie, aby wyeksportować do przedmiotu!",
 	"nbteditor.no_ref.container": "§cMusisz trzymać lub patrzeć na kontener! (np. skrzynkę)",
 	"nbteditor.no_ref.skull": "§cMusisz trzymać lub patrzeć na głowę gracza, aby ją edytować!",
+	"nbteditor.no_ref.attributes": "§cMusisz trzymać przedmiot lub patrzeć na stworzenie, aby je edytować!",
 	"nbteditor.no_ref.block": "§cMusisz trzymać lub patrzeć na blok, aby go edytować!",
+	"nbteditor.no_ref.book": "§cMusisz trzymać lub patrzeć na pulpit z zapisaną książką, aby ją edytować!",
 	"nbteditor.no_ref.signboard": "§cMusisz trzymać lub patrzeć na tabliczkę aby ją edytować!",
 	"nbteditor.no_hand.no_item.to_edit": "§cMusisz trzymać przedmiot, aby go edytować!",
 	"nbteditor.no_hand.no_item.to_view": "§cMusisz trzymać przedmiot, aby go przeglądać!",
@@ -66,8 +70,28 @@
 	"nbteditor.nbt.saving_air.no": "Anuluj",
 	
 	"nbteditor.nbt.export.copied": "§aKomenda skopiowana do schowka!",
-	"nbteditor.nbt.export.file.success": "Zapisano przedmiot jako %s",
-	"nbteditor.nbt.export.file.error": "Nie można zapisać przedmiotu: %s",
+	"nbteditor.nbt.export.item.error": "§cTen NBT nie może zostać przekształcony w przedmiot.",
+	"nbteditor.nbt.export.file.success": "Zapisano NBT jako %s",
+	"nbteditor.nbt.export.file.error": "Nie można zapisać NBT: %s",
+	
+	"nbteditor.nbt.import_1": "Importuj pliki",
+	"nbteditor.nbt.import_2": "",
+	"nbteditor.nbt.import_3": "Przeciągnij pliki, aby je tu zaimportować.",
+	"nbteditor.nbt.import_4": "",
+	"nbteditor.nbt.import_5": "Pliki .nbt z /nbt export dadzą/umieszczą/przyzwą przedmiot, blok lub stworzenie.",
+	"nbteditor.nbt.import_6": "Obrazy stworzą obraz, gdzie obraz będzie opisem.",
+	"nbteditor.nbt.import_7": "",
+	"nbteditor.nbt.import_8": "Możesz również przeciągnąć pliki na menu esc lub do swojego ekwipunku",
+	"nbteditor.nbt.import_9": "zamiast otwierania tego ekranu.",
+	
+	"nbteditor.img_to_lore": "Importuj Obraz(y)",
+	"nbteditor.img_to_lore.width": "Szerokość",
+	"nbteditor.img_to_lore.height": "Wysokość",
+	
+	"nbteditor.nbt.import.pos": "Importuj blok/stworzenie",
+	"nbteditor.nbt.import.pos.x": "x",
+	"nbteditor.nbt.import.pos.y": "y",
+	"nbteditor.nbt.import.pos.z": "z",
 	
 	"nbteditor.file_options.show": "§a[Otwórz Folder]",
 	"nbteditor.file_options.delete": "§c[Usuń]",
@@ -96,6 +120,7 @@
 	"nbteditor.client_chest.clear_page.no": "Anuluj",
 	
 	"nbteditor.book.convert": "Uczyń zapisywalną",
+	"nbteditor.book.convert.success": "§aZmieniono książkę w możliwą do zapisania!",
 	"nbteditor.book.convert.formatting_saved": "Ta książka zawiera formatowanie, które nie jest obsługiwane przez zapisywalne książki. Otrzymałeś kopię zamiast tego.",
 	
 	"nbteditor.container": "Kontener",
@@ -116,11 +141,9 @@
 	"nbteditor.lore.edited": "§aOpis edytowany!",
 	"nbteditor.lore.none": "§cBrak opisu.",
 	
-	"nbteditor.img_to_lore": "Importuj Obraz(y)",
-	"nbteditor.img_to_lore.width": "Szerokość",
-	"nbteditor.img_to_lore.height": "Wysokość",
-	
 	"nbteditor.get.item": "§aOtrzymano: ",
+	"nbteditor.get.block": "§aUmieszczono: ",
+	"nbteditor.get.entity": "§aPrzywołano: ",
 	"nbteditor.get.lost_item": "§cByć może utraciłeś przedmiot - ",
 	"nbteditor.get.lost_item.hover": "Kliknij, aby wykonać",
 	"nbteditor.get.lost_item.none": "§cNie ma zapisanych utraconych przedmiotów!",
@@ -164,6 +187,7 @@
 	"nbteditor.attributes": "Atrybuty",
 	"nbteditor.attributes.attribute": "Atrybut",
 	"nbteditor.attributes.operation": "Operacja",
+	"nbteditor.attributes.base": "Podstawa",
 	"nbteditor.attributes.amount": "Ilość",
 	"nbteditor.attributes.amount.max": "Maksimum",
 	"nbteditor.attributes.amount.min": "Minimum",

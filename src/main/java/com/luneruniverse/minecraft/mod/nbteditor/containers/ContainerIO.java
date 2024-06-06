@@ -139,11 +139,11 @@ public class ContainerIO {
 			return io != null && io.isItemReadable(item.getItem());
 		}
 		if (nbt instanceof LocalBlock block) {
-			BlockContainerIO io = BLOCK_IO.get(MVRegistry.BLOCK.get(block.getId()));
+			BlockContainerIO io = BLOCK_IO.get(block.getBlock());
 			return io != null && io.isBlockReadable(block);
 		}
 		if (nbt instanceof LocalEntity entity) {
-			EntityContainerIO io = ENTITY_IO.get(MVRegistry.ENTITY_TYPE.get(entity.getId()));
+			EntityContainerIO io = ENTITY_IO.get(entity.getEntityType());
 			return io != null && io.isEntityReadable(entity);
 		}
 		return false;
@@ -153,9 +153,9 @@ public class ContainerIO {
 		if (container instanceof LocalItem item)
 			output = ITEM_IO.get(item.getItem().getItem()).readItem(item.getItem());
 		if (container instanceof LocalBlock block)
-			output = BLOCK_IO.get(MVRegistry.BLOCK.get(block.getId())).readBlock(block);
+			output = BLOCK_IO.get(block.getBlock()).readBlock(block);
 		if (container instanceof LocalEntity entity)
-			output = ENTITY_IO.get(MVRegistry.ENTITY_TYPE.get(entity.getId())).readEntity(entity);
+			output = ENTITY_IO.get(entity.getEntityType()).readEntity(entity);
 		if (output == null)
 			throw new IllegalArgumentException("Not a container!");
 		for (int i = 0; i < output.length; i++) {
@@ -170,11 +170,11 @@ public class ContainerIO {
 			return;
 		}
 		if (container instanceof LocalBlock block) {
-			BLOCK_IO.get(MVRegistry.BLOCK.get(block.getId())).writeBlock(block, contents);
+			BLOCK_IO.get(block.getBlock()).writeBlock(block, contents);
 			return;
 		}
 		if (container instanceof LocalEntity entity) {
-			ENTITY_IO.get(MVRegistry.ENTITY_TYPE.get(entity.getId())).writeEntity(entity, contents);
+			ENTITY_IO.get(entity.getEntityType()).writeEntity(entity, contents);
 			return;
 		}
 		throw new IllegalArgumentException("Not a container!");

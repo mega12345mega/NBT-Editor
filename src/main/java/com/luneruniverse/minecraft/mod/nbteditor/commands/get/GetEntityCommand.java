@@ -15,8 +15,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.argument.NbtCompoundArgumentType;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.Vec3ArgumentType;
+import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 
 public class GetEntityCommand extends ClientCommand {
@@ -34,13 +34,14 @@ public class GetEntityCommand extends ClientCommand {
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		Command<FabricClientCommandSource> getEntity = context -> {
-			Identifier entityArg = context.getArgument("entity", Identifier.class);
+			EntityType<?> entityType = context.getArgument("entity", EntityType.class);
 			
 			PosArgument posArg = getDefaultArg(context, "pos", null, PosArgument.class);
 			Vec3d pos = (posArg == null ? null : posArg.toAbsolutePos(context.getSource().getPlayer().getCommandSource()));
 			
 			NbtCompound nbtArg = getDefaultArg(context, "nbt", new NbtCompound(), NbtCompound.class);
-			LocalEntity entity = new LocalEntity(entityArg, nbtArg);
+			
+			LocalEntity entity = new LocalEntity(entityType, nbtArg);
 			
 			if (pos == null) {
 				entity.toItem().ifPresentOrElse(MainUtil::getWithMessage,

@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
@@ -13,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
@@ -25,18 +27,18 @@ public class EntityReference implements NBTReference<LocalEntity> {
 				.sendRequest(requestId -> new GetEntityC2SPacket(requestId, world, uuid), ViewEntityS2CPacket.class)
 				.thenApply(optional -> optional.filter(ViewEntityS2CPacket::foundEntity)
 						.map(packet -> new EntityReference(packet.getWorld(), packet.getUUID(),
-								packet.getId(), packet.getNbt())));
+								MVRegistry.ENTITY_TYPE.get(packet.getId()), packet.getNbt())));
 	}
 	
 	private final RegistryKey<World> world;
 	private final UUID uuid;
-	private Identifier id;
+	private EntityType<?> entityType;
 	private NbtCompound nbt;
 	
-	public EntityReference(RegistryKey<World> world, UUID uuid, Identifier id, NbtCompound nbt) {
+	public EntityReference(RegistryKey<World> world, UUID uuid, EntityType<?> entityType, NbtCompound nbt) {
 		this.world = world;
 		this.uuid = uuid;
-		this.id = id;
+		this.entityType = entityType;
 		this.nbt = nbt;
 	}
 	
@@ -49,12 +51,12 @@ public class EntityReference implements NBTReference<LocalEntity> {
 	
 	@Override
 	public LocalEntity getLocalNBT() {
-		return new LocalEntity(id, nbt);
+		return new LocalEntity(entityType, nbt);
 	}
 	
 	@Override
 	public Identifier getId() {
-		return id;
+		return EntityType.getId(entityType);
 	}
 	@Override
 	public NbtCompound getNBT() {
@@ -62,11 +64,15 @@ public class EntityReference implements NBTReference<LocalEntity> {
 	}
 	@Override
 	public void saveNBT(Identifier id, NbtCompound toSave, Runnable onFinished) {
-		this.id = id;
+		this.entityType = MVRegistry.ENTITY_TYPE.get(id);
 		this.nbt = toSave;
 		ClientPlayNetworking.send(new SetEntityC2SPacket(world, uuid, id, toSave,
 				ConfigScreen.isRecreateBlocksAndEntities()));
 		onFinished.run();
+	}
+	
+	public EntityType<?> getEntityType() {
+		return entityType;
 	}
 	
 	@Override

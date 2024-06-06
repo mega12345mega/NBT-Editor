@@ -7,7 +7,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -43,8 +42,7 @@ public class GetBlockCommand extends ClientCommand {
 			NbtCompound nbt = blockArg.data;
 			if (nbt == null)
 				nbt = new NbtCompound();
-			LocalBlock block = new LocalBlock(MVRegistry.BLOCK.getId(blockArg.getBlockState().getBlock()),
-					new BlockStateProperties(blockArg.getBlockState()), nbt);
+			LocalBlock block = new LocalBlock(blockArg.getBlockState().getBlock(), new BlockStateProperties(blockArg.getBlockState()), nbt);
 			
 			if (pos == null) {
 				block.toItem().ifPresentOrElse(MainUtil::getWithMessage,

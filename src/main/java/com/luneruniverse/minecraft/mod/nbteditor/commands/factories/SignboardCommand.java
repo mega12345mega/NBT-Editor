@@ -5,7 +5,6 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.SignboardArgumentType;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
@@ -24,7 +23,7 @@ public class SignboardCommand extends ClientCommand {
 	
 	public static final NBTReferenceFilter SIGNBOARD_FILTER = NBTReferenceFilter.create(
 			ref -> ref.getItem().getItem() instanceof SignItem,
-			ref -> MVRegistry.BLOCK.get(ref.getId()) instanceof AbstractSignBlock,
+			ref -> ref.getBlock() instanceof AbstractSignBlock,
 			null,
 			TextInst.translatable("nbteditor.no_ref.signboard"),
 			TextInst.translatable("nbteditor.no_hand.no_item.signboard"));

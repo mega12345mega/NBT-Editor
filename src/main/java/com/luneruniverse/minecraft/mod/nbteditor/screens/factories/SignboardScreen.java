@@ -10,7 +10,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
@@ -105,7 +104,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L, NB
 			if (ref instanceof ItemReference itemRef)
 				block = ((SignItem) itemRef.getItem().getItem()).getBlock();
 			else if (ref instanceof BlockReference blockRef)
-				block = MVRegistry.BLOCK.get(blockRef.getId());
+				block = blockRef.getBlock();
 			this.texture = new Identifier("minecraft", "textures/block/" +
 					AbstractSignBlock.getWoodType(block).name() + "_planks.png");
 		} else {

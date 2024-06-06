@@ -28,6 +28,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LecternBlockEntity;
@@ -105,9 +106,9 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
 		if (world != null) {
-			BlockEntity block = world.getBlockEntity(packet.getPos());
-			if (block != null) {
-				sendViewBlockPacket(packet.getRequestId(), block, sender);
+			BlockEntity blockEntity = world.getBlockEntity(packet.getPos());
+			if (blockEntity != null) {
+				sendViewBlockPacket(packet.getRequestId(), blockEntity, sender);
 				return;
 			}
 		}
@@ -128,10 +129,10 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		
 		sender.sendPacket(new ViewBlockS2CPacket(packet.getRequestId(), null, null, null, null, null));
 	}
-	private void sendViewBlockPacket(int requestId, BlockEntity block, PacketSender sender) {
-		sender.sendPacket(new ViewBlockS2CPacket(requestId, block.getWorld().getRegistryKey(), block.getPos(),
-				MVRegistry.BLOCK.getId(block.getCachedState().getBlock()),
-				new BlockStateProperties(block.getCachedState()), block.createNbt()));
+	private void sendViewBlockPacket(int requestId, BlockEntity blockEntity, PacketSender sender) {
+		sender.sendPacket(new ViewBlockS2CPacket(requestId, blockEntity.getWorld().getRegistryKey(), blockEntity.getPos(),
+				MVRegistry.BLOCK.getId(blockEntity.getCachedState().getBlock()),
+				new BlockStateProperties(blockEntity.getCachedState()), blockEntity.createNbt()));
 	}
 	
 	private void onGetEntityPacket(GetEntityC2SPacket packet, ServerPlayerEntity player, PacketSender sender) {
@@ -160,11 +161,12 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		if (world == null)
 			return;
 		
+		Block block = MVRegistry.BLOCK.get(packet.getId());
 		BlockState state = world.getBlockState(packet.getPos());
-		if (!MVRegistry.BLOCK.getId(state.getBlock()).equals(packet.getId())) {
+		if (state.getBlock() != block) {
 			world.removeBlockEntity(packet.getPos());
 			world.setBlockState(packet.getPos(),
-					packet.getState().applyToSafely(MVRegistry.BLOCK.get(packet.getId()).getDefaultState()));
+					packet.getState().applyToSafely(block.getDefaultState()));
 		} else {
 			if (!new BlockStateProperties(state).equals(packet.getState()))
 				world.setBlockState(packet.getPos(), packet.getState().applyTo(state));
@@ -172,16 +174,16 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 				world.removeBlockEntity(packet.getPos());
 		}
 		
-		BlockEntity block = world.getBlockEntity(packet.getPos());
-		if (block == null)
+		BlockEntity blockEntity = world.getBlockEntity(packet.getPos());
+		if (blockEntity == null)
 			return;
 		
-		block.readNbt(packet.getNbt());
+		blockEntity.readNbt(packet.getNbt());
 		
 		if (packet.isTriggerUpdate()) {
-			block.markDirty();
+			blockEntity.markDirty();
 			// Flags arg seems to be unused, and I don't know what it's supposed to be for this
-			world.updateListeners(packet.getPos(), block.getCachedState(), block.getCachedState(), 0);
+			world.updateListeners(packet.getPos(), blockEntity.getCachedState(), blockEntity.getCachedState(), 0);
 		}
 	}
 	
@@ -207,14 +209,16 @@ public class NBTEditorServer implements ServerPlayConnectionEvents.Init {
 		} else
 			packet.getNbt().putUuid("UUID", packet.getUUID());
 		
-		if (packet.isRecreate() || !entity.getUuid().equals(newUUID) || !EntityType.getId(entity.getType()).equals(packet.getId())) {
+		EntityType<?> entityType = MVRegistry.ENTITY_TYPE.get(packet.getId());
+		
+		if (packet.isRecreate() || !entity.getUuid().equals(newUUID) || entity.getType() != entityType) {
 			Entity vehicle = entity.getVehicle();
 			Vec3d pos = entity.getPos();
 			entity.streamPassengersAndSelf().forEach(passengerOrSelf -> {
 				passengerOrSelf.stopRiding();
 				passengerOrSelf.remove(RemovalReason.DISCARDED);
 			});
-			entity = MVRegistry.ENTITY_TYPE.get(packet.getId()).create(world);
+			entity = entityType.create(world);
 			entity.setUuid(newUUID);
 			entity.setPosition(pos);
 			world.spawnEntity(entity);

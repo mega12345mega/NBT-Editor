@@ -17,18 +17,16 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.Identifier;
 
-public class SummonableEntityArgumentType implements ArgumentType<Identifier> {
+public class SummonableEntityArgumentType implements ArgumentType<EntityType<?>> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("minecraft:pig", "cow");
 	
 	public static SummonableEntityArgumentType summonableEntity() {
 		return new SummonableEntityArgumentType();
 	}
 	
-	public Identifier parse(StringReader stringReader) throws CommandSyntaxException {
-		Identifier id = Identifier.fromCommandInput(stringReader);
-		MVRegistry.ENTITY_TYPE.getOrEmpty(id).filter(EntityType::isSummonable).orElseThrow(
-				() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(stringReader));
-		return id;
+	public EntityType<?> parse(StringReader stringReader) throws CommandSyntaxException {
+		return MVRegistry.ENTITY_TYPE.getOrEmpty(Identifier.fromCommandInput(stringReader)).filter(EntityType::isSummonable)
+				.orElseThrow(() -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(stringReader));
 	}
 	
 	@Override

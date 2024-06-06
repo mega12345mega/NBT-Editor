@@ -1,7 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
@@ -11,7 +10,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -23,10 +21,7 @@ public class UnbindSkullCommand extends ClientCommand {
 	
 	public static final NBTReferenceFilter SKULL_FILTER = NBTReferenceFilter.create(
 			ref -> ref.getItem().getItem() == Items.PLAYER_HEAD,
-			ref -> {
-				Block block = MVRegistry.BLOCK.get(ref.getId());
-				return block == Blocks.PLAYER_HEAD || block == Blocks.PLAYER_WALL_HEAD;
-			},
+			ref -> ref.getBlock() == Blocks.PLAYER_HEAD || ref.getBlock() == Blocks.PLAYER_WALL_HEAD,
 			null,
 			TextInst.translatable("nbteditor.no_ref.skull"),
 			TextInst.translatable("nbteditor.no_hand.no_item.skull"));

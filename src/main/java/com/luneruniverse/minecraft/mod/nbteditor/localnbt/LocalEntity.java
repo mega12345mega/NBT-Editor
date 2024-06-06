@@ -36,14 +36,14 @@ import net.minecraft.world.World;
 public class LocalEntity implements LocalNBT {
 	
 	public static LocalEntity deserialize(NbtCompound nbt) {
-		return new LocalEntity(new Identifier(nbt.getString("id")), nbt.getCompound("tag"));
+		return new LocalEntity(MVRegistry.ENTITY_TYPE.get(new Identifier(nbt.getString("id"))), nbt.getCompound("tag"));
 	}
 	
-	private Identifier id;
+	private EntityType<?> entityType;
 	private NbtCompound nbt;
 	
-	public LocalEntity(Identifier id, NbtCompound nbt) {
-		this.id = id;
+	public LocalEntity(EntityType<?> entityType, NbtCompound nbt) {
+		this.entityType = entityType;
 		this.nbt = nbt;
 	}
 	
@@ -65,20 +65,27 @@ public class LocalEntity implements LocalNBT {
 	}
 	@Override
 	public String getDefaultName() {
-		return MVRegistry.ENTITY_TYPE.get(id).getName().getString();
+		return entityType.getName().getString();
 	}
 	
 	@Override
 	public Identifier getId() {
-		return id;
+		return MVRegistry.ENTITY_TYPE.getId(entityType);
 	}
 	@Override
 	public void setId(Identifier id) {
-		this.id = id;
+		this.entityType = MVRegistry.ENTITY_TYPE.get(id);
 	}
 	@Override
 	public Set<Identifier> getIdOptions() {
 		return MVRegistry.ENTITY_TYPE.getIds();
+	}
+	
+	public EntityType<?> getEntityType() {
+		return entityType;
+	}
+	public void setEntityType(EntityType<?> entityType) {
+		this.entityType = entityType;
 	}
 	
 	@Override
@@ -102,7 +109,7 @@ public class LocalEntity implements LocalNBT {
 		matrices.multiplyPositionMatrix(new Matrix4f().scaling(1, 1, -1));
 		
 		DiffuseLighting.method_34742();
-		Entity entity = MVRegistry.ENTITY_TYPE.get(id).create(MainUtil.client.world);
+		Entity entity = entityType.create(MainUtil.client.world);
 		entity.readNbt(nbt);
 		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getDrawContext(matrices).getVertexConsumers();
 		MainUtil.client.getEntityRenderDispatcher().getRenderer(entity).render(entity, 0, 0, matrices, provider, 255);
@@ -113,21 +120,20 @@ public class LocalEntity implements LocalNBT {
 	
 	@Override
 	public Optional<ItemStack> toItem() {
-		EntityType<?> entity = MVRegistry.ENTITY_TYPE.get(id);
 		ItemStack output = null;
 		for (Item item : MVRegistry.ITEM) {
-			if (item instanceof SpawnEggItem spawnEggItem && spawnEggItem.getEntityType(null) == entity)
+			if (item instanceof SpawnEggItem spawnEggItem && spawnEggItem.getEntityType(null) == entityType)
 				output = new ItemStack(spawnEggItem);
 		}
 		if (output == null) {
-			if (entity == EntityType.ARMOR_STAND)
+			if (entityType == EntityType.ARMOR_STAND)
 				output = new ItemStack(Items.ARMOR_STAND);
 			else
 				output = new ItemStack(Items.PIG_SPAWN_EGG);
 		}
 		
 		NbtCompound nbt = this.nbt.copy();
-		nbt.putString("id", id.toString());
+		nbt.putString("id", getId().toString());
 		output.setSubNbt("EntityTag", nbt);
 		
 		return Optional.of(output);
@@ -135,7 +141,7 @@ public class LocalEntity implements LocalNBT {
 	@Override
 	public NbtCompound serialize() {
 		NbtCompound output = new NbtCompound();
-		output.putString("id", id.toString());
+		output.putString("id", getId().toString());
 		output.put("tag", nbt);
 		output.putString("type", "entity");
 		return output;
@@ -145,15 +151,16 @@ public class LocalEntity implements LocalNBT {
 		UUID uuid = (nbt.containsUuid("UUID") ? nbt.getUuid("UUID") : UUID.nameUUIDFromBytes(new byte[] {0, 0, 0, 0}));
 		return TextInst.bracketed(getName()).styled(
 				style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityContent(
-						MVRegistry.ENTITY_TYPE.get(id), uuid, MainUtil.getNbtNameSafely(nbt, "CustomName", () -> null)))));
+						entityType, uuid, MainUtil.getNbtNameSafely(nbt, "CustomName", () -> null)))));
 	}
 	
 	public CompletableFuture<Optional<EntityReference>> summon(RegistryKey<World> world, Vec3d pos) {
 		return NBTEditorClient.SERVER_CONN
-				.sendRequest(requestId -> new SummonEntityC2SPacket(requestId, world, pos, id, nbt), ViewEntityS2CPacket.class)
+				.sendRequest(requestId -> new SummonEntityC2SPacket(requestId, world, pos, getId(), nbt), ViewEntityS2CPacket.class)
 				.thenApply(optional -> optional.filter(ViewEntityS2CPacket::foundEntity)
 						.map(packet -> {
-							EntityReference ref = new EntityReference(packet.getWorld(), packet.getUUID(), packet.getId(), packet.getNbt());
+							EntityReference ref = new EntityReference(packet.getWorld(), packet.getUUID(),
+									MVRegistry.ENTITY_TYPE.get(packet.getId()), packet.getNbt());
 							MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.get.entity")
 									.append(ref.getLocalNBT().toHoverableText()), false);
 							return ref;
@@ -162,13 +169,13 @@ public class LocalEntity implements LocalNBT {
 	
 	@Override
 	public LocalEntity copy() {
-		return new LocalEntity(id, nbt.copy());
+		return new LocalEntity(entityType, nbt.copy());
 	}
 	
 	@Override
 	public boolean equals(Object nbt) {
 		if (nbt instanceof LocalEntity entity)
-			return this.id.equals(entity.id) && this.nbt.equals(entity.nbt);
+			return this.entityType == entity.entityType && this.nbt.equals(entity.nbt);
 		return false;
 	}
 	

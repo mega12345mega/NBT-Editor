@@ -10,7 +10,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
@@ -40,7 +39,7 @@ public class BlockStatesScreen<L extends LocalNBT> extends LocalEditorScreen<L, 
 			state = defaultState.copy();
 			unset = state.setValues(localNBT.getOrCreateNBT().getCompound("BlockStateTag"));
 		} else if (localNBT instanceof LocalBlock block) {
-			defaultState = new BlockStateProperties(MVRegistry.BLOCK.get(block.getId()).getDefaultState());
+			defaultState = new BlockStateProperties(block.getBlock().getDefaultState());
 			state = block.getState();
 		} else
 			throw new IllegalStateException("BlockStatesScreen doesn't support " + localNBT.getClass().getName());

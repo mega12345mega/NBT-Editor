@@ -6,7 +6,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
 
 public class SpawnEggContainerIO implements ItemContainerIO {
 	
@@ -31,8 +30,8 @@ public class SpawnEggContainerIO implements ItemContainerIO {
 		ContainerIO.write(new LocalEntity(getEntityType(container), container.getOrCreateSubNbt("EntityTag")), contents);
 	}
 	
-	private Identifier getEntityType(ItemStack container) {
-		return EntityType.getId(((SpawnEggItem) container.getItem()).getEntityType(container.getNbt()));
+	private EntityType<?> getEntityType(ItemStack container) {
+		return ((SpawnEggItem) container.getItem()).getEntityType(container.getNbt());
 	}
 	
 }

@@ -35,24 +35,24 @@ import net.minecraft.util.math.random.Random;
 public class LocalBlock implements LocalNBT {
 	
 	public static LocalBlock deserialize(NbtCompound nbt) {
-		Identifier id = new Identifier(nbt.getString("id"));
-		BlockStateProperties state = new BlockStateProperties(MVRegistry.BLOCK.get(id).getDefaultState());
+		Block block = MVRegistry.BLOCK.get(new Identifier(nbt.getString("id")));
+		BlockStateProperties state = new BlockStateProperties(block.getDefaultState());
 		state.setValues(nbt.getCompound("state"));
-		return new LocalBlock(id, state, nbt.getCompound("tag"));
+		return new LocalBlock(block, state, nbt.getCompound("tag"));
 	}
 	
-	private Identifier id;
+	private Block block;
 	private BlockStateProperties state;
 	private NbtCompound nbt;
 	
-	public LocalBlock(Identifier id, BlockStateProperties state, NbtCompound nbt) {
-		this.id = id;
+	public LocalBlock(Block block, BlockStateProperties state, NbtCompound nbt) {
+		this.block = block;
 		this.state = state;
 		this.nbt = nbt;
 	}
 	
 	public boolean isBlockEntity() {
-		return MVRegistry.BLOCK.get(id) instanceof BlockEntityProvider;
+		return block instanceof BlockEntityProvider;
 	}
 	
 	@Override
@@ -73,21 +73,28 @@ public class LocalBlock implements LocalNBT {
 	}
 	@Override
 	public String getDefaultName() {
-		return MVRegistry.BLOCK.get(id).getName().getString();
+		return block.getName().getString();
 	}
 	
 	@Override
 	public Identifier getId() {
-		return id;
+		return MVRegistry.BLOCK.getId(block);
 	}
 	@Override
 	public void setId(Identifier id) {
-		this.id = id;
-		this.state = this.state.mapTo(MVRegistry.BLOCK.get(id).getDefaultState());
+		this.block = MVRegistry.BLOCK.get(id);
+		this.state = this.state.mapTo(block.getDefaultState());
 	}
 	@Override
 	public Set<Identifier> getIdOptions() {
 		return MVRegistry.BLOCK.getIds();
+	}
+	
+	public Block getBlock() {
+		return block;
+	}
+	public void setBlock(Block block) {
+		this.block = block;
 	}
 	
 	public BlockStateProperties getState() {
@@ -115,7 +122,6 @@ public class LocalBlock implements LocalNBT {
 		matrices.translate(-0.5, -0.5, -0.5);
 		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getDrawContext(matrices).getVertexConsumers();
 		
-		Block block = MVRegistry.BLOCK.get(id);
 		BlockState state = this.state.applyTo(block.getDefaultState());
 		
 		MainUtil.client.getBlockRenderManager().renderBlock(state, new BlockPos(0, 1000, 0), MainUtil.client.world, matrices,
@@ -136,7 +142,6 @@ public class LocalBlock implements LocalNBT {
 	
 	@Override
 	public Optional<ItemStack> toItem() {
-		Block block = MVRegistry.BLOCK.get(id);
 		for (Item item : MVRegistry.ITEM) {
 			if (item instanceof BlockItem blockItem && blockItem.getBlock() == block) {
 				ItemStack output = new ItemStack(blockItem);
@@ -153,7 +158,7 @@ public class LocalBlock implements LocalNBT {
 	@Override
 	public NbtCompound serialize() {
 		NbtCompound output = new NbtCompound();
-		output.putString("id", id.toString());
+		output.putString("id", getId().toString());
 		output.put("state", state.getValues());
 		if (nbt != null)
 			output.put("tag", nbt);
@@ -162,7 +167,7 @@ public class LocalBlock implements LocalNBT {
 	}
 	@Override
 	public Text toHoverableText() {
-		EditableText tooltip = TextInst.translatable("gui.entity_tooltip.type", MVRegistry.BLOCK.get(id).getName());
+		EditableText tooltip = TextInst.translatable("gui.entity_tooltip.type", block.getName());
 		if (!state.getProperties().isEmpty())
 			tooltip.append("\n" + state);
 		Text customName = MainUtil.getNbtNameSafely(nbt, "CustomName", () -> null);
@@ -181,13 +186,13 @@ public class LocalBlock implements LocalNBT {
 	
 	@Override
 	public LocalBlock copy() {
-		return new LocalBlock(id, state.copy(), nbt == null ? null : nbt.copy());
+		return new LocalBlock(block, state.copy(), nbt == null ? null : nbt.copy());
 	}
 	
 	@Override
 	public boolean equals(Object nbt) {
 		if (nbt instanceof LocalBlock block)
-			return this.id.equals(block.id) && this.state.equals(block.state) && Objects.equals(this.nbt, block.nbt);
+			return this.block == block.block && this.state.equals(block.state) && Objects.equals(this.nbt, block.nbt);
 		return false;
 	}
 	
