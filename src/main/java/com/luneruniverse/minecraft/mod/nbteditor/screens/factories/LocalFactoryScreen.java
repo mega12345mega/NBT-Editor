@@ -27,7 +27,7 @@ import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class LocalFactoryScreen<L extends LocalNBT, R extends NBTReference<L>> extends LocalEditorScreen<L, R> {
+public class LocalFactoryScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	public static final Identifier FACTORY_ICON = new Identifier("nbteditor", "textures/factory.png");
 	
@@ -61,7 +61,7 @@ public class LocalFactoryScreen<L extends LocalNBT, R extends NBTReference<L>> e
 	private final ConfigCategory config;
 	private ConfigPanel panel;
 	
-	public LocalFactoryScreen(R ref) {
+	public LocalFactoryScreen(NBTReference<L> ref) {
 		super(TextInst.of("Factories"), ref);
 		this.config = new ConfigCategory();
 		for (LocalFactoryReference factory : BASIC_FACTORIES) {
@@ -78,7 +78,7 @@ public class LocalFactoryScreen<L extends LocalNBT, R extends NBTReference<L>> e
 	}
 	
 	@Override
-	protected FactoryLink<R> getFactoryLink() {
+	protected FactoryLink<L> getFactoryLink() {
 		return null;
 	}
 	

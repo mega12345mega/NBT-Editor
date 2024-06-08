@@ -24,7 +24,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 
-public class EnchantmentsScreen extends LocalEditorScreen<LocalItem, ItemReference> {
+public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 	
 	private static final Map<String, Enchantment> ENCHANTMENTS;
 	static {

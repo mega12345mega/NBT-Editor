@@ -22,7 +22,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.BlockItem;
 import net.minecraft.nbt.NbtCompound;
 
-public class BlockStatesScreen<L extends LocalNBT> extends LocalEditorScreen<L, NBTReference<L>> {
+public class BlockStatesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	private final ConfigCategory blockStates;
 	private final boolean hasBlockStates;

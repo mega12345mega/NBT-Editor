@@ -34,7 +34,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 
-public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L, NBTReference<L>> {
+public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	private static class MaxButton extends ConfigButton {
 		

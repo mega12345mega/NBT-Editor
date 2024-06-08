@@ -38,7 +38,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
 
-public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L, NBTReference<L>> {
+public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	// Double sided & waxable
 	private static boolean NEW_FEATURES = Version.<Boolean>newSwitch()

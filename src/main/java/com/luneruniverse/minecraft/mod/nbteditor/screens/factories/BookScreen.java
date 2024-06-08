@@ -38,7 +38,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-public class BookScreen extends LocalEditorScreen<LocalItem, ItemReference> {
+public class BookScreen extends LocalEditorScreen<LocalItem> {
 	
 	private enum Generation {
 		ORIGINAL,

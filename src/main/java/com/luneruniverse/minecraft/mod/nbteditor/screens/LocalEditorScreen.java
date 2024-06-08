@@ -21,16 +21,16 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-public abstract class LocalEditorScreen<L extends LocalNBT, R extends NBTReference<L>> extends OverlaySupportingScreen {
+public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySupportingScreen {
 	
-	protected static record FactoryLink<T extends NBTReference<?>>(String langName, Function<T, Screen> factory) {
-		public FactoryLink(String langName, Function<T, Screen> factory) {
+	protected static record FactoryLink<L extends LocalNBT>(String langName, Function<NBTReference<L>, Screen> factory) {
+		public FactoryLink(String langName, Function<NBTReference<L>, Screen> factory) {
 			this.langName = langName;
 			this.factory = factory;
 		}
 	}
 	
-	protected final R ref;
+	protected final NBTReference<L> ref;
 	protected L localNBT;
 	protected L savedLocalNBT;
 	private boolean saved;
@@ -38,7 +38,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT, R extends NBTReferen
 	protected NamedTextFieldWidget name;
 	private ButtonWidget saveBtn;
 	
-	protected LocalEditorScreen(Text title, R ref) {
+	protected LocalEditorScreen(Text title, NBTReference<L> ref) {
 		super(title);
 		this.ref = ref;
 		this.savedLocalNBT = LocalNBT.copy(ref.getLocalNBT());
@@ -54,7 +54,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT, R extends NBTReferen
 		return true;
 	}
 	
-	protected FactoryLink<R> getFactoryLink() {
+	protected FactoryLink<L> getFactoryLink() {
 		return new FactoryLink<>("nbteditor.factory", LocalFactoryScreen::new);
 	}
 	
@@ -84,7 +84,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT, R extends NBTReferen
 			saveBtn.active = !saved;
 		}
 		
-		FactoryLink<R> link = getFactoryLink();
+		FactoryLink<L> link = getFactoryLink();
 		if (link != null) {
 			addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
 					LocalFactoryScreen.FACTORY_ICON,

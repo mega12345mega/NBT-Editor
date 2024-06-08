@@ -13,7 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 
 import net.minecraft.text.Text;
 
-public class HideFlagsScreen extends LocalEditorScreen<LocalItem, ItemReference> {
+public class HideFlagsScreen extends LocalEditorScreen<LocalItem> {
 	
 	private enum Flag {
 		ENCHANTMENTS(TextInst.translatable("nbteditor.hide_flags.enchantments"), 1),
@@ -78,7 +78,7 @@ public class HideFlagsScreen extends LocalEditorScreen<LocalItem, ItemReference>
 	}
 	
 	@Override
-	protected FactoryLink<ItemReference> getFactoryLink() {
+	protected FactoryLink<LocalItem> getFactoryLink() {
 		return new FactoryLink<>("nbteditor.display", DisplayScreen::new);
 	}
 	

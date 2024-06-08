@@ -44,7 +44,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 
-public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L, NBTReference<L>> {
+public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	private class RecursiveMenuGenerator implements MenuGenerator {
 		@Override

@@ -21,7 +21,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 
-public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L, NBTReference<L>> {
+public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	private FormattedTextFieldWidget name;
 	private FormattedTextFieldWidget lore;
