@@ -96,7 +96,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 					JsonObject json = new JsonObject();
 					json.addProperty("action", MVMisc.getHoverEventActionName(this.value));
 					json.add("contents", new Gson().fromJson(value, JsonElement.class));
-					return HoverEvent.CODEC.parse(JsonOps.INSTANCE, json).result().orElseThrow();
+					return MVMisc.getHoverEvent(json);
 				}
 				
 				@Override

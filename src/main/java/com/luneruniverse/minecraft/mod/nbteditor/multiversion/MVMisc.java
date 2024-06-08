@@ -23,12 +23,14 @@ import org.joml.Matrix4f;
 import org.joml.Vector2ic;
 import org.joml.Vector3f;
 
+import com.google.gson.JsonObject;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.serialization.JsonOps;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.block.SuspiciousStewIngredient.StewEffect;
@@ -410,6 +412,14 @@ public class MVMisc {
 		// Should be .byName() until 1.20.2 and doesn't have a clear replacement at and after 1.20.3
 		// But this seems to be equivalent (at least currently)
 		return ClickEvent.Action.valueOf(name.toUpperCase());
+	}
+	private static final Supplier<Reflection.MethodInvoker> HoverEvent_fromJson =
+			Reflection.getOptionalMethod(HoverEvent.class, "method_27664", MethodType.methodType(HoverEvent.class, JsonObject.class));
+	public static HoverEvent getHoverEvent(JsonObject json) {
+		return Version.<HoverEvent>newSwitch()
+				.range("1.20.3", null, () -> HoverEvent.CODEC.parse(JsonOps.INSTANCE, json).result().orElseThrow())
+				.range(null, "1.20.2", () -> HoverEvent_fromJson.get().invoke(null, json))
+				.get();
 	}
 	
 	public static VertexConsumer beginDrawing(MatrixStack matrices, MVShader shader) {
