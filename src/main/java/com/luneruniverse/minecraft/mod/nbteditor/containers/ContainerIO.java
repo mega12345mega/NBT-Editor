@@ -51,16 +51,16 @@ public class ContainerIO {
 	private static final BlockEntityTagContainerIO CAMPFIRE_IO = new BlockEntityTagContainerIO(new ConstSizeContainerIO(4));
 	private static final BlockEntityTagContainerIO DISPENSER_IO = new BlockEntityTagContainerIO(new ConstSizeContainerIO(9));
 	private static final BlockEntityTagContainerIO HOPPER_IO = new BlockEntityTagContainerIO(new ConstSizeContainerIO(5));
-	private static final BlockEntityTagContainerIO JUKEBOX_IO = new BlockEntityTagContainerIO(new SingleItemContainerIO("RecordItem"));
-	private static final BlockEntityTagContainerIO LECTERN_IO = new BlockEntityTagContainerIO(new SingleItemContainerIO("Book"));
-	private static final EntityTagContainerIO ITEM_FRAME_IO = new EntityTagContainerIO(new SingleItemContainerIO("Item"));
+	private static final BlockEntityTagContainerIO JUKEBOX_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("RecordItem"));
+	private static final BlockEntityTagContainerIO LECTERN_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("Book"));
+	private static final EntityTagContainerIO ITEM_FRAME_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("Item"));
 	private static final ItemContainerIO BUNDLE_IO = ItemContainerIO.forNBTIO(new DynamicSizeContainerIO(27));
 	private static final BlockEntityTagContainerIO CHISELED_BOOKSHELF_IO = new ChiseledBookshelfContainerIO();
-	private static final BlockEntityTagContainerIO SUSPICIOUS_SAND_IO = new BlockEntityTagContainerIO(new SingleItemContainerIO("item"));
-	private static final BlockEntityTagContainerIO DECORATED_POT_IO = new BlockEntityTagContainerIO(new SingleItemContainerIO("item"));
+	private static final BlockEntityTagContainerIO SUSPICIOUS_SAND_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item"));
+	private static final BlockEntityTagContainerIO DECORATED_POT_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item"));
 	private static final ItemContainerIO SPAWN_EGG_IO = new SpawnEggContainerIO();
 	private static final EntityTagContainerIO ARMOR_HANDS_IO = new EntityTagContainerIO(new ArmorHandsContainerIO());
-	private static final EntityTagContainerIO HORSE_IO = new EntityTagContainerIO(new SingleItemContainerIO("ArmorItem"));
+	private static final EntityTagContainerIO HORSE_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("SaddleItem", "ArmorItem"));
 	
 	public static void loadClass() {}
 	
