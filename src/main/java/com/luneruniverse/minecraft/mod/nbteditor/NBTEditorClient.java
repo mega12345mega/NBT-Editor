@@ -17,6 +17,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
@@ -24,7 +25,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -80,7 +80,7 @@ public class NBTEditorClient implements ClientModInitializer {
 				screen -> screen instanceof ClientChestScreen);
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST), () -> {
 					MainUtil.client.player.closeHandledScreen();
-					ClientPlayNetworking.send(new OpenEnderChestC2SPacket());
+					MVClientNetworking.send(new OpenEnderChestC2SPacket());
 				}, screen -> (screen instanceof CreativeInventoryScreen || screen instanceof InventoryScreen || screen instanceof ClientChestScreen)
 						&& SERVER_CONN.isEditingExpanded());
 		

@@ -9,6 +9,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.InventoryItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
@@ -18,7 +19,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryS
 import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -64,7 +64,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		}
 		if (!ItemStack.areEqual(clientCursor, SERVER_CURSOR)) {
 			if (MainUtil.client.interactionManager.getCurrentGameMode().isSurvivalLike())
-				ClientPlayNetworking.send(new SetCursorC2SPacket(clientCursor));
+				MVClientNetworking.send(new SetCursorC2SPacket(clientCursor));
 			SERVER_CURSOR = clientCursor.copy();
 		}
 	}

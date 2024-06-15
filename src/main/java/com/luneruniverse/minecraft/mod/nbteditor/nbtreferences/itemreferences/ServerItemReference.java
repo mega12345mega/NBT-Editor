@@ -1,11 +1,11 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetSlotC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.ItemStack;
@@ -53,9 +53,9 @@ public class ServerItemReference implements ItemReference {
 			screen.getScreenHandler().getSlot(slot).setStack(toSave);
 		if (screen instanceof InventoryScreen || NBTEditorClient.SERVER_CONN.isContainerScreen()) {
 			if (slot == -1)
-				ClientPlayNetworking.send(new SetCursorC2SPacket(toSave));
+				MVClientNetworking.send(new SetCursorC2SPacket(toSave));
 			else
-				ClientPlayNetworking.send(new SetSlotC2SPacket(slot, toSave));
+				MVClientNetworking.send(new SetSlotC2SPacket(slot, toSave));
 			onFinished.run();
 		}
 	}

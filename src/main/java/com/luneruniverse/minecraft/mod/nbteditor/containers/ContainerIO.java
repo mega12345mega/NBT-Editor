@@ -9,8 +9,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.entity.EntityType;
@@ -107,11 +108,11 @@ public class ContainerIO {
 		}
 		
 		registerEntityIO(EntityType.HORSE, HORSE_IO);
-		ClientPlayConnectionEvents.JOIN.register((network, sender, client) -> {
+		MVClientNetworking.PlayNetworkStateEvents.Join.EVENT.register(() -> {
 			for (EntityType<?> entity : MVRegistry.ENTITY_TYPE) {
 				if (ENTITY_IO.containsKey(entity))
 					continue;
-				if (entity.create(client.world) instanceof MobEntity)
+				if (entity.create(MainUtil.client.world) instanceof MobEntity)
 					registerEntityIO(entity, ARMOR_HANDS_IO);
 			}
 		});

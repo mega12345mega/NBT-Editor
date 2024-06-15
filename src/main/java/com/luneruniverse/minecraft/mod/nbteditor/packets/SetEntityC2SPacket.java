@@ -2,17 +2,17 @@ package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
 import java.util.UUID;
 
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
+
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
-public class SetEntityC2SPacket implements FabricPacket {
+public class SetEntityC2SPacket implements MVPacket {
 	
-	public static final PacketType<SetEntityC2SPacket> TYPE = PacketType.create(new Identifier("nbteditor", "set_entity"), SetEntityC2SPacket::new);
+	public static final Identifier ID = new Identifier("nbteditor", "set_entity");
 	
 	private final RegistryKey<World> world;
 	private final UUID uuid;
@@ -62,8 +62,8 @@ public class SetEntityC2SPacket implements FabricPacket {
 	}
 	
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public Identifier id() {
+		return ID;
 	}
 	
 }

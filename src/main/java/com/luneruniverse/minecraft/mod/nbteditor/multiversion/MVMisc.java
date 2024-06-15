@@ -32,6 +32,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.JsonOps;
 
+import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.SuspiciousStewIngredient.StewEffect;
 import net.minecraft.client.Keyboard;
@@ -53,6 +54,8 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.vehicle.StorageMinecartEntity;
+import net.minecraft.entity.vehicle.VehicleInventory;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SuspiciousStewItem;
@@ -62,6 +65,9 @@ import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
+import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
@@ -296,10 +302,18 @@ public class MVMisc {
 	
 	private static final Supplier<Reflection.MethodInvoker> ClientPlayNetworkHandler_sendPacket =
 			Reflection.getOptionalMethod(ClientPlayNetworkHandler.class, "method_2883", MethodType.methodType(void.class, Packet.class));
-	public static void sendPacket(Packet<?> packet) {
+	public static void sendC2SPacket(Packet<?> packet) {
 		Version.newSwitch()
 				.range("1.20.2", null, () -> MainUtil.client.getNetworkHandler().sendPacket(packet))
 				.range(null, "1.20.1", () -> ClientPlayNetworkHandler_sendPacket.get().invoke(MainUtil.client.getNetworkHandler(), packet))
+				.run();
+	}
+	private static final Supplier<Reflection.MethodInvoker> ServerPlayNetworkHandler_sendPacket =
+			Reflection.getOptionalMethod(ServerPlayNetworkHandler.class, "method_14369", MethodType.methodType(void.class, Packet.class, GenericFutureListener.class));
+	public static void sendS2CPacket(ServerPlayerEntity player, Packet<?> packet) {
+		Version.newSwitch()
+				.range("1.20.2", null, () -> player.networkHandler.sendPacket(packet))
+				.range(null, "1.20.1", () -> ServerPlayNetworkHandler_sendPacket.get().invoke(player.networkHandler, packet, null))
 				.run();
 	}
 	
@@ -455,6 +469,13 @@ public class MVMisc {
 				.range("1.20.2", null, () -> textField.setCursor(cursor, false))
 				.range(null, "1.20.1", () -> TextFieldWidget_setCursor.get().invoke(textField, cursor))
 				.run();
+	}
+	
+	public static boolean isInstanceOfVehicleInventory(NamedScreenHandlerFactory factory) {
+		return Version.<Boolean>newSwitch()
+				.range("1.19.0", null, () -> factory instanceof VehicleInventory)
+				.range(null, "1.18.2", () -> factory instanceof StorageMinecartEntity)
+				.get();
 	}
 	
 }

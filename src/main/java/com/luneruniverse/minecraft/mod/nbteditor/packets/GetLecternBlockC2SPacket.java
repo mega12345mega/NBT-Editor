@@ -1,13 +1,13 @@
 package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
+
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
-public class GetLecternBlockC2SPacket implements FabricPacket {
+public class GetLecternBlockC2SPacket implements MVPacket {
 	
-	public static final PacketType<GetLecternBlockC2SPacket> TYPE = PacketType.create(new Identifier("nbteditor", "get_lectern_block"), GetLecternBlockC2SPacket::new);
+	public static final Identifier ID = new Identifier("nbteditor", "get_lectern_block");
 	
 	private final int requestId;
 	
@@ -28,8 +28,8 @@ public class GetLecternBlockC2SPacket implements FabricPacket {
 	}
 	
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public Identifier id() {
+		return ID;
 	}
 	
 }

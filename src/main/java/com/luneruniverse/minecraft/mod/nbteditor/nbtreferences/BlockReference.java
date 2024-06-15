@@ -8,6 +8,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetLecternBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetBlockC2SPacket;
@@ -15,8 +17,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewBlockS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
@@ -28,7 +28,7 @@ import net.minecraft.world.World;
 
 public class BlockReference implements NBTReference<LocalBlock> {
 	
-	private static CompletableFuture<Optional<BlockReference>> getBlock(Function<Integer, FabricPacket> packetFactory) {
+	private static CompletableFuture<Optional<BlockReference>> getBlock(Function<Integer, MVPacket> packetFactory) {
 		return NBTEditorClient.SERVER_CONN
 				.sendRequest(packetFactory, ViewBlockS2CPacket.class)
 				.thenApply(optional -> optional.filter(ViewBlockS2CPacket::foundBlock)
@@ -77,7 +77,7 @@ public class BlockReference implements NBTReference<LocalBlock> {
 		this.block = block.getBlock();
 		this.state = block.getState();
 		this.nbt = block.getNBT();
-		ClientPlayNetworking.send(new SetBlockC2SPacket(world, pos, block.getId(), state, nbt,
+		MVClientNetworking.send(new SetBlockC2SPacket(world, pos, block.getId(), state, nbt,
 				ConfigScreen.isRecreateBlocksAndEntities(), ConfigScreen.isTriggerBlockUpdates()));
 		onFinished.run();
 	}
@@ -94,7 +94,7 @@ public class BlockReference implements NBTReference<LocalBlock> {
 	public void saveNBT(Identifier id, NbtCompound toSave, Runnable onFinished) {
 		this.block = MVRegistry.BLOCK.get(id);
 		this.nbt = toSave;
-		ClientPlayNetworking.send(new SetBlockC2SPacket(world, pos, id, state, toSave,
+		MVClientNetworking.send(new SetBlockC2SPacket(world, pos, id, state, toSave,
 				ConfigScreen.isRecreateBlocksAndEntities(), ConfigScreen.isTriggerBlockUpdates()));
 		onFinished.run();
 	}
@@ -108,7 +108,7 @@ public class BlockReference implements NBTReference<LocalBlock> {
 	}
 	public void saveState(BlockStateProperties state, Runnable onFinished) {
 		this.state = state;
-		ClientPlayNetworking.send(new SetBlockC2SPacket(world, pos, MVRegistry.BLOCK.getId(block), state, nbt,
+		MVClientNetworking.send(new SetBlockC2SPacket(world, pos, MVRegistry.BLOCK.getId(block), state, nbt,
 				ConfigScreen.isRecreateBlocksAndEntities(), ConfigScreen.isTriggerBlockUpdates()));
 		onFinished.run();
 	}

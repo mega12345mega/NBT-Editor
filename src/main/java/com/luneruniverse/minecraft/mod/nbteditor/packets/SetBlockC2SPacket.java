@@ -1,9 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
 
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
@@ -11,9 +10,9 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class SetBlockC2SPacket implements FabricPacket {
+public class SetBlockC2SPacket implements MVPacket {
 	
-	public static final PacketType<SetBlockC2SPacket> TYPE = PacketType.create(new Identifier("nbteditor", "set_block"), SetBlockC2SPacket::new);
+	public static final Identifier ID = new Identifier("nbteditor", "set_block");
 	
 	private final RegistryKey<World> world;
 	private final BlockPos pos;
@@ -78,8 +77,8 @@ public class SetBlockC2SPacket implements FabricPacket {
 	}
 	
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public Identifier id() {
+		return ID;
 	}
 	
 }

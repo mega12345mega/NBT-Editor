@@ -7,13 +7,13 @@ import java.util.concurrent.CompletableFuture;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryKey;
@@ -66,7 +66,7 @@ public class EntityReference implements NBTReference<LocalEntity> {
 	public void saveNBT(Identifier id, NbtCompound toSave, Runnable onFinished) {
 		this.entityType = MVRegistry.ENTITY_TYPE.get(id);
 		this.nbt = toSave;
-		ClientPlayNetworking.send(new SetEntityC2SPacket(world, uuid, id, toSave,
+		MVClientNetworking.send(new SetEntityC2SPacket(world, uuid, id, toSave,
 				ConfigScreen.isRecreateBlocksAndEntities()));
 		onFinished.run();
 	}

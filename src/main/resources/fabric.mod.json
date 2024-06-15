@@ -32,7 +32,8 @@
   "mixins": [
     "nbteditor.mixins.json",
     "nbteditor_multiversion.mixins.json",
-    "nbteditor_multiversion_commandapi.mixins.json"
+    "nbteditor_multiversion_commandapi.mixins.json",
+    "nbteditor_multiversion_networkingapi.mixins.json"
   ],
   
   "accessWidener": "nbteditor.accesswidener",

@@ -1,7 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
+
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
@@ -9,9 +9,9 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class SummonEntityC2SPacket implements FabricPacket {
+public class SummonEntityC2SPacket implements MVPacket {
 	
-	public static final PacketType<SummonEntityC2SPacket> TYPE = PacketType.create(new Identifier("nbteditor", "summon_entity"), SummonEntityC2SPacket::new);
+	public static final Identifier ID = new Identifier("nbteditor", "summon_entity");
 	
 	private final int requestId;
 	private final RegistryKey<World> world;
@@ -61,8 +61,8 @@ public class SummonEntityC2SPacket implements FabricPacket {
 	}
 	
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public Identifier id() {
+		return ID;
 	}
 	
 }

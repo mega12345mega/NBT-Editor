@@ -6,6 +6,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
@@ -13,8 +14,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScr
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
 public class OpenCommand extends ClientCommand {
 	
@@ -43,7 +42,7 @@ public class OpenCommand extends ClientCommand {
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(literal("echest").executes(context -> {
 			if (NBTEditorClient.SERVER_CONN.isEditingExpanded())
-				ClientPlayNetworking.send(new OpenEnderChestC2SPacket());
+				MVClientNetworking.send(new OpenEnderChestC2SPacket());
 			else
 				throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.requires_server")).create();
 			return Command.SINGLE_SUCCESS;

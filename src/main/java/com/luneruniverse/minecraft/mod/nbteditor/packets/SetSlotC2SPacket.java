@@ -1,14 +1,14 @@
 package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 
-public class SetSlotC2SPacket implements FabricPacket {
+public class SetSlotC2SPacket implements MVPacket {
 	
-	public static final PacketType<SetSlotC2SPacket> TYPE = PacketType.create(new Identifier("nbteditor", "set_slot"), SetSlotC2SPacket::new);
+	public static final Identifier ID = new Identifier("nbteditor", "set_slot");
 	
 	private final int slot;
 	private final ItemStack item;
@@ -36,8 +36,8 @@ public class SetSlotC2SPacket implements FabricPacket {
 	}
 	
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public Identifier id() {
+		return ID;
 	}
 	
 }

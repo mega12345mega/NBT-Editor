@@ -2,7 +2,6 @@ package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
 import java.util.UUID;
 
-import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
@@ -11,7 +10,7 @@ import net.minecraft.world.World;
 
 public class ViewEntityS2CPacket implements ResponsePacket {
 	
-	public static final PacketType<ViewEntityS2CPacket> TYPE = PacketType.create(new Identifier("nbteditor", "view_entity"), ViewEntityS2CPacket::new);
+	public static final Identifier ID = new Identifier("nbteditor", "view_entity");
 	
 	private final int requestId;
 	private final RegistryKey<World> world;
@@ -89,8 +88,8 @@ public class ViewEntityS2CPacket implements ResponsePacket {
 	}
 	
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public Identifier id() {
+		return ID;
 	}
 	
 }
