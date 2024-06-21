@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistryKeys;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
 
 import net.minecraft.nbt.NbtCompound;
@@ -27,8 +28,8 @@ public class SummonEntityC2SPacket implements MVPacket {
 		this.nbt = nbt;
 	}
 	public SummonEntityC2SPacket(PacketByteBuf payload) {
-		this.requestId = payload.readInt();
-		this.world = payload.readRegistryKey(payload.<World>readRegistryRefKey());
+		this.requestId = payload.readVarInt();
+		this.world = payload.readRegistryKey(MVRegistryKeys.WORLD);
 		this.pos = payload.readVec3d();
 		this.id = payload.readIdentifier();
 		this.nbt = payload.readNbt();
@@ -52,8 +53,7 @@ public class SummonEntityC2SPacket implements MVPacket {
 	
 	@Override
 	public void write(PacketByteBuf payload) {
-		payload.writeInt(requestId);
-		payload.writeIdentifier(world.getRegistry());
+		payload.writeVarInt(requestId);
 		payload.writeRegistryKey(world);
 		payload.writeVec3d(pos);
 		payload.writeIdentifier(id);
@@ -61,7 +61,7 @@ public class SummonEntityC2SPacket implements MVPacket {
 	}
 	
 	@Override
-	public Identifier id() {
+	public Identifier getPacketId() {
 		return ID;
 	}
 	

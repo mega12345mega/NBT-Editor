@@ -16,7 +16,7 @@ public class OpenEnderChestC2SPacket implements MVPacket {
 	public void write(PacketByteBuf payload) {}
 	
 	@Override
-	public Identifier id() {
+	public Identifier getPacketId() {
 		return ID;
 	}
 	

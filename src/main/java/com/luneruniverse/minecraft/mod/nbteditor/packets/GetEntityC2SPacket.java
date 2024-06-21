@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
 import java.util.UUID;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistryKeys;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
 
 import net.minecraft.network.PacketByteBuf;
@@ -23,8 +24,8 @@ public class GetEntityC2SPacket implements MVPacket {
 		this.uuid = uuid;
 	}
 	public GetEntityC2SPacket(PacketByteBuf payload) {
-		this.requestId = payload.readInt();
-		this.world = payload.readRegistryKey(payload.<World>readRegistryRefKey());
+		this.requestId = payload.readVarInt();
+		this.world = payload.readRegistryKey(MVRegistryKeys.WORLD);
 		this.uuid = payload.readUuid();
 	}
 	
@@ -40,14 +41,13 @@ public class GetEntityC2SPacket implements MVPacket {
 	
 	@Override
 	public void write(PacketByteBuf payload) {
-		payload.writeInt(requestId);
-		payload.writeIdentifier(world.getRegistry());
+		payload.writeVarInt(requestId);
 		payload.writeRegistryKey(world);
 		payload.writeUuid(uuid);
 	}
 	
 	@Override
-	public Identifier id() {
+	public Identifier getPacketId() {
 		return ID;
 	}
 	

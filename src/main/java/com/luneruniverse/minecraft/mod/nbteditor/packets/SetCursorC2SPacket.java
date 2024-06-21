@@ -29,7 +29,7 @@ public class SetCursorC2SPacket implements MVPacket {
 	}
 	
 	@Override
-	public Identifier id() {
+	public Identifier getPacketId() {
 		return ID;
 	}
 	

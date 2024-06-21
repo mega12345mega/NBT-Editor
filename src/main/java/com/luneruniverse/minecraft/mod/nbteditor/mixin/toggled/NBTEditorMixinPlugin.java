@@ -12,6 +12,11 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 	
 	@Override
 	public void addMixins(List<String> output) {
+		Version.newSwitch()
+				.range("1.19.3", null, () -> output.add("toggled.ServerPlayNetworkHandlerMixin"))
+				.range(null, "1.19.2", () -> {})
+				.run();
+		
 		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER)
 			return;
 		

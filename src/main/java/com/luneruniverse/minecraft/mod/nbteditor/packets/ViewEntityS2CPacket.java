@@ -2,6 +2,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
 import java.util.UUID;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistryKeys;
+
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
@@ -31,9 +33,9 @@ public class ViewEntityS2CPacket implements ResponsePacket {
 		this.nbt = nbt;
 	}
 	public ViewEntityS2CPacket(PacketByteBuf payload) {
-		this.requestId = payload.readInt();
+		this.requestId = payload.readVarInt();
 		if (payload.readBoolean()) {
-			this.world = payload.readRegistryKey(payload.<World>readRegistryRefKey());
+			this.world = payload.readRegistryKey(MVRegistryKeys.WORLD);
 			this.uuid = payload.readUuid();
 		} else {
 			this.world = null;
@@ -69,12 +71,11 @@ public class ViewEntityS2CPacket implements ResponsePacket {
 	
 	@Override
 	public void write(PacketByteBuf payload) {
-		payload.writeInt(requestId);
+		payload.writeVarInt(requestId);
 		if (world == null) {
 			payload.writeBoolean(false);
 		} else {
 			payload.writeBoolean(true);
-			payload.writeIdentifier(world.getRegistry());
 			payload.writeRegistryKey(world);
 			payload.writeUuid(uuid);
 		}
@@ -88,7 +89,7 @@ public class ViewEntityS2CPacket implements ResponsePacket {
 	}
 	
 	@Override
-	public Identifier id() {
+	public Identifier getPacketId() {
 		return ID;
 	}
 	

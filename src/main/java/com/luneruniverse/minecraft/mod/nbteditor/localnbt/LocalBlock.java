@@ -73,7 +73,7 @@ public class LocalBlock implements LocalNBT {
 	}
 	@Override
 	public String getDefaultName() {
-		return block.getName().getString();
+		return ((Text) block.getName()).getString();
 	}
 	
 	@Override

@@ -10,7 +10,8 @@
     "ScreenHandlerMixin",
     "DrawableMixin",
     "ScreenMixin",
-    "AbstractParentElementMixin"
+    "AbstractParentElementMixin",
+    "PacketByteBufMixin"
   ],
   "injectors": {
     "defaultRequire": 1

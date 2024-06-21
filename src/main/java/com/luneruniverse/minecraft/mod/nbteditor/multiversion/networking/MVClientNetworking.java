@@ -7,9 +7,12 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
 import net.minecraft.util.Identifier;
 
@@ -41,8 +44,21 @@ public class MVClientNetworking {
 	
 	private static final Map<Identifier, List<Consumer<MVPacket>>> listeners = new HashMap<>();
 	
+	@SuppressWarnings("deprecation")
 	public static void send(MVPacket packet) {
-		MVMisc.sendC2SPacket(new CustomPayloadC2SPacket(packet));
+		MVMisc.sendC2SPacket(Version.<CustomPayloadC2SPacket>newSwitch()
+				.range("1.20.2", null, () -> MVPacketCustomPayload.wrapC2S(packet))
+				.range(null, "1.20.1", () -> {
+					PacketByteBuf payload = new PacketByteBuf(Unpooled.buffer());
+					packet.write(payload);
+					try {
+						return CustomPayloadC2SPacket.class.getConstructor(Identifier.class, PacketByteBuf.class)
+								.newInstance(packet.getPacketId(), payload);
+					} catch (Exception e) {
+						throw new RuntimeException("Failed to create CustomPayloadC2SPacket", e);
+					}
+				})
+				.get());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -51,7 +67,7 @@ public class MVClientNetworking {
 	}
 	
 	public static void callListeners(MVPacket packet) {
-		List<Consumer<MVPacket>> specificListeners = listeners.get(packet.id());
+		List<Consumer<MVPacket>> specificListeners = listeners.get(packet.getPacketId());
 		if (specificListeners == null)
 			return;
 		specificListeners.forEach(listener -> listener.accept(packet));

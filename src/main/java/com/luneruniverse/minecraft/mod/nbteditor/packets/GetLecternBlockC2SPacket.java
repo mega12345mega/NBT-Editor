@@ -15,7 +15,7 @@ public class GetLecternBlockC2SPacket implements MVPacket {
 		this.requestId = requestId;
 	}
 	public GetLecternBlockC2SPacket(PacketByteBuf payload) {
-		this.requestId = payload.readInt();
+		this.requestId = payload.readVarInt();
 	}
 	
 	public int getRequestId() {
@@ -24,11 +24,11 @@ public class GetLecternBlockC2SPacket implements MVPacket {
 	
 	@Override
 	public void write(PacketByteBuf payload) {
-		payload.writeInt(requestId);
+		payload.writeVarInt(requestId);
 	}
 	
 	@Override
-	public Identifier id() {
+	public Identifier getPacketId() {
 		return ID;
 	}
 	

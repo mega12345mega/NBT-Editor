@@ -15,7 +15,7 @@ public class ProtocolVersionS2CPacket implements MVPacket {
 		this.version = version;
 	}
 	public ProtocolVersionS2CPacket(PacketByteBuf payload) {
-		this.version = payload.readInt();
+		this.version = payload.readVarInt();
 	}
 	
 	public int getVersion() {
@@ -24,11 +24,11 @@ public class ProtocolVersionS2CPacket implements MVPacket {
 	
 	@Override
 	public void write(PacketByteBuf payload) {
-		payload.writeInt(version);
+		payload.writeVarInt(version);
 	}
 	
 	@Override
-	public Identifier id() {
+	public Identifier getPacketId() {
 		return ID;
 	}
 	

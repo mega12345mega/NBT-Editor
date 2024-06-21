@@ -16,7 +16,7 @@ public class ContainerScreenS2CPacket implements MVPacket {
 	public void write(PacketByteBuf payload) {}
 	
 	@Override
-	public Identifier id() {
+	public Identifier getPacketId() {
 		return ID;
 	}
 	

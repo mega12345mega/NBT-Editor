@@ -18,7 +18,7 @@ public class SetSlotC2SPacket implements MVPacket {
 		this.item = item;
 	}
 	public SetSlotC2SPacket(PacketByteBuf payload) {
-		this.slot = payload.readInt();
+		this.slot = payload.readVarInt();
 		this.item = payload.readItemStack();
 	}
 	
@@ -31,12 +31,12 @@ public class SetSlotC2SPacket implements MVPacket {
 	
 	@Override
 	public void write(PacketByteBuf payload) {
-		payload.writeInt(slot);
+		payload.writeVarInt(slot);
 		payload.writeItemStack(item);
 	}
 	
 	@Override
-	public Identifier id() {
+	public Identifier getPacketId() {
 		return ID;
 	}
 	

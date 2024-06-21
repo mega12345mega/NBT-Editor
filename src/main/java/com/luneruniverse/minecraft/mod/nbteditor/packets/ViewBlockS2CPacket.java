@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistryKeys;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -34,9 +35,9 @@ public class ViewBlockS2CPacket implements ResponsePacket {
 		this.nbt = nbt;
 	}
 	public ViewBlockS2CPacket(PacketByteBuf payload) {
-		this.requestId = payload.readInt();
+		this.requestId = payload.readVarInt();
 		if (payload.readBoolean()) {
-			this.world = payload.readRegistryKey(payload.<World>readRegistryRefKey());
+			this.world = payload.readRegistryKey(MVRegistryKeys.WORLD);
 			this.pos = payload.readBlockPos();
 		} else {
 			this.world = null;
@@ -77,12 +78,11 @@ public class ViewBlockS2CPacket implements ResponsePacket {
 	
 	@Override
 	public void write(PacketByteBuf payload) {
-		payload.writeInt(requestId);
+		payload.writeVarInt(requestId);
 		if (world == null) {
 			payload.writeBoolean(false);
 		} else {
 			payload.writeBoolean(true);
-			payload.writeIdentifier(world.getRegistry());
 			payload.writeRegistryKey(world);
 			payload.writeBlockPos(pos);
 		}
@@ -97,7 +97,7 @@ public class ViewBlockS2CPacket implements ResponsePacket {
 	}
 	
 	@Override
-	public Identifier id() {
+	public Identifier getPacketId() {
 		return ID;
 	}
 	
