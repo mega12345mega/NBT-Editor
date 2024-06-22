@@ -88,7 +88,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		if (slot.inventory == player.getInventory())
 			return;
 		
-		slot.setStack(packet.getItem());
+		slot.setStackNoCallbacks(packet.getItem());
 	}
 	
 	private void onOpenEnderChestPacket(OpenEnderChestC2SPacket packet, ServerPlayerEntity player) {

@@ -50,7 +50,7 @@ public class ServerItemReference implements ItemReference {
 		if (slot == -1)
 			screen.getScreenHandler().setCursorStack(toSave);
 		else
-			screen.getScreenHandler().getSlot(slot).setStack(toSave);
+			screen.getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
 		if (screen instanceof InventoryScreen || NBTEditorClient.SERVER_CONN.isContainerScreen()) {
 			if (slot == -1)
 				MVClientNetworking.send(new SetCursorC2SPacket(toSave));
