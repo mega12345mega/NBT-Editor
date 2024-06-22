@@ -16,6 +16,6 @@ public class BlockEntityMixin {
 	@SuppressWarnings("target")
 	private void writeNbt(NbtCompound nbt, CallbackInfoReturnable<NbtCompound> info) {
 		if (MixinLink.BLOCK_ENTITY_WRITE_NBT_WITHOUT_IDENTIFYING_DATA.remove(Thread.currentThread()))
-			info.cancel();
+			info.setReturnValue(nbt);
 	}
 }

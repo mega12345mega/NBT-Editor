@@ -28,6 +28,7 @@ import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class ImportScreen extends OverlaySupportingScreen {
 	
@@ -47,7 +48,7 @@ public class ImportScreen extends OverlaySupportingScreen {
 						else if (localNBT instanceof LocalBlock block)
 							posConsumers.add(pos -> block.place(pos));
 						else if (localNBT instanceof LocalEntity entity)
-							posConsumers.add(pos -> entity.summon(MainUtil.client.world.getRegistryKey(), pos.toCenterPos()));
+							posConsumers.add(pos -> entity.summon(MainUtil.client.world.getRegistryKey(), Vec3d.ofCenter(pos)));
 					});
 				} catch (Exception e) {
 					NBTEditor.LOGGER.error("Error while importing a .nbt file", e);

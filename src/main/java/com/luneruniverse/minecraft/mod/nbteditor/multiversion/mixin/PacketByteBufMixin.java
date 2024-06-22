@@ -16,6 +16,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
 
 @Mixin(PacketByteBuf.class)
 public abstract class PacketByteBufMixin implements MVPacketByteBufParent {
@@ -24,10 +25,18 @@ public abstract class PacketByteBufMixin implements MVPacketByteBufParent {
 	public abstract String readString();
 	@Shadow
 	public abstract PacketByteBuf writeString(String str);
+	@Shadow
+	public abstract double readDouble();
 	
 	@Override
 	public PacketByteBuf writeBoolean(boolean value) {
 		((ByteBuf) (Object) this).writeBoolean(value);
+		return (PacketByteBuf) (Object) this;
+	}
+	
+	@Override
+	public PacketByteBuf writeDouble(double value) {
+		((ByteBuf) (Object) this).writeDouble(value);
 		return (PacketByteBuf) (Object) this;
 	}
 	
@@ -57,6 +66,17 @@ public abstract class PacketByteBufMixin implements MVPacketByteBufParent {
 				.range("1.20.2", null, () -> ((PacketByteBuf) (Object) this).writeNbt(element))
 				.range(null, "1.20.1", () -> PacketByteBuf_writeNbt.get().invoke(this, (NbtCompound) element))
 				.get();
+	}
+	
+	@Override
+	public Vec3d readVec3d() {
+		return new Vec3d(readDouble(), readDouble(), readDouble());
+	}
+	@Override
+	public void writeVec3d(Vec3d vector) {
+		writeDouble(vector.getX());
+		writeDouble(vector.getY());
+		writeDouble(vector.getZ());
 	}
 	
 }

@@ -12,7 +12,6 @@
     "HorseScreenHandlerMixin",
     "HorseScreenHandler1and2Mixin",
     "DataTrackerMixin",
-    "LecternBlockEntity1Mixin",
     "ThreadExecutorMixin"
   ],
   "client": [

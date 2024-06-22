@@ -42,6 +42,8 @@ accessible field net/minecraft/entity/data/DataTracker$Entry initialValue Ljava/
 
 accessible field net/minecraft/command/argument/BlockStateArgument data Lnet/minecraft/nbt/NbtCompound;
 
+accessible field net/minecraft/screen/LecternScreenHandler inventory Lnet/minecraft/inventory/Inventory;
+
 # Private in older versions
 accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;
 accessible method net/minecraft/client/render/RenderLayer of (Ljava/lang/String;Lnet/minecraft/client/render/VertexFormat;Lnet/minecraft/client/render/VertexFormat$DrawMode;ILnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;)Lnet/minecraft/client/render/RenderLayer$MultiPhase;

@@ -5,11 +5,16 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
 
 public interface MVPacketByteBufParent {
 	
 	public default PacketByteBuf writeBoolean(boolean value) {
 		throw new RuntimeException("Missing implementation for MVPacketByteBufParent#writeBoolean");
+	}
+	
+	public default PacketByteBuf writeDouble(double value) {
+		throw new RuntimeException("Missing implementation for MVPacketByteBufParent#writeDouble");
 	}
 	
 	public default Identifier readIdentifier() {
@@ -28,6 +33,13 @@ public interface MVPacketByteBufParent {
 	
 	public default PacketByteBuf writeNbtCompound(NbtCompound element) {
 		throw new RuntimeException("Missing implementation for MVPacketByteBufParent#writeNbtCompound");
+	}
+	
+	public default Vec3d readVec3d() {
+		throw new RuntimeException("Missing implementation for MVPacketByteBufParent#readVec3d");
+	}
+	public default void writeVec3d(Vec3d vector) {
+		throw new RuntimeException("Missing implementation for MVPacketByteBufParent#writeVec3d");
 	}
 	
 }
