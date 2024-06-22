@@ -57,7 +57,7 @@ public class SummonEntityC2SPacket implements MVPacket {
 		payload.writeRegistryKey(world);
 		payload.writeVec3d(pos);
 		payload.writeIdentifier(id);
-		payload.writeNbt(nbt);
+		payload.writeNbtCompound(nbt);
 	}
 	
 	@Override

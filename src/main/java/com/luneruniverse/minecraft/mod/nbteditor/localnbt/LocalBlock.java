@@ -6,9 +6,11 @@ import java.util.Set;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -30,7 +32,6 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
 
 public class LocalBlock implements LocalNBT {
 	
@@ -118,23 +119,27 @@ public class LocalBlock implements LocalNBT {
 		RenderSystem.disableCull();
 		
 		matrices.push();
-		LocalNBT.makeRotatingIcon(matrices, x, y, 1);
-		matrices.translate(-0.5, -0.5, -0.5);
-		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getDrawContext(matrices).getVertexConsumers();
+		MatrixStack renderMatrices = Version.<MatrixStack>newSwitch()
+				.range("1.20.0", null, matrices)
+				.range(null, "1.19.4", MatrixStack::new)
+				.get();
+		MVMatrix4f.ofScale(1, 1, -1).applyToPositionMatrix(renderMatrices);
+		LocalNBT.makeRotatingIcon(renderMatrices, x, y, 1, true);
+		renderMatrices.translate(-0.5, -0.5, -0.5);
 		
+		VertexConsumerProvider.Immediate provider = MVMisc.beginDrawingNormal();
 		BlockState state = this.state.applyTo(block.getDefaultState());
-		
-		MainUtil.client.getBlockRenderManager().renderBlock(state, new BlockPos(0, 1000, 0), MainUtil.client.world, matrices,
-				provider.getBuffer(RenderLayer.getCutout()), false, Random.create());
+		MVMisc.renderBlock(MainUtil.client.getBlockRenderManager(), state, new BlockPos(0, 1000, 0), MainUtil.client.world,
+				renderMatrices, provider.getBuffer(RenderLayer.getCutout()), false);
 		if (block instanceof BlockEntityProvider entityProvider) {
 			BlockEntity entity = entityProvider.createBlockEntity(new BlockPos(0, 1000, 0), state);
 			entity.setWorld(MainUtil.client.world);
 			if (nbt != null)
 				entity.readNbt(nbt);
-			MainUtil.client.getBlockEntityRenderDispatcher().renderEntity(entity, matrices, provider, 0xF000F0, OverlayTexture.DEFAULT_UV);
+			MainUtil.client.getBlockEntityRenderDispatcher().renderEntity(entity, renderMatrices, provider, 0xF000F0, OverlayTexture.DEFAULT_UV);
 		}
 		
-		provider.draw();
+		MVMisc.endDrawingNormal(provider);
 		matrices.pop();
 		
 		RenderSystem.enableCull();

@@ -23,6 +23,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -425,27 +426,27 @@ public class MainUtil {
 		int x2 = x + width;
 		int y2 = y + height;
 		
-		Object matrix = MVMisc.getPositionMatrix(matrices.peek());
-		VertexConsumer vertex = MVMisc.beginDrawing(matrices, shader);
+		MVMatrix4f matrix = MVMatrix4f.getPositionMatrix(matrices.peek());
+		VertexConsumer vertex = MVMisc.beginDrawingShader(matrices, shader);
 		
-		MVMisc.vertex(vertex, matrix, x1, y1, 0).texture(0, 0);
+		matrix.applyToVertex(vertex, x1, y1, 0).texture(0, 0);
 		data.accept(vertex);
 		vertex.next();
 		
-		MVMisc.vertex(vertex, matrix, x1, y2, 0).texture(0, 1);
+		matrix.applyToVertex(vertex, x1, y2, 0).texture(0, 1);
 		data.accept(vertex);
 		vertex.next();
 		
-		MVMisc.vertex(vertex, matrix, x2, y2, 0).texture(1, 1);
+		matrix.applyToVertex(vertex, x2, y2, 0).texture(1, 1);
 		data.accept(vertex);
 		vertex.next();
 		
-		MVMisc.vertex(vertex, matrix, x2, y1, 0).texture(1, 0);
+		matrix.applyToVertex(vertex, x2, y1, 0).texture(1, 0);
 		data.accept(vertex);
 		vertex.next();
 		
 		RenderSystem.disableDepthTest();
-		MVMisc.endDrawing(matrices, vertex);
+		MVMisc.endDrawingShader(matrices, vertex);
 		RenderSystem.enableDepthTest();
 	}
 	

@@ -26,7 +26,7 @@ public interface NBTReference<T extends LocalNBT> {
 	public static CompletableFuture<? extends Optional<? extends NBTReference<?>>> getReference(NBTReferenceFilter filter, boolean airable) {
 		HitResult target = MainUtil.client.crosshairTarget;
 		if (target instanceof EntityHitResult entity && filter.isEntityAllowed()) {
-			return EntityReference.getEntity(entity.getEntity().getWorld().getRegistryKey(), entity.getEntity().getUuid())
+			return EntityReference.getEntity(entity.getEntity().getEntityWorld().getRegistryKey(), entity.getEntity().getUuid())
 					.thenApply(ref -> ref.<NBTReference<?>>map(UnaryOperator.identity())
 							.filter(filter).or(() -> getClientReference(target, filter, airable)));
 		}

@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVServerNetworking;
@@ -130,7 +131,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		MVServerNetworking.send(player,
 				new ViewBlockS2CPacket(requestId, blockEntity.getWorld().getRegistryKey(), blockEntity.getPos(),
 						MVRegistry.BLOCK.getId(blockEntity.getCachedState().getBlock()),
-						new BlockStateProperties(blockEntity.getCachedState()), blockEntity.createNbt()));
+						new BlockStateProperties(blockEntity.getCachedState()), MVMisc.createNbt(blockEntity)));
 	}
 	
 	private void onGetEntityPacket(GetEntityC2SPacket packet, ServerPlayerEntity player) {
@@ -143,7 +144,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 			if (entity != null && !(entity instanceof PlayerEntity)) {
 				MVServerNetworking.send(player,
 						new ViewEntityS2CPacket(packet.getRequestId(),
-								entity.getWorld().getRegistryKey(), entity.getUuid(),
+								entity.getEntityWorld().getRegistryKey(), entity.getUuid(),
 								EntityType.getId(entity.getType()), entity.writeNbt(new NbtCompound())));
 				return;
 			}
@@ -258,7 +259,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		readEntityNbtWithPassengers(world, entity, packet.getNbt());
 		
 		MVServerNetworking.send(player,
-				new ViewEntityS2CPacket(packet.getRequestId(), entity.getWorld().getRegistryKey(), entity.getUuid(),
+				new ViewEntityS2CPacket(packet.getRequestId(), entity.getEntityWorld().getRegistryKey(), entity.getUuid(),
 						EntityType.getId(entity.getType()), entity.writeNbt(new NbtCompound())));
 	}
 	

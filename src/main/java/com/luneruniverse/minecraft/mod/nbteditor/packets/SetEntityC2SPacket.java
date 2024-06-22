@@ -57,7 +57,7 @@ public class SetEntityC2SPacket implements MVPacket {
 		payload.writeRegistryKey(world);
 		payload.writeUuid(uuid);
 		payload.writeIdentifier(id);
-		payload.writeNbt(nbt);
+		payload.writeNbtCompound(nbt);
 		payload.writeBoolean(recreate);
 	}
 	

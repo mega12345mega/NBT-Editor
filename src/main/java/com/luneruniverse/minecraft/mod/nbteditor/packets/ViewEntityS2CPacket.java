@@ -84,7 +84,7 @@ public class ViewEntityS2CPacket implements ResponsePacket {
 		} else {
 			payload.writeBoolean(true);
 			payload.writeIdentifier(id);
-			payload.writeNbt(nbt);
+			payload.writeNbtCompound(nbt);
 		}
 	}
 	

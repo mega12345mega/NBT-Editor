@@ -13,17 +13,15 @@ import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.joml.Matrix4f;
 import org.joml.Vector2ic;
-import org.joml.Vector3f;
 
 import com.google.gson.JsonObject;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
@@ -34,7 +32,9 @@ import com.mojang.serialization.JsonOps;
 
 import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.SharedConstants;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.SuspiciousStewIngredient.StewEffect;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -49,6 +49,8 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgumentType;
@@ -72,6 +74,9 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.BlockRenderView;
 
 public class MVMisc {
 	
@@ -208,31 +213,6 @@ public class MVMisc {
 				.run();
 	}
 	
-	static final Class<?> Matrix4f_class = Version.<Class<?>>newSwitch()
-			.range("1.19.3", null, () -> Reflection.getClass("org.joml.Matrix4f"))
-			.range(null, "1.19.2", () -> Reflection.getClass("net.minecraft.class_1159"))
-			.get();
-	private static final Reflection.MethodInvoker MatrixStack_Entry_getPositionMatrix =
-			Reflection.getMethod(MatrixStack.Entry.class, "method_23761", MethodType.methodType(Matrix4f_class));
-	public static Object getPositionMatrix(MatrixStack.Entry matrix) {
-		return MatrixStack_Entry_getPositionMatrix.invoke(matrix);
-	}
-	
-	private static final Supplier<Reflection.MethodInvoker> Matrix4f_copy =
-			Reflection.getOptionalMethod(Matrix4f_class, "method_22673", MethodType.methodType(Matrix4f_class));
-	public static Object copyMatrix(Object matrix) {
-		return Version.newSwitch()
-				.range("1.19.3", null, () -> Reflection.newInstance(Matrix4f_class, new Class<?>[] {Reflection.getClass("org.joml.Matrix4fc")}, matrix)) // new Matrix4f((Matrix4f) matrix)
-				.range(null, "1.19.2", () -> Matrix4f_copy.get().invoke(matrix))
-				.get();
-	}
-	
-	private static final Reflection.MethodInvoker VertexConsumer_vertex =
-			Reflection.getMethod(VertexConsumer.class, "method_22918", MethodType.methodType(VertexConsumer.class, Matrix4f_class, float.class, float.class, float.class));
-	public static VertexConsumer vertex(VertexConsumer buffer, Object matrix, float x, float y, float z) {
-		return VertexConsumer_vertex.invoke(buffer, matrix, x, y, z);
-	}
-	
 	public static String stripInvalidChars(String str, boolean allowLinebreaks) {
 		StringBuilder output = new StringBuilder();
 		for (char c : str.toCharArray()) {
@@ -269,25 +249,6 @@ public class MVMisc {
 				.range("1.20.0", null, () -> ((TooltipPositioner) positioner).getPosition(
 						MainUtil.client.getWindow().getScaledWidth(), MainUtil.client.getWindow().getScaledHeight(), x, y, width, height))
 				.range("1.19.3", "1.19.4", () -> TooltipPositioner_getPosition.get().invoke(positioner, screen, x, y, width, height))
-				.get();
-	}
-	
-	private static final Supplier<Reflection.MethodInvoker> Matrix4f_writeColumnMajor =
-			Reflection.getOptionalMethod(MVMisc.Matrix4f_class, "method_4932", MethodType.methodType(void.class, FloatBuffer.class));
-	public static float[] getTranslation(MatrixStack matrices) {
-		Object matrix = MVMisc.getPositionMatrix(matrices.peek());
-		return Version.<float[]>newSwitch()
-				.range("1.19.3", null, () -> {
-					Vector3f output = ((Matrix4f) matrix).getColumn(3, new Vector3f());
-					return new float[] {output.x, output.y, output.z};
-				})
-				.range(null, "1.19.2", () -> {
-					FloatBuffer buffer = FloatBuffer.allocate(16);
-					Matrix4f_writeColumnMajor.get().invoke(matrix, buffer); // matrix.writeColumnMajor(buffer)
-					float[] output = new float[3];
-					buffer.get(12, output);
-					return output;
-				})
 				.get();
 	}
 	
@@ -436,7 +397,7 @@ public class MVMisc {
 				.get();
 	}
 	
-	public static VertexConsumer beginDrawing(MatrixStack matrices, MVShader shader) {
+	public static VertexConsumer beginDrawingShader(MatrixStack matrices, MVShader shader) {
 		return Version.<VertexConsumer>newSwitch()
 				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().getBuffer(shader.layer()))
 				.range(null, "1.19.4", () -> {
@@ -447,11 +408,14 @@ public class MVMisc {
 				})
 				.get();
 	}
+	public static VertexConsumerProvider.Immediate beginDrawingNormal() {
+		return VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+	}
 	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_end =
 			Reflection.getOptionalMethod(BufferBuilder.class, "method_1326", MethodType.methodType(void.class));
 	private static final Supplier<Reflection.MethodInvoker> BufferRenderer_draw =
 			Reflection.getOptionalMethod(BufferRenderer.class, "method_1309", MethodType.methodType(void.class, BufferBuilder.class));
-	public static void endDrawing(MatrixStack matrices, VertexConsumer vertexConsumer) {
+	public static void endDrawingShader(MatrixStack matrices, VertexConsumer vertexConsumer) {
 		Version.newSwitch()
 				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().draw())
 				.range("1.19.0", "1.19.4", () -> BufferRenderer.drawWithGlobalProgram(((BufferBuilder) vertexConsumer).end()))
@@ -460,6 +424,9 @@ public class MVMisc {
 					BufferRenderer_draw.get().invoke(null, vertexConsumer);
 				})
 				.run();
+	}
+	public static void endDrawingNormal(VertexConsumerProvider.Immediate provider) {
+		provider.draw();
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> TextFieldWidget_setCursor =
@@ -475,6 +442,27 @@ public class MVMisc {
 		return Version.<Boolean>newSwitch()
 				.range("1.19.0", null, () -> factory instanceof VehicleInventory)
 				.range(null, "1.18.2", () -> factory instanceof StorageMinecartEntity)
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> BlockRenderManager_renderBlock =
+			Reflection.getOptionalMethod(BlockRenderManager.class, "method_3355", MethodType.methodType(boolean.class, BlockState.class, BlockPos.class, BlockRenderView.class, MatrixStack.class, VertexConsumer.class, boolean.class, java.util.Random.class));
+	public static void renderBlock(BlockRenderManager renderer, BlockState state, BlockPos pos, BlockRenderView world, MatrixStack matrices, VertexConsumer vertexConsumer, boolean cull) {
+		Version.newSwitch()
+				.range("1.19.0", null, () -> renderer.renderBlock(state, pos, world, matrices, vertexConsumer, cull, Random.create()))
+				.range(null, "1.18.2", () -> BlockRenderManager_renderBlock.get().invoke(renderer, state, pos, world, matrices, vertexConsumer, cull, new java.util.Random()))
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> BlockEntity_writeNbt =
+			Reflection.getOptionalMethod(BlockEntity.class, "method_11007", MethodType.methodType(NbtCompound.class, NbtCompound.class));
+	public static NbtCompound createNbt(BlockEntity blockEntity) {
+		return Version.<NbtCompound>newSwitch()
+				.range("1.18.0", null, () -> blockEntity.createNbt())
+				.range(null, "1.17.1", () -> {
+					MixinLink.BLOCK_ENTITY_WRITE_NBT_WITHOUT_IDENTIFYING_DATA.add(Thread.currentThread());
+					return BlockEntity_writeNbt.get().invoke(blockEntity, new NbtCompound());
+				})
 				.get();
 	}
 	

@@ -118,7 +118,7 @@ public class MVTooltip {
 		
 		// Undo translations and render at actual position
 		// This allows Screen#renderTooltip to adjust for window height
-		float[] translation = MVMisc.getTranslation(matrices);
+		float[] translation = MVMatrix4f.getTranslation(matrices);
 		matrices.push();
 		matrices.translate(-translation[0], -translation[1], 0.0);
 		boolean scissor = GL20.glGetBoolean(GL20.GL_SCISSOR_TEST);

@@ -283,4 +283,7 @@ public class MixinLink {
 		return getLecternRequests.remove(Thread.currentThread());
 	}
 	
+	
+	public static final List<Thread> BLOCK_ENTITY_WRITE_NBT_WITHOUT_IDENTIFYING_DATA = new ArrayList<>();
+	
 }

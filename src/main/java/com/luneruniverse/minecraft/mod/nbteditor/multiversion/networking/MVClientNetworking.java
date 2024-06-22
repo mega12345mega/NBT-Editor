@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.event.Event;
@@ -67,6 +68,10 @@ public class MVClientNetworking {
 	}
 	
 	public static void callListeners(MVPacket packet) {
+		if (!MainUtil.client.isOnThread()) {
+			MainUtil.client.execute(() -> callListeners(packet));
+			return;
+		}
 		List<Consumer<MVPacket>> specificListeners = listeners.get(packet.getPacketId());
 		if (specificListeners == null)
 			return;

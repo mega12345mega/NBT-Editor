@@ -71,7 +71,7 @@ public class SetBlockC2SPacket implements MVPacket {
 		payload.writeBlockPos(pos);
 		payload.writeIdentifier(id);
 		state.writeToPayload(payload);
-		payload.writeNbt(nbt);
+		payload.writeNbtCompound(nbt);
 		payload.writeBoolean(recreate);
 		payload.writeBoolean(triggerUpdate);
 	}

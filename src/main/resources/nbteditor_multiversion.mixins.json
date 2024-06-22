@@ -5,13 +5,14 @@
   "compatibilityLevel": "JAVA_16",
   "plugin": "com.luneruniverse.minecraft.mod.nbteditor.multiversion.mixin.toggled.MVMixinPlugin",
   "mixins": [
+    "PacketByteBufMixin",
+    "BlockEntityMixin"
   ],
   "client": [
     "ScreenHandlerMixin",
     "DrawableMixin",
     "ScreenMixin",
-    "AbstractParentElementMixin",
-    "PacketByteBufMixin"
+    "AbstractParentElementMixin"
   ],
   "injectors": {
     "defaultRequire": 1

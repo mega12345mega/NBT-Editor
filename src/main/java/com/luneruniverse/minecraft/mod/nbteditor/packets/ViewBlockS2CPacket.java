@@ -92,7 +92,7 @@ public class ViewBlockS2CPacket implements ResponsePacket {
 			payload.writeBoolean(true);
 			payload.writeIdentifier(id);
 			state.writeToPayload(payload);
-			payload.writeNbt(nbt);
+			payload.writeNbtCompound(nbt);
 		}
 	}
 	

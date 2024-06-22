@@ -5,19 +5,22 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import org.joml.Matrix4f;
-
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVQuaternionf;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.EntityReference;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -105,17 +108,30 @@ public class LocalEntity implements LocalNBT {
 	public void renderIcon(MatrixStack matrices, int x, int y) {
 		matrices.push();
 		matrices.translate(0.0, 8.0, 0.0);
-		LocalNBT.makeRotatingIcon(matrices, x, y, 0.75f);
-		matrices.multiplyPositionMatrix(new Matrix4f().scaling(1, 1, -1));
 		
-		DiffuseLighting.method_34742();
 		Entity entity = entityType.create(MainUtil.client.world);
 		entity.readNbt(nbt);
-		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getDrawContext(matrices).getVertexConsumers();
-		MainUtil.client.getEntityRenderDispatcher().getRenderer(entity).render(entity, 0, 0, matrices, provider, 255);
-		provider.draw();
+		
+		MatrixStack renderMatrices = Version.<MatrixStack>newSwitch()
+				.range("1.20.0", null, matrices)
+				.range(null, "1.19.4", MatrixStack::new)
+				.get();
+		
+		MVMatrix4f.ofScale(1, 1, -1).applyToPositionMatrix(matrices);
+		MVQuaternionf rotation = LocalNBT.makeRotatingIcon(renderMatrices, x, y, 0.75f, true);
+		RenderSystem.applyModelViewMatrix();
+		
+		DiffuseLighting.method_34742();
+		VertexConsumerProvider.Immediate provider = MVMisc.beginDrawingNormal();
+		EntityRenderDispatcher dispatcher = MainUtil.client.getEntityRenderDispatcher();
+		dispatcher.setRenderShadows(false);
+		rotation.copy().conjugate().applyToEntityRenderDispatcher(dispatcher);
+		dispatcher.render(entity, 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
+		dispatcher.setRenderShadows(true);
+		MVMisc.endDrawingNormal(provider);
 		
 		matrices.pop();
+		RenderSystem.applyModelViewMatrix();
 	}
 	
 	@Override

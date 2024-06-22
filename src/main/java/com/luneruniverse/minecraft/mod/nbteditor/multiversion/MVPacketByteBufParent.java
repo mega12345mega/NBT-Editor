@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -23,6 +24,10 @@ public interface MVPacketByteBufParent {
 	}
 	public default void writeRegistryKey(RegistryKey<?> key) {
 		throw new RuntimeException("Missing implementation for MVPacketByteBufParent#writeRegistryKey");
+	}
+	
+	public default PacketByteBuf writeNbtCompound(NbtCompound element) {
+		throw new RuntimeException("Missing implementation for MVPacketByteBufParent#writeNbtCompound");
 	}
 	
 }

@@ -61,6 +61,10 @@ public class MVServerNetworking {
 	}
 	
 	public static void callListeners(MVPacket packet, ServerPlayerEntity player) {
+		if (!player.server.isOnThread()) {
+			player.server.execute(() -> callListeners(packet, player));
+			return;
+		}
 		List<BiConsumer<MVPacket, ServerPlayerEntity>> specificListeners = listeners.get(packet.getPacketId());
 		if (specificListeners == null)
 			return;
