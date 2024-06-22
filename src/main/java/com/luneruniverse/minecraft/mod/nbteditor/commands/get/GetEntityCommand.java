@@ -5,12 +5,16 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.SummonableEntityArgumentType;
+import com.luneruniverse.minecraft.mod.nbteditor.integrations.NBTAutocompleteIntegration;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mt1006.nbt_ac.autocomplete.NbtSuggestionManager;
 
 import net.minecraft.command.argument.NbtCompoundArgumentType;
 import net.minecraft.command.argument.PosArgument;
@@ -53,12 +57,23 @@ public class GetEntityCommand extends ClientCommand {
 			
 			return Command.SINGLE_SUCCESS;
 		};
+		SuggestionProvider<FabricClientCommandSource> nbtSuggestions = (context, suggestionsBuilder) -> {
+			if (NBTAutocompleteIntegration.INSTANCE.isEmpty())
+				return Suggestions.empty();
+			EntityType<?> entityType = context.getArgument("entity", EntityType.class);
+			String name = "entity/" + EntityType.getId(entityType);
+			String tag = suggestionsBuilder.getRemaining();
+			return NbtSuggestionManager.loadFromName(name, tag, suggestionsBuilder, false);
+		};
 		
 		builder.then(argument("entity", SummonableEntityArgumentType.summonableEntity())
 				.then(argument("pos", Vec3ArgumentType.vec3())
-						.then(argument("nbt", NbtCompoundArgumentType.nbtCompound()).executes(getEntity))
+						.then(argument("nbt", NbtCompoundArgumentType.nbtCompound())
+								.suggests(nbtSuggestions)
+								.executes(getEntity))
 						.executes(getEntity))
 				.then(argument("nbt", NbtCompoundArgumentType.nbtCompound())
+						.suggests(nbtSuggestions)
 						.executes(getEntity))
 				.executes(getEntity));
 	}
