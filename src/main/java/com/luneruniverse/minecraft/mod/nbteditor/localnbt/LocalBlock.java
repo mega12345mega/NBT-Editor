@@ -120,8 +120,8 @@ public class LocalBlock implements LocalNBT {
 		
 		matrices.push();
 		MatrixStack renderMatrices = Version.<MatrixStack>newSwitch()
-				.range("1.20.0", null, matrices)
-				.range(null, "1.19.4", MatrixStack::new)
+				.range("1.19.4", null, matrices)
+				.range(null, "1.19.3", MatrixStack::new)
 				.get();
 		MVMatrix4f.ofScale(1, 1, -1).applyToPositionMatrix(renderMatrices);
 		LocalNBT.makeRotatingIcon(renderMatrices, x, y, 1, true);

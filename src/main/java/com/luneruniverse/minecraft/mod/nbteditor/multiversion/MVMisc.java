@@ -30,7 +30,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.JsonOps;
 
-import io.netty.util.concurrent.GenericFutureListener;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SuspiciousStewIngredient.StewEffect;
@@ -68,7 +67,6 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -269,12 +267,12 @@ public class MVMisc {
 				.range(null, "1.20.1", () -> ClientPlayNetworkHandler_sendPacket.get().invoke(MainUtil.client.getNetworkHandler(), packet))
 				.run();
 	}
-	private static final Supplier<Reflection.MethodInvoker> ServerPlayNetworkHandler_sendPacket =
-			Reflection.getOptionalMethod(ServerPlayNetworkHandler.class, "method_14369", MethodType.methodType(void.class, Packet.class, GenericFutureListener.class));
+	private static final Supplier<Reflection.MethodInvoker> EntityTrackingListener_sendPacket =
+			Reflection.getOptionalMethod(() -> Reflection.getClass("net.minecraft.class_5629"), () -> "method_14364", () -> MethodType.methodType(void.class, Packet.class));
 	public static void sendS2CPacket(ServerPlayerEntity player, Packet<?> packet) {
 		Version.newSwitch()
 				.range("1.20.2", null, () -> player.networkHandler.sendPacket(packet))
-				.range(null, "1.20.1", () -> ServerPlayNetworkHandler_sendPacket.get().invoke(player.networkHandler, packet, null))
+				.range(null, "1.20.1", () -> EntityTrackingListener_sendPacket.get().invoke(player.networkHandler, packet))
 				.run();
 	}
 	

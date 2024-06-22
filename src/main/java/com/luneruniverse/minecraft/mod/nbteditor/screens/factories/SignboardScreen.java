@@ -185,7 +185,12 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	}
 	
 	private void setLines(List<Text> lines) {
-		modifySideTagRef(tagRef -> tagRef.text = lines.stream().map(line -> fixClickEvent(line))
+		List<Text> allLines = new ArrayList<>(lines);
+		if (allLines.size() > 4)
+			allLines.subList(4, allLines.size()).clear();
+		while (allLines.size() < 4)
+			allLines.add(Text.of(""));
+		modifySideTagRef(tagRef -> tagRef.text = allLines.stream().map(line -> fixClickEvent(line))
 				.map(line -> newFeatures ? fixEditable(line) : line).toArray(Text[]::new));
 		checkSave();
 	}
