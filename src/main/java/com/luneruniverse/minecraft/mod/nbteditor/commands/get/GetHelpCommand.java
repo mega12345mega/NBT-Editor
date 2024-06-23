@@ -14,7 +14,7 @@ public class GetHelpCommand extends ClientCommand {
 	public enum HelpType {
 		NBTEDITOR("nbteditor.help.nbt"),
 		CLIENTCHEST("nbteditor.help.client_chest"),
-		ITEMFACTORIES("nbteditor.help.item_factories"),
+		FACTORIES("nbteditor.help.factories"),
 		TEXTFORMAT("nbteditor.help.text_format");
 		
 		private final String msgKey;

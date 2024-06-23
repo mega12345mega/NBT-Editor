@@ -4,7 +4,7 @@
   "version": "2.0.0.999",
 
   "name": "NBT Editor",
-  "description": "Lets you edit items' nbt ingame, store items in a client side chest, open containers in your inventory, and more!",
+  "description": "Lets you edit items, blocks, and entities ingame, store items in a client side chest, open containers in your inventory, and more!",
   "authors": [
     "mega12345mega"
   ],
