@@ -36,6 +36,11 @@ import net.minecraft.util.Identifier;
 public class ItemStackMixin {
 	@Inject(at = @At("RETURN"), method = "getTooltip", cancellable = true)
 	private void getTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info) {
+		// Tooltips are requested for all items when GameJoinS2CPacket is received to setup the creative inventory's search
+		// The world doesn't exist yet, so this causes the game to freeze when an exception from this mixin breaks everything
+		if (MainUtil.client.world == null)
+			return;
+		
 		ItemStack source = (ItemStack) (Object) this;
 		
 		ConfigScreen.ItemSizeFormat sizeConfig = ConfigScreen.getItemSizeFormat();
