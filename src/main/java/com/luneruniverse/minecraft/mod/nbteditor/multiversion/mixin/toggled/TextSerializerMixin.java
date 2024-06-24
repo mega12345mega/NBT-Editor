@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.mixin.toggled;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

@@ -12,6 +12,11 @@ public class MVMixinPlugin extends BasicMixinPlugin {
 	
 	@Override
 	public void addMixins(List<String> output) {
+		Version.newSwitch()
+				.range("1.20.3", null, () -> {})
+				.range(null, "1.20.2", () -> output.add("toggled.TextSerializerMixin"))
+				.run();
+		
 		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER)
 			return;
 		

@@ -98,7 +98,8 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 			return;
 		
 		player.openHandledScreen(new SimpleNamedScreenHandlerFactory((syncId, inventory, player2) ->
-				GenericContainerScreenHandler.createGeneric9x3(syncId, inventory, player.getEnderChestInventory()), TextInst.translatable("container.enderchest")));
+				GenericContainerScreenHandler.createGeneric9x3(syncId, inventory, player.getEnderChestInventory()),
+				TextInst.translatable("container.enderchest")));
 	}
 	
 	private void onGetBlockPacket(GetBlockC2SPacket packet, ServerPlayerEntity player) {
