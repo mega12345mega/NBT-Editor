@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -19,14 +19,14 @@ import net.minecraft.server.network.ServerPlayerEntity;
 public class ShulkerBoxSlotMixin {
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void init(Inventory inventory, int index, int x, int y, CallbackInfo info) {
-		PlayerEntity owner = MixinLink.SCREEN_HANDLER_OWNER.get(Thread.currentThread());
+		PlayerEntity owner = ServerMixinLink.SCREEN_HANDLER_OWNER.get(Thread.currentThread());
 		if (owner == null)
 			return;
-		MixinLink.SLOT_OWNER.put((ShulkerBoxSlot) (Object) this, owner);
+		ServerMixinLink.SLOT_OWNER.put((ShulkerBoxSlot) (Object) this, owner);
 	}
 	@Inject(method = "canInsert(Lnet/minecraft/item/ItemStack;)Z", at = @At("HEAD"), cancellable = true)
 	private void canInsert(ItemStack item, CallbackInfoReturnable<Boolean> info) {
-		PlayerEntity owner = MixinLink.SLOT_OWNER.get((ShulkerBoxSlot) (Object) this);
+		PlayerEntity owner = ServerMixinLink.SLOT_OWNER.get((ShulkerBoxSlot) (Object) this);
 		if (owner == null)
 			return;
 		if (owner instanceof ServerPlayerEntity) {

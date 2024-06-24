@@ -21,7 +21,6 @@ import java.util.function.Supplier;
 import org.joml.Vector2ic;
 
 import com.google.gson.JsonObject;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
@@ -33,7 +32,6 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SuspiciousStewIngredient.StewEffect;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -55,8 +53,6 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.vehicle.StorageMinecartEntity;
-import net.minecraft.entity.vehicle.VehicleInventory;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SuspiciousStewItem;
@@ -66,8 +62,6 @@ import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
@@ -267,14 +261,6 @@ public class MVMisc {
 				.range(null, "1.20.1", () -> ClientPlayNetworkHandler_sendPacket.get().invoke(MainUtil.client.getNetworkHandler(), packet))
 				.run();
 	}
-	private static final Supplier<Reflection.MethodInvoker> EntityTrackingListener_sendPacket =
-			Reflection.getOptionalMethod(() -> Reflection.getClass("net.minecraft.class_5629"), () -> "method_14364", () -> MethodType.methodType(void.class, Packet.class));
-	public static void sendS2CPacket(ServerPlayerEntity player, Packet<?> packet) {
-		Version.newSwitch()
-				.range("1.20.2", null, () -> player.networkHandler.sendPacket(packet))
-				.range(null, "1.20.1", () -> EntityTrackingListener_sendPacket.get().invoke(player.networkHandler, packet))
-				.run();
-	}
 	
 	private static final Supplier<Reflection.MethodInvoker> NbtIo_read =
 			Reflection.getOptionalMethod(NbtIo.class, "method_10627", MethodType.methodType(NbtCompound.class, DataInput.class));
@@ -436,13 +422,6 @@ public class MVMisc {
 				.run();
 	}
 	
-	public static boolean isInstanceOfVehicleInventory(NamedScreenHandlerFactory factory) {
-		return Version.<Boolean>newSwitch()
-				.range("1.19.0", null, () -> factory instanceof VehicleInventory)
-				.range(null, "1.18.2", () -> factory instanceof StorageMinecartEntity)
-				.get();
-	}
-	
 	private static final Supplier<Reflection.MethodInvoker> BlockRenderManager_renderBlock =
 			Reflection.getOptionalMethod(BlockRenderManager.class, "method_3355", MethodType.methodType(boolean.class, BlockState.class, BlockPos.class, BlockRenderView.class, MatrixStack.class, VertexConsumer.class, boolean.class, java.util.Random.class));
 	public static void renderBlock(BlockRenderManager renderer, BlockState state, BlockPos pos, BlockRenderView world, MatrixStack matrices, VertexConsumer vertexConsumer, boolean cull) {
@@ -450,18 +429,6 @@ public class MVMisc {
 				.range("1.19.0", null, () -> renderer.renderBlock(state, pos, world, matrices, vertexConsumer, cull, Random.create()))
 				.range(null, "1.18.2", () -> BlockRenderManager_renderBlock.get().invoke(renderer, state, pos, world, matrices, vertexConsumer, cull, new java.util.Random()))
 				.run();
-	}
-	
-	private static final Supplier<Reflection.MethodInvoker> BlockEntity_writeNbt =
-			Reflection.getOptionalMethod(BlockEntity.class, "method_11007", MethodType.methodType(NbtCompound.class, NbtCompound.class));
-	public static NbtCompound createNbt(BlockEntity blockEntity) {
-		return Version.<NbtCompound>newSwitch()
-				.range("1.18.0", null, () -> blockEntity.createNbt())
-				.range(null, "1.17.1", () -> {
-					MixinLink.BLOCK_ENTITY_WRITE_NBT_WITHOUT_IDENTIFYING_DATA.add(Thread.currentThread());
-					return BlockEntity_writeNbt.get().invoke(blockEntity, new NbtCompound());
-				})
-				.get();
 	}
 	
 }

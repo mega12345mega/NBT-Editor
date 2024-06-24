@@ -22,6 +22,8 @@ import net.minecraft.util.math.Vec3d;
 public abstract class PacketByteBufMixin implements MVPacketByteBufParent {
 	
 	@Shadow
+	private ByteBuf parent;
+	@Shadow
 	public abstract String readString();
 	@Shadow
 	public abstract PacketByteBuf writeString(String str);
@@ -30,13 +32,13 @@ public abstract class PacketByteBufMixin implements MVPacketByteBufParent {
 	
 	@Override
 	public PacketByteBuf writeBoolean(boolean value) {
-		((ByteBuf) (Object) this).writeBoolean(value);
+		parent.writeBoolean(value);
 		return (PacketByteBuf) (Object) this;
 	}
 	
 	@Override
 	public PacketByteBuf writeDouble(double value) {
-		((ByteBuf) (Object) this).writeDouble(value);
+		parent.writeDouble(value);
 		return (PacketByteBuf) (Object) this;
 	}
 	

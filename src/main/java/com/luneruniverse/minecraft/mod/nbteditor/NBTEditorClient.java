@@ -21,6 +21,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClien
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -50,6 +51,8 @@ public class NBTEditorClient implements ClientModInitializer {
 	
 	@Override
 	public void onInitializeClient() {
+		NBTEditorServer.IS_DEDICATED = false;
+		
 		if (!SETTINGS_FOLDER.exists())
 			SETTINGS_FOLDER.mkdir();
 		

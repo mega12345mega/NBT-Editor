@@ -17,6 +17,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.SetSlotC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewBlockS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 
 import net.fabricmc.api.ModInitializer;
 

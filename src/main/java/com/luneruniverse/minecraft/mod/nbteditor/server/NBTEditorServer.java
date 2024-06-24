@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor;
+package com.luneruniverse.minecraft.mod.nbteditor.server;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -8,8 +8,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorServerConn;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -51,6 +51,8 @@ import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.math.Vec3d;
 
 public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvents.Start {
+	
+	public static boolean IS_DEDICATED = true;
 	
 	public NBTEditorServer() {
 		MVServerNetworking.registerListener(SetCursorC2SPacket.ID, this::onSetCursorPacket);
@@ -134,7 +136,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		MVServerNetworking.send(player,
 				new ViewBlockS2CPacket(requestId, blockEntity.getWorld().getRegistryKey(), blockEntity.getPos(),
 						MVRegistry.BLOCK.getId(blockEntity.getCachedState().getBlock()),
-						new BlockStateProperties(blockEntity.getCachedState()), MVMisc.createNbt(blockEntity)));
+						new BlockStateProperties(blockEntity.getCachedState()), ServerMVMisc.createNbt(blockEntity)));
 	}
 	
 	private void onGetEntityPacket(GetEntityC2SPacket packet, ServerPlayerEntity player) {

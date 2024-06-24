@@ -16,8 +16,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVNetwo
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacketCustomPayload;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVServerNetworking;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ClientLink;
+import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.PacketByteBuf;
@@ -48,9 +49,9 @@ public class ClientConnectionMixin {
 	@Inject(method = "setPacketListener", at = @At("RETURN"))
 	private void setPacketListener_return(PacketListener listener, CallbackInfo info) {
 		if (side == NetworkSide.CLIENTBOUND) {
-			if (listener instanceof ClientPlayNetworkHandler)
+			if (ClientLink.isInstanceOfClientPlayNetworkHandler(listener))
 				MVClientNetworking.PlayNetworkStateEvents.Start.EVENT.invoker().onPlayStart();
-			else if (prevListener instanceof ClientPlayNetworkHandler)
+			else if (ClientLink.isInstanceOfClientPlayNetworkHandler(prevListener))
 				MVClientNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop();
 		}
 		if (side == NetworkSide.SERVERBOUND) {
@@ -64,7 +65,7 @@ public class ClientConnectionMixin {
 	@Inject(method = "disconnect", at = @At("HEAD"))
 	private void disconnect(Text reason, CallbackInfo info) {
 		if (isOpen()) {
-			if (packetListener instanceof ClientPlayNetworkHandler)
+			if (!NBTEditorServer.IS_DEDICATED && ClientLink.isInstanceOfClientPlayNetworkHandler(packetListener))
 				MVClientNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop();
 			if (packetListener instanceof ServerPlayNetworkHandler handler)
 				MVServerNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop(handler.player);
@@ -81,7 +82,7 @@ public class ClientConnectionMixin {
 			Reflection.getOptionalMethod(CustomPayloadC2SPacket.class, "method_36170", MethodType.methodType(PacketByteBuf.class));
 	@Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
 	private static void handlePacket(Packet<?> packet, PacketListener listener, CallbackInfo info) {
-		if (listener instanceof ClientPlayNetworkHandler handler && packet instanceof CustomPayloadS2CPacket customPacket) {
+		if (!NBTEditorServer.IS_DEDICATED && ClientLink.isInstanceOfClientPlayNetworkHandler(listener) && packet instanceof CustomPayloadS2CPacket customPacket) {
 			MVPacket mvPacket = Version.<MVPacket>newSwitch()
 					.range("1.20.2", null, () -> MVPacketCustomPayload.unwrapS2C(customPacket))
 					.range(null, "1.20.1", () -> MVNetworking.readPacket(
