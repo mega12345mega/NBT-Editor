@@ -19,7 +19,7 @@
 	"nbteditor.no_ref.to_export_item": "§cYou must be looking at a block/entity to export to an item!",
 	"nbteditor.no_ref.container": "§cYou must be holding or looking at a container!",
 	"nbteditor.no_ref.skull": "§cYou must be holding or looking at a player head to edit!",
-	"nbteditor.no_ref.attributes": "§cYou must be holding an item or looking at a mob edit!",
+	"nbteditor.no_ref.attributes": "§cYou must be holding an item or looking at a mob to edit!",
 	"nbteditor.no_ref.block": "§cYou must be holding or looking at a block to edit!",
 	"nbteditor.no_ref.book": "§cYou must be holding or looking at a lectern with a written book to edit!",
 	"nbteditor.no_ref.signboard": "§cYou must be holding or looking at a sign to edit!",
@@ -473,6 +473,7 @@
 	"nbteditor.credits_8": "§6zh_cn: hyplant",
 	"nbteditor.credits_9": "§6pl_pl: Xantrisse",
 	"nbteditor.credits_10": "§6ru_ru: TheFaceJD",
+	"nbteditor.credits_11": "§6fr_fr: Darukshock",
 	
 	
 	
