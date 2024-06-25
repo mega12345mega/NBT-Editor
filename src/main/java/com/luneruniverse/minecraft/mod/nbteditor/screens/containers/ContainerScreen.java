@@ -3,13 +3,15 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ContainerItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ContainerItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.entity.player.PlayerInventory;
@@ -19,13 +21,13 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 
-public class ContainerScreen extends ClientHandledScreen {
+public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	
 	private boolean saved;
 	private final Text unsavedTitle;
 	
-	private ItemReference ref;
-	private ItemStack item;
+	private NBTReference<L> ref;
+	private L localNBT;
 	private int blockedInvSlot;
 	private int blockedHotbarSlot;
 	private int numSlots;
@@ -39,43 +41,47 @@ public class ContainerScreen extends ClientHandledScreen {
 		this.saved = true;
 		this.unsavedTitle = TextInst.copy(title).append("*");
 	}
-	private ContainerScreen build(ItemReference ref) {
+	private ContainerScreen<L> build(NBTReference<L> ref) {
 		this.ref = ref;
-		this.item = ref.getItem().copy();
-		this.blockedInvSlot = ref.getBlockedInvSlot();
+		this.localNBT = LocalNBT.copy(ref.getLocalNBT());
+		this.blockedInvSlot = (ref instanceof ItemReference item ? item.getBlockedInvSlot() : -1);
 		if (this.blockedInvSlot != -1)
 			this.blockedInvSlot += 27;
-		this.blockedHotbarSlot = ref.getBlockedHotbarSlot();
+		this.blockedHotbarSlot = (ref instanceof ItemReference item ? item.getBlockedHotbarSlot() : -1);
 		
-		ItemStack[] contents = ContainerIO.read(item);
+		ItemStack[] contents = ContainerIO.read(localNBT);
 		for (int i = 0; i < contents.length; i++)
 			this.handler.getSlot(i).setStackNoCallbacks(contents[i] == null ? ItemStack.EMPTY : contents[i]);
 		this.numSlots = contents.length;
 		
 		return this;
 	}
-	public static void show(ItemReference ref) {
+	public static <L extends LocalNBT> void show(NBTReference<L> ref) {
 		PlayerInventory inv = MainUtil.client.player.getInventory();
-		MainUtil.client.setScreen(new ContainerScreen(new ContainerHandler(0, inv), inv, TextInst.translatable("nbteditor.container.title")
-				.append(ref.getItem().getName())).build(ref));
+		MainUtil.client.setScreen(new ContainerScreen<L>(new ContainerHandler(0, inv), inv, TextInst.translatable("nbteditor.container.title")
+				.append(ref.getLocalNBT().getName())).build(ref));
 	}
 	
 	@Override
 	protected void init() {
 		super.init();
 		
-		if (ref.isLockable()) {
+		if (ref instanceof ItemReference item && item.isLockable()) {
 			this.addDrawableChild(MVMisc.newButton(16, 64, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
 				navigationClicked = true;
-				ConfigScreen.setLockSlots(!ConfigScreen.isLockSlots());
+				if (ConfigScreen.isLockSlotsRequired()) {
+					btn.active = false;
+					ConfigScreen.setLockSlots(true);
+				} else
+					ConfigScreen.setLockSlots(!ConfigScreen.isLockSlots());
 				btn.setMessage(ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"));
 			})).active = !ConfigScreen.isLockSlotsRequired();
 		}
 		
 		addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
-				ItemFactoryScreen.FACTORY_ICON,
-				btn -> client.setScreen(new ItemFactoryScreen(ref)),
-				new MVTooltip("nbteditor.item_factory")));
+				LocalFactoryScreen.FACTORY_ICON,
+				btn -> client.setScreen(new LocalFactoryScreen<>(ref)),
+				new MVTooltip("nbteditor.factory")));
 	}
 	
 	@Override
@@ -115,8 +121,8 @@ public class ContainerScreen extends ClientHandledScreen {
 		save();
 	}
 	@Override
-	public boolean lockSlots() {
-		return ref.isLocked();
+	public SlotLockType getSlotLockType() {
+		return ref instanceof ItemReference item && item.isLocked() ? SlotLockType.ITEMS_LOCKED : SlotLockType.UNLOCKED;
 	}
 	@Override
 	public ItemStack[] getPrevInventory() {
@@ -130,10 +136,10 @@ public class ContainerScreen extends ClientHandledScreen {
 		ItemStack[] contents = new ItemStack[this.handler.getInventory().size()];
 		for (int i = 0; i < contents.length; i++)
 			contents[i] = this.handler.getInventory().getStack(i);
-		ContainerIO.write(item, contents);
+		ContainerIO.write(localNBT, contents);
 		
 		saved = false;
-		ref.saveItem(item, () -> {
+		ref.saveLocalNBT(localNBT, () -> {
 			saved = true;
 		});
 	}
@@ -144,7 +150,7 @@ public class ContainerScreen extends ClientHandledScreen {
 		
 		if (keyCode == GLFW.GLFW_KEY_SPACE) {
 			if (focusedSlot != null && (focusedSlot.id < numSlots || focusedSlot.inventory != this.handler.getInventory())) {
-				if (handleKeybind(keyCode, focusedSlot, slot -> new ContainerItemReference(ref, slot.getIndex())))
+				if (handleKeybind(keyCode, focusedSlot, slot -> new ContainerItemReference<>(ref, slot.getIndex())))
 					return true;
 			}
 		}
@@ -157,7 +163,7 @@ public class ContainerScreen extends ClientHandledScreen {
 		return true;
 	}
 	
-	public ItemReference getReference() {
+	public NBTReference<L> getReference() {
 		return ref;
 	}
 	

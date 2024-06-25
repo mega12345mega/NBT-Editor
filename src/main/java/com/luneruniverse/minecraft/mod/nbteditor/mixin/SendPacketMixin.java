@@ -8,7 +8,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.ClientConnection;
+import net.minecraft.network.NetworkSide;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
@@ -21,12 +23,18 @@ public class SendPacketMixin {
 	
     @Inject(at = @At(value = "HEAD"), method = "send(Lnet/minecraft/network/packet/Packet;)V", cancellable = true)
     private void send(Packet<?> packet, CallbackInfo info) {
+    	if (((ClientConnection) (Object) this).getSide() != NetworkSide.CLIENTBOUND)
+    		return;
+    	
     	if (sendingSafe)
         	return;
         
     	if (MainUtil.client.currentScreen instanceof ClientHandledScreen) {
     		if (packet instanceof CloseHandledScreenC2SPacket) {
-    			info.cancel();
+    			if (MainUtil.client.interactionManager.getCurrentGameMode().isCreative())
+    				info.cancel();
+    			else
+    				MainUtil.client.player.currentScreenHandler.setCursorStack(ItemStack.EMPTY); // Moved to inventory by server
     			return;
     		}
 	    	if (packet instanceof ClickSlotC2SPacket slotPacket) {

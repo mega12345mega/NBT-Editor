@@ -12,6 +12,8 @@ public class GetCommand extends ClientCommandGroup {
 	private GetCommand() {
 		super(new ArrayList<>(List.of(
 				new GetItemCommand(),
+				new GetBlockCommand(),
+				new GetEntityCommand(),
 				new GetPotionCommand(),
 				new GetSoupCommand(),
 				new GetSkullCommand(),

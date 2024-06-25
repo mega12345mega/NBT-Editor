@@ -177,10 +177,10 @@ public class HeadDatabase {
                 }
             }
 
-            updated = System.nanoTime();
             result.put(category, heads);
         }
 
+        updated = System.nanoTime();
         return result;
     }
 

@@ -5,13 +5,13 @@
   "compatibilityLevel": "JAVA_16",
   "plugin": "com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.mixin.client.toggled.CommandMixinPlugin",
   "mixins": [
+  ],
+  "client": [
     "CommandManagerMixin",
     "HelpCommandAccessor",
     "client.ClientCommandSourceMixin",
     "client.ClientPlayerEntityMixin",
     "client.ClientPlayNetworkHandlerMixin"
-  ],
-  "client": [
   ],
   "injectors": {
     "defaultRequire": 1

@@ -13,17 +13,24 @@ import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.CommandHandler;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
+import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import tsp.headdb.ported.HeadAPI;
@@ -32,6 +39,7 @@ public class NBTEditorClient implements ClientModInitializer {
 	
 	public static final File SETTINGS_FOLDER = new File("nbteditor");
 	public static ClientChest CLIENT_CHEST;
+	public static NBTEditorServerConn SERVER_CONN;
 	
 	private static final Map<String, NBTEditorAddon> addons = new HashMap<>();
 	public static NBTEditorAddon getAddon(String modId) {
@@ -43,6 +51,8 @@ public class NBTEditorClient implements ClientModInitializer {
 	
 	@Override
 	public void onInitializeClient() {
+		NBTEditorServer.IS_DEDICATED = false;
+		
 		if (!SETTINGS_FOLDER.exists())
 			SETTINGS_FOLDER.mkdir();
 		
@@ -54,18 +64,30 @@ public class NBTEditorClient implements ClientModInitializer {
 		} catch (IOException e) {
 			NBTEditor.LOGGER.error("Error while loading HeadDB favorites", e);
 		}
+		ContainerIO.loadClass();
 		new HeadRefreshThread().start();
 		ConfigScreen.loadSettings();
 		
 		CLIENT_CHEST = ConfigScreen.isLargeClientChest() ? new LargeClientChest(5) : new SmallClientChest(100);
 		CLIENT_CHEST.loadAync();
 		
-		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST)
-				.setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest")), ClientChestScreen::show);
-		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.BRICKS)
-				.setCustomName(TextInst.translatable("itemGroup.nbteditor.creative")),
+		ItemStack clientChestIcon = new ItemStack(Items.ENDER_CHEST)
+				.setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));
+		clientChestIcon.addEnchantment(Enchantments.LOYALTY, 1);
+		MixinLink.ENCHANT_GLINT_FIX.add(clientChestIcon);
+		NBTEditorAPI.registerInventoryTab(clientChestIcon, ClientChestScreen::show,
+				screen -> screen instanceof CreativeInventoryScreen || (screen instanceof InventoryScreen && SERVER_CONN.isEditingExpanded()));
+		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.CHEST)
+				.setCustomName(TextInst.translatable("itemGroup.nbteditor.inventory")),
 				() -> MainUtil.client.setScreen(new InventoryScreen(MainUtil.client.player)),
 				screen -> screen instanceof ClientChestScreen);
+		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST), () -> {
+					MainUtil.client.player.closeHandledScreen();
+					MVClientNetworking.send(new OpenEnderChestC2SPacket());
+				}, screen -> (screen instanceof CreativeInventoryScreen || screen instanceof InventoryScreen || screen instanceof ClientChestScreen)
+						&& SERVER_CONN.isEditingExpanded());
+		
+		SERVER_CONN = new NBTEditorServerConn();
 		
 		for (EntrypointContainer<NBTEditorAddon> container : FabricLoader.getInstance()
 				.getEntrypointContainers("nbteditor", NBTEditorAddon.class)) {

@@ -19,9 +19,11 @@ import java.util.function.Supplier;
 import java.util.zip.ZipException;
 
 import com.google.gson.JsonParseException;
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -54,15 +56,19 @@ public class MainUtil {
 	public static final MinecraftClient client = MinecraftClient.getInstance();
 	
 	// Same as ClientPlayerInteractionManager#clickCreativeSlot, but without a feature flag check
+	// Also includes survival bypass
 	public static void clickCreativeStack(ItemStack item, int slot) {
-		if (client.interactionManager.getCurrentGameMode().isCreative())
-			MVMisc.sendPacket(new CreativeInventoryActionC2SPacket(slot, item));
+		if (NBTEditorClient.SERVER_CONN.isEditingAllowed())
+			MVMisc.sendC2SPacket(new CreativeInventoryActionC2SPacket(slot, item));
+	}
+	public static void dropCreativeStack(ItemStack item) {
+		if (NBTEditorClient.SERVER_CONN.isEditingAllowed() && !item.isEmpty())
+			MVMisc.sendC2SPacket(new CreativeInventoryActionC2SPacket(-1, item));
 	}
 	
 	public static void saveItem(Hand hand, ItemStack item) {
 		client.player.setStackInHand(hand, item.copy());
-		if (client.interactionManager.getCurrentGameMode().isCreative())
-			MVMisc.sendPacket(new CreativeInventoryActionC2SPacket(hand == Hand.OFF_HAND ? 45 : client.player.getInventory().selectedSlot + 36, item));
+		clickCreativeStack(item, hand == Hand.OFF_HAND ? 45 : client.player.getInventory().selectedSlot + 36);
 	}
 	public static void saveItem(EquipmentSlot equipment, ItemStack item) {
 		if (equipment == EquipmentSlot.MAINHAND)
@@ -94,7 +100,7 @@ public class MainUtil {
 			if (dropIfNoSpace) {
 				if (item.getCount() > item.getMaxCount())
 					item.setCount(item.getMaxCount());
-				client.interactionManager.dropCreativeStack(item);
+				dropCreativeStack(item);
 			}
 		} else {
 			item.setCount(item.getCount() + inv.getStack(slot).getCount());
@@ -103,7 +109,7 @@ public class MainUtil {
 				overflow = item.getCount() - item.getMaxCount();
 				item.setCount(item.getMaxCount());
 			}
-			saveItem(slot, item);
+			saveItem(slot == 40 ? 45 : slot, item);
 			if (overflow != 0) {
 				item.setCount(overflow);
 				get(item, false);
@@ -235,14 +241,17 @@ public class MainUtil {
 	
 	public static Text getItemNameSafely(ItemStack item) {
 		NbtCompound nbt = item.getSubNbt(ItemStack.DISPLAY_KEY);
-        if (nbt != null && nbt.contains(ItemStack.NAME_KEY, NbtElement.STRING_TYPE)) {
+		return getNbtNameSafely(nbt, ItemStack.NAME_KEY, () -> item.getItem().getName(item));
+	}
+	public static Text getNbtNameSafely(NbtCompound nbt, String key, Supplier<Text> defaultName) {
+		if (nbt != null && nbt.contains(key, NbtElement.STRING_TYPE)) {
             try {
-                MutableText text = Text.Serialization.fromJson(nbt.getString(ItemStack.NAME_KEY));
+                MutableText text = Text.Serialization.fromJson(nbt.getString(key));
                 if (text != null)
                     return text;
-            } catch (JsonParseException text) {}
+            } catch (JsonParseException e) {}
         }
-        return item.getItem().getName(item);
+        return defaultName.get();
 	}
 	
 	
@@ -379,7 +388,7 @@ public class MainUtil {
 	
 	public static Predicate<String> intPredicate(Supplier<Integer> min, Supplier<Integer> max, boolean allowEmpty) {
 		return str -> {
-			if (str.isEmpty())
+			if (str.isEmpty() || str.equals("+") || str.equals("-"))
 				return allowEmpty;
 			try {
 				int value = Integer.parseInt(str);
@@ -403,6 +412,12 @@ public class MainUtil {
 			return null;
 		}
 	}
+	public static int parseDefaultInt(String str, int defaultValue) {
+		Integer output = parseOptionalInt(str);
+		if (output == null)
+			return defaultValue;
+		return output;
+	}
 	
 	
 	public static void fillShader(MatrixStack matrices, MVShader shader, Consumer<VertexConsumer> data, int x, int y, int width, int height) {
@@ -411,27 +426,27 @@ public class MainUtil {
 		int x2 = x + width;
 		int y2 = y + height;
 		
-		Object matrix = MVMisc.getPositionMatrix(matrices.peek());
-		VertexConsumer vertex = MVMisc.beginDrawing(matrices, shader);
+		MVMatrix4f matrix = MVMatrix4f.getPositionMatrix(matrices.peek());
+		VertexConsumer vertex = MVMisc.beginDrawingShader(matrices, shader);
 		
-		MVMisc.vertex(vertex, matrix, x1, y1, 0).texture(0, 0);
+		matrix.applyToVertex(vertex, x1, y1, 0).texture(0, 0);
 		data.accept(vertex);
 		vertex.next();
 		
-		MVMisc.vertex(vertex, matrix, x1, y2, 0).texture(0, 1);
+		matrix.applyToVertex(vertex, x1, y2, 0).texture(0, 1);
 		data.accept(vertex);
 		vertex.next();
 		
-		MVMisc.vertex(vertex, matrix, x2, y2, 0).texture(1, 1);
+		matrix.applyToVertex(vertex, x2, y2, 0).texture(1, 1);
 		data.accept(vertex);
 		vertex.next();
 		
-		MVMisc.vertex(vertex, matrix, x2, y1, 0).texture(1, 0);
+		matrix.applyToVertex(vertex, x2, y1, 0).texture(1, 0);
 		data.accept(vertex);
 		vertex.next();
 		
 		RenderSystem.disableDepthTest();
-		MVMisc.endDrawing(matrices, vertex);
+		MVMisc.endDrawingShader(matrices, vertex);
 		RenderSystem.enableDepthTest();
 	}
 	

@@ -22,27 +22,35 @@ import net.minecraft.util.Formatting;
 public class ChatInputSuggestorMixin {
 	@Shadow
 	TextFieldWidget textField;
+	
 	@ModifyArgs(method = "show", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ChatInputSuggestor$SuggestionWindow;<init>(Lnet/minecraft/client/gui/screen/ChatInputSuggestor;IIILjava/util/List;Z)V"))
 	private void SuggestionWindow(Args args) {
-		if (textField instanceof SuggestingTextFieldWidget suggestor) {
-			if (suggestor.isDropdownOnly()) {
-				Point pos = suggestor.getSpecialDropdownPos();
-				args.set(1, pos.x);
-				args.set(2, pos.y);
-			} else
-				args.set(2, textField.y + textField.getHeight() + 2);
-		}
+		if (!(textField instanceof SuggestingTextFieldWidget suggestor))
+			return;
+		
+		if (suggestor.isDropdownOnly()) {
+			Point pos = suggestor.getSpecialDropdownPos();
+			args.set(1, pos.x);
+			args.set(2, pos.y);
+		} else
+			args.set(2, textField.y + textField.getHeight() + 2);
 	}
 	
 	@Inject(method = "showUsages", at = @At("HEAD"), cancellable = true)
 	@Group(name = "showUsages", min = 1)
 	private void showUsages(Formatting formatting, CallbackInfoReturnable<Boolean> info) {
+		if (!(textField instanceof SuggestingTextFieldWidget))
+			return;
+		
 		info.setReturnValue(true);
 	}
 	@Inject(method = "method_23929(Lnet/minecraft/class_124;)V", at = @At("HEAD"), cancellable = true)
 	@Group(name = "showUsages", min = 1)
 	@SuppressWarnings("target")
 	private void showUsages(Formatting formatting, CallbackInfo info) {
+		if (!(textField instanceof SuggestingTextFieldWidget))
+			return;
+		
 		info.cancel();
 	}
 }

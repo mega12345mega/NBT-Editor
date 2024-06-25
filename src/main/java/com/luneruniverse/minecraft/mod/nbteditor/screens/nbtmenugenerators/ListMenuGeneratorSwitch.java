@@ -47,7 +47,7 @@ public class ListMenuGeneratorSwitch implements MenuGenerator {
 	}
 	
 	@Override
-	public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source) {
+	public List<NBTValue> getElements(NBTEditorScreen<?> screen, NbtElement source) {
 		return getRealGen(source).getElements(screen, source);
 	}
 	
@@ -62,7 +62,7 @@ public class ListMenuGeneratorSwitch implements MenuGenerator {
 	}
 	
 	@Override
-	public void addElement(NBTEditorScreen screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
+	public void addElement(NBTEditorScreen<?> screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
 		getRealGen(source).addElement(screen, source, requestOverwrite, force);
 	}
 	

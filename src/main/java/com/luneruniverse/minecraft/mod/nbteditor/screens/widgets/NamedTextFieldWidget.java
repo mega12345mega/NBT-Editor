@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.TextFieldWidgetMixin;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -19,7 +19,7 @@ public class NamedTextFieldWidget extends TextFieldWidget implements Tickable {
 	 * Via {@link TextFieldWidgetMixin}, the vertex calls are redirected to take this matrix into account
 	 * As of 1.19.4, this is fixed
 	 */
-	public static Object matrix;
+	public static MVMatrix4f matrix;
 	
 	protected Text name;
 	protected boolean valid;
@@ -51,7 +51,7 @@ public class NamedTextFieldWidget extends TextFieldWidget implements Tickable {
 			this.setSuggestion(text.isEmpty() ? name.getString() : null);
 		
 		try {
-			matrix = MVMisc.copyMatrix(MVMisc.getPositionMatrix(matrices.peek()));
+			matrix = MVMatrix4f.getPositionMatrix(matrices.peek()).copy();
 			MVDrawableHelper.super_render(NamedTextFieldWidget.class, this, matrices, mouseX, mouseY, delta);
 		} finally {
 			matrix = null;

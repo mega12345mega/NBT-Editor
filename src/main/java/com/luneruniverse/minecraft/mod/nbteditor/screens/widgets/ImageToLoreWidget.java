@@ -128,7 +128,7 @@ public class ImageToLoreWidget extends GroupWidget implements InitializableOverl
 		if (!(MainUtil.client.currentScreen instanceof WidgetScreen))
 			MVDrawableHelper.fill(matrices, width / 2 - 102 - 16, height / 2 - 18 - 16, width / 2 + 102 + 16, height / 2 + 22 + 16, 0xC8101010);
 		super.render(matrices, mouseX, mouseY, delta);
-		MVDrawableHelper.drawCenteredTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.img2lore"),
+		MVDrawableHelper.drawCenteredTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.img_to_lore"),
 				width / 2, height / 2 - textRenderer.fontHeight - 22, -1);
 		MainUtil.renderLogo(matrices);
 	}

@@ -73,6 +73,9 @@ public class LargeClientChest extends ClientChest {
 	
 	@Override
 	public int[] getNearestItems(int page) {
+		if (!CLIENT_CHEST_FOLDER.exists())
+			return new int[] {-1, -1};
+		
 		int prev = -1;
 		int next = -1;
 		

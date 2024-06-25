@@ -5,20 +5,30 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 import java.util.UUID;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.AttributesScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 
 public class AttributesCommand extends ClientCommand {
+	
+	public static final NBTReferenceFilter ATTRIBUTES_FILTER = NBTReferenceFilter.create(
+			ref -> true,
+			null,
+			ref -> ref.getEntityType().create(MainUtil.client.world) instanceof MobEntity,
+			TextInst.translatable("nbteditor.no_ref.attributes"),
+			TextInst.translatable("nbteditor.no_hand.no_item.to_edit"));
 	
 	@Override
 	public String getName() {
@@ -45,7 +55,7 @@ public class AttributesCommand extends ClientCommand {
 			}
 			return Command.SINGLE_SUCCESS;
 		})).executes(context -> {
-			MainUtil.client.setScreen(new AttributesScreen(ItemReference.getHeldItem()));
+			NBTReference.getReference(ATTRIBUTES_FILTER, false, ref -> MainUtil.client.setScreen(new AttributesScreen<>(ref)));
 			return Command.SINGLE_SUCCESS;
 		});
 	}

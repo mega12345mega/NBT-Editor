@@ -45,8 +45,8 @@ public class CursorHistoryScreen extends ClientHandledScreen {
 	}
 	
 	@Override
-	public boolean lockSlots() {
-		return true;
+	public SlotLockType getSlotLockType() {
+		return SlotLockType.ALL_LOCKED;
 	}
 	@Override
 	public ItemStack[] getPrevInventory() {

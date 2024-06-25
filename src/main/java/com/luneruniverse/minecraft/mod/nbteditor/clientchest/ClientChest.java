@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -71,6 +72,8 @@ public abstract class ClientChest {
 	}
 	@SuppressWarnings("serial")
 	public void setNameOfPage(int page, String name) throws IOException {
+		if (Objects.equals(pageToName.get(page), name != null && name.isEmpty() ? null : name))
+			return;
 		if (name == null || name.isEmpty()) {
 			nameToPage.remove(pageToName.remove(page));
 		} else {
@@ -80,6 +83,8 @@ public abstract class ClientChest {
 				pageToName.remove(oldPage);
 			pageToName.put(page, name);
 		}
+		if (!CLIENT_CHEST_FOLDER.exists())
+			CLIENT_CHEST_FOLDER.mkdir();
 		try (FileWriter writer = new FileWriter(PAGE_NAMES, Charset.forName("UTF-8"))) {
 			new Gson().toJson(nameToPage, new TypeToken<Map<Integer, String>>() {}.getType(), writer);
 		}

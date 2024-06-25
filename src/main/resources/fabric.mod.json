@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "nbteditor",
-  "version": "1.13.0",
+  "version": "2.0.0",
 
   "name": "NBT Editor",
-  "description": "Lets you edit items' nbt ingame, store items in a client side chest, open containers in your inventory, and more!",
+  "description": "Lets you edit items, blocks, and entities ingame, store items in a client side chest, open containers in your inventory, and more!",
   "authors": [
     "mega12345mega"
   ],
@@ -17,7 +17,7 @@
   "license": "MIT",
   "icon": "assets/nbteditor/textures/logo.png",
 
-  "environment": "client",
+  "environment": "*",
   "entrypoints": {
     "main": [
       "com.luneruniverse.minecraft.mod.nbteditor.NBTEditor"
@@ -32,7 +32,8 @@
   "mixins": [
     "nbteditor.mixins.json",
     "nbteditor_multiversion.mixins.json",
-    "nbteditor_multiversion_commandapi.mixins.json"
+    "nbteditor_multiversion_commandapi.mixins.json",
+    "nbteditor_multiversion_networkingapi.mixins.json"
   ],
   
   "accessWidener": "nbteditor.accesswidener",
@@ -49,12 +50,17 @@
   
   "custom": {
     "modmenu": {
+      "links": {
+      	"modmenu.discord": "https://discord.gg/PzeYTbEZjn"
+      }
     },
     "loom:injected_interfaces": {
       "net/minecraft/class_4068": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVDrawableParent"],
       "net/minecraft/class_437": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVScreenParent"],
       "net/minecraft/class_342": ["com/luneruniverse/minecraft/mod/nbteditor/screens/InjectableTickable"],
-      "net/minecraft/class_364": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVElementParent"]
+      "net/minecraft/class_364": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVElementParent"],
+      "net/minecraft/class_2945": ["com/luneruniverse/minecraft/mod/nbteditor/misc/ResetableDataTracker"],
+      "net/minecraft/class_2540": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVPacketByteBufParent"]
     }
   }
 }

@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommandGroup;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -20,7 +21,8 @@ public class NBTCommand extends ClientCommandGroup {
 		super(new ArrayList<>(List.of(
 				new NBTConfigCommand(),
 				new NBTNewCommand(),
-				new NBTExportCommand())));
+				new NBTExportCommand(),
+				new NBTImportCommand())));
 	}
 	
 	@Override
@@ -37,8 +39,8 @@ public class NBTCommand extends ClientCommandGroup {
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		super.register(builder, path);
 		builder.executes(context -> {
-			MainUtil.client.setScreen(new NBTEditorScreen(
-					ConfigScreen.isAirEditable() ? ItemReference.getHeldItemAirable() : ItemReference.getHeldItem()));
+			NBTReference.getReference(NBTReferenceFilter.ANY, ConfigScreen.isAirEditable(),
+					ref -> MainUtil.client.setScreen(new NBTEditorScreen<>(ref)));
 			return Command.SINGLE_SUCCESS;
 		});
 	}

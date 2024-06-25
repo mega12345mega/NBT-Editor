@@ -26,4 +26,8 @@ public class TextInst {
 		return new EditableText(text.copy());
 	}
 	
+	public static EditableText bracketed(Text text) {
+		return translatable("chat.square_brackets", text);
+	}
+	
 }

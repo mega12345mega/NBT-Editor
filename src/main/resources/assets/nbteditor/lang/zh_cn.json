@@ -66,8 +66,6 @@
 	"nbteditor.file_options.delete.error": "§c删除 %s 时出现错误",
 	"nbteditor.file_options.delete.missing": "§c%s§c 不存在，可能已被删除。",
 	
-	"nbteditor.img2lore": "导入图片",
-	
 	"itemGroup.nbteditor.client_chest": "客户端物品栏",
 	"itemGroup.nbteditor.creative": "创造模式物品栏",
 	"nbteditor.client_chest": "Nbt Editor >> 客户端物品栏",
@@ -90,7 +88,7 @@
 	"nbteditor.container": "容器",
 	"nbteditor.container.title": "Nbt Editor >> ",
 	
-	"nbteditor.item_factory": "高级编辑器",
+	"nbteditor.factory": "高级编辑器",
 	
 	"nbteditor.sign.added": "§a已添加签名",
 	"nbteditor.sign.removed": "§a已移除签名",
@@ -105,6 +103,7 @@
 	"nbteditor.lore.edited": "§a附加信息已编辑！",
 	"nbteditor.lore.none": "§c没有附加信息！",
 	
+	"nbteditor.img_to_lore": "导入图片",
 	"nbteditor.img_to_lore.width": "宽度",
 	"nbteditor.img_to_lore.height": "高度",
 	
@@ -130,7 +129,7 @@
 	"nbteditor.keybind.enchant": "按住 §6§lCTRL§r§6 点击来附魔",
 	"nbteditor.keybind.edit": "按 §6§l空格§r§6 来编辑",
 	"nbteditor.keybind.container": "按 §6§lCTRL + 空格§r§6 来打开容器",
-	"nbteditor.keybind.item_factory": "按 §6§lShift + 空格§r§6 打开高级编辑器",
+	"nbteditor.keybind.factory": "按 §6§lShift + 空格§r§6 打开高级编辑器",
 	
 	"nbteditor.unbind_skull.no_textures": "该玩家模型未加载任何贴图",
 	"nbteditor.unbind_skull.unbound": "§a玩家模型未绑定！",
@@ -208,7 +207,7 @@
 	"nbteditor.config.category.guis": "图形用户界面调整",
 	"nbteditor.config.category.functional": "功能性调整",
 	"nbteditor.config.shortcuts": "快捷方式",
-	"nbteditor.config.shortcuts.desc": "为命令创建快捷方式，例如：\n使用 /lore 代替 /itemfactory display lore",
+	"nbteditor.config.shortcuts.desc": "为命令创建快捷方式，例如：\n使用 /lore 代替 /factory display lore",
 	"nbteditor.config.shortcuts.example": "例子：为 \"/get hdb\" 创建快捷方式 \"/hdb\"",
 	"nbteditor.config.enchant_level_max": "显示最高附魔等级",
 	"nbteditor.config.enchant_level_max.desc": "在附魔等级之后显示该项目的最大值",
@@ -311,7 +310,7 @@
 	"nbteditor.help_5": "§6/open：§7打开手持的容器，支持在潜影盒中放入潜影盒",
 	"nbteditor.help_6": "§6/get <item | potion | soup | skull | hdb | colorcodes | lostitem | help | credits> [<args>]：§7获取物品或物品信息",
 	"nbteditor.help_7": "§6/sign [<add | remove | edit <new signature>>]：§7为物品签名",
-	"nbteditor.help_8": "§6/itemfactory <factory> [<args>]：§7打开高级编辑器，可修改物品附魔、属性等",
+	"nbteditor.help_8": "§6/factory <factory> [<args>]：§7打开高级编辑器，可修改物品附魔、属性等",
 	"nbteditor.help_9": "",
 	"nbteditor.help_10": "§7获取具体功能帮助：§b/get help <nbteditor | clientchest | itemfactories>",
 	"nbteditor.help_11": "§7发送反馈：",
@@ -339,7 +338,7 @@
 	"nbteditor.help.client_chest_10": "§7--------------------",
 	
 	"nbteditor.help.item_factories_1": "§7--------------------",
-	"nbteditor.help.item_factories_2": "§6命令：/itemfactory <factory>",
+	"nbteditor.help.item_factories_2": "§6命令：/factory <factory>",
 	"nbteditor.help.item_factories_3": "§6<factory>可选值：",
 	"nbteditor.help.item_factories_4": "§6attributes: §7编辑属性修饰符",
 	"nbteditor.help.item_factories_5": "§6blockstates: §7编辑方块状态",
@@ -373,6 +372,8 @@
 	"nbteditor.credits_7": "",
 	"nbteditor.credits_8": "§6zh_cn: hyplant",
 	"nbteditor.credits_9": "§6pl_pl: Xantrisse",
+	"nbteditor.credits_10": "§6ru_ru: TheFaceJD",
+	"nbteditor.credits_11": "§6fr_fr: Darukshock",
 	
 	
 	

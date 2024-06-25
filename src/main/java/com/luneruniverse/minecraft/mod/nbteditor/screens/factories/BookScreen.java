@@ -8,14 +8,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.AlertWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
@@ -24,6 +25,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidg
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.TranslatedGroupWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore.LoreConsumer;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.client.gui.screen.ingame.BookScreen.Contents;
 import net.minecraft.client.util.math.MatrixStack;
@@ -36,7 +38,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-public class BookScreen extends ItemEditorScreen {
+public class BookScreen extends LocalEditorScreen<LocalItem> {
 	
 	private enum Generation {
 		ORIGINAL,
@@ -66,46 +68,46 @@ public class BookScreen extends ItemEditorScreen {
 	}
 	
 	private String getBookTitle() {
-		return item.getOrCreateNbt().getString("title");
+		return localNBT.getOrCreateNBT().getString("title");
 	}
 	private void setBookTitle(String title) {
-		item.getOrCreateNbt().putString("title", title);
-		item.getNbt().remove("filtered_title");
+		localNBT.getOrCreateNBT().putString("title", title);
+		localNBT.getNBT().remove("filtered_title");
 		checkSave();
 	}
 	
 	private String getAuthor() {
-		return item.getOrCreateNbt().getString("author");
+		return localNBT.getOrCreateNBT().getString("author");
 	}
 	private void setAuthor(String author) {
-		item.getOrCreateNbt().putString("author", author);
+		localNBT.getOrCreateNBT().putString("author", author);
 		checkSave();
 	}
 	
 	private Generation getGeneration() {
-		int gen = item.getOrCreateNbt().getInt("generation");
+		int gen = localNBT.getOrCreateNBT().getInt("generation");
 		if (gen < 0 || gen >= 4)
 			return Generation.TATTERED;
 		return Generation.values()[gen];
 	}
 	private void setGeneration(Generation gen) {
-		item.getOrCreateNbt().putInt("generation", gen.ordinal());
+		localNBT.getOrCreateNBT().putInt("generation", gen.ordinal());
 		checkSave();
 	}
 	
 	private int getPageCount() {
-		return item.getOrCreateNbt().getList("pages", NbtElement.STRING_TYPE).size();
+		return localNBT.getOrCreateNBT().getList("pages", NbtElement.STRING_TYPE).size();
 	}
 	private Text getPage() {
 		EditableText output = TextInst.literal("");
-		MixinLink.getActualContents(item).getPage(page).visit((style, str) -> {
+		MixinLink.getActualContents(localNBT.getItem()).getPage(page).visit((style, str) -> {
 			output.append(TextInst.literal(str).setStyle(style));
 			return Optional.empty();
 		}, Style.EMPTY);
 		return output;
 	}
 	private void setPage(Text contents) {
-		NbtList pages = item.getOrCreateNbt().getList("pages", NbtElement.STRING_TYPE);
+		NbtList pages = localNBT.getOrCreateNBT().getList("pages", NbtElement.STRING_TYPE);
 		NbtString nbtContents = NbtString.of(Text.Serialization.toJsonString(contents));
 		if (page < pages.size())
 			pages.set(page, nbtContents);
@@ -114,16 +116,16 @@ public class BookScreen extends ItemEditorScreen {
 				pages.add(NbtString.of("{\"text\":\"\"}"));
 			pages.add(nbtContents);
 		}
-		item.getNbt().put("pages", pages);
+		localNBT.getNBT().put("pages", pages);
 		
-		if (item.getNbt().contains("filtered_pages", NbtElement.COMPOUND_TYPE))
-			item.getNbt().getCompound("filtered_pages").remove(page + "");
+		if (localNBT.getNBT().contains("filtered_pages", NbtElement.COMPOUND_TYPE))
+			localNBT.getNBT().getCompound("filtered_pages").remove(page + "");
 		
 		checkSave();
 	}
 	
 	private void addPage() {
-		NbtList pages = item.getOrCreateNbt().getList("pages", NbtElement.STRING_TYPE);
+		NbtList pages = localNBT.getOrCreateNBT().getList("pages", NbtElement.STRING_TYPE);
 		if (page < pages.size()) {
 			pages.add(page, NbtString.of("{\"text\":\"\"}"));
 			checkSave();
@@ -131,7 +133,7 @@ public class BookScreen extends ItemEditorScreen {
 		}
 	}
 	private void removePage() {
-		NbtList pages = item.getOrCreateNbt().getList("pages", NbtElement.STRING_TYPE);
+		NbtList pages = localNBT.getOrCreateNBT().getList("pages", NbtElement.STRING_TYPE);
 		if (page < pages.size()) {
 			pages.remove(page);
 			checkSave();
@@ -157,7 +159,7 @@ public class BookScreen extends ItemEditorScreen {
 	}
 	
 	private Contents getPreviewItem() {
-		ItemStack output = item.copy();
+		ItemStack output = localNBT.getItem().copy();
 		if (!output.hasNbt()) {
 			return new Contents() {
 				@Override
@@ -173,7 +175,7 @@ public class BookScreen extends ItemEditorScreen {
 		NbtList pages = output.getNbt().getList("pages", NbtElement.STRING_TYPE);
 		List<Text> previewPages = new ArrayList<>();
 		for (int i = 0; i < pages.size(); i++)
-			previewPages.add(makePreviewText(Text.Serialization.fromJson(pages.getString(i))));
+			previewPages.add(makePreviewText(TextUtil.fromJsonSafely(pages.getString(i))));
 		return new Contents() {
 			@Override
 			public int getPageCount() {

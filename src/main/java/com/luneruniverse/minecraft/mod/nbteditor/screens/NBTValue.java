@@ -35,7 +35,7 @@ public class NBTValue extends List2D.List2DValue {
 	
 	
 	
-	private final NBTEditorScreen screen;
+	private final NBTEditorScreen<?> screen;
 	private final String key;
 	private NbtElement value;
 	private AbstractNbtList<?> parentList;
@@ -43,13 +43,13 @@ public class NBTValue extends List2D.List2DValue {
 	private boolean selected;
 	private boolean unsafe;
 	
-	public NBTValue(NBTEditorScreen screen, String key, NbtElement value, AbstractNbtList<?> parentList) {
+	public NBTValue(NBTEditorScreen<?> screen, String key, NbtElement value, AbstractNbtList<?> parentList) {
 		this.screen = screen;
 		this.key = key;
 		this.value = value;
 		this.parentList = parentList;
 	}
-	public NBTValue(NBTEditorScreen screen, String key, NbtElement value) {
+	public NBTValue(NBTEditorScreen<?> screen, String key, NbtElement value) {
 		this(screen, key, value, null);
 	}
 	

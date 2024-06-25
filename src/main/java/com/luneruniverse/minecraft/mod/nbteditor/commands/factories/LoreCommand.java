@@ -5,10 +5,10 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.DisplayScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -99,23 +99,23 @@ public class LoreCommand extends ClientCommand {
 			ItemStack item = heldItem.getItem();
 			
 			context.getSource().sendFeedback(TextInst.literal("[").formatted(Formatting.GRAY).append(TextInst.literal("+").formatted(Formatting.GREEN)).append(TextInst.literal("] ").formatted(Formatting.GRAY))
-					.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/itemfactory display lore add "))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/itemfactory display lore add"))))
+					.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore add "))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/factory display lore add"))))
 					.append(TextInst.literal("[").formatted(Formatting.GRAY).append(TextInst.literal("Clear").formatted(Formatting.RED)).append(TextInst.literal("] ").formatted(Formatting.GRAY))
-					.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/itemfactory display lore clear"))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/itemfactory display lore clear"))))));
+					.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore clear"))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/factory display lore clear"))))));
 			
 			Lore lore = new Lore(item);
 			int i = 0;
 			for (Text line : lore.getLore()) {
 				final int finalI = i;
 				context.getSource().sendFeedback(TextInst.literal("[").formatted(Formatting.GRAY).append(TextInst.literal("-").formatted(Formatting.RED)).append(TextInst.literal("]").formatted(Formatting.GRAY))
-						.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/itemfactory display lore remove " + finalI))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/itemfactory display lore remove " + finalI))))
+						.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore remove " + finalI))
+								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/factory display lore remove " + finalI))))
 						.append(TextInst.literal(" ").formatted(Formatting.DARK_PURPLE).formatted(Formatting.ITALIC).append(line)
 						.styled(style -> MixinLink.withRunClickEvent(style, () -> MainUtil.client.currentScreen.handleTextClick(Style.EMPTY.withClickEvent(
-									new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/itemfactory display lore set " + finalI + " " + FancyTextArgumentType.stringifyFancyText(line, true, true)))))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/itemfactory display lore set " + finalI))))));
+									new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore set " + finalI + " " + FancyTextArgumentType.stringifyFancyText(line, true, true)))))
+								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/factory display lore set " + finalI))))));
 				i++;
 			}
 			if (lore.isEmpty())
@@ -136,7 +136,7 @@ public class LoreCommand extends ClientCommand {
 				.then(literal("clear").executes(clear))
 				.then(literal("list").executes(list))
 			.executes(context -> {
-				MainUtil.client.setScreen(new DisplayScreen(ItemReference.getHeldItem()));
+				MainUtil.client.setScreen(new DisplayScreen<>(ItemReference.getHeldItem()));
 				return Command.SINGLE_SUCCESS;
 			});
 	}

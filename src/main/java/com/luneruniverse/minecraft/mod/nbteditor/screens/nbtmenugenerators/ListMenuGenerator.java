@@ -29,7 +29,7 @@ public class ListMenuGenerator<T extends NbtElement, L extends AbstractNbtList<?
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source) {
+	public List<NBTValue> getElements(NBTEditorScreen<?> screen, NbtElement source) {
 		AbstractNbtList<? extends NbtElement> nbt = (AbstractNbtList<T>) source;
 		List<NBTValue> output = new ArrayList<>();
 		for (int i = 0; i < nbt.size(); i++)
@@ -66,7 +66,7 @@ public class ListMenuGenerator<T extends NbtElement, L extends AbstractNbtList<?
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void addElement(NBTEditorScreen screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
+	public void addElement(NBTEditorScreen<?> screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
 		((AbstractNbtList<T>) source).add((T) defaultValue.copy());
 		requestOverwrite.accept(null);
 	}
@@ -85,7 +85,7 @@ public class ListMenuGenerator<T extends NbtElement, L extends AbstractNbtList<?
 	@Override
 	public void pasteElement(NbtElement source, String key, NbtElement value) {
 		AbstractNbtList<T> list = (AbstractNbtList<T>) source;
-		if (list.getHeldType() == value.getType())
+		if (list.getHeldType() == 0 || list.getHeldType() == value.getType())
 			list.add((T) value);
 		else if (list.getHeldType() == NbtElement.STRING_TYPE)
 			list.add((T) NbtString.of(value.toString()));

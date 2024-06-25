@@ -1,9 +1,10 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigButton;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem;
@@ -12,7 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 
 import net.minecraft.text.Text;
 
-public class HideFlagsScreen extends ItemEditorScreen {
+public class HideFlagsScreen extends LocalEditorScreen<LocalItem> {
 	
 	private enum Flag {
 		ENCHANTMENTS(TextInst.translatable("nbteditor.hide_flags.enchantments"), 1),
@@ -56,7 +57,7 @@ public class HideFlagsScreen extends ItemEditorScreen {
 		config.setConfigurable("disable_all", new ConfigButton(100, TextInst.translatable("nbteditor.hide_flags.show_all"), btn -> setCode(0)));
 		config.setConfigurable("enable_all", new ConfigButton(100, TextInst.translatable("nbteditor.hide_flags.hide_all"), btn -> setCode(127)));
 		
-		int code = item.getOrCreateNbt().getInt("HideFlags");
+		int code = localNBT.getOrCreateNBT().getInt("HideFlags");
 		for (Flag flag : Flag.values())
 			config.setConfigurable(flag.name(), new ConfigItem<>(flag.getText(), new ConfigValueBoolean(flag.isEnabled(code), false, 100, ScreenTexts.ON, ScreenTexts.OFF)));
 		
@@ -66,7 +67,7 @@ public class HideFlagsScreen extends ItemEditorScreen {
 				if (((ConfigItem<ConfigValueBoolean>) config.getConfigurable(flag.name())).getValue().getValidValue())
 					newCode = flag.toggle(newCode);
 			}
-			item.getOrCreateNbt().putInt("HideFlags", newCode);
+			localNBT.getOrCreateNBT().putInt("HideFlags", newCode);
 			checkSave();
 		});
 	}
@@ -77,8 +78,8 @@ public class HideFlagsScreen extends ItemEditorScreen {
 	}
 	
 	@Override
-	protected FactoryLink getFactoryLink() {
-		return new FactoryLink("nbteditor.display", DisplayScreen::new);
+	protected FactoryLink<LocalItem> getFactoryLink() {
+		return new FactoryLink<>("nbteditor.display", DisplayScreen::new);
 	}
 	
 	@Override

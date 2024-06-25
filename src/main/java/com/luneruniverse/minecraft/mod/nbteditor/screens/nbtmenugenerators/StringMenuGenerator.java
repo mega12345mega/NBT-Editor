@@ -19,7 +19,7 @@ public class StringMenuGenerator implements MenuGenerator {
 	public static final List<Thread> STR_BOOL_REQUESTED = new ArrayList<>();
 	
 	@Override
-	public List<NBTValue> getElements(NBTEditorScreen screen, NbtElement source) {
+	public List<NBTValue> getElements(NBTEditorScreen<?> screen, NbtElement source) {
 		NbtElement nbt = getRealNbt(source);
 		if (nbt == null)
 			return null;
@@ -53,7 +53,7 @@ public class StringMenuGenerator implements MenuGenerator {
 	}
 	
 	@Override
-	public void addElement(NBTEditorScreen screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
+	public void addElement(NBTEditorScreen<?> screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
 		NbtElement nbt = getRealNbt(source);
 		if (nbt == null)
 			return;

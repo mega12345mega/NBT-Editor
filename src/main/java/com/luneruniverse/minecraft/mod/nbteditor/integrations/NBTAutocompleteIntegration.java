@@ -6,17 +6,20 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mt1006.nbt_ac.autocomplete.NbtSuggestionManager;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.util.Identifier;
 
 public class NBTAutocompleteIntegration extends Integration {
 	
@@ -33,7 +36,7 @@ public class NBTAutocompleteIntegration extends Integration {
 		return "nbt_ac";
 	}
 	
-	public CompletableFuture<Suggestions> getSuggestions(ItemStack item, List<String> path, String key, String value, int cursor, Collection<String> otherTags) {
+	private CompletableFuture<Suggestions> getSuggestions(String type, Identifier id, NbtElement nbt, List<String> path, String key, String value, int cursor, Collection<String> otherTags) {
 		if (value != null && otherTags != null)
 			throw new IllegalArgumentException("Both value and otherTags can't be non-null at the same time!");
 		if (key == null && value == null)
@@ -52,7 +55,6 @@ public class NBTAutocompleteIntegration extends Integration {
 			return new SuggestionsBuilder("", 0).buildFuture();
 		
 		StringBuilder pathBuilder = new StringBuilder();
-		NbtElement nbt = item.getNbt();
 		if (nbt != null) {
 			for (String piece : path) {
 				if (nbt instanceof NbtCompound compound) {
@@ -71,20 +73,27 @@ public class NBTAutocompleteIntegration extends Integration {
 		if (key != null) {
 			if (nbt instanceof NbtCompound)
 				pathBuilder.append('{');
+			else if (nbt instanceof NbtList)
+				pathBuilder.append('[');
 			else
 				return new SuggestionsBuilder("", 0).buildFuture();
 			fieldStart = pathBuilder.length();
-			pathBuilder.append(key);
+			
+			if (nbt instanceof NbtCompound)
+				pathBuilder.append(key);
+			
 			if (value != null) {
-				pathBuilder.append(':');
-				fieldStart = pathBuilder.length();
+				if (nbt instanceof NbtCompound) {
+					pathBuilder.append(':');
+					fieldStart = pathBuilder.length();
+				}
 				pathBuilder.append(value);
 			}
 		} else
 			pathBuilder.append(value);
 		String pathStr = pathBuilder.toString();
 		
-		String suggestionId = "item/" + MVRegistry.ITEM.getId(item.getItem());
+		String suggestionId = type + "/" + id;
 		SuggestionsBuilder builder = new SuggestionsBuilder(pathStr, 0);
 		final int fieldStartFinal = fieldStart;
 		final String valueFinal = value;
@@ -104,8 +113,18 @@ public class NBTAutocompleteIntegration extends Integration {
 			return new Suggestions(shiftRange(suggestions.getRange(), -fieldStartFinal), shiftedSuggestions);
 		});
 	}
-	public CompletableFuture<Suggestions> getSuggestions(ItemStack item, List<String> path, String key, String value, int cursor) {
-		return getSuggestions(item, path, key, value, cursor, null);
+	
+	public CompletableFuture<Suggestions> getSuggestions(LocalNBT nbt, List<String> path, String key, String value, int cursor, Collection<String> otherTags) {
+		if (nbt instanceof LocalItem)
+			return getSuggestions("item", nbt.getId(), nbt.getNBT(), path, key, value, cursor, otherTags);
+		if (nbt instanceof LocalBlock)
+			return getSuggestions("block", nbt.getId(), nbt.getNBT(), path, key, value, cursor, otherTags);
+		if (nbt instanceof LocalEntity)
+			return getSuggestions("entity", nbt.getId(), nbt.getNBT(), path, key, value, cursor, otherTags);
+		return new SuggestionsBuilder("", 0).buildFuture();
+	}
+	public CompletableFuture<Suggestions> getSuggestions(LocalNBT nbt, List<String> path, String key, String value, int cursor) {
+		return getSuggestions(nbt, path, key, value, cursor, null);
 	}
 	
 }

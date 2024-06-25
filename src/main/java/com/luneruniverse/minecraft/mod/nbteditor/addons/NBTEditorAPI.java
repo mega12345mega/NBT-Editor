@@ -10,23 +10,32 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.FactoryCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetPresetCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.BlockContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.BlockEntityTagContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.EntityContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.EntityTagContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ItemContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.ItemFactoryScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.entity.EntityType;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtType;
@@ -47,14 +56,14 @@ public class NBTEditorAPI {
 	}
 	
 	/**
-	 * Register an advanced item factory<br>
+	 * Register an advanced factory<br>
 	 * Allows for inputting arguments<br>
 	 * Keep in mind NBT Editor uses a modified version of Fabric's command API to support multiple Minecraft versions<br>
 	 * Refer to the {@link com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands} package<br>
 	 * Example usage:<br>
 	 * <pre>
 	 * <code>
-	 * NBTEditorAPI.registerAdvancedItemFactory("myfactory", builder -> {
+	 * NBTEditorAPI.registerAdvancedFactory("myfactory", builder -> {
 	 * 	builder.executes(context -> {
 	 * 		ItemReference ref = MainUtil.getHeldItem();
 	 * 		ItemStack item = ref.getItem();
@@ -65,13 +74,13 @@ public class NBTEditorAPI {
 	 * });
 	 * </code>
 	 * </pre>
-	 * @param name The name of the item factory (used in the itemfactory command)
+	 * @param name The name of the factory (used in the factory command)
 	 * @param extremeAlias The extreme alias
-	 * @param onRegister A consumer for the {@code /itemfactory <name>} argument builder
-	 * @see #registerItemFactory(String, Consumer)
-	 * @see #registerItemFactory(String, Text, Consumer)
+	 * @param onRegister A consumer for the {@code /factory <name>} argument builder
+	 * @see #registerFactory(String, Consumer)
+	 * @see #registerFactory(String, Text, Consumer)
 	 */
-	public static void registerAdvancedItemFactory(String name, String extremeAlias, Consumer<LiteralArgumentBuilder<FabricClientCommandSource>> onRegister) {
+	public static void registerAdvancedFactory(String name, String extremeAlias, Consumer<LiteralArgumentBuilder<FabricClientCommandSource>> onRegister) {
 		FactoryCommand.INSTANCE.getChildren().add(new ClientCommand() {
 			@Override
 			public String getName() {
@@ -89,33 +98,40 @@ public class NBTEditorAPI {
 	}
 	
 	/**
-	 * Register a normal item factory
-	 * @param name The name of the item factory (used in the itemfactory command)
+	 * Register a normal factory
+	 * @param name The name of the factory (used in the factory command)
 	 * @param extremeAlias The extreme alias
-	 * @param factory A consumer for the {@link ItemReference} the factory is called on
-	 * @see #registerItemFactory(String, Text, Consumer)
-	 * @see #registerAdvancedItemFactory(String, Consumer)
+	 * @param factory A consumer for the {@link NBTReference} the factory is called on
+	 * @see #registerFactory(String, Text, Consumer)
+	 * @see #registerAdvancedFactory(String, Consumer)
 	 */
-	public static void registerItemFactory(String name, String extremeAlias, Consumer<ItemReference> factory) {
-		registerAdvancedItemFactory(name, extremeAlias, builder -> builder.executes(context -> {
-			factory.accept(ItemReference.getHeldItem());
+	public static void registerFactory(String name, String extremeAlias, Consumer<NBTReference<?>> factory) {
+		registerAdvancedFactory(name, extremeAlias, builder -> builder.executes(context -> {
+			NBTReference.getReference(NBTReferenceFilter.ANY, false, factory);
 			return Command.SINGLE_SUCCESS;
 		}));
 	}
 	
 	/**
-	 * Register a normal item factory, adding it to the factory gui
-	 * @param name The name of the item factory (used in the itemfactory command)
+	 * Register a normal factory, adding it to the factory gui
+	 * @param name The name of the factory (used in the factory command)
 	 * @param extremeAlias The extreme alias
-	 * @param buttonMsg The text to display in the itemfactory gui
-	 * @param supported If the button should display for the current item
-	 * @param factory A consumer for the {@link ItemReference} the factory is called on
-	 * @see #registerItemFactory(String, Consumer)
-	 * @see #registerAdvancedItemFactory(String, Consumer)
+	 * @param buttonMsg The text to display in the factory gui
+	 * @param supported If the factory supports the particular reference (item vs. entity, etc.)
+	 * @param unsupportedMsg The message to show in chat if the command is called on an unsupported reference
+	 * @param factory A consumer for the {@link NBTReference} the factory is called on
+	 * @see #registerFactory(String, Consumer)
+	 * @see #registerAdvancedFactory(String, Consumer)
 	 */
-	public static void registerItemFactory(String name, String extremeAlias, Text buttonMsg, Predicate<ItemReference> supported, Consumer<ItemReference> factory) {
-		registerItemFactory(name, extremeAlias, factory);
-		ItemFactoryScreen.BASIC_FACTORIES.add(new ItemFactoryScreen.ItemFactoryReference(buttonMsg, supported, factory));
+	public static void registerFactory(String name, String extremeAlias, Text buttonMsg,
+			Predicate<NBTReference<?>> supported, Text unsupportedMsg, Consumer<NBTReference<?>> factory) {
+		registerFactory(name, extremeAlias, ref -> {
+			if (supported.test(ref))
+				factory.accept(ref);
+			else if (MainUtil.client.player != null)
+				MainUtil.client.player.sendMessage(unsupportedMsg, false);
+		});
+		LocalFactoryScreen.BASIC_FACTORIES.add(new LocalFactoryScreen.LocalFactoryReference(buttonMsg, supported, factory));
 	}
 	
 	/**
@@ -125,7 +141,7 @@ public class NBTEditorAPI {
 	 * @param name The name of the item that will be received (used in the get command)
 	 * @param extremeAlias The extreme alias
 	 * @param onRegister A consumer for the {@code /get <name>} argument builder
-	 * @see #registerAdvancedItemFactory(String, Consumer) An example of using onRegister
+	 * @see #registerAdvancedFactory(String, Consumer) An example of using onRegister
 	 * @see MainUtil#getWithMessage(ItemStack)
 	 */
 	public static void registerGetCommand(String name, String extremeAlias, Consumer<LiteralArgumentBuilder<FabricClientCommandSource>> onRegister) {
@@ -188,9 +204,67 @@ public class NBTEditorAPI {
 	 * This is used with the {@code /open} command to edit special containers (like item frames)
 	 * @param item The item that this container applies to
 	 * @param container The container reader and writer
+	 * @see #registerBlockContainer(Block, BlockContainerIO)
+	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
 	 */
-	public static void registerContainer(Item item, ContainerIO container) {
-		ContainerIO.registerContainer(item, container);
+	public static void registerItemContainer(Item item, ItemContainerIO container) {
+		ContainerIO.registerItemIO(item, container);
+	}
+	/**
+	 * Register a container<br>
+	 * This is used with the {@code /open} command to edit special containers (like item frames)
+	 * @param block The block that this container applies to
+	 * @param container The container reader and writer
+	 * @see #registerItemContainer(Item, ItemContainerIO)
+	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 */
+	public static void registerBlockContainer(Block block, BlockContainerIO container) {
+		ContainerIO.registerBlockIO(block, container);
+	}
+	/**
+	 * Register a container<br>
+	 * This is used with the {@code /open} command to edit special containers (like item frames)
+	 * @param entity The entity that this container applies to, including spawn eggs of this type
+	 * @param container The container reader and writer
+	 * @see #registerItemContainer(Item, ItemContainerIO)
+	 * @see #registerBlockContainer(Block, BlockContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 */
+	public static void registerEntityContainer(EntityType<?> entity, EntityContainerIO container) {
+		ContainerIO.registerEntityIO(entity, container);
+	}
+	/**
+	 * Register a container<br>
+	 * This is used with the {@code /open} command to edit special containers (like item frames)
+	 * @param blockItem The item and block that this container applies to
+	 * @param container The container reader and writer
+	 * @see #registerItemContainer(Item, ItemContainerIO)
+	 * @see #registerBlockContainer(Block, BlockContainerIO)
+	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 */
+	public static void registerBlockEntityTagContainer(BlockItem blockItem, BlockEntityTagContainerIO container) {
+		ContainerIO.registerBlockEntityTagIO(blockItem, container);
+	}
+	/**
+	 * Register a container<br>
+	 * This is used with the {@code /open} command to edit special containers (like item frames)<br>
+	 * DO NOT pass in the spawn egg to <code>item</code>; use {@link #registerEntityContainer(EntityType, EntityContainerIO)}
+	 * @param item The item that this container applies to
+	 * @param entity The entity that this container applies to, including spawn eggs of this type
+	 * @param container The container reader and writer
+	 * @see #registerItemContainer(Item, ItemContainerIO)
+	 * @see #registerBlockContainer(Block, BlockContainerIO)
+	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
+	 */
+	public static void registerEntityTagContainer(Item item, EntityType<?> entity, EntityTagContainerIO container) {
+		ContainerIO.registerEntityTagIO(item, entity, container);
 	}
 	
 	/**

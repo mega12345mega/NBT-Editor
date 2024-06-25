@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ExtendableButtonWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -48,7 +48,7 @@ public class ConfigValueDropdown<T> extends ExtendableButtonWidget implements Co
 	
 	@Override
 	public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		float[] translation = MVMisc.getTranslation(matrices);
+		float[] translation = MVMatrix4f.getTranslation(matrices);
 		matrices.push();
 		matrices.translate(0.0, 0.0, (MainUtil.client.getWindow().getScaledHeight() - translation[1]) / 20);
 		

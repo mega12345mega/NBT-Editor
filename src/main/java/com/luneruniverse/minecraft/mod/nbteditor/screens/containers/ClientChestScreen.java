@@ -6,11 +6,11 @@ import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ClientChestItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ClientChestItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
@@ -135,7 +135,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 		pageField.setMaxLength((NBTEditorClient.CLIENT_CHEST.getPageCount() + "").length());
 		pageField.setText((PAGE + 1) + "");
 		pageField.setChangedListener(str -> {
-			if (str.isEmpty())
+			if (str.isEmpty() || str.equals("+"))
 				return;
 			
 			int intVal = Integer.parseInt(str);
@@ -181,7 +181,11 @@ public class ClientChestScreen extends ClientHandledScreen {
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 68, 83, 20, ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"), btn -> {
 			navigationClicked = true;
-			ConfigScreen.setLockSlots(!ConfigScreen.isLockSlots());
+			if (ConfigScreen.isLockSlotsRequired()) {
+				btn.active = false;
+				ConfigScreen.setLockSlots(true);
+			} else
+				ConfigScreen.setLockSlots(!ConfigScreen.isLockSlots());
 			btn.setMessage(ConfigScreen.isLockSlots() ? TextInst.translatable("nbteditor.client_chest.slots.unlock") : TextInst.translatable("nbteditor.client_chest.slots.lock"));
 		})).active = !ConfigScreen.isLockSlotsRequired();
 		
@@ -293,8 +297,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 		save();
 	}
 	@Override
-	public boolean lockSlots() {
-		return ConfigScreen.isLockSlots();
+	public SlotLockType getSlotLockType() {
+		return ConfigScreen.isLockSlots() ? SlotLockType.ITEMS_LOCKED : SlotLockType.UNLOCKED;
 	}
 	@Override
 	public ItemStack[] getPrevInventory() {

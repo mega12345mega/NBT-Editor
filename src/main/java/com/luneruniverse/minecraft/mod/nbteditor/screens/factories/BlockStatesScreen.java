@@ -1,58 +1,73 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
-import com.luneruniverse.minecraft.mod.nbteditor.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ItemEditorScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.BlockItem;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.state.property.Property;
 
-public class BlockStatesScreen extends ItemEditorScreen {
+public class BlockStatesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	private final ConfigCategory blockStates;
 	private final boolean hasBlockStates;
 	private ConfigPanel panel;
 	
-	public BlockStatesScreen(ItemReference ref) {
+	public BlockStatesScreen(NBTReference<L> ref) {
 		super(TextInst.of("Block States"), ref);
 		
-		BlockState defaultState = ((BlockItem) item.getItem()).getBlock().getDefaultState();
+		BlockStateProperties defaultState;
+		BlockStateProperties state;
+		Set<String> unset = new HashSet<>();
+		if (localNBT instanceof LocalItem item) {
+			defaultState = new BlockStateProperties(((BlockItem) item.getItem().getItem()).getBlock().getDefaultState());
+			state = defaultState.copy();
+			unset = state.setValues(localNBT.getOrCreateNBT().getCompound("BlockStateTag"));
+		} else if (localNBT instanceof LocalBlock block) {
+			defaultState = new BlockStateProperties(block.getBlock().getDefaultState());
+			state = block.getState();
+		} else
+			throw new IllegalStateException("BlockStatesScreen doesn't support " + localNBT.getClass().getName());
 		this.hasBlockStates = !defaultState.getProperties().isEmpty();
 		this.blockStates = new ConfigCategory(this.hasBlockStates ? TextInst.translatable("nbteditor.block_states") : null);
 		
-		NbtCompound nbt = item.getOrCreateNbt();
-		NbtCompound blockStatesNbt = nbt.getCompound("BlockStateTag");
-		
-		for (Property<?> property : defaultState.getProperties()) {
-			String thisState = Optional.of(blockStatesNbt.getString(property.getName())).filter(state -> !state.isEmpty()).orElse("unset");
+		for (String property : defaultState.getProperties()) {
+			String value = (unset.contains(property) ? "unset" : state.getValue(property));
 			
-			List<String> options = property.getValues().stream().map(Object::toString).collect(Collectors.toList());
-			options.add(0, "unset");
-			if (!options.contains(thisState))
-				thisState = "unset";
+			List<String> options = new ArrayList<>(defaultState.getOptions(property));
+			if (localNBT instanceof LocalItem)
+				options.add(0, "unset");
 			
-			blockStates.setConfigurable(property.getName(), new ConfigItem<>(TextInst.literal(property.getName()),
-				new ConfigValueDropdown<>(thisState, defaultState.get(property).toString(), options)
+			blockStates.setConfigurable(property, new ConfigItem<>(TextInst.literal(property),
+				new ConfigValueDropdown<>(value, defaultState.getValue(property), options)
 				.addValueListener(dropdown -> {
-					String value = dropdown.getValidValue();
+					String newValue = dropdown.getValidValue();
 					
-					if (value.equals("unset"))
-						blockStatesNbt.remove(property.getName());
-					else
-						blockStatesNbt.putString(property.getName(), value);
-					nbt.put("BlockStateTag", blockStatesNbt);
+					if (localNBT instanceof LocalItem item) {
+						NbtCompound blockStatesTag = item.getOrCreateNBT().getCompound("BlockStateTag");
+						if (newValue.equals("unset"))
+							blockStatesTag.remove(property);
+						else
+							blockStatesTag.putString(property, newValue);
+						item.getNBT().put("BlockStateTag", blockStatesTag);
+					} else if (localNBT instanceof LocalBlock) {
+						state.setValue(property, newValue);
+					}
 					
 					checkSave();
 				})));

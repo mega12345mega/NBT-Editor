@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
@@ -31,13 +32,14 @@ import net.minecraft.util.Formatting;
 
 public class TextUtil {
 	
-	public static EditableText getLongTranslatableText(String key) {
-		EditableText output = TextInst.translatable(key + "_1");
-		for (int i = 2; true; i++) {
+	public static List<Text> getLongTranslatableTextLines(String key) {
+		List<Text> lines = new ArrayList<>();
+		for (int i = 1; i <= 50; i++) {
 			Text line = TextInst.translatable(key + "_" + i);
 			String str = line.getString();
-			if (str.equals(key + "_" + i) || i > 50)
+			if (str.equals(key + "_" + i))
 				break;
+			
 			if (str.startsWith("[LINK] ")) {
 				String url = str.substring("[LINK] ".length());
 				line = TextInst.literal(url).styled(style -> style.withClickEvent(new ClickEvent(Action.OPEN_URL, url))
@@ -47,8 +49,17 @@ public class TextUtil {
 				String toFormat = str.substring("[FORMAT] ".length());
 				line = parseFormattedText(toFormat);
 			}
-			output.append("\n").append(line);
+			lines.add(line);
 		}
+		return lines;
+	}
+	public static Text getLongTranslatableText(String key) {
+		List<Text> lines = getLongTranslatableTextLines(key);
+		if (lines.isEmpty())
+			return TextInst.of(key);
+		EditableText output = TextInst.copy(lines.get(0));
+		for (int i = 1; i < lines.size(); i++)
+			output.append("\n").append(lines.get(i));
 		return output;
 	}
 	
@@ -165,12 +176,15 @@ public class TextUtil {
 	}
 	
 	public static boolean isTextFormatted(Text text, boolean allowNonNull) {
-		return isTextFormatted(Text.Serialization.toJsonTree(text).getAsJsonObject(), allowNonNull);
+		return isTextFormatted(Text.Serialization.toJsonTree(text), allowNonNull);
 	}
-	private static boolean isTextFormatted(JsonObject data, boolean allowNonNull) {
+	private static boolean isTextFormatted(JsonElement dataElement, boolean allowNonNull) {
+		if (!(dataElement instanceof JsonObject data))
+			return false;
+		
 		if (data.has("extra")) {
 			for (JsonElement part : data.get("extra").getAsJsonArray()) {
-				if (isTextFormatted(part.getAsJsonObject(), allowNonNull))
+				if (isTextFormatted(part, allowNonNull))
 					return true;
 			}
 		}
@@ -257,6 +271,15 @@ public class TextUtil {
 			return Optional.empty();
 		});
 		return output.getPlain();
+	}
+	
+	public static Text fromJsonSafely(String json) {
+		try {
+			Text output = Text.Serialization.fromJson(json);
+			if (output != null)
+				return output;
+		} catch (JsonParseException e) {}
+		return TextInst.of(json);
 	}
 	
 }

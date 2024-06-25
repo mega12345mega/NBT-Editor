@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
@@ -52,7 +51,7 @@ public abstract class TextFieldWidgetMixin implements Tickable {
 	private VertexConsumer vertex(BufferBuilder buffer, double x, double y, double z) {
 		if (NamedTextFieldWidget.matrix == null)
 			return buffer.vertex(x, y, z);
-		return MVMisc.vertex(buffer, NamedTextFieldWidget.matrix, (float) x, (float) y, (float) z);
+		return NamedTextFieldWidget.matrix.applyToVertex(buffer, (float) x, (float) y, (float) z);
 	}
 	
 	private static final Supplier<Reflection.FieldReference> TextFieldWidget_focusedTicks =
