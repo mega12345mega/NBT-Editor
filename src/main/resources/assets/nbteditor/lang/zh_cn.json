@@ -173,8 +173,8 @@
 	"nbteditor.keybind.page.shift": "§6§lSHIFT + ",
 	"nbteditor.keybind.page.next": "§6下一页",
 	"nbteditor.keybind.page.prev": "§6上一页",
-	"nbteditor.keybind.page.next_jump": "\n§6翻到下一页",
-	"nbteditor.keybind.page.prev_jump": "\n§6翻到上一页",
+	"nbteditor.keybind.page.next_jump": "\n§6下一非空页",
+	"nbteditor.keybind.page.prev_jump": "\n§6上一非空页",
 	
 	"nbteditor.unbind_skull.no_textures": "该玩家模型未加载任何贴图",
 	"nbteditor.unbind_skull.unbound": "§a玩家模型未绑定！",
@@ -231,12 +231,12 @@
 	"nbteditor.book.preview.click.value": "动作值：%s",
 	
 	"nbteditor.signboard": "告示牌（方块）",
-	"nbteditor.signboard.side.front": "正",
-	"nbteditor.signboard.side.back": "背",
-	"nbteditor.signboard.wax.enabled": "蜡",
-	"nbteditor.signboard.wax.disabled": "无",
-	"nbteditor.signboard.glowing.enabled": "光",
-	"nbteditor.signboard.glowing.disabled": "暗",
+	"nbteditor.signboard.side.front": "编辑正面",
+	"nbteditor.signboard.side.back": "编辑背面",
+	"nbteditor.signboard.wax.enabled": "涂蜡",
+	"nbteditor.signboard.wax.disabled": "未涂蜡",
+	"nbteditor.signboard.glowing.enabled": "发光",
+	"nbteditor.signboard.glowing.disabled": "不发光",
 	"nbteditor.signboard.glowing.desc": "按 SHIFT 打开颜色选择器",
 	"nbteditor.signboard.import.success": "§a告示牌更改为：%s",
 	"nbteditor.signboard.import.fail": "§c告示牌已经是 %s",
@@ -370,7 +370,7 @@
 	"nbteditor.config.enchant_glint_fix.enabled": "启用修复",
 	"nbteditor.config.enchant_glint_fix.disabled": "禁用修复",
 	"nbteditor.config.recreate_blocks_and_entities": "重新创建方块和实体",
-	"nbteditor.config.recreate_blocks_and_entities.desc": " 由于 MC-128225，当移除某些标签时，目标不会正确更新\n因为标签丢失后并不会主动清除数据\n启用修复后，目标会被重新生成，而不是直接编辑\n可能会产生其他副作用",
+	"nbteditor.config.recreate_blocks_and_entities.desc": "由于 MC-128225，当移除某些标签时，目标不会正确更新\n因为标签丢失后并不会主动清除数据\n启用修复后，目标会被重新生成，而不是直接编辑\n可能会产生其他副作用",
 	"nbteditor.config.recreate_blocks_and_entities.enabled": "启用修复",
 	"nbteditor.config.recreate_blocks_and_entities.disabled": "禁用修复",
 	
@@ -407,7 +407,7 @@
 	"nbteditor.help_11": "§7获取指定功能的使用指南：§b/get help <nbteditor | clientchest | factories | textformat>",
 	"nbteditor.help_12": "",
 	"nbteditor.help_13": "§7获取功能列表：",
-	"nbteditor.help_14": "[网页链接] https://github.com/mega12345mega/NBT-Editor/wiki/List-of-Every-Feature",
+	"nbteditor.help_14": "[LINK] https://github.com/mega12345mega/NBT-Editor/wiki/List-of-Every-Feature",
 	"nbteditor.help_15": "§7发送反馈：",
 	"nbteditor.help_16": "[网页链接] https://github.com/mega12345mega/NBT-Editor/issues",
 	"nbteditor.help_17": "§7Discord 服务器：",
@@ -494,8 +494,8 @@
 	"nbteditor.hdb.category.humanoid": "人型生物",
 	"nbteditor.hdb.category.miscellaneous": "杂项",
 	"nbteditor.hdb.category.monsters": "怪物",
-	"nbteditor.hdb.category.plants": "植物"
+	"nbteditor.hdb.category.plants": "植物",
 	
 	
-	"nbteditor.lang.zh_cn.version": "2.0.0",
+	"nbteditor.lang.zh_cn.version": "2.0.0"
 }
