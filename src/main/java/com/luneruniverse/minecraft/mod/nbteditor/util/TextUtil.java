@@ -176,7 +176,7 @@ public class TextUtil {
 	}
 	
 	public static boolean isTextFormatted(Text text, boolean allowNonNull) {
-		return isTextFormatted(Text.Serialization.toJsonTree(text), allowNonNull);
+		return isTextFormatted(TextInst.toJsonTree(text), allowNonNull);
 	}
 	private static boolean isTextFormatted(JsonElement dataElement, boolean allowNonNull) {
 		if (!(dataElement instanceof JsonObject data))
@@ -275,7 +275,7 @@ public class TextUtil {
 	
 	public static Text fromJsonSafely(String json) {
 		try {
-			Text output = Text.Serialization.fromJson(json);
+			Text output = TextInst.fromJson(json);
 			if (output != null)
 				return output;
 		} catch (JsonParseException e) {}

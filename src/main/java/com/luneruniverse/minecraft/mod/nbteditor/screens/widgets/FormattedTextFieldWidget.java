@@ -578,7 +578,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		
 		@Override
 		protected String onCopy(String text, int pos, int len) {
-			return Text.Serialization.toJsonString(TextUtil.substring(this.text, pos, pos + len));
+			return TextInst.toJsonString(TextUtil.substring(this.text, pos, pos + len));
 		}
 		
 		@Override

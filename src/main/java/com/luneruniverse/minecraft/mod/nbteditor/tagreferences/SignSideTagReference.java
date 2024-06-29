@@ -7,13 +7,16 @@ import net.minecraft.text.Text;
 
 public class SignSideTagReference extends TagReference {
 	
-	@RefersTo(max = "1.19.4", path = "GlowingText")
 	@RefersTo(min = "1.20.0", path = "has_glowing_text")
+	@RefersTo(max = "1.19.4", path = "GlowingText")
 	public boolean glowing;
 	
-	@RefersTo(max = "1.19.4", path = "Color")
 	@RefersTo(min = "1.20.0", path = "color")
+	@RefersTo(max = "1.19.4", path = "Color")
 	public String color;
+	
+	@RefersTo(min = "1.20.0", path = "messages")
+	private Text[] messages;
 	
 	@RefersTo(max = "1.19.4", path = "Text1")
 	private Text text1;
@@ -24,39 +27,36 @@ public class SignSideTagReference extends TagReference {
 	@RefersTo(max = "1.19.4", path = "Text4")
 	private Text text4;
 	
-	@RefersTo(min = "1.20.0", path = "messages")
-	private Text[] messages;
-	
-	@RefersToProxy(max = "1.19.4", value = "[Text1, Text2, Text3, Text4]")
 	@RefersToProxy(min = "1.20.0", value = "messages")
+	@RefersToProxy(max = "1.19.4", value = "[Text1, Text2, Text3, Text4]")
 	public Text[] text;
 	
 	public SignSideTagReference(int[] version) {
 		super(version);
 	}
 	public SignSideTagReference() {
-		this(Version.get());
+		super();
 	}
 	
 	@Override
 	public void load(NbtCompound nbt) {
 		super.load(nbt);
 		text = Version.<Text[]>newSwitch(version)
-				.range(null, "1.19.4", () -> new Text[] {text1, text2, text3, text4})
 				.range("1.20.0", null, () -> messages)
+				.range(null, "1.19.4", () -> new Text[] {text1, text2, text3, text4})
 				.get();
 	}
 	
 	@Override
 	public void save(NbtCompound nbt) {
 		Version.newSwitch(version)
+				.range("1.20.0", null, () -> messages = text)
 				.range(null, "1.19.4", () -> {
 					text1 = text[0];
 					text2 = text[1];
 					text3 = text[2];
 					text4 = text[3];
 				})
-				.range("1.20.0", null, () -> messages = text)
 				.run();
 		super.save(nbt);
 	}

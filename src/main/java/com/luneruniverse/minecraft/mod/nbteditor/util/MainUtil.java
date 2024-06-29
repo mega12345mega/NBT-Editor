@@ -27,6 +27,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.fabricmc.fabric.api.event.Event;
@@ -43,7 +44,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
@@ -246,7 +246,7 @@ public class MainUtil {
 	public static Text getNbtNameSafely(NbtCompound nbt, String key, Supplier<Text> defaultName) {
 		if (nbt != null && nbt.contains(key, NbtElement.STRING_TYPE)) {
             try {
-                MutableText text = Text.Serialization.fromJson(nbt.getString(key));
+                Text text = TextInst.fromJson(nbt.getString(key));
                 if (text != null)
                     return text;
             } catch (JsonParseException e) {}
@@ -298,18 +298,17 @@ public class MainUtil {
 	public static ItemStack copyAirable(ItemStack item) {
 		ItemStack output = new ItemStack(item.getItem(), item.getCount());
 		output.setBobbingAnimationTime(item.getBobbingAnimationTime());
-		if (item.getNbt() != null)
-			output.setNbt(item.getNbt().copy());
+		if (item.manager$hasNbt())
+			output.manager$setNbt(item.manager$getNbt());
 		return output;
 	}
 	
 	
 	public static ItemStack setType(Item type, ItemStack item, int count) {
-		NbtCompound fullData = new NbtCompound();
-		item.writeNbt(fullData);
+		NbtCompound fullData = item.manager$serialize();
 		fullData.putString("id", MVRegistry.ITEM.getId(type).toString());
-		fullData.putInt("Count", count);
-		return ItemStack.fromNbt(fullData);
+		fullData.putInt(NBTManagers.COMPONENTS_EXIST ? "count" : "Count", count);
+		return NBTManagers.ITEM.deserialize(fullData);
 	}
 	public static ItemStack setType(Item type, ItemStack item) {
 		return setType(type, item, item.getCount());

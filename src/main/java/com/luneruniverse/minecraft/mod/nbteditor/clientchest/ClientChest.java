@@ -19,6 +19,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.item.ItemStack;
@@ -114,7 +115,7 @@ public abstract class ClientChest {
 		boolean empty = true;
 		int i = -1;
 		for (NbtElement item : pageNbt) {
-			items[++i] = ItemStack.fromNbt((NbtCompound) item);
+			items[++i] = NBTManagers.ITEM.deserialize((NbtCompound) item);
 			if (empty && items[i] != null && !items[i].isEmpty())
 				empty = false;
 		}
@@ -186,7 +187,7 @@ public abstract class ClientChest {
 		NbtCompound nbt = new NbtCompound();
 		NbtList pageNbt = new NbtList();
 		for (int i = 0; i < items.length; i++)
-			pageNbt.add((items[i] == null ? ItemStack.EMPTY : items[i]).writeNbt(new NbtCompound()));
+			pageNbt.add((items[i] == null ? ItemStack.EMPTY : items[i]).manager$serialize());
 		nbt.put("items", pageNbt);
 		try {
 			MixinLink.throwHiddenException(() -> MVMisc.writeNbt(nbt, file));

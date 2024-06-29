@@ -6,10 +6,8 @@ import java.util.function.Supplier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.vehicle.StorageMinecartEntity;
 import net.minecraft.entity.vehicle.VehicleInventory;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -29,18 +27,6 @@ public class ServerMVMisc {
 		return Version.<Boolean>newSwitch()
 				.range("1.19.0", null, () -> factory instanceof VehicleInventory)
 				.range(null, "1.18.2", () -> factory instanceof StorageMinecartEntity)
-				.get();
-	}
-	
-	private static final Supplier<Reflection.MethodInvoker> BlockEntity_writeNbt =
-			Reflection.getOptionalMethod(BlockEntity.class, "method_11007", MethodType.methodType(NbtCompound.class, NbtCompound.class));
-	public static NbtCompound createNbt(BlockEntity blockEntity) {
-		return Version.<NbtCompound>newSwitch()
-				.range("1.18.0", null, () -> blockEntity.createNbt())
-				.range(null, "1.17.1", () -> {
-					ServerMixinLink.BLOCK_ENTITY_WRITE_NBT_WITHOUT_IDENTIFYING_DATA.add(Thread.currentThread());
-					return BlockEntity_writeNbt.get().invoke(blockEntity, new NbtCompound());
-				})
 				.get();
 	}
 	

@@ -64,7 +64,7 @@ public class LocalEntity implements LocalNBT {
 		if (name == null)
 			getOrCreateNBT().remove("CustomName");
 		else
-			getOrCreateNBT().putString("CustomName", Text.Serialization.toJsonString(name));
+			getOrCreateNBT().putString("CustomName", TextInst.toJsonString(name));
 	}
 	@Override
 	public String getDefaultName() {

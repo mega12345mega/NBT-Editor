@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nbteditor",
-  "version": "2.0.0",
+  "version": "2.0.1.999",
 
   "name": "NBT Editor",
   "description": "Lets you edit items, blocks, and entities ingame, store items in a client side chest, open containers in your inventory, and more!",
@@ -60,7 +60,8 @@
       "net/minecraft/class_342": ["com/luneruniverse/minecraft/mod/nbteditor/screens/InjectableTickable"],
       "net/minecraft/class_364": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVElementParent"],
       "net/minecraft/class_2945": ["com/luneruniverse/minecraft/mod/nbteditor/misc/ResetableDataTracker"],
-      "net/minecraft/class_2540": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVPacketByteBufParent"]
+      "net/minecraft/class_2540": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVPacketByteBufParent"],
+      "net/minecraft/class_1799": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/IntegratedNBTManager"]
     }
   }
 }

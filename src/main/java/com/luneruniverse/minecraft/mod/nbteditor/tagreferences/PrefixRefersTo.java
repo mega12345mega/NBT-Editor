@@ -6,20 +6,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.FIELD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(RefersTo.RefersToList.class)
-public @interface RefersTo {
-	@Target(ElementType.FIELD)
+@Repeatable(PrefixRefersTo.PrefixRefersToList.class)
+public @interface PrefixRefersTo {
+	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
-	public @interface RefersToList {
-		public RefersTo[] value();
+	public @interface PrefixRefersToList {
+		public PrefixRefersTo[] value();
 	}
 	
 	public String min() default "";
 	public String max() default "";
 	/**
-	 * @return The name of the tag, which may include forward slashes to enter compounds
+	 * @return The prefix before @RefersTo paths, which may include forward slashes to enter compounds
 	 */
-	public String path();
+	public String prefix();
 }

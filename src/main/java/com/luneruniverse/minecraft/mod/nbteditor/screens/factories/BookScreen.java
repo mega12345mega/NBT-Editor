@@ -108,7 +108,7 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 	}
 	private void setPage(Text contents) {
 		NbtList pages = localNBT.getOrCreateNBT().getList("pages", NbtElement.STRING_TYPE);
-		NbtString nbtContents = NbtString.of(Text.Serialization.toJsonString(contents));
+		NbtString nbtContents = NbtString.of(TextInst.toJsonString(contents));
 		if (page < pages.size())
 			pages.set(page, nbtContents);
 		else {

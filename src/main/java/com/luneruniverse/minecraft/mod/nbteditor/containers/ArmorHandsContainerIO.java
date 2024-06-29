@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -13,11 +15,11 @@ public class ArmorHandsContainerIO implements NBTContainerIO {
 		
 		NbtList armorItemsNbt = container.getList("ArmorItems", NbtElement.COMPOUND_TYPE);
 		for (int i = 0; i < armorItemsNbt.size() && i < 4; i++)
-			items[3 - i] = ItemStack.fromNbt(armorItemsNbt.getCompound(i));
+			items[3 - i] = NBTManagers.ITEM.deserialize(armorItemsNbt.getCompound(i));
 		
 		NbtList handItemsNbt = container.getList("HandItems", NbtElement.COMPOUND_TYPE);
 		for (int i = 0; i < handItemsNbt.size() && i < 2; i++)
-			items[4 + i] = ItemStack.fromNbt(handItemsNbt.getCompound(i));
+			items[4 + i] = NBTManagers.ITEM.deserialize(handItemsNbt.getCompound(i));
 		
 		return items;
 	}
@@ -26,12 +28,12 @@ public class ArmorHandsContainerIO implements NBTContainerIO {
 	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
 		NbtList armorItemsNbt = new NbtList();
 		for (int i = 0; i < 4; i++)
-			armorItemsNbt.add(contents[3 - i].writeNbt(new NbtCompound()));
+			armorItemsNbt.add(contents[3 - i].manager$serialize());
 		container.put("ArmorItems", armorItemsNbt);
 		
 		NbtList handItemsNbt = new NbtList();
 		for (int i = 0; i < 2; i++)
-			handItemsNbt.add(contents[4 + i].writeNbt(new NbtCompound()));
+			handItemsNbt.add(contents[4 + i].manager$serialize());
 		container.put("HandItems", handItemsNbt);
 	}
 	

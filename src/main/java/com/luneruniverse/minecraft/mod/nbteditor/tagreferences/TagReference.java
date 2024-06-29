@@ -39,6 +39,19 @@ public class TagReference {
 		
 		Class<?> clazz = getClass();
 		while (clazz != TagReference.class) {
+			PrefixRefersTo[] prefixRefersToOptions = clazz.getDeclaredAnnotationsByType(PrefixRefersTo.class);
+			Version.VersionSwitch<PrefixRefersTo> prefixRefersToSwitch = Version.newSwitch(version);
+			for (PrefixRefersTo prefixRefersToOption : prefixRefersToOptions) {
+				String min = prefixRefersToOption.min();
+				if (min.isEmpty())
+					min = null;
+				String max = prefixRefersToOption.max();
+				if (max.isEmpty())
+					max = null;
+				prefixRefersToSwitch.range(min, max, prefixRefersToOption);
+			}
+			String prefix = prefixRefersToSwitch.getOptionally().map(PrefixRefersTo::prefix).orElse("");
+			
 			for (Field field : clazz.getDeclaredFields()) {
 				RefersTo[] refersToOptions = field.getDeclaredAnnotationsByType(RefersTo.class);
 				Version.VersionSwitch<RefersTo> refersToSwitch = Version.newSwitch(version);
@@ -51,12 +64,16 @@ public class TagReference {
 						max = null;
 					refersToSwitch.range(min, max, refersToOption);
 				}
-				refersToSwitch.getOptionally().ifPresent(refersTo -> refs.put(field, refersTo.path().split("/")));
+				refersToSwitch.getOptionally().ifPresent(refersTo -> refs.put(field, (prefix + refersTo.path()).split("/")));
 			}
+			
 			clazz = clazz.getSuperclass();
 		}
 		
 		refs.keySet().forEach(field -> field.setAccessible(true));
+	}
+	public TagReference() {
+		this(Version.get());
 	}
 	
 	public void load(NbtCompound nbt) {
@@ -79,6 +96,13 @@ public class TagReference {
 				Array.set(output, i, deserialize(list.get(i), target.componentType()));
 			return output;
 		}
+		
+		if (target.isAssignableFrom(NbtElement.class))
+			return element;
+		if (target.isAssignableFrom(NbtCompound.class))
+			return (element instanceof NbtCompound compound ? compound : new NbtCompound());
+		if (target.isAssignableFrom(NbtList.class))
+			return (element instanceof NbtList list ? list : new NbtList());
 		
 		Class<?> primitiveTarget = (target.isPrimitive() ? target : MethodType.methodType(target).unwrap().returnType());
 		if (primitiveTarget.isPrimitive()) {
@@ -149,6 +173,9 @@ public class TagReference {
 			return output;
 		}
 		
+		if (NbtElement.class.isAssignableFrom(valueType))
+			return (NbtElement) value;
+		
 		Class<?> primitiveValueType = (valueType.isPrimitive() ? valueType : MethodType.methodType(valueType).unwrap().returnType());
 		if (primitiveValueType.isPrimitive()) {
 			if (primitiveValueType == boolean.class)
@@ -174,7 +201,7 @@ public class TagReference {
 			return NbtString.of(((CharSequence) value).toString());
 		
 		if (Text.class.isAssignableFrom(valueType))
-			return NbtString.of(Text.Serialization.toJsonString((Text) value));
+			return NbtString.of(TextInst.toJsonString((Text) value));
 		
 		throw new IllegalArgumentException("Cannot convert " + valueType.getName() + " to nbt!");
 	}

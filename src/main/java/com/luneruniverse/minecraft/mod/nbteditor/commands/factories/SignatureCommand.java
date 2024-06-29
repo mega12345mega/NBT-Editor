@@ -32,7 +32,7 @@ public class SignatureCommand extends ClientCommand {
 			signature = TextInst.translatable("nbteditor.sign.default");
 		else {
 			try {
-				signature = Text.Serialization.fromJson(new String(Files.readAllBytes(SIGNATURE_FILE.toPath())));
+				signature = TextInst.fromJson(new String(Files.readAllBytes(SIGNATURE_FILE.toPath())));
 			} catch (IOException | JsonParseException e) {
 				NBTEditor.LOGGER.error("Error while loading signature", e);
 				signature = TextInst.translatable("nbteditor.sign.load_error");
@@ -95,7 +95,7 @@ public class SignatureCommand extends ClientCommand {
 						throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.sign.new.missing_arg")).create();
 					}
 					try {
-						Files.write(SIGNATURE_FILE.toPath(), Text.Serialization.toJsonString(signature).getBytes());
+						Files.write(SIGNATURE_FILE.toPath(), TextInst.toJsonString(signature).getBytes());
 					} catch (IOException e) {
 						NBTEditor.LOGGER.error("Error while saving signature", e);
 						throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.sign.save_error")).create();

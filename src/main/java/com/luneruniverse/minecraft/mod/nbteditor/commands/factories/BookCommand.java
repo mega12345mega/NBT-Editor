@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
@@ -15,6 +16,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilte
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ContainerItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.BookScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.WrittenBookTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.Command;
@@ -83,9 +85,11 @@ public class BookCommand extends ClientCommand {
 		})).then(literal("new").executes(context -> {
 			ItemReference ref = ItemReference.getHeldAir();
 			ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
-			book.getOrCreateNbt().putString("title", "");
-			book.getNbt().putString("author", "");
-			book.getNbt().put("pages", new NbtList());
+			book.manager$modifyNbt(new WrittenBookTagReference(), tagRef -> {
+				tagRef.title = "";
+				tagRef.author = "";
+				tagRef.pages = new ArrayList<>();
+			});
 			ref.saveItem(book);
 			MainUtil.client.setScreen(new BookScreen(ref));
 			return Command.SINGLE_SUCCESS;

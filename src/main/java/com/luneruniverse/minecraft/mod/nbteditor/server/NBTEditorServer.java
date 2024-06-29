@@ -13,6 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVServerNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;
@@ -137,7 +138,8 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		MVServerNetworking.send(player,
 				new ViewBlockS2CPacket(requestId, blockEntity.getWorld().getRegistryKey(), blockEntity.getPos(),
 						MVRegistry.BLOCK.getId(blockEntity.getCachedState().getBlock()),
-						new BlockStateProperties(blockEntity.getCachedState()), ServerMVMisc.createNbt(blockEntity)));
+						new BlockStateProperties(blockEntity.getCachedState()),
+						NBTManagers.BLOCK_ENTITY.getNbt(blockEntity)));
 	}
 	
 	private void onGetEntityPacket(GetEntityC2SPacket packet, ServerPlayerEntity player) {
@@ -184,7 +186,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		if (blockEntity == null)
 			return;
 		
-		blockEntity.readNbt(packet.getNbt());
+		NBTManagers.BLOCK_ENTITY.setNbt(blockEntity, packet.getNbt());
 		
 		if (packet.isTriggerUpdate()) {
 			blockEntity.markDirty();

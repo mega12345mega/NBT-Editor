@@ -11,6 +11,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -70,7 +71,7 @@ public class LocalBlock implements LocalNBT {
 		if (name == null)
 			getOrCreateNBT().remove("CustomName");
 		else
-			getOrCreateNBT().putString("CustomName", Text.Serialization.toJsonString(name));
+			getOrCreateNBT().putString("CustomName", TextInst.toJsonString(name));
 	}
 	@Override
 	public String getDefaultName() {
@@ -135,7 +136,7 @@ public class LocalBlock implements LocalNBT {
 			BlockEntity entity = entityProvider.createBlockEntity(new BlockPos(0, 1000, 0), state);
 			entity.setWorld(MainUtil.client.world);
 			if (nbt != null)
-				entity.readNbt(nbt);
+				NBTManagers.BLOCK_ENTITY.setNbt(entity, nbt);
 			MainUtil.client.getBlockEntityRenderDispatcher().renderEntity(entity, renderMatrices, provider, 0xF000F0, OverlayTexture.DEFAULT_UV);
 		}
 		

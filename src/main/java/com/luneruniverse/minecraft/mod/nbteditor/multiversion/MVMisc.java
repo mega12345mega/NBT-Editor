@@ -52,9 +52,11 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.command.argument.ItemStackArgumentType;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.item.SuspiciousStewItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
@@ -429,6 +431,16 @@ public class MVMisc {
 				.range("1.19.0", null, () -> renderer.renderBlock(state, pos, world, matrices, vertexConsumer, cull, Random.create()))
 				.range(null, "1.18.2", () -> BlockRenderManager_renderBlock.get().invoke(renderer, state, pos, world, matrices, vertexConsumer, cull, new java.util.Random()))
 				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> SpawnEggItem_getEntityType =
+			Reflection.getOptionalMethod(SpawnEggItem.class, "method_8015", MethodType.methodType(EntityType.class, NbtCompound.class));
+	public static EntityType<?> getEntityType(ItemStack item) {
+		SpawnEggItem spawnEggItem = (SpawnEggItem) item.getItem();
+		return Version.<EntityType<?>>newSwitch()
+				.range("1.20.5", null, () -> spawnEggItem.getEntityType(item))
+				.range(null, "1.20.4", () -> SpawnEggItem_getEntityType.get().invoke(spawnEggItem, item.manager$getNbt()))
+				.get();
 	}
 	
 }

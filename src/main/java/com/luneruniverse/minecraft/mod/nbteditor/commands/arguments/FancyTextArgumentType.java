@@ -49,7 +49,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	
 	public static String stringifyFancyText(Text text, boolean jsonAllowed, boolean printErrors) {
 		if (jsonAllowed && ConfigScreen.isJsonText())
-			return Text.Serialization.toJsonString(text);
+			return TextInst.toJsonString(text);
 		
 		StringBuilder output = new StringBuilder();
 		if (stringifyFancyText(text, output) && printErrors)
@@ -89,7 +89,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 		StringBuilder color = new StringBuilder();
 		StringBuilder formats = new StringBuilder();
 		boolean needsReset = false;
-		for (Map.Entry<String, JsonElement> entry : Text.Serialization.toJsonTree(text).getAsJsonObject().entrySet()) {
+		for (Map.Entry<String, JsonElement> entry : TextInst.toJsonTree(text).getAsJsonObject().entrySet()) {
 			switch (entry.getKey()) {
 				case "color" -> {
 					Formatting colorFormatting = Formatting.byName(text.getStyle().getColor().getName());

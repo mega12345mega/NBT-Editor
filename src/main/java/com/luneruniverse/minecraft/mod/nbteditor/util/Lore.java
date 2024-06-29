@@ -116,7 +116,7 @@ public class Lore {
 	}
 	
 	public void addLine(Text text, int pos) {
-		NbtString line = NbtString.of(Text.Serialization.toJsonString(text));
+		NbtString line = NbtString.of(TextInst.toJsonString(text));
 		if (pos < 0)
 			lore.add(lore.size() + pos + 1, line);
 		else
@@ -136,7 +136,7 @@ public class Lore {
 	}
 	
 	public void setLine(Text text, int pos) {
-		NbtString line = NbtString.of(Text.Serialization.toJsonString(text));
+		NbtString line = NbtString.of(TextInst.toJsonString(text));
 		if (pos < 0)
 			lore.set(lore.size() + pos, line);
 		else

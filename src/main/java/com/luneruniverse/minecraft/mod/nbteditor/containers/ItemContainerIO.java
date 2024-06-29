@@ -8,21 +8,21 @@ public interface ItemContainerIO {
 		return new ItemContainerIO() {
 			@Override
 			public boolean isItemReadable(ItemStack item) {
-				NbtCompound nbt = item.getNbt();
+				NbtCompound nbt = item.manager$getNbt();
 				if (nbt == null)
 					nbt = new NbtCompound();
 				return io.isNBTReadable(nbt, SourceContainerType.ITEM);
 			}
 			@Override
 			public ItemStack[] readItem(ItemStack container) {
-				NbtCompound nbt = container.getNbt();
+				NbtCompound nbt = container.manager$getNbt();
 				if (nbt == null)
 					nbt = new NbtCompound();
 				return io.readNBT(nbt, SourceContainerType.ITEM);
 			}
 			@Override
 			public void writeItem(ItemStack container, ItemStack[] contents) {
-				io.writeNBT(container.getOrCreateNbt(), contents, SourceContainerType.ITEM);
+				container.manager$modifyNbt(nbt -> io.writeNBT(nbt, contents, SourceContainerType.ITEM));
 			}
 		};
 	}
