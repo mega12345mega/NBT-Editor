@@ -54,6 +54,7 @@ public class MVRegistry<T> implements Iterable<T> {
 				.get(null));
 	}
 	
+	public static final MVRegistry<? extends Registry<?>> REGISTRIES = getRegistry("field_11144", "field_41167", false);
 	public static final MVRegistry<ScreenHandlerType<?>> SCREEN_HANDLER = getRegistry("field_17429", "field_41187", false);
 	public static final MVRegistry<Item> ITEM = getRegistry("field_11142", "field_41178", true);
 	public static final MVRegistry<Block> BLOCK = getRegistry("field_11146", "field_41175", true);
@@ -72,6 +73,11 @@ public class MVRegistry<T> implements Iterable<T> {
 	
 	private MVRegistry(Object value) {
 		this.value = value;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Registry<T> getInternalValue() {
+		return (Registry<T>) value;
 	}
 	
 	@SuppressWarnings("unchecked")

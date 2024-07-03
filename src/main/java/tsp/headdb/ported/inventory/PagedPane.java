@@ -279,7 +279,7 @@ public class PagedPane extends ClientHandledScreen {
     }
 
     protected ItemStack setMeta(ItemStack itemStack, String name, String... lore) {
-        itemStack.setCustomName(TextInst.of(Utils.colorize(name)));
+        itemStack.manager$setCustomName(TextInst.of(Utils.colorize(name)));
         Lore loreObj = new Lore(itemStack);
         loreObj.setAllLines(Arrays.stream(lore).map(MainUtil::colorize).map(TextInst::of).collect(Collectors.toList()));
         return itemStack;

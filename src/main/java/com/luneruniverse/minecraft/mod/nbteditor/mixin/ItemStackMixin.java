@@ -6,36 +6,41 @@ import java.util.OptionalLong;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.ItemSize;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.item.TooltipType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
-	@Inject(at = @At("RETURN"), method = "getTooltip", cancellable = true)
-	private void getTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info) {
+	@Inject(at = @At("RETURN"), method = "getTooltip")
+	@Group(name = "getTooltip", min = 1)
+	private void getTooltip(Item.TooltipContext context, PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> info) {
+		modifyTooltip(info.getReturnValue());
+	}
+	@Inject(at = @At("RETURN"), method = "method_7950(Lnet/minecraft/class_1657;Lnet/minecraft/class_1836;)Ljava/util/List;", remap = false)
+	@Group(name = "getTooltip", min = 1)
+	private void getTooltip(PlayerEntity player, TooltipType context, CallbackInfoReturnable<List<Text>> info) {
+		modifyTooltip(info.getReturnValue());
+	}
+	private void modifyTooltip(List<Text> tooltip) {
 		// Tooltips are requested for all items when GameJoinS2CPacket is received to setup the creative inventory's search
 		// The world doesn't exist yet, so this causes the game to freeze when an exception from this mixin breaks everything
 		if (MainUtil.client.world == null)
@@ -90,7 +95,7 @@ public class ItemStackMixin {
 			}
 			TextColor sizeColor = (sizeFormat != null ? TextColor.fromFormatting(sizeFormat) :
 				TextColor.fromRgb(Color.HSBtoRGB((System.currentTimeMillis() % 1000) / 1000.0f, 1, 1)));
-			info.getReturnValue().add(TextInst.translatable("nbteditor.item_size." + (sizeConfig.isCompressed() ? "compressed" : "uncompressed"),
+			tooltip.add(TextInst.translatable("nbteditor.item_size." + (sizeConfig.isCompressed() ? "compressed" : "uncompressed"),
 					TextInst.literal(displaySize).styled(style -> style.withColor(sizeColor))));
 		}
 		
@@ -100,27 +105,13 @@ public class ItemStackMixin {
 			
 			if (creativeInv || (!(MainUtil.client.currentScreen instanceof CreativeInventoryScreen) &&
 					NBTEditorClient.SERVER_CONN.isScreenEditable())) {
-				info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.edit"));
-				info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.factory"));
+				tooltip.add(TextInst.translatable("nbteditor.keybind.edit"));
+				tooltip.add(TextInst.translatable("nbteditor.keybind.factory"));
 				if (ContainerIO.isContainer(source))
-					info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.container"));
+					tooltip.add(TextInst.translatable("nbteditor.keybind.container"));
 				if (source.getItem() == Items.ENCHANTED_BOOK)
-					info.getReturnValue().add(TextInst.translatable("nbteditor.keybind.enchant"));
+					tooltip.add(TextInst.translatable("nbteditor.keybind.enchant"));
 			}
-		}
-	}
-	
-	@Inject(at = @At("HEAD"), method = "appendEnchantments", cancellable = true)
-	private static void appendEnchantments(List<Text> tooltip, NbtList enchantments, CallbackInfo info) {
-		if (Enchants.checkingCap)
-			return;
-		
-		info.cancel();
-		
-		for (int i = 0; i < enchantments.size(); ++i) {
-			NbtCompound nbtCompound = enchantments.getCompound(i);
-			MVRegistry.ENCHANTMENT.getOrEmpty(Identifier.tryParse(nbtCompound.getString("id")))
-					.ifPresent(e -> tooltip.add(ConfigScreen.getEnchantNameWithMax(e, Enchants.applyCap(nbtCompound.getInt("lvl")))));
 		}
 	}
 }

@@ -1,12 +1,15 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
+import java.lang.invoke.MethodType;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
@@ -105,6 +108,8 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		MainUtil.renderLogo(matrices);
 		renderPreview(matrices);
 	}
+	private static final Supplier<Reflection.MethodInvoker> RenderSystem_getModelViewStack =
+			Reflection.getOptionalMethod(RenderSystem.class, "getModelViewStack", MethodType.methodType(MatrixStack.class));
 	private void renderPreview(MatrixStack matrices) {
 		int x = 16 + 32 + 8;
 		int y = 16;
@@ -119,7 +124,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 				.range(null, "1.19.3", true)
 				.get();
 		if (oldMatrix)
-			matrices = RenderSystem.getModelViewStack();
+			matrices = RenderSystem_getModelViewStack.get().invoke(null);
 		
 		matrices.push();
 		matrices.translate(0.0D, 0.0D, 32.0D);

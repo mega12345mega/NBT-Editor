@@ -12,9 +12,9 @@ import net.minecraft.nbt.NbtCompound;
 
 @Mixin(WrittenBookItem.class)
 public class WrittenBookItemMixin {
-	@Inject(method = "isValid", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "isValid", at = @At("HEAD"), cancellable = true, require = 0)
 	private static void isValid(NbtCompound nbt, CallbackInfoReturnable<Boolean> info) {
-		if (MixinLink.actualBookContents.contains(Thread.currentThread()))
+		if (MixinLink.ACTUAL_BOOK_CONTENTS.contains(Thread.currentThread()))
 			info.setReturnValue(true);
 	}
 }

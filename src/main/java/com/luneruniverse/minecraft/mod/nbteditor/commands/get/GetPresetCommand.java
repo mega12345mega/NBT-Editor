@@ -28,7 +28,7 @@ public class GetPresetCommand extends ClientCommand {
 	}
 	public static Supplier<ItemStack> registerPresetItem(String name) {
 		Supplier<ItemStack> output = () -> Optional.ofNullable(getItem(name)).orElseGet(() -> new ItemStack(Items.BARRIER)
-				.setCustomName(TextInst.translatable("nbteditor.get.preset_item.missing")));
+				.manager$setCustomName(TextInst.translatable("nbteditor.get.preset_item.missing")));
 		presetItems.put(name, output);
 		return output;
 	}

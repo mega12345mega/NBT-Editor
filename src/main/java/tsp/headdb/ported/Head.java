@@ -38,7 +38,7 @@ public class Head {
 
         ItemStack item = new ItemStack(Items.PLAYER_HEAD);
         NbtCompound nbt = item.getOrCreateNbt();
-        item.setCustomName(TextInst.of(Utils.colorize(category != null ? category.getColor() + name : "&8" + name)));
+        item.manager$setCustomName(TextInst.of(Utils.colorize(category != null ? category.getColor() + name : "&8" + name)));
         // set skull owner
         GameProfile profile = new GameProfile(uuid, name);
         profile.getProperties().put("textures", new Property("textures", value));

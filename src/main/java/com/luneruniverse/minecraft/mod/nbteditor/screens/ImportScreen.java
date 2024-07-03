@@ -71,7 +71,7 @@ public class ImportScreen extends OverlaySupportingScreen {
 				name = name.substring(0, nameDot);
 			
 			ItemStack painting = new ItemStack(Items.PAINTING);
-			painting.setCustomName(TextInst.literal(name).styled(style -> style.withItalic(false).withColor(Formatting.GOLD)));
+			painting.manager$setCustomName(TextInst.literal(name).styled(style -> style.withItalic(false).withColor(Formatting.GOLD)));
 			return LoreConsumer.createReceiveItem(painting);
 		}, () -> {});
 	}

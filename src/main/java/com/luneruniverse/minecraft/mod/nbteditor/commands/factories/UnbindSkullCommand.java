@@ -49,8 +49,8 @@ public class UnbindSkullCommand extends ClientCommand {
 					if (ref instanceof ItemReference itemRef) {
 						ItemStack item = itemRef.getItem();
 						item.setNbt(nbt);
-						if (!item.hasCustomName()) {
-							item.setCustomName(TextInst.translatable("block.minecraft.player_head.named", name)
+						if (!item.manager$hasCustomName()) {
+							item.manager$setCustomName(TextInst.translatable("block.minecraft.player_head.named", name)
 									.styled(style -> style.withItalic(false).withColor(Formatting.YELLOW)));
 						}
 					}

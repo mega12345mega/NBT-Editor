@@ -3,7 +3,6 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.lwjgl.glfw.GLFW;
@@ -33,7 +32,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -99,12 +97,7 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 		return localNBT.getOrCreateNBT().getList("pages", NbtElement.STRING_TYPE).size();
 	}
 	private Text getPage() {
-		EditableText output = TextInst.literal("");
-		MixinLink.getActualContents(localNBT.getItem()).getPage(page).visit((style, str) -> {
-			output.append(TextInst.literal(str).setStyle(style));
-			return Optional.empty();
-		}, Style.EMPTY);
-		return output;
+		return MVMisc.getActualPage(localNBT.getItem(), page);
 	}
 	private void setPage(Text contents) {
 		NbtList pages = localNBT.getOrCreateNBT().getList("pages", NbtElement.STRING_TYPE);
@@ -160,32 +153,14 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 	
 	private Contents getPreviewItem() {
 		ItemStack output = localNBT.getItem().copy();
-		if (!output.hasNbt()) {
-			return new Contents() {
-				@Override
-				public int getPageCount() {
-					return 0;
-				}
-				@Override
-				public StringVisitable getPageUnchecked(int page) {
-					return TextInst.of("");
-				}
-			};
-		}
+		if (!output.hasNbt())
+			return net.minecraft.client.gui.screen.ingame.BookScreen.EMPTY_PROVIDER;
 		NbtList pages = output.getNbt().getList("pages", NbtElement.STRING_TYPE);
 		List<Text> previewPages = new ArrayList<>();
 		for (int i = 0; i < pages.size(); i++)
 			previewPages.add(makePreviewText(TextUtil.fromJsonSafely(pages.getString(i))));
-		return new Contents() {
-			@Override
-			public int getPageCount() {
-				return previewPages.size();
-			}
-			@Override
-			public StringVisitable getPageUnchecked(int page) {
-				return previewPages.get(page);
-			}
-		};
+		
+		return MVMisc.getBookContents(previewPages);
 	}
 	private Text makePreviewText(Text text) {
 		EditableText output = TextInst.copy(text);

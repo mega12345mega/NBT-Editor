@@ -24,7 +24,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
-import net.minecraft.command.argument.TextArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
@@ -144,7 +143,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	@Override
 	public Text parse(StringReader reader) throws CommandSyntaxException {
 		if (jsonAllowed && ConfigScreen.isJsonText())
-			return TextArgumentType.text().parse(reader);
+			return MVMisc.getTextArg().parse(reader);
 		
 		return parseInternal(reader);
 	}
@@ -318,7 +317,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
 		if (jsonAllowed && ConfigScreen.isJsonText())
-			return TextArgumentType.text().listSuggestions(context, builder);
+			return MVMisc.getTextArg().listSuggestions(context, builder);
 		
 		if (builder.getRemaining().isEmpty())
 			return builder.buildFuture();

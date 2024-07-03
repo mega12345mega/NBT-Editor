@@ -36,6 +36,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
@@ -240,8 +241,14 @@ public class MainUtil {
 	
 	
 	public static Text getItemNameSafely(ItemStack item) {
-		NbtCompound nbt = item.getSubNbt(ItemStack.DISPLAY_KEY);
-		return getNbtNameSafely(nbt, ItemStack.NAME_KEY, () -> item.getItem().getName(item));
+		if (NBTManagers.COMPONENTS_EXIST) {
+			Text name = item.get(DataComponentTypes.CUSTOM_NAME);
+			return name == null ? item.getItem().getName(item) : name;
+		}
+		NbtCompound nbt = item.manager$getNbt();
+		if (nbt != null)
+			nbt = nbt.getCompound("display");
+		return getNbtNameSafely(nbt, "Name", () -> item.getItem().getName(item));
 	}
 	public static Text getNbtNameSafely(NbtCompound nbt, String key, Supplier<Text> defaultName) {
 		if (nbt != null && nbt.contains(key, NbtElement.STRING_TYPE)) {

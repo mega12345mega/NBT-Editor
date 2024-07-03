@@ -25,7 +25,7 @@ public class LocalHead extends Head {
         Validate.notNull(uuid, "uuid must not be null!");
         
         ItemStack item = new ItemStack(Items.PLAYER_HEAD);
-        item.setCustomName(TextInst.of(Utils.colorize("&e" + name)));
+        item.manager$setCustomName(TextInst.of(Utils.colorize("&e" + name)));
         item.getOrCreateNbt().putString("SkullOwner", name);
         Lore lore = new Lore(item);
         lore.addLine(TextInst.of(Utils.colorize("&7UUID: " + uuid.toString())));

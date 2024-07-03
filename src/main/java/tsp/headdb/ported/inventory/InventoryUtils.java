@@ -179,7 +179,7 @@ public class InventoryUtils {
 
         for (Category category : Category.getValues()) {
             ItemStack item = getUIItem(category.getName(), category.getItem());
-            item.setCustomName(TextInst.of(Utils.colorize(category.getColor() + "&l" + category.getTranslatedName().toUpperCase())));
+            item.manager$setCustomName(TextInst.of(Utils.colorize(category.getColor() + "&l" + category.getTranslatedName().toUpperCase())));
             Lore lore = new Lore(item);
             lore.clearLore();
             lore.addLine(TextInst.of(Utils.colorize("&e" + TextInst.translatable("nbteditor.hdb.head_count", HeadAPI.getHeads(category).size()).getString())));
@@ -233,7 +233,7 @@ public class InventoryUtils {
     }
 
     private static ItemStack buildButton(ItemStack item, String name, String... lore) {
-        item.setCustomName(TextInst.of(Utils.colorize(name)));
+        item.manager$setCustomName(TextInst.of(Utils.colorize(name)));
         
         Lore list = new Lore(item);
         list.clearLore();

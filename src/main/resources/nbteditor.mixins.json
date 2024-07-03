@@ -40,7 +40,8 @@
     "GameRendererMixin",
     "ChatInputSuggestorMixin",
     "ClientPlayerEntityMixin",
-    "BuiltinModelItemRendererMixin"
+    "BuiltinModelItemRendererMixin",
+    "EnchantmentMixin"
   ],
   "injectors": {
     "defaultRequire": 1

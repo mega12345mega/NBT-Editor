@@ -45,7 +45,7 @@ public class LocalItem implements LocalNBT {
 	}
 	@Override
 	public void setName(Text name) {
-		item.setCustomName(name);
+		item.manager$setCustomName(name);
 	}
 	@Override
 	public String getDefaultName() {

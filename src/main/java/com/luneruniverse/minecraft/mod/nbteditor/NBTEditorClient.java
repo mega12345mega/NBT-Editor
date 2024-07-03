@@ -22,7 +22,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.api.ClientModInitializer;
@@ -57,7 +56,6 @@ public class NBTEditorClient implements ClientModInitializer {
 			SETTINGS_FOLDER.mkdir();
 		
 		NbtTypeModifier.loadClass();
-		Enchants.checkCap();
 		CommandHandler.registerCommands();
 		try {
 			HeadAPI.loadFavorites();
@@ -72,13 +70,13 @@ public class NBTEditorClient implements ClientModInitializer {
 		CLIENT_CHEST.loadAync();
 		
 		ItemStack clientChestIcon = new ItemStack(Items.ENDER_CHEST)
-				.setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));
+				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));
 		clientChestIcon.addEnchantment(Enchantments.LOYALTY, 1);
 		MixinLink.ENCHANT_GLINT_FIX.add(clientChestIcon);
 		NBTEditorAPI.registerInventoryTab(clientChestIcon, ClientChestScreen::show,
 				screen -> screen instanceof CreativeInventoryScreen || (screen instanceof InventoryScreen && SERVER_CONN.isEditingExpanded()));
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.CHEST)
-				.setCustomName(TextInst.translatable("itemGroup.nbteditor.inventory")),
+				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.inventory")),
 				() -> MainUtil.client.setScreen(new InventoryScreen(MainUtil.client.player)),
 				screen -> screen instanceof ClientChestScreen);
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST), () -> {

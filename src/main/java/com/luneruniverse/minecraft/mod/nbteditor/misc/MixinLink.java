@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -34,7 +35,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.BookScreen.WrittenBookContents;
+import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
@@ -153,15 +154,10 @@ public class MixinLink {
 	}
 	
 	
-	public static final Set<Thread> actualBookContents = Collections.synchronizedSet(new HashSet<>());
-	public static WrittenBookContents getActualContents(ItemStack item) {
-		actualBookContents.add(Thread.currentThread());
-		try {
-			return new WrittenBookContents(item);
-		} finally {
-			actualBookContents.remove(Thread.currentThread());
-		}
-	}
+	/**
+	 * Only in 1.20.4 or lower
+	 */
+	public static final Set<Thread> ACTUAL_BOOK_CONTENTS = Collections.synchronizedSet(new HashSet<>());
 	
 	
 	public static void renderChatLimitWarning(ChatScreen source, MatrixStack matrices) {
@@ -266,5 +262,11 @@ public class MixinLink {
 	
 	
 	public static final List<ItemStack> ENCHANT_GLINT_FIX = new ArrayList<>();
+	
+	
+	/**
+	 * Only in 1.20.5 or higher
+	 */
+	public static final WeakHashMap<BookScreen.Contents, Boolean> WRITTEN_BOOK_CONTENTS = new WeakHashMap<>();
 	
 }

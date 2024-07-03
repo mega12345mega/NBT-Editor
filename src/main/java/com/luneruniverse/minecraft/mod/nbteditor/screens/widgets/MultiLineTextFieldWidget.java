@@ -29,7 +29,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.suggestion.Suggestions;
 
-import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Selectable;
@@ -936,7 +935,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	
 	@Override
 	public boolean charTyped(char chr, int modifiers) {
-		if (SharedConstants.isValidChar(chr)) {
+		if (MVMisc.isValidChar(chr)) {
 			this.write(Character.toString(chr));
 			cursorX = -1;
 			return true;

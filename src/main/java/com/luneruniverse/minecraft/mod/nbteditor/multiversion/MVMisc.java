@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -21,20 +22,21 @@ import java.util.function.Supplier;
 import org.joml.Vector2ic;
 
 import com.google.gson.JsonObject;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.SuspiciousStewIngredient.StewEffect;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
@@ -52,8 +54,14 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.command.argument.ItemStackArgumentType;
+import net.minecraft.command.argument.TextArgumentType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.SuspiciousStewEffectsComponent;
+import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
+import net.minecraft.component.type.WrittenBookContentComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SpawnEggItem;
@@ -62,10 +70,13 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.registry.Registries;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
+import net.minecraft.text.StringVisitable;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -109,6 +120,14 @@ public class MVMisc {
 		return Version.<BlockStateArgumentType>newSwitch()
 				.range("1.19.0", null, () -> BlockStateArgumentType.blockState((CommandRegistryAccess) registryAccess))
 				.range(null, "1.18.2", () -> BlockStateArgumentType_blockState.get().invoke(null)) // BlockStateArgumentType.blockState()
+				.get();
+	}
+	private static final Supplier<Reflection.MethodInvoker> TextArgumentType_text =
+			Reflection.getOptionalMethod(TextArgumentType.class, "method_9281", MethodType.methodType(TextArgumentType.class));
+	public static TextArgumentType getTextArg() {
+		return Version.<TextArgumentType>newSwitch()
+				.range("1.20.5", null, () -> TextArgumentType.text((CommandRegistryAccess) registryAccess))
+				.range(null, "1.20.4", () -> TextArgumentType_text.get().invoke(null))
 				.get();
 	}
 	
@@ -207,10 +226,13 @@ public class MVMisc {
 				.run();
 	}
 	
+	public static boolean isValidChar(char c) {
+		return c != '§' && c >= ' ' && c != 127;
+	}
 	public static String stripInvalidChars(String str, boolean allowLinebreaks) {
 		StringBuilder output = new StringBuilder();
 		for (char c : str.toCharArray()) {
-			if (SharedConstants.isValidChar(c)) {
+			if (isValidChar(c)) {
 				output.append(c);
 			} else if (allowLinebreaks && c == '\n') {
 				output.append(c);
@@ -246,11 +268,14 @@ public class MVMisc {
 				.get();
 	}
 	
+	private static final Supplier<Reflection.MethodInvoker> SuspiciousStewItem_addEffectsToStew =
+			Reflection.getOptionalMethod(SuspiciousStewItem.class, "method_53209", MethodType.methodType(void.class, ItemStack.class, List.class));
 	private static final Supplier<Reflection.MethodInvoker> SuspiciousStewItem_addEffectToStew =
 			Reflection.getOptionalMethod(SuspiciousStewItem.class, "method_8021", MethodType.methodType(void.class, ItemStack.class, StatusEffect.class, int.class));
 	public static void addEffectToStew(ItemStack item, StatusEffect effect, int duration) {
 		Version.newSwitch()
-				.range("1.20.2", null, () -> SuspiciousStewItem.addEffectsToStew(item, List.of(new StewEffect(effect, duration))))
+				.range("1.20.5", null, () -> item.apply(DataComponentTypes.SUSPICIOUS_STEW_EFFECTS, new SuspiciousStewEffectsComponent(List.of()), effects -> effects.with(new StewEffect(Registries.STATUS_EFFECT.getEntry(effect), duration))))
+				.range("1.20.2", "1.20.4", () -> SuspiciousStewItem_addEffectsToStew.get().invoke(null, item, List.of(Reflection.newInstance(StewEffect.class, new Class<?>[] {StatusEffect.class, int.class}, effect, duration))))
 				.range(null, "1.20.1", () -> SuspiciousStewItem_addEffectToStew.get().invoke(null, item, effect, duration))
 				.run();
 	}
@@ -440,6 +465,81 @@ public class MVMisc {
 		return Version.<EntityType<?>>newSwitch()
 				.range("1.20.5", null, () -> spawnEggItem.getEntityType(item))
 				.range(null, "1.20.4", () -> SpawnEggItem_getEntityType.get().invoke(spawnEggItem, item.manager$getNbt()))
+				.get();
+	}
+	
+	public static StatusEffectInstance newStatusEffectInstance(StatusEffect effect, int duration) {
+		return Version.<StatusEffectInstance>newSwitch()
+				.range("1.20.5", null, () -> new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(effect), duration))
+				.range(null, "1.20.4", () -> Reflection.newInstance(StatusEffectInstance.class, new Class<?>[] {StatusEffect.class, int.class}, effect, duration))
+				.get();
+	}
+	public static StatusEffectInstance newStatusEffectInstance(StatusEffect effect, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon) {
+		return Version.<StatusEffectInstance>newSwitch()
+				.range("1.20.5", null, () -> new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(effect), duration, amplifier, ambient, showParticles, showIcon))
+				.range(null, "1.20.4", () -> Reflection.newInstance(StatusEffectInstance.class, new Class<?>[] {StatusEffect.class, int.class, int.class, boolean.class, boolean.class, boolean.class}, effect, duration, amplifier, ambient, showParticles, showIcon))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> StatusEffectInstance_getEffectType =
+			Reflection.getOptionalMethod(StatusEffectInstance.class, "method_5579", MethodType.methodType(StatusEffect.class));
+	public static StatusEffect getEffectType(StatusEffectInstance effect) {
+		return Version.<StatusEffect>newSwitch()
+				.range("1.20.5", null, () -> effect.getEffectType().value())
+				.range(null, "1.20.4", () -> StatusEffectInstance_getEffectType.get().invoke(effect))
+				.get();
+	}
+	
+	private static final Supplier<Class<?>> WrittenBookContents =
+			Reflection.getOptionalClass("net.minecraft.class_3872$class_3933");
+	private static final Supplier<Reflection.MethodInvoker> BookScreen$Contents_getPage =
+			Reflection.getOptionalMethod(BookScreen.Contents.class, "method_17563", MethodType.methodType(StringVisitable.class, int.class));
+	private static StringVisitable getActualPageOld(ItemStack item, int page) {
+		MixinLink.ACTUAL_BOOK_CONTENTS.add(Thread.currentThread());
+		try {
+			Object contents = Reflection.newInstance(WrittenBookContents.get(), new Class<?>[] {ItemStack.class}, item);
+			return BookScreen$Contents_getPage.get().invoke(contents, page);
+		} finally {
+			MixinLink.ACTUAL_BOOK_CONTENTS.remove(Thread.currentThread());
+		}
+	}
+	public static Text getActualPage(ItemStack item, int page) {
+		return Version.<Text>newSwitch()
+				.range("1.20.5", null, () -> {
+					WrittenBookContentComponent contents = item.get(DataComponentTypes.WRITTEN_BOOK_CONTENT);
+					if (contents == null)
+						return TextInst.of("");
+					return contents.asResolved().getPages(false).get(page);
+				})
+				.range(null, "1.20.4", () -> {
+					EditableText output = TextInst.literal("");
+					getActualPageOld(item, page).visit((style, str) -> {
+						output.append(TextInst.literal(str).setStyle(style));
+						return Optional.empty();
+					}, Style.EMPTY);
+					return output;
+				})
+				.get();
+	}
+	
+	public static BookScreen.Contents getBookContents(List<Text> pages) {
+		if (NBTManagers.COMPONENTS_EXIST)
+			return new BookScreen.Contents(pages);
+		
+		return (BookScreen.Contents) Proxy.newProxyInstance(MVMisc.class.getClassLoader(),
+				new Class<?>[] {BookScreen.Contents.class}, (obj, method, args) -> {
+			if (method.getName().equals("method_17560")) // getPageCount
+				return pages.size();
+			if (method.getName().equals("method_17561")) // getPageUnchecked
+				return (StringVisitable) pages.get((int) args[0]);
+			return method.invoke(obj, args);
+		});
+	}
+	
+	public static boolean isWrittenBookContents(BookScreen.Contents contents) {
+		return Version.<Boolean>newSwitch()
+				.range("1.20.5", null, () -> MixinLink.WRITTEN_BOOK_CONTENTS.containsKey(contents))
+				.range(null, "1.20.4", Reflection.getClass("net.minecraft.class_3872$class_3933").isInstance(contents))
 				.get();
 	}
 	

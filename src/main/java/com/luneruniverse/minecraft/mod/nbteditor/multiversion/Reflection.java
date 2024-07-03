@@ -27,6 +27,9 @@ public class Reflection {
 			throw new RuntimeException("Error getting class", e);
 		}
 	}
+	public static Supplier<Class<?>> getOptionalClass(String name) {
+		return jitSupplier(() -> getClass(name));
+	}
 	
 	
 	public static <T> T newInstance(Class<T> clazz, Class<?>[] parameters, Object... args) {

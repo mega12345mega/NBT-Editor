@@ -1,6 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,38 +11,16 @@ import java.util.stream.Collectors;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
 
 public class Enchants {
 	
 	public static record EnchantWithLevel(Enchantment enchant, int level) {}
-	
-	public static boolean checkingCap;
-	public static boolean cappedAt255;
-	public static void checkCap() {
-		try {
-			checkingCap = true;
-			
-			Enchants enchants = new Enchants(new ItemStack(Items.STONE));
-			enchants.addEnchant(Enchantments.SHARPNESS, 32767);
-			List<Text> lines = new ArrayList<>();
-			ItemStack.appendEnchantments(lines, enchants.enchants);
-			cappedAt255 = lines.stream().map(Text::getString).anyMatch(line -> line.contains("255"));
-		} finally {
-			checkingCap = false;
-		}
-	}
-	public static int applyCap(int level) {
-		return MathHelper.clamp(level, 0, cappedAt255 ? 255 : Integer.MAX_VALUE);
-	}
 	
 	private static String getEnchantKey(ItemStack item) {
 		return item.isOf(Items.ENCHANTED_BOOK) ? "StoredEnchantments" : "Enchantments";

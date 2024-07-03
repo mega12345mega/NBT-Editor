@@ -31,7 +31,7 @@ public class ItemChest {
 				
 				ItemStack section = new ItemStack(Items.SHULKER_BOX);
 				path.add(i + "");
-				section.setCustomName(TextInst.of(TextInst.translatable("nbteditor.hdb.section").getString() + ": " + String.join(".", path)));
+				section.manager$setCustomName(TextInst.of(TextInst.translatable("nbteditor.hdb.section").getString() + ": " + String.join(".", path)));
 				writeDatabase(section, data.subList(i * sectionSize, Math.min(data.size(), (i + 1) * sectionSize)), stackGenerator, path);
 				path.remove(path.size() - 1);
 				chest.addStack(section);
