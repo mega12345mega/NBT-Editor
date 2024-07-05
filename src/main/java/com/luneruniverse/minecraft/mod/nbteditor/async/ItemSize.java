@@ -36,7 +36,7 @@ public class ItemSize {
 	private static final WeakHashMap<ItemStack, OptionalLong> compressedSizes = new WeakHashMap<>();
 	
 	public static OptionalLong getItemSize(ItemStack stack, boolean compressed) {
-		if (!stack.hasNbt()) {
+		if (!stack.manager$hasNbt()) {
 			return OptionalLong.of(calcItemSize(stack, compressed));
 		}
 		WeakHashMap<ItemStack, OptionalLong> sizes = (compressed ? compressedSizes : uncompressedSizes);
@@ -62,7 +62,7 @@ public class ItemSize {
 	private static long calcItemSize(ItemStack stack, boolean compressed) {
 		ByteCountingOutputStream stream = new ByteCountingOutputStream();
 		try {
-			NbtCompound nbt = stack.writeNbt(new NbtCompound());
+			NbtCompound nbt = stack.manager$serialize();
 			if (compressed)
 				MVMisc.writeCompressedNbt(nbt, stream);
 			else
