@@ -10,41 +10,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCate
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueBoolean;
-
-import net.minecraft.text.Text;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.HideFlag;
 
 public class HideFlagsScreen extends LocalEditorScreen<LocalItem> {
-	
-	private enum Flag {
-		ENCHANTMENTS(TextInst.translatable("nbteditor.hide_flags.enchantments"), 1),
-		ATTRIBUTE_MODIFIERS(TextInst.translatable("nbteditor.hide_flags.attribute_modifiers"), 2),
-		UNBREAKABLE(TextInst.translatable("nbteditor.hide_flags.unbreakable"), 4),
-		CAN_DESTORY(TextInst.translatable("nbteditor.hide_flags.can_destroy"), 8),
-		CAN_PLACE_ON(TextInst.translatable("nbteditor.hide_flags.can_place_on"), 16),
-		MISC(TextInst.translatable("nbteditor.hide_flags.misc"), 32),
-		DYED_COLOR(TextInst.translatable("nbteditor.hide_flags.dyed_color"), 64);
-		
-		private final Text text;
-		private final int code;
-		
-		private Flag(Text text, int code) {
-			this.text = text;
-			this.code = code;
-		}
-		
-		public Text getText() {
-			return text;
-		}
-		
-		public int toggle(int code) {
-			return (code & ~this.code) | (~code & this.code);
-		}
-		public boolean isEnabled(int code) {
-			return (code & this.code) != 0;
-		}
-	}
-	
-	
 	
 	private final ConfigCategory config;
 	private ConfigPanel panel;
@@ -58,12 +26,12 @@ public class HideFlagsScreen extends LocalEditorScreen<LocalItem> {
 		config.setConfigurable("enable_all", new ConfigButton(100, TextInst.translatable("nbteditor.hide_flags.hide_all"), btn -> setCode(127)));
 		
 		int code = localNBT.getOrCreateNBT().getInt("HideFlags");
-		for (Flag flag : Flag.values())
+		for (HideFlag flag : HideFlag.values())
 			config.setConfigurable(flag.name(), new ConfigItem<>(flag.getText(), new ConfigValueBoolean(flag.isEnabled(code), false, 100, ScreenTexts.ON, ScreenTexts.OFF)));
 		
 		config.addValueListener(source -> {
 			int newCode = 0;
-			for (Flag flag : Flag.values()) {
+			for (HideFlag flag : HideFlag.values()) {
 				if (((ConfigItem<ConfigValueBoolean>) config.getConfigurable(flag.name())).getValue().getValidValue())
 					newCode = flag.toggle(newCode);
 			}
@@ -73,7 +41,7 @@ public class HideFlagsScreen extends LocalEditorScreen<LocalItem> {
 	}
 	@SuppressWarnings("unchecked")
 	private void setCode(int code) {
-		for (Flag flag : Flag.values())
+		for (HideFlag flag : HideFlag.values())
 			((ConfigItem<ConfigValueBoolean>) config.getConfigurable(flag.name())).getValue().setValue(flag.isEnabled(code));
 	}
 	

@@ -175,16 +175,16 @@ public class TextUtil {
 								TextInst.translatable("nbteditor.file_options.delete.desc", file.getName()))))));
 	}
 	
-	public static boolean isTextFormatted(Text text, boolean allowNonNull) {
-		return isTextFormatted(TextInst.toJsonTree(text), allowNonNull);
+	public static boolean isTextFormatted(Text text, boolean allowNonNull, String baseColor) {
+		return isTextFormatted(TextInst.toJsonTree(text), allowNonNull, baseColor);
 	}
-	private static boolean isTextFormatted(JsonElement dataElement, boolean allowNonNull) {
+	private static boolean isTextFormatted(JsonElement dataElement, boolean allowNonNull, String baseColor) {
 		if (!(dataElement instanceof JsonObject data))
 			return false;
 		
 		if (data.has("extra")) {
 			for (JsonElement part : data.get("extra").getAsJsonArray()) {
-				if (isTextFormatted(part, allowNonNull))
+				if (isTextFormatted(part, allowNonNull, baseColor))
 					return true;
 			}
 		}
@@ -202,7 +202,7 @@ public class TextUtil {
 			return true;
 		if (data.has("obfuscated") && data.get("obfuscated").getAsBoolean())
 			return true;
-		if (data.has("color") && !data.get("color").getAsString().equals("white"))
+		if (data.has("color") && (baseColor == null || !data.get("color").getAsString().equals(baseColor)))
 			return true;
 		if (data.has("insertion") && data.get("insertion").getAsBoolean())
 			return true;

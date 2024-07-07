@@ -1,14 +1,10 @@
-package com.luneruniverse.minecraft.mod.nbteditor.tagreferences;
+package com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general;
 
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.nbt.AbstractNbtList;
@@ -28,65 +24,9 @@ import net.minecraft.nbt.NbtShort;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.text.Text;
 
-public class TagReference {
+public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 	
-	protected final int[] version;
-	private final Map<Field, String[]> refs;
-	
-	public TagReference(int[] version) {
-		this.version = version;
-		this.refs = new HashMap<>();
-		
-		Class<?> clazz = getClass();
-		while (clazz != TagReference.class) {
-			PrefixRefersTo[] prefixRefersToOptions = clazz.getDeclaredAnnotationsByType(PrefixRefersTo.class);
-			Version.VersionSwitch<PrefixRefersTo> prefixRefersToSwitch = Version.newSwitch(version);
-			for (PrefixRefersTo prefixRefersToOption : prefixRefersToOptions) {
-				String min = prefixRefersToOption.min();
-				if (min.isEmpty())
-					min = null;
-				String max = prefixRefersToOption.max();
-				if (max.isEmpty())
-					max = null;
-				prefixRefersToSwitch.range(min, max, prefixRefersToOption);
-			}
-			String prefix = prefixRefersToSwitch.getOptionally().map(PrefixRefersTo::prefix).orElse("");
-			
-			for (Field field : clazz.getDeclaredFields()) {
-				RefersTo[] refersToOptions = field.getDeclaredAnnotationsByType(RefersTo.class);
-				Version.VersionSwitch<RefersTo> refersToSwitch = Version.newSwitch(version);
-				for (RefersTo refersToOption : refersToOptions) {
-					String min = refersToOption.min();
-					if (min.isEmpty())
-						min = null;
-					String max = refersToOption.max();
-					if (max.isEmpty())
-						max = null;
-					refersToSwitch.range(min, max, refersToOption);
-				}
-				refersToSwitch.getOptionally().ifPresent(refersTo -> refs.put(field, (prefix + refersTo.path()).split("/")));
-			}
-			
-			clazz = clazz.getSuperclass();
-		}
-		
-		refs.keySet().forEach(field -> field.setAccessible(true));
-	}
-	public TagReference() {
-		this(Version.get());
-	}
-	
-	public void load(NbtCompound nbt) {
-		try {
-			for (Map.Entry<Field, String[]> ref : refs.entrySet()) {
-				NbtElement element = getFromNbt(nbt, ref.getValue());
-				ref.getKey().set(this, deserialize(element, ref.getKey().getType()));
-			}
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new RuntimeException("Failed to load " + getClass().getName() + " from an NbtCompound", e);
-		}
-	}
-	private Object deserialize(NbtElement element, Class<?> target) {
+	private static Object deserialize(NbtElement element, Class<?> target) {
 		if (target.isArray()) {
 			if (!(element instanceof AbstractNbtList<?> list))
 				return Array.newInstance(target.componentType(), 0);
@@ -139,17 +79,7 @@ public class TagReference {
 		throw new IllegalArgumentException("Cannot get " + target.getName() + " from nbt!");
 	}
 	
-	public void save(NbtCompound nbt) {
-		try {
-			for (Map.Entry<Field, String[]> ref : refs.entrySet()) {
-				Object value = ref.getKey().get(this);
-				setToNbt(nbt, ref.getValue(), serialize(value));
-			}
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new RuntimeException("Failed to save " + getClass().getName() + " to an NbtCompound", e);
-		}
-	}
-	private NbtElement serialize(Object value) {
+	private static NbtElement serialize(Object value) {
 		if (value == null)
 			throw new IllegalArgumentException("Cannot convert null to nbt!");
 		
@@ -206,7 +136,7 @@ public class TagReference {
 		throw new IllegalArgumentException("Cannot convert " + valueType.getName() + " to nbt!");
 	}
 	
-	private NbtElement manageNbt(NbtCompound nbt, String[] path, NbtElement toWrite) {
+	private static NbtElement manageNbt(NbtCompound nbt, String[] path, NbtElement toWrite) {
 		boolean writing = (toWrite != null);
 		for (int i = 0; i < path.length - 1; i++) {
 			NbtElement element = nbt.get(path[i]);
@@ -226,11 +156,30 @@ public class TagReference {
 		}
 		return nbt.get(finalKey);
 	}
-	protected NbtElement getFromNbt(NbtCompound nbt, String[] path) {
+	private static NbtElement getFromNbt(NbtCompound nbt, String[] path) {
 		return manageNbt(nbt, path, null);
 	}
-	protected void setToNbt(NbtCompound nbt, String[] path, NbtElement value) {
+	private static void setToNbt(NbtCompound nbt, String[] path, NbtElement value) {
 		manageNbt(nbt, path, value);
+	}
+	
+	private final Class<T> clazz;
+	private final String[] path;
+	
+	public NBTTagReference(Class<T> clazz, String path) {
+		this.clazz = clazz;
+		this.path = path.split("/");
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public T get(NbtCompound object) {
+		return (T) deserialize(object == null ? null : getFromNbt(object, path), clazz);
+	}
+	
+	@Override
+	public void set(NbtCompound object, T value) {
+		setToNbt(object, path, serialize(value));
 	}
 	
 }

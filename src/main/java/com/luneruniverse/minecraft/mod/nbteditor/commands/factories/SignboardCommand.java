@@ -45,11 +45,7 @@ public class SignboardCommand extends ClientCommand {
 			ref.saveItem(new ItemStack(context.getArgument("sign", SignItem.class)));
 			MainUtil.client.setScreen(new SignboardScreen<>(ref));
 			return Command.SINGLE_SUCCESS;
-		}))).then(literal("import").executes(context -> {
-			SignboardScreen.importSign(ItemReference.getHeldItem(
-					item -> item.getItem() instanceof SignItem, TextInst.translatable("nbteditor.no_hand.no_item.signboard")));
-			return Command.SINGLE_SUCCESS;
-		})).executes(context -> {
+		}))).executes(context -> {
 			NBTReference.getReference(SIGNBOARD_FILTER, false, ref -> MainUtil.client.setScreen(new SignboardScreen<>(ref)));
 			return Command.SINGLE_SUCCESS;
 		});

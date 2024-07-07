@@ -2,6 +2,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.localnbt;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVQuaternionf;
 
@@ -70,6 +72,18 @@ public interface LocalNBT {
 			setNBT(nbt);
 		}
 		return nbt;
+	}
+	public default void modifyNBT(UnaryOperator<NbtCompound> modifier) {
+		NbtCompound nbt = getNBT();
+		if (nbt == null)
+			nbt = new NbtCompound();
+		setNBT(modifier.apply(nbt));
+	}
+	public default void modifyNBT(Consumer<NbtCompound> modifier) {
+		modifyNBT(nbt -> {
+			modifier.accept(nbt);
+			return nbt;
+		});
 	}
 	
 	public void renderIcon(MatrixStack matrices, int x, int y);

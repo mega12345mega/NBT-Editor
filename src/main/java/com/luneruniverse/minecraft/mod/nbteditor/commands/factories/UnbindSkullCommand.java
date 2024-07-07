@@ -1,20 +1,26 @@
 package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.BlockTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Formatting;
 
 public class UnbindSkullCommand extends ClientCommand {
@@ -40,26 +46,29 @@ public class UnbindSkullCommand extends ClientCommand {
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.executes(context -> {
 			NBTReference.getReference(SKULL_FILTER, false, ref -> {
-				NbtCompound nbt = ref.getNBT();
-				if (nbt.contains("SkullOwner", NbtElement.COMPOUND_TYPE)) {
-					NbtCompound owner = nbt.getCompound("SkullOwner");
-					owner.putIntArray("Id", new int[] {0, 0, 0, 0});
-					String name = owner.getString("Name");
-					owner.putString("Name", "Unbound Player");
-					if (ref instanceof ItemReference itemRef) {
-						ItemStack item = itemRef.getItem();
-						item.setNbt(nbt);
-						if (!item.manager$hasCustomName()) {
-							item.manager$setCustomName(TextInst.translatable("block.minecraft.player_head.named", name)
-									.styled(style -> style.withItalic(false).withColor(Formatting.YELLOW)));
-						}
-					}
-				} else {
+				Optional<GameProfile> profile = (ref instanceof ItemReference itemRef ?
+						ItemTagReferences.PROFILE.get(itemRef.getItem()) :
+						BlockTagReferences.PROFILE.get((LocalBlock) ref.getLocalNBT()));
+				if (profile.isEmpty() || profile.get().getProperties().isEmpty()) {
 					MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.unbind_skull.no_textures"), false);
 					return;
 				}
-				
-				ref.saveNBT(ref.getId(), nbt, TextInst.translatable("nbteditor.unbind_skull.unbound"));
+				GameProfile newProfile = new GameProfile(new UUID(0L, 0L), "Unbound Player");
+				newProfile.getProperties().putAll(profile.get().getProperties());
+				if (ref instanceof ItemReference itemRef) {
+					ItemStack item = itemRef.getItem();
+					ItemTagReferences.PROFILE.set(item, Optional.of(newProfile));
+					if (!item.manager$hasCustomName()) {
+						item.manager$setCustomName(TextInst.translatable("block.minecraft.player_head.named", profile.get().getName())
+								.styled(style -> style.withItalic(false).withColor(Formatting.YELLOW)));
+					}
+					itemRef.saveItem(item, TextInst.translatable("nbteditor.unbind_skull.unbound"));
+				} else {
+					BlockReference blockRef = (BlockReference) ref;
+					LocalBlock block = blockRef.getLocalNBT();
+					BlockTagReferences.PROFILE.set(block, Optional.of(newProfile));
+					blockRef.saveLocalNBT(block, TextInst.translatable("nbteditor.unbind_skull.unbound"));
+				}
 			});
 			return Command.SINGLE_SUCCESS;
 		});

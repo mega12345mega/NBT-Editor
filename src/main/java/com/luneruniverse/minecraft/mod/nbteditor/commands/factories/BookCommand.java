@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
@@ -10,24 +11,24 @@ import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ContainerItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.BookScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.WrittenBookTagReference;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.WrittenBookTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.text.Text;
 
 public class BookCommand extends ClientCommand {
@@ -50,16 +51,16 @@ public class BookCommand extends ClientCommand {
 	public static void convertBookToWritable(ItemReference ref) {
 		ItemStack item = MainUtil.setType(Items.WRITABLE_BOOK, ref.getItem(), 1);
 		boolean formatted = false;
-		if (item.hasNbt() && item.getNbt().contains("pages", NbtElement.LIST_TYPE)) {
-			NbtList convertedPages = new NbtList();
-			for (NbtElement page : item.getNbt().getList("pages", NbtElement.STRING_TYPE)) {
-				Text text = TextUtil.fromJsonSafely(((NbtString) page).value);
-				if (!formatted && TextUtil.isTextFormatted(text, true))
-					formatted = true;
-				convertedPages.add(NbtString.of(text.getString()));
-			}
-			item.getNbt().put("pages", convertedPages);
+		List<Text> pages = WrittenBookTagReferences.PAGES.get(item);
+		List<String> convertedPages = new ArrayList<>();
+		for (Text page : pages) {
+			if (!formatted && TextUtil.isTextFormatted(page, true, "black"))
+				formatted = true;
+			convertedPages.add(page.getString());
 		}
+		ItemTagReferences.WRITABLE_BOOK_PAGES.set(item, convertedPages);
+		if (NBTManagers.COMPONENTS_EXIST)
+			item.remove(DataComponentTypes.WRITTEN_BOOK_CONTENT);
 		if (formatted) {
 			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.book.convert.formatting_saved"), false);
 			MainUtil.get(item, true);
@@ -85,11 +86,10 @@ public class BookCommand extends ClientCommand {
 		})).then(literal("new").executes(context -> {
 			ItemReference ref = ItemReference.getHeldAir();
 			ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
-			book.manager$modifyNbt(new WrittenBookTagReference(), tagRef -> {
-				tagRef.title = "";
-				tagRef.author = "";
-				tagRef.pages = new ArrayList<>();
-			});
+			WrittenBookTagReferences.TITLE.set(book, "");
+			WrittenBookTagReferences.AUTHOR.set(book, "");
+			WrittenBookTagReferences.GENERATION.set(book, 0);
+			WrittenBookTagReferences.PAGES.set(book, new ArrayList<>());
 			ref.saveItem(book);
 			MainUtil.client.setScreen(new BookScreen(ref));
 			return Command.SINGLE_SUCCESS;

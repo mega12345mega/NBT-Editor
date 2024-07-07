@@ -5,6 +5,8 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.EffectListArgumentType;
@@ -12,6 +14,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.EnumArgument
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.CustomPotionContents;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -20,9 +24,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionUtil;
 
 public class GetPotionCommand extends ClientCommand {
 	
@@ -54,18 +56,16 @@ public class GetPotionCommand extends ClientCommand {
 		builder.then(argument("type", EnumArgumentType.options(PotionType.class)).then(argument("effects", EffectListArgumentType.effectList()).executes(context -> {
 			ItemStack item = new ItemStack(context.getArgument("type", PotionType.class).item, 1);
 			List<StatusEffectInstance> effects = new ArrayList<>(context.getArgument("effects", Collection.class));
+			Optional<Integer> color = Optional.empty();
 			if (!effects.isEmpty()) {
 				StatusEffectInstance effect = effects.get(0);
-				List<Potion> potions = new ArrayList<>();
-				MVRegistry.POTION.forEach(potions::add);
-				Potion potion = potions.stream().filter(testPotion -> !testPotion.getEffects().isEmpty() && testPotion.getEffects().get(0).getEffectType() == effect.getEffectType()).findFirst().orElse(null);
-				if (potion != null) {
-					int color = MVMisc.getEffectType(potion.getEffects().get(0)).getColor();
-					NbtCompound nbt = item.getOrCreateNbt();
-					nbt.putInt("CustomPotionColor", color);
-				}
+				Potion potion = MVRegistry.POTION.getEntrySet().stream().map(Map.Entry::getValue)
+						.filter(testPotion -> !testPotion.getEffects().isEmpty() &&
+								testPotion.getEffects().get(0).getEffectType() == effect.getEffectType()).findFirst().orElse(null);
+				if (potion != null)
+					color = Optional.of(MVMisc.getEffectType(potion.getEffects().get(0)).getColor());
 			}
-			PotionUtil.setCustomPotionEffects(item, effects);
+			ItemTagReferences.CUSTOM_POTION_CONTENTS.set(item, new CustomPotionContents(color, effects));
 			MainUtil.getWithMessage(item);
 			return Command.SINGLE_SUCCESS;
 		})));

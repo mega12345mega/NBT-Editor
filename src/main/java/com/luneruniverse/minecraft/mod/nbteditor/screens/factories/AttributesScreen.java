@@ -24,6 +24,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueNumber;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -121,11 +122,11 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		visible.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), new ConfigValueDropdown<>(
 				firstAttribute, firstAttribute, new ArrayList<>(ATTRIBUTES.keySet()))));
 		visible.setConfigurable("operation", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.operation"), new ConfigValueDropdownEnum<>(
-				Operation.ADD, Operation.ADD, Operation.class)));
+				AttributeModifierData.Operation.ADD, AttributeModifierData.Operation.ADD, AttributeModifierData.Operation.class)));
 		visible.setConfigurable("amount", new ConfigBar().setConfigurable("number", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.amount"),
 				ConfigValueNumber.forDouble(0, 0, -Double.MAX_VALUE, Double.MAX_VALUE))).setConfigurable("autofill", new MaxButton()));
 		visible.setConfigurable("slot", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.slot"), new ConfigValueDropdownEnum<>(
-				Slot.ALL, Slot.ALL, Slot.class)));
+				AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.class)));
 		ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visible, UUID.randomUUID(), (uuid, defaults) -> UUID.randomUUID());
 	}
 	@SuppressWarnings("unchecked")
@@ -133,49 +134,16 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		return ((ConfigItem<ConfigValueDropdown<String>>) attribute.getConfigurable("attribute")).getValue();
 	}
 	@SuppressWarnings("unchecked")
-	private static ConfigValueDropdown<Operation> getConfigOperation(ConfigCategory attribute) {
-		return ((ConfigItem<ConfigValueDropdown<Operation>>) attribute.getConfigurable("operation")).getValue();
+	private static ConfigValueDropdown<AttributeModifierData.Operation> getConfigOperation(ConfigCategory attribute) {
+		return ((ConfigItem<ConfigValueDropdown<AttributeModifierData.Operation>>) attribute.getConfigurable("operation")).getValue();
 	}
 	@SuppressWarnings("unchecked")
 	private static ConfigValueNumber<Double> getConfigAmount(ConfigCategory attribute) {
 		return ((ConfigItem<ConfigValueNumber<Double>>) ((ConfigBar) attribute.getConfigurable("amount")).getConfigurable("number")).getValue();
 	}
 	@SuppressWarnings("unchecked")
-	private static ConfigValueDropdown<Slot> getConfigSlot(ConfigCategory attribute) {
-		return ((ConfigItem<ConfigValueDropdown<Slot>>) attribute.getConfigurable("slot")).getValue();
-	}
-	
-	private enum Operation {
-		ADD("Add"),
-		MULTIPLY_BASE("Multiply Base"),
-		MULTIPLY("Multiply");
-		
-		private final String name;
-		private Operation(String name) {
-			this.name = name;
-		}
-		@Override
-		public String toString() {
-			return name;
-		}
-	}
-	private enum Slot {
-		ALL("All"),
-		MAINHAND("Main Hand"),
-		OFFHAND("Off Hand"),
-		HEAD("Head"),
-		CHEST("Chest"),
-		LEGS("Legs"),
-		FEET("Feet");
-		
-		private final String name;
-		private Slot(String name) {
-			this.name = name;
-		}
-		@Override
-		public String toString() {
-			return name;
-		}
+	private static ConfigValueDropdown<AttributeModifierData.Slot> getConfigSlot(ConfigCategory attribute) {
+		return ((ConfigItem<ConfigValueDropdown<AttributeModifierData.Slot>>) attribute.getConfigurable("slot")).getValue();
 	}
 	
 	private final ConfigList attributes;
@@ -207,19 +175,19 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			
 			if (modifiers) {
 				int operation = attributeNbt.getInt("Operation");
-				if (operation < 0 || operation >= Operation.values().length)
+				if (operation < 0 || operation >= AttributeModifierData.Operation.values().length)
 					continue;
-				getConfigOperation(attribute).setValue(Operation.values()[operation]);
+				getConfigOperation(attribute).setValue(AttributeModifierData.Operation.values()[operation]);
 			}
 			
 			getConfigAmount(attribute).setValue(attributeNbt.getDouble(modifiers ? "Amount" : "Base"));
 			
 			if (modifiers) {
 				String slotStr = attributeNbt.getString("Slot");
-				Slot slot = Slot.ALL;
+				AttributeModifierData.Slot slot = AttributeModifierData.Slot.ANY;
 				if (!slotStr.isEmpty()) {
 					try {
-						slot = Slot.valueOf(slotStr.toUpperCase());
+						slot = AttributeModifierData.Slot.valueOf(slotStr.toUpperCase());
 					} catch (IllegalArgumentException e) {
 						// Invalid slot
 					}
@@ -250,8 +218,8 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				}
 				attributeNbt.putDouble(modifiers ? "Amount" : "Base", getConfigAmount(attribute).getValidValue());
 				if (modifiers) {
-					Slot slot = getConfigSlot(attribute).getValidValue();
-					if (slot != Slot.ALL)
+					AttributeModifierData.Slot slot = getConfigSlot(attribute).getValidValue();
+					if (slot != AttributeModifierData.Slot.ANY)
 						attributeNbt.putString("Slot", slot.name().toLowerCase());
 				}
 				attributesNbt.add(attributeNbt);

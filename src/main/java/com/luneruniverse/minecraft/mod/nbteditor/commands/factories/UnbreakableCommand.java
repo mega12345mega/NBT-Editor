@@ -4,6 +4,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
@@ -26,13 +27,9 @@ public class UnbreakableCommand extends ClientCommand {
 		builder.executes(context -> {
 			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
-			if (item.getOrCreateNbt().getBoolean("Unbreakable")) {
-				item.getNbt().remove("Unbreakable");
-				ref.saveItem(item, TextInst.translatable("nbteditor.unbreakable.disabled"));
-			} else {
-				item.getNbt().putBoolean("Unbreakable", true);
-				ref.saveItem(item, TextInst.translatable("nbteditor.unbreakable.enabled"));
-			}
+			boolean unbreakable = !ItemTagReferences.UNBREAKABLE.get(item);
+			ItemTagReferences.UNBREAKABLE.set(item, unbreakable);
+			ref.saveItem(item, TextInst.translatable("nbteditor.unbreakable." + (unbreakable ? "enabled" : "disabled")));
 			return Command.SINGLE_SUCCESS;
 		});
 	}
