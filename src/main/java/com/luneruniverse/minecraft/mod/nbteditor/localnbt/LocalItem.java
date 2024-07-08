@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.util.math.MatrixStack;
@@ -17,7 +18,7 @@ import net.minecraft.util.Identifier;
 public class LocalItem implements LocalNBT {
 	
 	public static LocalItem deserialize(NbtCompound nbt) {
-		return new LocalItem(ItemStack.fromNbt(nbt));
+		return new LocalItem(NBTManagers.ITEM.deserialize(nbt));
 	}
 	
 	private ItemStack item;
@@ -74,15 +75,15 @@ public class LocalItem implements LocalNBT {
 	
 	@Override
 	public NbtCompound getNBT() {
-		return item.getNbt();
+		return item.manager$getNbt();
 	}
 	@Override
 	public void setNBT(NbtCompound nbt) {
-		item.setNbt(nbt);
+		item.manager$setNbt(nbt);
 	}
 	@Override
 	public NbtCompound getOrCreateNBT() {
-		return item.getOrCreateNbt();
+		return item.manager$getOrCreateNbt();
 	}
 	
 	@Override
@@ -96,7 +97,7 @@ public class LocalItem implements LocalNBT {
 	}
 	@Override
 	public NbtCompound serialize() {
-		NbtCompound output = item.writeNbt(new NbtCompound());
+		NbtCompound output = item.manager$serialize();
 		output.putString("type", "item");
 		return output;
 	}

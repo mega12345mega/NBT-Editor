@@ -48,6 +48,8 @@ accessible method net/minecraft/text/Text$Serialization toJson (Lnet/minecraft/t
 
 accessible field net/minecraft/util/Rarity formatting Lnet/minecraft/util/Formatting;
 
+accessible method net/minecraft/client/MinecraftClient addBlockEntityNbt (Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/registry/DynamicRegistryManager;)V
+
 # Private in older versions
 accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;
 accessible method net/minecraft/client/render/RenderLayer of (Ljava/lang/String;Lnet/minecraft/client/render/VertexFormat;Lnet/minecraft/client/render/VertexFormat$DrawMode;ILnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;)Lnet/minecraft/client/render/RenderLayer$MultiPhase;

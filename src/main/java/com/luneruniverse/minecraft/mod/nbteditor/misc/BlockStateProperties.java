@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.misc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -126,6 +127,27 @@ public class BlockStateProperties {
 			if (property == null)
 				continue;
 			String value = blockStateTag.getString(tag);
+			if (property.options.contains(value)) {
+				property.value = value;
+				unset.remove(tag);
+			}
+		}
+		return unset;
+	}
+	
+	public Map<String, String> getValuesMap() {
+		Map<String, String> output = new HashMap<>();
+		for (Map.Entry<String, BlockStateProperty> property : properties.entrySet())
+			output.put(property.getKey(), property.getValue().value);
+		return output;
+	}
+	public Set<String> setValues(Map<String, String> blockStateTag) {
+		Set<String> unset = new HashSet<>(properties.keySet());
+		for (String tag : blockStateTag.keySet()) {
+			BlockStateProperty property = properties.get(tag);
+			if (property == null)
+				continue;
+			String value = blockStateTag.get(tag);
 			if (property.options.contains(value)) {
 				property.value = value;
 				unset.remove(tag);

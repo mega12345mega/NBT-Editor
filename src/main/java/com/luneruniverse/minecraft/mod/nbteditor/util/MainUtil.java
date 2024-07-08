@@ -303,6 +303,12 @@ public class MainUtil {
 	
 	
 	public static ItemStack copyAirable(ItemStack item) {
+		if (NBTManagers.COMPONENTS_EXIST) {
+			ItemStack output = item.copyComponentsToNewStack(item.getItem(), item.getCount());
+			output.setBobbingAnimationTime(item.getBobbingAnimationTime());
+			return output;
+		}
+		
 		ItemStack output = new ItemStack(item.getItem(), item.getCount());
 		output.setBobbingAnimationTime(item.getBobbingAnimationTime());
 		if (item.manager$hasNbt())
@@ -312,9 +318,12 @@ public class MainUtil {
 	
 	
 	public static ItemStack setType(Item type, ItemStack item, int count) {
+		if (NBTManagers.COMPONENTS_EXIST)
+			return item.copyComponentsToNewStack(type, count);
+		
 		NbtCompound fullData = item.manager$serialize();
 		fullData.putString("id", MVRegistry.ITEM.getId(type).toString());
-		fullData.putInt(NBTManagers.COMPONENTS_EXIST ? "count" : "Count", count);
+		fullData.putInt("Count", count);
 		return NBTManagers.ITEM.deserialize(fullData);
 	}
 	public static ItemStack setType(Item type, ItemStack item) {

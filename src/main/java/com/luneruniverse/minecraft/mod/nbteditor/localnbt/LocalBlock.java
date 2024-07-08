@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
@@ -13,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -151,11 +153,21 @@ public class LocalBlock implements LocalNBT {
 		for (Item item : MVRegistry.ITEM) {
 			if (item instanceof BlockItem blockItem && blockItem.getBlock() == block) {
 				ItemStack output = new ItemStack(blockItem);
-				NbtCompound nbt = new NbtCompound();
-				nbt.put("BlockStateTag", state.getValues());
-				if (nbt != null)
-					nbt.put("BlockEntityTag", this.nbt);
-				output.setNbt(nbt);
+				if (nbt != null) {
+					if (NBTManagers.COMPONENTS_EXIST) {
+						if (block instanceof BlockEntityProvider provider) {
+							BlockEntity entity = provider.createBlockEntity(new BlockPos(0, 1000, 0), state.applyTo(block.getDefaultState()));
+							entity.setWorld(MainUtil.client.world);
+							NBTManagers.BLOCK_ENTITY.setNbt(entity, nbt);
+							MainUtil.client.addBlockEntityNbt(output, entity, DynamicRegistryManagerHolder.get());
+						}
+					} else {
+						NbtCompound nbt = new NbtCompound();
+						nbt.put("BlockEntityTag", this.nbt);
+						output.manager$setNbt(nbt);
+					}
+				}
+				ItemTagReferences.BLOCK_STATE.set(output, state.getValuesMap());
 				return Optional.of(output);
 			}
 		}

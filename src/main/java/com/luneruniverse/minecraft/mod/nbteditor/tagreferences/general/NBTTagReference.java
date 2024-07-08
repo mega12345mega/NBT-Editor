@@ -38,11 +38,11 @@ public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 		}
 		
 		if (target.isAssignableFrom(NbtElement.class))
-			return element;
+			return element.copy();
 		if (target.isAssignableFrom(NbtCompound.class))
-			return (element instanceof NbtCompound compound ? compound : new NbtCompound());
+			return (element instanceof NbtCompound compound ? compound.copy() : new NbtCompound());
 		if (target.isAssignableFrom(NbtList.class))
-			return (element instanceof NbtList list ? list : new NbtList());
+			return (element instanceof NbtList list ? list.copy() : new NbtList());
 		
 		Class<?> primitiveTarget = (target.isPrimitive() ? target : MethodType.methodType(target).unwrap().returnType());
 		if (primitiveTarget.isPrimitive()) {
@@ -104,7 +104,7 @@ public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 		}
 		
 		if (NbtElement.class.isAssignableFrom(valueType))
-			return (NbtElement) value;
+			return ((NbtElement) value).copy();
 		
 		Class<?> primitiveValueType = (valueType.isPrimitive() ? valueType : MethodType.methodType(valueType).unwrap().returnType());
 		if (primitiveValueType.isPrimitive()) {

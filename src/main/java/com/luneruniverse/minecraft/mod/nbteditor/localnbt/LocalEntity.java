@@ -15,6 +15,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.EntityReference;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -150,7 +151,7 @@ public class LocalEntity implements LocalNBT {
 		
 		NbtCompound nbt = this.nbt.copy();
 		nbt.putString("id", getId().toString());
-		output.setSubNbt("EntityTag", nbt);
+		ItemTagReferences.ENTITY_DATA.set(output, nbt);
 		
 		return Optional.of(output);
 	}
