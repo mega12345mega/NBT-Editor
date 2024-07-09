@@ -19,6 +19,10 @@ public class CommandMixinPlugin extends BasicMixinPlugin {
 				.range("1.19.0", null, () -> output.add("client.toggled.CommandExecutionC2SPacketMixin"))
 				.range(null, "1.18.2", () -> {})
 				.run();
+		Version.newSwitch()
+				.range("1.20.5", null, () -> output.add("client.toggled.ChatCommandSignedC2SPacketMixin"))
+				.range(null, "1.20.4", () -> {})
+				.run();
 	}
 	
 }

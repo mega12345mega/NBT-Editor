@@ -52,9 +52,5 @@ public class NBTBlockEntityNBTManager implements NBTManager<BlockEntity> {
 	public void setNbt(BlockEntity subject, NbtCompound nbt) {
 		BlockEntity_readNbt.invoke(subject, nbt);
 	}
-	@Override
-	public String getNbtString(BlockEntity subject) {
-		return getNbt(subject).asString();
-	}
 	
 }

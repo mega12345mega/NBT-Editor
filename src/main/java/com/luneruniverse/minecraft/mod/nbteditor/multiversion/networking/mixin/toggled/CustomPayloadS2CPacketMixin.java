@@ -17,7 +17,7 @@ import net.minecraft.util.Identifier;
 @SuppressWarnings("deprecation")
 @Mixin(CustomPayloadS2CPacket.class)
 public class CustomPayloadS2CPacketMixin {
-	@Inject(method = "readPayload", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "method_53023(Lnet/minecraft/class_2960;Lnet/minecraft/class_2540;)Lnet/minecraft/class_8710;", at = @At("HEAD"), cancellable = true, remap = false)
 	private static void readPayload(Identifier id, PacketByteBuf payload, CallbackInfoReturnable<CustomPayload> info) {
 		MVPacket packet = MVNetworking.readPacket(id, payload);
 		if (packet != null)

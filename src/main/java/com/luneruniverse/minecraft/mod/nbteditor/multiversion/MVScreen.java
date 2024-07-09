@@ -62,4 +62,7 @@ public class MVScreen extends Screen implements OldEventBehavior {
 				.run();
 	}
 	
+	@Override
+	protected void setInitialFocus() {}
+	
 }
