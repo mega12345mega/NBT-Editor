@@ -110,7 +110,7 @@ public interface ItemReference extends NBTReference<LocalItem> {
 	}
 	@Override
 	public default NbtCompound getNBT() {
-		NbtCompound nbt = getItem().getNbt();
+		NbtCompound nbt = getItem().manager$getNbt();
 		if (nbt != null)
 			return nbt;
 		return new NbtCompound();
@@ -120,7 +120,7 @@ public interface ItemReference extends NBTReference<LocalItem> {
 		ItemStack item = getItem();
 		if (!MVRegistry.ITEM.getId(item.getItem()).equals(id))
 			item = MainUtil.setType(MVRegistry.ITEM.get(id), item);
-		item.setNbt(toSave);
+		item.manager$setNbt(toSave);
 		saveItem(item, onFinished);
 	}
 }
