@@ -141,7 +141,7 @@ public class BlockStateProperties {
 			output.put(property.getKey(), property.getValue().value);
 		return output;
 	}
-	public Set<String> setValues(Map<String, String> blockStateTag) {
+	public Set<String> setValuesMap(Map<String, String> blockStateTag) {
 		Set<String> unset = new HashSet<>(properties.keySet());
 		for (String tag : blockStateTag.keySet()) {
 			BlockStateProperty property = properties.get(tag);

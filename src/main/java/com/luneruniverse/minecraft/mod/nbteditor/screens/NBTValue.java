@@ -151,7 +151,6 @@ public class NBTValue extends List2D.List2DValue {
 		this.unsafe = unsafe;
 	}
 	/**
-	 * 
 	 * @return Returns if this value has been manually set as unsafe; doesn't take into account list types
 	 */
 	public boolean isUnsafe() {

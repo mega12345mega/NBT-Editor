@@ -10,14 +10,14 @@ import net.minecraft.util.Unit;
 
 public class ComponentTagReference<T, C> implements TagReference<T, ItemStack> {
 	
-	public static <C> TagReference<Boolean, ItemStack> forExistance(DataComponentType<C> component, Supplier<C> supplier) {
+	public static <C> ComponentTagReference<Boolean, C> forExistance(DataComponentType<C> component, Supplier<C> supplier) {
 		return new ComponentTagReference<>(component, null, componentValue -> componentValue != null, (componentValue, value) -> {
 			if ((componentValue != null) == value)
 				return componentValue;
 			return value ? supplier.get() : null;
 		});
 	}
-	public static TagReference<Boolean, ItemStack> forExistance(DataComponentType<Unit> component) {
+	public static ComponentTagReference<Boolean, Unit> forExistance(DataComponentType<Unit> component) {
 		return forExistance(component, () -> Unit.INSTANCE);
 	}
 	

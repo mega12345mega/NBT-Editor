@@ -62,7 +62,7 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 				.map(Map.Entry::getKey).toList();
 		String firstEnchant = orderedEnchants.get(0);
 		entry.setConfigurable("enchantment", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.enchantment"),
-				new ConfigValueDropdown<>(firstEnchant, firstEnchant, orderedEnchants,
+				ConfigValueDropdown.forList(firstEnchant, firstEnchant, orderedEnchants,
 				ENCHANTMENTS.entrySet().stream().filter(enchant -> enchant.getValue().isAcceptableItem(inputItem)).map(Map.Entry::getKey).toList())));
 		entry.setConfigurable("level", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.level"), ConfigValueNumber.forInt(1, 1, 1, 32767)));
 		config = new ConfigList(TextInst.translatable("nbteditor.enchantments"), false, entry);

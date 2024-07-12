@@ -34,7 +34,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigTooltipSupplier;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueBoolean;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueSlider;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -446,7 +446,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.setTooltip("nbteditor.config.tooltip_overflow_fix.desc"));
 		
 		mc.setConfigurable("maxEnchantLevelDisplay", new ConfigItem<>(TextInst.translatable("nbteditor.config.enchant_level_max"),
-				new ConfigValueDropdownEnum<>(enchantLevelMax, EnchantLevelMax.NEVER, EnchantLevelMax.class)
+				ConfigValueDropdown.forEnum(enchantLevelMax, EnchantLevelMax.NEVER, EnchantLevelMax.class)
 				.addValueListener(value -> enchantLevelMax = value.getValidValue()))
 				.setTooltip("nbteditor.config.enchant_level_max.desc"));
 		
@@ -500,7 +500,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.setTooltip("nbteditor.config.page_keybinds.desc"));
 		
 		guis.setConfigurable("itemSize", new ConfigItem<>(TextInst.translatable("nbteditor.config.item_size"),
-				new ConfigValueDropdownEnum<>(itemSizeFormat, ItemSizeFormat.HIDDEN, ItemSizeFormat.class)
+				ConfigValueDropdown.forEnum(itemSizeFormat, ItemSizeFormat.HIDDEN, ItemSizeFormat.class)
 				.addValueListener(value -> itemSizeFormat = value.getValidValue()))
 				.setTooltip("nbteditor.config.item_size.desc"));
 		
@@ -510,7 +510,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.setTooltip("nbteditor.config.key_text_size.desc"));
 		
 		guis.setConfigurable("checkUpdates", new ConfigItem<>(TextInst.translatable("nbteditor.config.check_updates"),
-				new ConfigValueDropdownEnum<>(checkUpdates, CheckUpdatesLevel.MINOR, CheckUpdatesLevel.class)
+				ConfigValueDropdown.forEnum(checkUpdates, CheckUpdatesLevel.MINOR, CheckUpdatesLevel.class)
 				.addValueListener(value -> checkUpdates = value.getValidValue()))
 				.setTooltip("nbteditor.config.check_updates.desc"));
 		

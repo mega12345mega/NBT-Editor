@@ -81,6 +81,24 @@ public interface TagReference<T, O> {
 			}
 		};
 	}
+	public static <T> TagReference<T, NbtCompound> alsoRemove(String path, TagReference<T, NbtCompound> tagRef) {
+		return new TagReference<>() {
+			@Override
+			public T get(NbtCompound object) {
+				return tagRef.get(object);
+			}
+			@Override
+			public void set(NbtCompound object, T value) {
+				tagRef.set(object, value);
+				
+				String[] pathParts = path.split("/");
+				NbtCompound nbt = object;
+				for (int i = 0; i < pathParts.length - 1; i++)
+					nbt = nbt.getCompound(pathParts[i]);
+				nbt.remove(pathParts[pathParts.length - 1]);
+			}
+		};
+	}
 	
 	/**
 	 * If T is a collection, this should return a mutable copy

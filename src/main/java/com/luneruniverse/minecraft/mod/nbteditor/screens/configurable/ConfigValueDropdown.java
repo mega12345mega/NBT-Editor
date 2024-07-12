@@ -1,7 +1,9 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ExtendableButtonWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
@@ -14,6 +16,36 @@ import net.minecraft.client.util.math.MatrixStack;
 
 public class ConfigValueDropdown<T> extends ExtendableButtonWidget implements ConfigValue<T, ConfigValueDropdown<T>> {
 	
+	public static <T> ConfigValueDropdown<T> forList(T value, T defaultValue, List<T> allValues) {
+		return new ConfigValueDropdown<>(value, defaultValue, allValues, new ArrayList<>());
+	}
+	public static <T> ConfigValueDropdown<T> forList(T value, T defaultValue, List<T> allValues, List<T> importantValues) {
+		return new ConfigValueDropdown<>(value, defaultValue, allValues, importantValues);
+	}
+	public static <T> ConfigValueDropdown<T> forList(T value, T defaultValue, List<T> allValues, Predicate<T> importantValues) {
+		return new ConfigValueDropdown<>(value, defaultValue, allValues, allValues.stream().filter(importantValues).toList());
+	}
+	
+	public static <T extends Enum<T>> ConfigValueDropdown<T> forEnum(T value, T defaultValue, Class<T> enumClass) {
+		return new ConfigValueDropdown<>(value, defaultValue, Arrays.asList(enumClass.getEnumConstants()), new ArrayList<>());
+	}
+	public static <T extends Enum<T>> ConfigValueDropdown<T> forEnum(T value, T defaultValue, Class<T> enumClass, List<T> importantValues) {
+		return new ConfigValueDropdown<>(value, defaultValue, Arrays.asList(enumClass.getEnumConstants()), importantValues);
+	}
+	public static <T extends Enum<T>> ConfigValueDropdown<T> forEnum(T value, T defaultValue, Class<T> enumClass, Predicate<T> importantValues) {
+		return new ConfigValueDropdown<>(value, defaultValue, Arrays.asList(enumClass.getEnumConstants()), Arrays.stream(enumClass.getEnumConstants()).filter(importantValues).toList());
+	}
+	
+	public static <T extends Enum<T>> ConfigValueDropdown<T> forFilteredEnum(T value, T defaultValue, Class<T> enumClass, Predicate<T> filter) {
+		return new ConfigValueDropdown<>(value, defaultValue, Arrays.stream(enumClass.getEnumConstants()).filter(filter).toList(), new ArrayList<>());
+	}
+	public static <T extends Enum<T>> ConfigValueDropdown<T> forFilteredEnum(T value, T defaultValue, Class<T> enumClass, Predicate<T> filter, List<T> importantValues) {
+		return new ConfigValueDropdown<>(value, defaultValue, Arrays.stream(enumClass.getEnumConstants()).filter(filter).toList(), importantValues.stream().filter(filter).toList());
+	}
+	public static <T extends Enum<T>> ConfigValueDropdown<T> forFilteredEnum(T value, T defaultValue, Class<T> enumClass, Predicate<T> filter, Predicate<T> importantValues) {
+		return new ConfigValueDropdown<>(value, defaultValue, Arrays.stream(enumClass.getEnumConstants()).filter(filter).toList(), Arrays.stream(enumClass.getEnumConstants()).filter(filter.and(importantValues)).toList());
+	}
+	
 	protected T value;
 	protected boolean open;
 	protected final T defaultValue;
@@ -23,7 +55,7 @@ public class ConfigValueDropdown<T> extends ExtendableButtonWidget implements Co
 	protected final List<ConfigValueListener<ConfigValueDropdown<T>>> onChanged;
 	
 	@SuppressWarnings("unchecked")
-	public ConfigValueDropdown(T value, T defaultValue, List<T> allValues, List<T> importantValues) {
+	private ConfigValueDropdown(T value, T defaultValue, List<T> allValues, List<T> importantValues) {
 		super(0, 0, getMaxWidth(allValues) + MainUtil.client.textRenderer.fontHeight * 2, 20, TextInst.of(value.toString()),
 				btn -> ((ConfigValueDropdown<T>) btn).open = !((ConfigValueDropdown<T>) btn).open);
 		
@@ -33,9 +65,6 @@ public class ConfigValueDropdown<T> extends ExtendableButtonWidget implements Co
 		this.importantValues = importantValues;
 		this.open = false;
 		this.onChanged = new ArrayList<>();
-	}
-	public ConfigValueDropdown(T value, T defaultValue, List<T> allValues) {
-		this(value, defaultValue, allValues, new ArrayList<>());
 	}
 	private static int getMaxWidth(List<?> allValues) {
 		return allValues.stream().map(Object::toString).mapToInt(MainUtil.client.textRenderer::getWidth).max().orElse(0);

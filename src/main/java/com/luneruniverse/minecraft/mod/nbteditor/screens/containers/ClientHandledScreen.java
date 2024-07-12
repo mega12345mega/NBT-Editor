@@ -43,7 +43,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	
 	public static void updateServerInventory() {
 		if (!(MainUtil.client.currentScreen instanceof ClientHandledScreen)) {
-			NBTEditor.LOGGER.warn("Attempted to update the server inventory when the client chest wasn't open!");
+			NBTEditor.LOGGER.warn("Attempted to update the server inventory when a ClientHandledScreen wasn't open!");
 			return;
 		}
 		

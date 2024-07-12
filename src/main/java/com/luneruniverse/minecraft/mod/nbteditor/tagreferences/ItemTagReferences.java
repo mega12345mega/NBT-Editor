@@ -16,12 +16,10 @@ import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.CustomDa
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.CustomPotionContentsNBTTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.GameProfileNBTTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.GameProfileNameNBTTagReference;
-import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.HideFlagsNBTTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.Operation;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.Slot;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.CustomPotionContents;
-import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.HideFlag;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 
@@ -49,11 +47,6 @@ public class ItemTagReferences {
 				componentValue -> componentValue == null ? new NbtCompound() : componentValue.copyNbt(),
 				NbtComponent::of);
 	}
-	
-	public static final TagReference<Boolean, ItemStack> HIDE_ADDITIONAL_TOOLTIP = Version.<TagReference<Boolean, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> ComponentTagReference.forExistance(DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP))
-			.range(null, "1.20.4", () -> new HideFlagsNBTTagReference(HideFlag.MISC))
-			.get();
 	
 	public static final TagReference<CustomPotionContents, ItemStack> CUSTOM_POTION_CONTENTS = Version.<TagReference<CustomPotionContents, ItemStack>>newSwitch()
 			.range("1.20.5", null, () -> new ComponentTagReference<>(DataComponentTypes.POTION_CONTENTS,
@@ -91,7 +84,7 @@ public class ItemTagReferences {
 											data.modifierData().get().operation().toMinecraft()),
 									data.modifierData().get().slot().toMinecraft())).toList(),
 							component == null ? true : component.showInTooltip())))
-			.range(null, "1.20.4", () -> new AttributesNBTTagReference())
+			.range(null, "1.20.4", () -> TagReference.forItems(ArrayList::new, new AttributesNBTTagReference(true)))
 			.get();
 	
 	public static final TagReference<List<String>, ItemStack> WRITABLE_BOOK_PAGES = Version.<TagReference<List<String>, ItemStack>>newSwitch()

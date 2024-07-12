@@ -423,7 +423,11 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		boolean scissor = !ConfigScreen.isMacScrollPatch();
 		if (scissor) {
 			MinecraftClient client = MainUtil.client;
-			RenderSystem.enableScissor((int) (x * client.getWindow().getScaleFactor()), client.getWindow().getHeight() - (int) ((y + height) * client.getWindow().getScaleFactor()), (int) (width * client.getWindow().getScaleFactor()), (int) (height * client.getWindow().getScaleFactor()));
+			RenderSystem.enableScissor(
+					(int) (x * client.getWindow().getScaleFactor()),
+					client.getWindow().getHeight() - (int) ((y + height) * client.getWindow().getScaleFactor()),
+					(int) (width * client.getWindow().getScaleFactor()),
+					(int) (height * client.getWindow().getScaleFactor()));
 		}
 		
 		matrices.push();

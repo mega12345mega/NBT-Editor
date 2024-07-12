@@ -4,7 +4,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
@@ -43,7 +42,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -348,15 +346,11 @@ public class MainUtil {
 	
 	public static NbtCompound readNBT(InputStream in) throws IOException {
 		byte[] data = in.readAllBytes();
-		DataInputStream resetableIn = new DataInputStream(new ByteArrayInputStream(data));
-		NbtCompound nbt;
 		try {
-			nbt = MVMisc.readCompressedNbt(resetableIn);
+			return MVMisc.readCompressedNbt(new ByteArrayInputStream(data));
 		} catch (ZipException e) {
-			resetableIn.reset();
-			nbt = NbtIo.readCompound(resetableIn);
+			return MVMisc.readNbt(new ByteArrayInputStream(data));
 		}
-		return nbt;
 	}
 	
 	

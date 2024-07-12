@@ -17,6 +17,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.It
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ButtonDropdownWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.SignSideTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
@@ -26,7 +27,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.SignItem;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -45,7 +45,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	private static int getRenderedColor(DyeColor color) {
 		if (color == DyeColor.BLACK)
-			return -988212;
+			return 0xFFF0EBCC;
 		int rgb = color.getSignColor();
 		int r = (int) (ColorHelper.Argb.getRed(rgb) * 0.4D);
 		int g = (int) (ColorHelper.Argb.getGreen(rgb) * 0.4D);
@@ -75,49 +75,67 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		}
 	}
 	
-	private NbtCompound getSideNbt(boolean create) {
-		NbtCompound nbt = localNBT.getOrCreateNBT();
-		
-		if (localNBT instanceof LocalItem) {
-			if (nbt.contains("BlockEntityTag", NbtElement.COMPOUND_TYPE))
-				nbt = nbt.getCompound("BlockEntityTag");
-			else if (!create)
+	private NbtCompound getSideNbt() {
+		NbtCompound nbt;
+		if (localNBT instanceof LocalItem localItem)
+			nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getItem());
+		else {
+			nbt = localNBT.getNBT();
+			if (nbt == null)
 				return new NbtCompound();
-			else {
-				NbtCompound blockEntityTag = new NbtCompound();
-				nbt.put("BlockEntityTag", blockEntityTag);
-				nbt = blockEntityTag;
-			}
 		}
 		
-		if (newFeatures) {
-			String side = (back ? "back_text" : "front_text");
-			if (nbt.contains(side, NbtElement.COMPOUND_TYPE))
-				nbt = nbt.getCompound(side);
-			else if (!create)
-				return new NbtCompound();
-			else {
-				NbtCompound sideTag = new NbtCompound();
-				nbt.put(side, sideTag);
-				nbt = sideTag;
-			}
-		}
-		
+		if (newFeatures)
+			return nbt.getCompound(back ? "back_text" : "front_text");
 		return nbt;
 	}
+	private void setSideNbt(NbtCompound sideNbt) {
+		if (!newFeatures) {
+			if (localNBT instanceof LocalItem localItem)
+				ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getItem(), sideNbt);
+			else
+				localNBT.setNBT(sideNbt);
+			return;
+		}
+		
+		if (localNBT instanceof LocalItem localItem) {
+			NbtCompound nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getItem());
+			nbt.put(back ? "back_text" : "front_text", sideNbt);
+			ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getItem(), nbt);
+		} else {
+			NbtCompound nbt = localNBT.getNBT();
+			nbt.put(back ? "back_text" : "front_text", sideNbt);
+			localNBT.setNBT(nbt);
+		}
+	}
 	private void modifySideNbt(Consumer<NbtCompound> modifier) {
-		modifier.accept(getSideNbt(true));
+		NbtCompound sideNbt = getSideNbt();
+		modifier.accept(sideNbt);
+		setSideNbt(sideNbt);
 	}
 	
 	private void setWaxed(boolean waxed) {
 		if (!newFeatures)
 			throw new IllegalStateException("Incorrect version!");
-		localNBT.getOrCreateNBT().putBoolean("is_waxed", waxed);
+		
+		if (localNBT instanceof LocalItem localItem) {
+			NbtCompound nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getItem());
+			nbt.putBoolean("is_waxed", waxed);
+			ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getItem(), nbt);
+		} else {
+			NbtCompound nbt = localNBT.getNBT();
+			nbt.putBoolean("is_waxed", waxed);
+			localNBT.setNBT(nbt);
+		}
 		checkSave();
 	}
 	private boolean isWaxed() {
-		NbtCompound blockTag = localNBT.getNBT();
-		return blockTag != null && blockTag.getBoolean("is_waxed");
+		NbtCompound nbt;
+		if (localNBT instanceof LocalItem localItem)
+			nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getItem());
+		else
+			nbt = localNBT.getNBT();
+		return nbt != null && nbt.getBoolean("is_waxed");
 	}
 	
 	private void setGlowing(boolean glowing) {
@@ -125,7 +143,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		checkSave();
 	}
 	private boolean isGlowing() {
-		return SignSideTagReferences.GLOWING.get(getSideNbt(false));
+		return SignSideTagReferences.GLOWING.get(getSideNbt());
 	}
 	
 	private void setColor(DyeColor color) {
@@ -133,16 +151,16 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		checkSave();
 	}
 	private DyeColor getColor() {
-		return DyeColor.byName(SignSideTagReferences.COLOR.get(getSideNbt(false)), DyeColor.BLACK);
+		return DyeColor.byName(SignSideTagReferences.COLOR.get(getSideNbt()), DyeColor.BLACK);
 	}
 	
 	private void setLines(List<Text> lines) {
 		modifySideNbt(nbt -> SignSideTagReferences.TEXT.set(nbt, lines.stream()
-				.map(line -> fixClickEvent(line)).map(line -> newFeatures ? fixEditable(line) : line).toList()));
+				.map(this::fixClickEvent).map(line -> newFeatures ? fixEditable(line) : line).toList()));
 		checkSave();
 	}
 	private List<Text> getLines() {
-		List<Text> output = SignSideTagReferences.TEXT.get(getSideNbt(false));
+		List<Text> output = SignSideTagReferences.TEXT.get(getSideNbt());
 		while (output.size() < 4)
 			output.add(TextInst.of(""));
 		return output;

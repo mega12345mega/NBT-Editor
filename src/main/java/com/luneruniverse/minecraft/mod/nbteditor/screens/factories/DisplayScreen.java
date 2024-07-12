@@ -14,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.It
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.EntityTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
 import com.luneruniverse.minecraft.mod.nbteditor.util.Lore.LoreConsumer;
 
@@ -72,9 +73,9 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		if (localNBT instanceof LocalEntity entity) {
 			addDrawableChild(MVMisc.newButton(16, nextY, 150, 20,
 					TextInst.translatable("nbteditor.display.custom_name_visible." +
-							(entity.getOrCreateNBT().getBoolean("CustomNameVisible") ? "enabled" : "disabled")), btn -> {
-				boolean customNameVisible = !entity.getOrCreateNBT().getBoolean("CustomNameVisible");
-				entity.getNBT().putBoolean("CustomNameVisible", customNameVisible);
+							(EntityTagReferences.CUSTOM_NAME_VISIBLE.get(entity) ? "enabled" : "disabled")), btn -> {
+				boolean customNameVisible = !EntityTagReferences.CUSTOM_NAME_VISIBLE.get(entity);
+				EntityTagReferences.CUSTOM_NAME_VISIBLE.set(entity, customNameVisible);
 				btn.setMessage(TextInst.translatable("nbteditor.display.custom_name_visible." + (customNameVisible ? "enabled" : "disabled")));
 				checkSave();
 			}));

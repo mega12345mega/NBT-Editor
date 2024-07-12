@@ -154,12 +154,6 @@ public class MixinLink {
 	}
 	
 	
-	/**
-	 * Only in 1.20.4 or lower
-	 */
-	public static final Set<Thread> ACTUAL_BOOK_CONTENTS = Collections.synchronizedSet(new HashSet<>());
-	
-	
 	public static void renderChatLimitWarning(ChatScreen source, MatrixStack matrices) {
 		if (!ConfigScreen.isChatLimitExtended())
 			return;

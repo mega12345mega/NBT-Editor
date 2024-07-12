@@ -15,11 +15,17 @@ public class HideFlagsNBTTagReference implements TagReference<Boolean, ItemStack
 	
 	@Override
 	public Boolean get(ItemStack object) {
+		if (!flag.isInThisVersion())
+			throw new IllegalArgumentException("The flag " + flag + " isn't available in this version of Minecraft!");
+		
 		return object.manager$hasNbt() && flag.isEnabled(object.manager$getNbt().getInt("HideFlags"));
 	}
 	
 	@Override
 	public void set(ItemStack object, Boolean value) {
+		if (!flag.isInThisVersion())
+			throw new IllegalArgumentException("The flag " + flag + " isn't available in this version of Minecraft!");
+		
 		int flags = (object.manager$hasNbt() ? object.manager$getNbt().getInt("HideFlags") : 0);
 		flag.set(flags, value);
 		if (flags == 0) {

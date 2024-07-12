@@ -2,10 +2,12 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
@@ -22,17 +24,16 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigList
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueNumber;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.EntityTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.attribute.ClampedEntityAttribute;
 import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 
 public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
@@ -112,21 +113,21 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		String firstAttribute = ATTRIBUTES.keySet().stream().findFirst().get();
 		
 		ConfigCategory visibleBase = new ConfigCategory();
-		visibleBase.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), new ConfigValueDropdown<>(
+		visibleBase.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), ConfigValueDropdown.forList(
 				firstAttribute, firstAttribute, new ArrayList<>(ATTRIBUTES.keySet()))));
 		visibleBase.setConfigurable("amount", new ConfigBar().setConfigurable("number", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.base"),
 				ConfigValueNumber.forDouble(0, 0, -Double.MAX_VALUE, Double.MAX_VALUE))).setConfigurable("autofill", new MaxButton()));
 		BASE_ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visibleBase, UUID.randomUUID(), (uuid, defaults) -> UUID.randomUUID());
 		
 		ConfigCategory visible = new ConfigCategory();
-		visible.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), new ConfigValueDropdown<>(
+		visible.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), ConfigValueDropdown.forList(
 				firstAttribute, firstAttribute, new ArrayList<>(ATTRIBUTES.keySet()))));
-		visible.setConfigurable("operation", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.operation"), new ConfigValueDropdownEnum<>(
+		visible.setConfigurable("operation", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.operation"), ConfigValueDropdown.forEnum(
 				AttributeModifierData.Operation.ADD, AttributeModifierData.Operation.ADD, AttributeModifierData.Operation.class)));
 		visible.setConfigurable("amount", new ConfigBar().setConfigurable("number", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.amount"),
 				ConfigValueNumber.forDouble(0, 0, -Double.MAX_VALUE, Double.MAX_VALUE))).setConfigurable("autofill", new MaxButton()));
-		visible.setConfigurable("slot", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.slot"), new ConfigValueDropdownEnum<>(
-				AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.class)));
+		visible.setConfigurable("slot", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.slot"), ConfigValueDropdown.forFilteredEnum(
+				AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.class, AttributeModifierData.Slot::isInThisVersion)));
 		ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visible, UUID.randomUUID(), (uuid, defaults) -> UUID.randomUUID());
 	}
 	@SuppressWarnings("unchecked")
@@ -155,79 +156,52 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		boolean modifiers = (ref instanceof ItemReference);
 		ConfigHiddenDataNamed<ConfigCategory, UUID> entry = (modifiers ? ATTRIBUTE_ENTRY : BASE_ATTRIBUTE_ENTRY);
-		String attributeTagName = (modifiers ? "AttributeModifiers" : "Attributes");
+		List<AttributeData> attributes = (ref instanceof ItemReference itemRef ?
+				ItemTagReferences.ATTRIBUTES.get(itemRef.getItem()) :
+				EntityTagReferences.ATTRIBUTES.get((LocalEntity) ref.getLocalNBT()));
 		
-		NbtCompound nbt = localNBT.getOrCreateNBT();
-		NbtList attributesNbt = nbt.getList(attributeTagName, NbtElement.COMPOUND_TYPE);
 		this.attributes = new ConfigList(TextInst.translatable("nbteditor.attributes"), false, entry);
-		
-		for (NbtElement element : attributesNbt) {
-			NbtCompound attributeNbt = (NbtCompound) element;
-			ConfigHiddenDataNamed<ConfigCategory, UUID> fullAttribute = entry.clone(true);
-			ConfigCategory attribute = fullAttribute.getVisible();
+		for (AttributeData attribute : attributes) {
+			ConfigHiddenDataNamed<ConfigCategory, UUID> hiddenAttributeConfig = entry.clone(true);
+			ConfigCategory attributeConfig = hiddenAttributeConfig.getVisible();
 			
-			String attributeName = attributeNbt.getString(modifiers ? "AttributeName" : "Name");
-			if (!attributeName.contains(":"))
-				attributeName = "minecraft:" + attributeName;
-			if (!ATTRIBUTES.containsKey(attributeName))
-				continue;
-			getConfigAttribute(attribute).setValue(attributeName);
+			getConfigAttribute(attributeConfig).setValue(MVRegistry.ATTRIBUTE.getId(attribute.attribute()).toString());
+			getConfigAmount(attributeConfig).setValue(attribute.value());
 			
 			if (modifiers) {
-				int operation = attributeNbt.getInt("Operation");
-				if (operation < 0 || operation >= AttributeModifierData.Operation.values().length)
-					continue;
-				getConfigOperation(attribute).setValue(AttributeModifierData.Operation.values()[operation]);
+				AttributeData.AttributeModifierData modifier = attribute.modifierData().get();
+				getConfigOperation(attributeConfig).setValue(modifier.operation());
+				getConfigSlot(attributeConfig).setValue(modifier.slot());
+				hiddenAttributeConfig.setData(modifier.uuid());
 			}
 			
-			getConfigAmount(attribute).setValue(attributeNbt.getDouble(modifiers ? "Amount" : "Base"));
-			
-			if (modifiers) {
-				String slotStr = attributeNbt.getString("Slot");
-				AttributeModifierData.Slot slot = AttributeModifierData.Slot.ANY;
-				if (!slotStr.isEmpty()) {
-					try {
-						slot = AttributeModifierData.Slot.valueOf(slotStr.toUpperCase());
-					} catch (IllegalArgumentException e) {
-						// Invalid slot
-					}
-				}
-				getConfigSlot(attribute).setValue(slot);
-				
-				if (!attributeNbt.containsUuid("UUID"))
-					continue;
-				fullAttribute.setData(attributeNbt.getUuid("UUID"));
-			}
-			
-			this.attributes.addConfigurable(fullAttribute);
+			this.attributes.addConfigurable(hiddenAttributeConfig);
 		}
 		
 		this.attributes.addValueListener(source -> {
-			attributesNbt.clear();
+			List<AttributeData> newAttributes = new ArrayList<>();
+			
 			for (ConfigPath path : this.attributes.getConfigurables().values()) {
-				ConfigHiddenDataNamed<ConfigCategory, UUID> fullAttribute =
+				ConfigHiddenDataNamed<ConfigCategory, UUID> hiddenAttributeConfig =
 						(ConfigHiddenDataNamed<ConfigCategory, UUID>) path;
-				ConfigCategory attribute = fullAttribute.getVisible();
-				NbtCompound attributeNbt = new NbtCompound();
-				if (modifiers)
-					attributeNbt.putUuid("UUID", fullAttribute.getData());
-				attributeNbt.putString(modifiers ? "AttributeName" : "Name", getConfigAttribute(attribute).getValidValue());
+				ConfigCategory attributeConfig = hiddenAttributeConfig.getVisible();
+				
+				EntityAttribute attribute = ATTRIBUTES.get(getConfigAttribute(attributeConfig).getValidValue());
+				double amount = getConfigAmount(attributeConfig).getValidValue();
+				
 				if (modifiers) {
-					attributeNbt.putString("Name", attributeNbt.getString("AttributeName"));
-					attributeNbt.putInt("Operation", getConfigOperation(attribute).getValidValue().ordinal());
-				}
-				attributeNbt.putDouble(modifiers ? "Amount" : "Base", getConfigAmount(attribute).getValidValue());
-				if (modifiers) {
-					AttributeModifierData.Slot slot = getConfigSlot(attribute).getValidValue();
-					if (slot != AttributeModifierData.Slot.ANY)
-						attributeNbt.putString("Slot", slot.name().toLowerCase());
-				}
-				attributesNbt.add(attributeNbt);
+					AttributeModifierData.Operation operation = getConfigOperation(attributeConfig).getValidValue();
+					AttributeModifierData.Slot slot = getConfigSlot(attributeConfig).getValidValue();
+					UUID uuid = hiddenAttributeConfig.getData();
+					newAttributes.add(new AttributeData(attribute, amount, operation, slot, uuid));
+				} else
+					newAttributes.add(new AttributeData(attribute, amount));
 			}
-			if (attributesNbt.isEmpty())
-				nbt.remove(attributeTagName);
+			
+			if (ref instanceof ItemReference itemRef)
+				ItemTagReferences.ATTRIBUTES.set(itemRef.getItem(), newAttributes);
 			else
-				nbt.put(attributeTagName, attributesNbt);
+				EntityTagReferences.ATTRIBUTES.set((LocalEntity) ref.getLocalNBT(), newAttributes);
 			checkSave();
 		});
 	}

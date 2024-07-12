@@ -31,7 +31,7 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 	
 	public SuggestingTextFieldWidget(Screen screen, int x, int y, int width, int height, TextFieldWidget copyFrom) {
 		super(x, y, width, height, copyFrom);
-		suggestor = new ChatInputSuggestor(MainUtil.client, screen, this, MainUtil.client.textRenderer, false, true, 0, 7, false, -2147483648) {
+		suggestor = new ChatInputSuggestor(MainUtil.client, screen, this, MainUtil.client.textRenderer, false, true, 0, 7, false, 0x80000000) {
 			@Override
 			public void refresh() {
 				if (!this.completingSuggestions) {

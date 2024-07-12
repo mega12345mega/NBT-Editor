@@ -35,7 +35,8 @@ public class WrittenBookTagReferences {
 					null,
 					content -> content == null ? "" : content.title().raw(),
 					(content, value) -> getComponent(content, () -> value, null, null, null)))
-			.range(null, "1.20.4", () -> TagReference.forItems(() -> "", new NBTTagReference<>(String.class, "title")))
+			.range(null, "1.20.4", () -> TagReference.forItems(() -> "", TagReference.alsoRemove("filtered_title",
+					new NBTTagReference<>(String.class, "title"))))
 			.get();
 	
 	public static final TagReference<String, ItemStack> AUTHOR = Version.<TagReference<String, ItemStack>>newSwitch()
@@ -59,7 +60,8 @@ public class WrittenBookTagReferences {
 					null,
 					content -> content == null ? new ArrayList<>() : content.pages().stream().map(RawFilteredPair::raw).collect(Collectors.toList()),
 					(content, value) -> getComponent(content, null, null, null, () -> value)))
-			.range(null, "1.20.4", () -> TagReference.forItems(ArrayList::new, TagReference.forLists(Text.class, new NBTTagReference<>(Text[].class, "pages"))))
+			.range(null, "1.20.4", () -> TagReference.forItems(ArrayList::new, TagReference.alsoRemove("filtered_pages",
+					TagReference.forLists(Text.class, new NBTTagReference<>(Text[].class, "pages")))))
 			.get();
 	
 }

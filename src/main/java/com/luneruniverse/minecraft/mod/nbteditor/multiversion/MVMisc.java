@@ -58,7 +58,6 @@ import net.minecraft.command.argument.TextArgumentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
-import net.minecraft.component.type.WrittenBookContentComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -76,7 +75,6 @@ import net.minecraft.resource.ResourceFactory;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -487,38 +485,6 @@ public class MVMisc {
 		return Version.<StatusEffect>newSwitch()
 				.range("1.20.5", null, () -> effect.getEffectType().value())
 				.range(null, "1.20.4", () -> StatusEffectInstance_getEffectType.get().invoke(effect))
-				.get();
-	}
-	
-	private static final Supplier<Class<?>> WrittenBookContents =
-			Reflection.getOptionalClass("net.minecraft.class_3872$class_3933");
-	private static final Supplier<Reflection.MethodInvoker> BookScreen$Contents_getPage =
-			Reflection.getOptionalMethod(BookScreen.Contents.class, "method_17563", MethodType.methodType(StringVisitable.class, int.class));
-	private static StringVisitable getActualPageOld(ItemStack item, int page) {
-		MixinLink.ACTUAL_BOOK_CONTENTS.add(Thread.currentThread());
-		try {
-			Object contents = Reflection.newInstance(WrittenBookContents.get(), new Class<?>[] {ItemStack.class}, item);
-			return BookScreen$Contents_getPage.get().invoke(contents, page);
-		} finally {
-			MixinLink.ACTUAL_BOOK_CONTENTS.remove(Thread.currentThread());
-		}
-	}
-	public static Text getActualPage(ItemStack item, int page) {
-		return Version.<Text>newSwitch()
-				.range("1.20.5", null, () -> {
-					WrittenBookContentComponent contents = item.get(DataComponentTypes.WRITTEN_BOOK_CONTENT);
-					if (contents == null)
-						return TextInst.of("");
-					return contents.asResolved().getPages(false).get(page);
-				})
-				.range(null, "1.20.4", () -> {
-					EditableText output = TextInst.literal("");
-					getActualPageOld(item, page).visit((style, str) -> {
-						output.append(TextInst.literal(str).setStyle(style));
-						return Optional.empty();
-					}, Style.EMPTY);
-					return output;
-				})
 				.get();
 	}
 	

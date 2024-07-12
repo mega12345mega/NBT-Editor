@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.Operation;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.Slot;
 
@@ -97,6 +98,9 @@ public record AttributeData(EntityAttribute attribute, double value, Optional<At
 			}
 			public boolean isOnlyForComponents() {
 				return onlyForComponents;
+			}
+			public boolean isInThisVersion() {
+				return !onlyForComponents || NBTManagers.COMPONENTS_EXIST;
 			}
 			@Override
 			public String toString() {
