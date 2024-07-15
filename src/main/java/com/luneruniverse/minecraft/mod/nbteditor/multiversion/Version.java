@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 public class Version {
+	
 	public static class VersionSwitch<T> {
 		private final int[] version;
 		private Supplier<T> match;
@@ -87,18 +88,33 @@ public class Version {
 	
 	private static String releaseTarget;
 	public static String getReleaseTarget() {
-		if (releaseTarget != null)
-			return releaseTarget;
-		
+		if (releaseTarget == null)
+			readVersionJson();
+		return releaseTarget;
+	}
+	
+	private static Integer worldVersion;
+	public static int getWorldVersion() {
+		if (worldVersion == null)
+			readVersionJson();
+		return worldVersion;
+	}
+	
+	private static void readVersionJson() {
 		try (InputStream in = Version.class.getResourceAsStream("/version.json");
 				InputStreamReader reader = new InputStreamReader(in);) {
 			JsonObject data = new Gson().fromJson(reader, JsonObject.class);
+			
 			if (data.has("release_target"))
-				return releaseTarget = data.get("release_target").getAsString();
-			String id = data.get("id").getAsString();
-			return releaseTarget = id.split("\\+|-")[0];
+				releaseTarget = data.get("release_target").getAsString();
+			else {
+				String id = data.get("id").getAsString();
+				releaseTarget = id.split("\\+|-")[0];
+			}
+			
+			worldVersion = data.get("world_version").getAsInt();
 		} catch (IOException e) {
-			throw new UncheckedIOException("Error trying to read game version", e);
+			throw new UncheckedIOException("Error trying to parse version.json", e);
 		}
 	}
 	
@@ -110,4 +126,5 @@ public class Version {
 			return parts;
 		return new int[] {parts[0], parts[1], 0};
 	}
+	
 }

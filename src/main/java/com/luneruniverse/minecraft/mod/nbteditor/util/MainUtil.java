@@ -26,8 +26,11 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.DSL.TypeReference;
+import com.mojang.serialization.Dynamic;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
@@ -42,6 +45,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -457,6 +461,20 @@ public class MainUtil {
 		RenderSystem.disableDepthTest();
 		MVMisc.endDrawingShader(matrices, vertex);
 		RenderSystem.enableDepthTest();
+	}
+	
+	
+	// Based on DataFixTypes
+	public static NbtCompound update(TypeReference typeRef, NbtCompound nbt, int oldVersion) {
+		return (NbtCompound) client.getDataFixer().update(typeRef, new Dynamic<>(NbtOps.INSTANCE, nbt), oldVersion, Version.getWorldVersion()).getValue();
+	}
+	/**
+	 * If a DataVersion tag exists, this updates from that - otherwise, nbt is returned
+	 */
+	public static NbtCompound update(TypeReference typeRef, NbtCompound nbt) {
+		if (!nbt.contains("DataVersion", NbtElement.NUMBER_TYPE))
+			return nbt;
+		return update(typeRef, nbt, nbt.getInt("DataVersion"));
 	}
 	
 }
