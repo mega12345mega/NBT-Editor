@@ -10,6 +10,13 @@ import net.minecraft.nbt.NbtCompound;
 public class SpawnEggContainerIO implements ItemContainerIO {
 	
 	@Override
+	public int getMaxItemSize(ItemStack item) {
+		NbtCompound nbt = item.manager$getNbt();
+		NbtCompound entityTag = (nbt == null ? new NbtCompound() : nbt.getCompound(TagNames.ENTITY_TAG));
+		return ContainerIO.getMaxSize(new LocalEntity(MVMisc.getEntityType(item), entityTag));
+	}
+	
+	@Override
 	public boolean isItemReadable(ItemStack item) {
 		NbtCompound nbt = item.manager$getNbt();
 		NbtCompound entityTag = (nbt == null ? new NbtCompound() : nbt.getCompound(TagNames.ENTITY_TAG));

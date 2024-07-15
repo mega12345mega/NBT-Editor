@@ -136,13 +136,12 @@ public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 		throw new IllegalArgumentException("Cannot convert " + valueType.getName() + " to nbt!");
 	}
 	
-	private static NbtElement manageNbt(NbtCompound nbt, String[] path, NbtElement toWrite) {
-		boolean writing = (toWrite != null);
+	private static NbtElement manageNbt(NbtCompound nbt, String[] path, boolean write, NbtElement toWrite) {
 		for (int i = 0; i < path.length - 1; i++) {
 			NbtElement element = nbt.get(path[i]);
 			if (element instanceof NbtCompound compound)
 				nbt = compound;
-			else if (writing) {
+			else if (write) {
 				NbtCompound compound = new NbtCompound();
 				nbt.put(path[i], compound);
 				nbt = compound;
@@ -150,17 +149,23 @@ public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 				return null;
 		}
 		String finalKey = path[path.length - 1];
-		if (writing) {
-			nbt.put(finalKey, toWrite);
+		if (write) {
+			if (toWrite == null)
+				nbt.remove(finalKey);
+			else
+				nbt.put(finalKey, toWrite);
 			return null;
 		}
 		return nbt.get(finalKey);
 	}
 	private static NbtElement getFromNbt(NbtCompound nbt, String[] path) {
-		return manageNbt(nbt, path, null);
+		return manageNbt(nbt, path, false, null);
 	}
 	private static void setToNbt(NbtCompound nbt, String[] path, NbtElement value) {
-		manageNbt(nbt, path, value);
+		manageNbt(nbt, path, true, value);
+	}
+	private static void removeFromNbt(NbtCompound nbt, String[] path) {
+		manageNbt(nbt, path, true, null);
 	}
 	
 	private final Class<T> clazz;
@@ -179,6 +184,10 @@ public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 	
 	@Override
 	public void set(NbtCompound object, T value) {
+		if (value == null) {
+			removeFromNbt(object, path);
+			return;
+		}
 		setToNbt(object, path, serialize(value));
 	}
 	

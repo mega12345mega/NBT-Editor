@@ -18,6 +18,7 @@ public class NBTComponentTagReference<T, C> implements TagReference<T, NbtCompou
 	private final Supplier<C> defaultComponent;
 	private final Function<C, T> getter;
 	private final BiFunction<C, T, C> setter;
+	private boolean passNullValue;
 	
 	public NBTComponentTagReference(String tag, Codec<C> codec, Supplier<T> defaultValue, Supplier<C> defaultComponent, Function<C, T> getter, BiFunction<C, T, C> setter) {
 		this.tag = tag;
@@ -31,6 +32,11 @@ public class NBTComponentTagReference<T, C> implements TagReference<T, NbtCompou
 		this(tag, codec, defaultValue, null, getter, (componentValue, value) -> setter.apply(value));
 	}
 	
+	public NBTComponentTagReference<T, C> passNullValue() {
+		passNullValue = true;
+		return this;
+	}
+	
 	@Override
 	public T get(NbtCompound object) {
 		return codec.decode(NbtOps.INSTANCE, object.get(tag)).result().map(Pair::getFirst).map(getter).orElseGet(defaultValue);
@@ -38,9 +44,18 @@ public class NBTComponentTagReference<T, C> implements TagReference<T, NbtCompou
 	
 	@Override
 	public void set(NbtCompound object, T value) {
+		if (value == null && !passNullValue) {
+			object.remove(tag);
+			return;
+		}
 		C componentValue = (defaultComponent == null ? null :
 			codec.decode(NbtOps.INSTANCE, object.get(tag)).result().map(Pair::getFirst).orElseGet(defaultComponent));
-		object.put(tag, codec.encodeStart(NbtOps.INSTANCE, setter.apply(componentValue, value)).getOrThrow());
+		componentValue = setter.apply(componentValue, value);
+		if (componentValue == null) {
+			object.remove(tag);
+			return;
+		}
+		object.put(tag, codec.encodeStart(NbtOps.INSTANCE, componentValue).getOrThrow());
 	}
 	
 }

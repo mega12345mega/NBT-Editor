@@ -1,8 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -23,7 +23,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidg
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.TranslatedGroupWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.WrittenBookTagReferences;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore.LoreConsumer;
 
 import net.minecraft.client.gui.screen.ingame.BookScreen.Contents;
 import net.minecraft.client.util.math.MatrixStack;
@@ -259,9 +258,12 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 	
 	@Override
 	public void filesDragged(List<Path> paths) {
-		AtomicReference<Text> newPage = new AtomicReference<>();
-		LoreConsumer loreConsumer = LoreConsumer.createAppendPage(getPage(), newPage::setPlain);
-		ImageToLoreWidget.openImportFiles(paths, file -> loreConsumer, () -> contents.setText(newPage.getPlain()));
+		List<Text> lines = new ArrayList<>();
+		lines.add(getPage());
+		ImageToLoreWidget.openImportFiles(paths, (file, imgLines) -> lines.addAll(imgLines), () -> {
+			if (lines.size() > 1)
+				contents.setText(lines);
+		});
 	}
 	
 	@Override

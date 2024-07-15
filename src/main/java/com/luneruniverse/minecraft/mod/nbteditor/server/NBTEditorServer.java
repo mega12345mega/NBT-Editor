@@ -8,7 +8,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorServerConn;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
@@ -53,6 +52,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvents.Start {
 	
+	public static final int PROTOCOL_VERSION = 0;
 	public static boolean IS_DEDICATED = true;
 	
 	public NBTEditorServer() {
@@ -71,7 +71,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	
 	@Override
 	public void onPlayStart(ServerPlayerEntity player) {
-		MVServerNetworking.send(player, new ProtocolVersionS2CPacket(NBTEditorServerConn.PROTOCOL_VERSION));
+		MVServerNetworking.send(player, new ProtocolVersionS2CPacket(PROTOCOL_VERSION));
 	}
 	
 	private void onSetCursorPacket(SetCursorC2SPacket packet, ServerPlayerEntity player) {
@@ -153,7 +153,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 				MVServerNetworking.send(player,
 						new ViewEntityS2CPacket(packet.getRequestId(),
 								entity.getEntityWorld().getRegistryKey(), entity.getUuid(),
-								EntityType.getId(entity.getType()), entity.writeNbt(new NbtCompound())));
+								EntityType.getId(entity.getType()), NBTManagers.ENTITY.getNbt(entity)));
 				return;
 			}
 		}
@@ -268,11 +268,11 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		
 		MVServerNetworking.send(player,
 				new ViewEntityS2CPacket(packet.getRequestId(), entity.getEntityWorld().getRegistryKey(), entity.getUuid(),
-						EntityType.getId(entity.getType()), entity.writeNbt(new NbtCompound())));
+						EntityType.getId(entity.getType()), NBTManagers.ENTITY.getNbt(entity)));
 	}
 	
 	private void readEntityNbtWithPassengers(ServerWorld world, Entity entity, NbtCompound nbt) {
-		entity.readNbt(nbt);
+		NBTManagers.ENTITY.setNbt(entity, nbt);
 		
 		Map<UUID, Entity> passengers = entity.getPassengerList().stream().collect(Collectors.toMap(Entity::getUuid, Function.identity()));
 		NbtList passengersNbt = nbt.getList("Passengers", NbtElement.COMPOUND_TYPE);

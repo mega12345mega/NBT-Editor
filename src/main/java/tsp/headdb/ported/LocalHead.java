@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.Validate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -27,8 +27,7 @@ public class LocalHead extends Head {
         ItemStack item = new ItemStack(Items.PLAYER_HEAD);
         item.manager$setCustomName(TextInst.of(Utils.colorize("&e" + name)));
         item.getOrCreateNbt().putString("SkullOwner", name);
-        Lore lore = new Lore(item);
-        lore.addLine(TextInst.of(Utils.colorize("&7UUID: " + uuid.toString())));
+        ItemTagReferences.LORE.set(item, List.of(TextInst.of(Utils.colorize("&7UUID: " + uuid.toString()))));
         
         return item;
     }

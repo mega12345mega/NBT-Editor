@@ -50,6 +50,7 @@ accessible field net/minecraft/util/Rarity formatting Lnet/minecraft/util/Format
 
 accessible method net/minecraft/client/MinecraftClient addBlockEntityNbt (Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/registry/DynamicRegistryManager;)V
 
+accessible method net/minecraft/component/type/ItemEnchantmentsComponent <init> (Lit/unimi/dsi/fastutil/objects/Object2IntOpenHashMap;Z)V
 accessible field net/minecraft/component/type/ItemEnchantmentsComponent showInTooltip Z
 accessible field net/minecraft/item/trim/ArmorTrim showInTooltip Z
 

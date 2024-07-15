@@ -27,7 +27,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.Se
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -205,7 +206,9 @@ public class MixinLink {
 					item = temp;
 				}
 				
-				new Enchants(item).addEnchants(new Enchants(cursor).getEnchants());
+				Enchants enchants = ItemTagReferences.ENCHANTMENTS.get(item);
+				enchants.addEnchants(ItemTagReferences.ENCHANTMENTS.get(cursor).getEnchants());
+				ItemTagReferences.ENCHANTMENTS.set(item, enchants);
 				
 				slotId = slot.id;
 				

@@ -1,5 +1,6 @@
 package tsp.headdb.ported.inventory;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Map;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.inventory.Inventory;
@@ -180,9 +181,8 @@ public class InventoryUtils {
         for (Category category : Category.getValues()) {
             ItemStack item = getUIItem(category.getName(), category.getItem());
             item.manager$setCustomName(TextInst.of(Utils.colorize(category.getColor() + "&l" + category.getTranslatedName().toUpperCase())));
-            Lore lore = new Lore(item);
-            lore.clearLore();
-            lore.addLine(TextInst.of(Utils.colorize("&e" + TextInst.translatable("nbteditor.hdb.head_count", HeadAPI.getHeads(category).size()).getString())));
+            ItemTagReferences.LORE.set(item, List.of(TextInst.of(
+            		Utils.colorize("&e" + TextInst.translatable("nbteditor.hdb.head_count", HeadAPI.getHeads(category).size()).getString()))));
             inventory.setStack(getUILocation(category.getName(), category.getLocation()), item);
         }
 
@@ -234,13 +234,7 @@ public class InventoryUtils {
 
     private static ItemStack buildButton(ItemStack item, String name, String... lore) {
         item.manager$setCustomName(TextInst.of(Utils.colorize(name)));
-        
-        Lore list = new Lore(item);
-        list.clearLore();
-        for (String line : lore) {
-            list.addLine(TextInst.of(Utils.colorize(line)));
-        }
-        
+        ItemTagReferences.LORE.set(item, Arrays.stream(lore).map(Utils::colorize).map(TextInst::of).toList());
         return item;
     }
     

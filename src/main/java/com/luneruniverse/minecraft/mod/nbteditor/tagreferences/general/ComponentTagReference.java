@@ -12,6 +12,8 @@ public class ComponentTagReference<T, C> implements TagReference<T, ItemStack> {
 	
 	public static <C> ComponentTagReference<Boolean, C> forExistance(DataComponentType<C> component, Supplier<C> supplier) {
 		return new ComponentTagReference<>(component, null, componentValue -> componentValue != null, (componentValue, value) -> {
+			if (value == null)
+				value = false;
 			if ((componentValue != null) == value)
 				return componentValue;
 			return value ? supplier.get() : null;

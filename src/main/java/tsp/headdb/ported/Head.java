@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.Validate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
@@ -44,8 +44,7 @@ public class Head {
         profile.getProperties().put("textures", new Property("textures", value));
         nbt.put("SkullOwner", NbtHelper.writeGameProfile(new NbtCompound(), profile));
         
-        Lore lore = new Lore(item);
-        lore.setAllLines(Arrays.asList(
+        ItemTagReferences.LORE.set(item, Arrays.asList(
                 Utils.colorize("&cID: " + id),
                 Utils.colorize("&e" + buildTagLore(tags)),
                 "",

@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
@@ -15,11 +16,11 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.EntityTagReferences;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore.LoreConsumer;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
@@ -55,11 +56,11 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		if (localNBT instanceof LocalItem item) {
 			lore = FormattedTextFieldWidget.create(lore, 16, nextY, width - 32, height - 16 - 20 - 4 - nextY,
-					new Lore(item.getItem()).getLore(), Style.EMPTY.withFormatting(Formatting.ITALIC, Formatting.DARK_PURPLE), lines -> {
+					ItemTagReferences.LORE.get(item.getItem()), Style.EMPTY.withFormatting(Formatting.ITALIC, Formatting.DARK_PURPLE), lines -> {
 				if (lines.size() == 1 && lines.get(0).getString().isEmpty())
-					new Lore(item.getItem()).clearLore();
+					ItemTagReferences.LORE.set(item.getItem(), new ArrayList<>());
 				else
-					new Lore(item.getItem()).setAllLines(lines);
+					ItemTagReferences.LORE.set(item.getItem(), lines);
 				checkSave();
 			});
 			addSelectableChild(name);
@@ -96,8 +97,12 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	public void filesDragged(List<Path> paths) {
 		if (!(localNBT instanceof LocalItem item))
 			return;
-		LoreConsumer loreConsumer = LoreConsumer.createAppend(item.getItem());
-		ImageToLoreWidget.openImportFiles(paths, file -> loreConsumer, () -> lore.setText(new Lore(item.getItem()).getLore()));
+		List<Text> lines = new ArrayList<>();
+		lines.add(lore.getText());
+		ImageToLoreWidget.openImportFiles(paths, (file, imgLines) -> lines.addAll(imgLines), () -> {
+			if (lines.size() > 1)
+				lore.setText(lines);
+		});
 	}
 	
 	@Override

@@ -10,6 +10,11 @@ import net.minecraft.nbt.NbtList;
 public class ArmorHandsContainerIO implements NBTContainerIO {
 	
 	@Override
+	public int getMaxNBTSize(NbtCompound nbt, SourceContainerType source) {
+		return 6;
+	}
+	
+	@Override
 	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
 		ItemStack[] items = new ItemStack[6];
 		
@@ -26,14 +31,24 @@ public class ArmorHandsContainerIO implements NBTContainerIO {
 	
 	@Override
 	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
+		ItemStack[] actualContents = new ItemStack[6];
+		for (int i = 0; i < 6; i++) {
+			ItemStack item = null;
+			if (i < contents.length)
+				item = contents[i];
+			if (item == null)
+				item = ItemStack.EMPTY;
+			actualContents[i] = item;
+		}
+		
 		NbtList armorItemsNbt = new NbtList();
 		for (int i = 0; i < 4; i++)
-			armorItemsNbt.add(contents[3 - i].manager$serialize());
+			armorItemsNbt.add(actualContents[3 - i].manager$serialize());
 		container.put("ArmorItems", armorItemsNbt);
 		
 		NbtList handItemsNbt = new NbtList();
 		for (int i = 0; i < 2; i++)
-			handItemsNbt.add(contents[4 + i].manager$serialize());
+			handItemsNbt.add(actualContents[4 + i].manager$serialize());
 		container.put("HandItems", handItemsNbt);
 	}
 	

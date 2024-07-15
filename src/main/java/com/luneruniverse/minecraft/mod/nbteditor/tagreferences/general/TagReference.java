@@ -16,6 +16,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 
 public interface TagReference<T, O> {
 	public static <T> TagReference<T, ItemStack> forItems(Supplier<T> defaultValue, TagReference<T, NbtCompound> tagRef) {
@@ -56,7 +57,31 @@ public interface TagReference<T, O> {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void set(O object, List<C> value) {
-				tagRef.set(object, value.toArray(len -> (C[]) Array.newInstance(clazz, len)));
+				tagRef.set(object, value == null ? null : value.toArray(len -> (C[]) Array.newInstance(clazz, len)));
+			}
+		};
+	}
+	public static <C, O> TagReference<List<C>, O> forLists(Function<NbtElement, C> getter, Function<C, NbtElement> setter, TagReference<NbtList, O> tagRef) {
+		return new TagReference<>() {
+			@Override
+			public List<C> get(O object) {
+				List<C> list = new ArrayList<>();
+				for (NbtElement elementNbt : tagRef.get(object)) {
+					C elementValue = getter.apply(elementNbt);
+					if (elementValue != null)
+						list.add(elementValue);
+				}
+				return list;
+			}
+			@Override
+			public void set(O object, List<C> value) {
+				NbtList listNbt = new NbtList();
+				for (C elementValue : value) {
+					NbtElement elementNbt = setter.apply(elementValue);
+					if (elementNbt != null)
+						listNbt.add(elementNbt);
+				}
+				tagRef.set(object, listNbt);
 			}
 		};
 	}
@@ -75,8 +100,16 @@ public interface TagReference<T, O> {
 			}
 			@Override
 			public void set(O object, Map<String, V> value) {
+				if (value == null) {
+					tagRef.set(object, null);
+					return;
+				}
 				NbtCompound nbt = new NbtCompound();
-				value.forEach((key, entryValue) -> nbt.put(key, setter.apply(entryValue)));
+				value.forEach((key, entryValue) -> {
+					NbtElement entryValueNbt = setter.apply(entryValue);
+					if (entryValueNbt != null)
+						nbt.put(key, entryValueNbt);
+				});
 				tagRef.set(object, nbt);
 			}
 		};

@@ -16,7 +16,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.DrawContext;
@@ -267,7 +268,10 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 					item = temp;
 				}
 				
-				new Enchants(item).addEnchants(new Enchants(cursor).getEnchants());
+				Enchants enchants = ItemTagReferences.ENCHANTMENTS.get(item);
+				enchants.addEnchants(ItemTagReferences.ENCHANTMENTS.get(cursor).getEnchants());
+				ItemTagReferences.ENCHANTMENTS.set(item, enchants);
+				
 				slot.setStackNoCallbacks(item);
 				handler.setCursorStack(ItemStack.EMPTY);
 				return true;

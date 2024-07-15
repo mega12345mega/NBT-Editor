@@ -12,6 +12,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVQuaternionf;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.EntityReference;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
@@ -111,7 +112,7 @@ public class LocalEntity implements LocalNBT {
 		matrices.translate(0.0, 8.0, 0.0);
 		
 		Entity entity = entityType.create(MainUtil.client.world);
-		entity.readNbt(nbt);
+		NBTManagers.ENTITY.setNbt(entity, nbt);
 		
 		MatrixStack renderMatrices = Version.<MatrixStack>newSwitch()
 				.range("1.19.4", null, matrices)

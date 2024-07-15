@@ -8,7 +8,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -47,14 +48,15 @@ public class MaxCommand extends ClientCommand {
 	private int max(CommandContext<FabricClientCommandSource> context, int enchantLevel, boolean allEnchants, boolean cursed) throws CommandSyntaxException {
 		ItemReference ref = ItemReference.getHeldItem();
 		ItemStack item = ref.getItem();
+		Enchants enchants = ItemTagReferences.ENCHANTMENTS.get(item);
 		
-		Enchants enchants = new Enchants(item);
 		enchants.removeDuplicates();
 		MVRegistry.ENCHANTMENT.forEach(enchant -> {
 			if ((allEnchants || enchant.isAcceptableItem(item)) && (cursed || !enchant.isCursed()))
 				enchants.setEnchant(enchant, enchantLevel == -1 ? enchant.getMaxLevel() : enchantLevel, true);
 		});
 		
+		ItemTagReferences.ENCHANTMENTS.set(item, enchants);
 		ref.saveItem(item, TextInst.translatable("nbteditor.maxed"));
 		
 		return Command.SINGLE_SUCCESS;

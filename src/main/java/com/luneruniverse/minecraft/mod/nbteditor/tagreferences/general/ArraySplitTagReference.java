@@ -31,6 +31,11 @@ public class ArraySplitTagReference<C, O> implements TagReference<List<C>, O> {
 	
 	@Override
 	public void set(O object, List<C> value) {
+		if (value == null) {
+			for (TagReference<C, O> entryTagRef : entryTagRefs)
+				entryTagRef.set(object, null);
+			return;
+		}
 		for (int i = 0; i < entryTagRefs.length; i++)
 			entryTagRefs[i].set(object, i < value.size() ? value.get(i) : entryPadder.get());
 	}

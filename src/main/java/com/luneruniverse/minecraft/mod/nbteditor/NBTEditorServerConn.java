@@ -18,6 +18,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.Screen;
@@ -34,8 +35,6 @@ public class NBTEditorServerConn implements MVClientNetworking.PlayNetworkStateE
 		INCOMPATIBLE,
 		BOTH
 	}
-	
-	public static final int PROTOCOL_VERSION = 0;
 	
 	private Status status;
 	private boolean containerScreen;
@@ -117,7 +116,7 @@ public class NBTEditorServerConn implements MVClientNetworking.PlayNetworkStateE
 	}
 	
 	private void onProtocolVersionPacket(ProtocolVersionS2CPacket packet) {
-		if (packet.getVersion() == PROTOCOL_VERSION)
+		if (packet.getVersion() == NBTEditorServer.PROTOCOL_VERSION)
 			status = Status.BOTH;
 		else {
 			status = Status.INCOMPATIBLE;

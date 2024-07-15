@@ -14,12 +14,14 @@ import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.TagRefere
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.AttributesNBTTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.CustomDataNBTTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.CustomPotionContentsNBTTagReference;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.EnchantsTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.GameProfileNBTTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.GameProfileNameNBTTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.Operation;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.Slot;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.CustomPotionContents;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 
@@ -27,6 +29,7 @@ import net.minecraft.component.DataComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.component.type.BlockStateComponent;
+import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.component.type.ProfileComponent;
@@ -38,6 +41,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.RawFilteredPair;
+import net.minecraft.text.Text;
 
 public class ItemTagReferences {
 	
@@ -124,6 +128,16 @@ public class ItemTagReferences {
 	public static final TagReference<NbtCompound, ItemStack> ENTITY_DATA = Version.<TagReference<NbtCompound, ItemStack>>newSwitch()
 			.range("1.20.5", null, () -> getComponentTagRefOfNBT(DataComponentTypes.ENTITY_DATA))
 			.range(null, "1.20.4", () -> TagReference.forItems(NbtCompound::new, new NBTTagReference<>(NbtCompound.class, "EntityTag")))
+			.get();
+	
+	public static final TagReference<Enchants, ItemStack> ENCHANTMENTS = new EnchantsTagReference();
+	
+	public static final TagReference<List<Text>, ItemStack> LORE = Version.<TagReference<List<Text>, ItemStack>>newSwitch()
+			.range("1.20.5", null, () -> new ComponentTagReference<>(DataComponentTypes.LORE,
+					() -> LoreComponent.DEFAULT,
+					LoreComponent::lines,
+					lore -> new LoreComponent(lore.stream().limit(256).toList())))
+			.range(null, "1.20.4", () -> TagReference.forItems(ArrayList::new, TagReference.forLists(Text.class, new NBTTagReference<>(Text[].class, "display/Lore"))))
 			.get();
 	
 }

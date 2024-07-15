@@ -16,6 +16,16 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
+	public boolean passRootNbt(SourceContainerType source) {
+		return NBTManagers.COMPONENTS_EXIST && source == SourceContainerType.ITEM;
+	}
+	
+	@Override
+	public int getMaxNBTSize(NbtCompound nbt, SourceContainerType source) {
+		return numItems;
+	}
+	
+	@Override
 	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
 		boolean itemComponent = NBTManagers.COMPONENTS_EXIST && source == SourceContainerType.ITEM;
 		

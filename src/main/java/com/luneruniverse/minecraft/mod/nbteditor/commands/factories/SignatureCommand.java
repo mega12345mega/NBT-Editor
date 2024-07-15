@@ -6,6 +6,7 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 
 import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
@@ -15,7 +16,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArg
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -56,14 +57,15 @@ public class SignatureCommand extends ClientCommand {
 			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			
-			Lore lore = new Lore(item);
+			List<Text> lore = ItemTagReferences.LORE.get(item);
 			if (!hasSignature(lore))
-				lore.addLine(signature);
+				lore.add(signature);
 			else {
 				context.getSource().sendFeedback(TextInst.translatable("nbteditor.sign.already_added"));
 				return Command.SINGLE_SUCCESS;
 			}
 			
+			ItemTagReferences.LORE.set(item, lore);
 			ref.saveItem(item, TextInst.translatable("nbteditor.sign.added"));
 			
 			return Command.SINGLE_SUCCESS;
@@ -75,13 +77,14 @@ public class SignatureCommand extends ClientCommand {
 					ItemReference ref = ItemReference.getHeldItem();
 					ItemStack item = ref.getItem();
 					
-					Lore lore = new Lore(item);
+					List<Text> lore = ItemTagReferences.LORE.get(item);
 					if (!hasSignature(lore)) {
 						context.getSource().sendFeedback(TextInst.translatable("nbteditor.sign.not_added"));
 						return Command.SINGLE_SUCCESS;
 					}
 					
-					lore.removeLine(-1);
+					lore.remove(lore.size() - 1);
+					ItemTagReferences.LORE.set(item, lore);
 					ref.saveItem(item, TextInst.translatable("nbteditor.sign.removed"));
 					
 					return Command.SINGLE_SUCCESS;
@@ -104,9 +107,10 @@ public class SignatureCommand extends ClientCommand {
 					ItemReference ref = ItemReference.getHeldItem();
 					ItemStack item = ref.getItem();
 					
-					Lore lore = new Lore(item);
+					List<Text> lore = ItemTagReferences.LORE.get(item);
 					if (hasSignature(lore, oldSignature)) {
-						lore.setLine(signature, -1);
+						lore.set(lore.size() - 1, signature);
+						ItemTagReferences.LORE.set(item, lore);
 						ref.saveItem(item, TextInst.translatable("nbteditor.sign.edited"));
 					}
 					
@@ -114,12 +118,12 @@ public class SignatureCommand extends ClientCommand {
 				})));
 	}
 	
-	private static boolean hasSignature(Lore lore, Text signature) {
+	private static boolean hasSignature(List<Text> lore, Text signature) {
 		if (lore.isEmpty())
 			return false;
-		return lore.getLine(-1).getString().equals(signature.getString());
+		return lore.get(lore.size() - 1).getString().equals(signature.getString());
 	}
-	private static boolean hasSignature(Lore lore) {
+	private static boolean hasSignature(List<Text> lore) {
 		return hasSignature(lore, signature);
 	}
 	

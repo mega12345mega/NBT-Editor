@@ -18,7 +18,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImportPosWidget;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore.LoreConsumer;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
@@ -64,7 +64,7 @@ public class ImportScreen extends OverlaySupportingScreen {
 			return;
 		}
 		
-		ImageToLoreWidget.openImportFiles(paths, file -> {
+		ImageToLoreWidget.openImportFiles(paths, (file, imgLore) -> {
 			String name = file.getName();
 			int nameDot = name.lastIndexOf('.');
 			if (nameDot != -1)
@@ -72,7 +72,8 @@ public class ImportScreen extends OverlaySupportingScreen {
 			
 			ItemStack painting = new ItemStack(Items.PAINTING);
 			painting.manager$setCustomName(TextInst.literal(name).styled(style -> style.withItalic(false).withColor(Formatting.GOLD)));
-			return LoreConsumer.createReceiveItem(painting);
+			ItemTagReferences.LORE.set(painting, imgLore);
+			MainUtil.getWithMessage(painting);
 		}, () -> {});
 	}
 	

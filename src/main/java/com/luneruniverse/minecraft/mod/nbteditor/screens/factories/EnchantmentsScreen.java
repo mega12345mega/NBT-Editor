@@ -18,7 +18,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPane
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueNumber;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
@@ -67,7 +68,7 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 		entry.setConfigurable("level", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.level"), ConfigValueNumber.forInt(1, 1, 1, 32767)));
 		config = new ConfigList(TextInst.translatable("nbteditor.enchantments"), false, entry);
 		
-		new Enchants(localNBT.getItem()).getEnchants().forEach(enchant -> {
+		ItemTagReferences.ENCHANTMENTS.get(localNBT.getItem()).getEnchants().forEach(enchant -> {
 			ConfigCategory enchantConfig = entry.clone(true);
 			getConfigEnchantment(enchantConfig).setValue(MVRegistry.ENCHANTMENT.getId(enchant.enchant()).toString());
 			getConfigLevel(enchantConfig).setValue(enchant.level());
@@ -80,7 +81,7 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 				ConfigCategory enchant = (ConfigCategory) path;
 				newEnchants.add(new Enchants.EnchantWithLevel(ENCHANTMENTS.get(getConfigEnchantment(enchant).getValidValue()), getConfigLevel(enchant).getValidValue()));
 			}
-			new Enchants(localNBT.getItem()).replaceEnchants(newEnchants);
+			ItemTagReferences.ENCHANTMENTS.set(localNBT.getItem(), new Enchants(newEnchants));
 			checkSave();
 		});
 	}

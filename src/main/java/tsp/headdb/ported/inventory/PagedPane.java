@@ -15,7 +15,7 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.inventory.Inventory;
@@ -280,8 +280,7 @@ public class PagedPane extends ClientHandledScreen {
 
     protected ItemStack setMeta(ItemStack itemStack, String name, String... lore) {
         itemStack.manager$setCustomName(TextInst.of(Utils.colorize(name)));
-        Lore loreObj = new Lore(itemStack);
-        loreObj.setAllLines(Arrays.stream(lore).map(MainUtil::colorize).map(TextInst::of).collect(Collectors.toList()));
+        ItemTagReferences.LORE.set(itemStack, Arrays.stream(lore).map(MainUtil::colorize).map(TextInst::of).collect(Collectors.toList()));
         return itemStack;
     }
 

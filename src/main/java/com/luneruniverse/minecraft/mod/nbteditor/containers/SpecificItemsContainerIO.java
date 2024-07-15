@@ -32,6 +32,11 @@ public class SpecificItemsContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
+	public int getMaxNBTSize(NbtCompound nbt, SourceContainerType source) {
+		return keys.length;
+	}
+	
+	@Override
 	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
 		return Stream.of(keys).map(key -> readKey(container, key)).toArray(ItemStack[]::new);
 	}
