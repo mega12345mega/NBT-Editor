@@ -78,7 +78,7 @@ public class ContainerIO {
 		registerBlockEntityTagIO((BlockItem) Items.TRAPPED_CHEST, CHEST_IO);
 		registerBlockEntityTagIO((BlockItem) Items.BARREL, CHEST_IO);
 		for (Item item : MVRegistry.ITEM) {
-			if (item instanceof BlockItem blockItem && blockItem.getBlock() instanceof ShulkerBoxBlock block)
+			if (item instanceof BlockItem blockItem && blockItem.getBlock() instanceof ShulkerBoxBlock)
 				registerBlockEntityTagIO(blockItem, CHEST_IO);
 		}
 		

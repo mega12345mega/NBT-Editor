@@ -18,7 +18,7 @@ public class DataTrackerMixin implements ResetableDataTracker {
 	@Shadow
 	private boolean dirty;
 	private static final Supplier<Reflection.FieldReference> DataTracker_entries_array =
-			Reflection.getOptionalField(DataTracker.class, "field_13331", "[Lnet/minecraft/entity/data/DataTracker$Entry;");
+			Reflection.getOptionalField(DataTracker.class, "field_13331", "[Lnet/minecraft/class_2945$class_2946;");
 	private static final Supplier<Reflection.FieldReference> DataTracker_entries_Int2ObjectMap =
 			Reflection.getOptionalField(DataTracker.class, "field_13331", "Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;");
 	private static final Supplier<Reflection.FieldReference> DataTracker_lock =

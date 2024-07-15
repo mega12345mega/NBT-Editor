@@ -95,7 +95,7 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	@Override
 	public void filesDragged(List<Path> paths) {
-		if (!(localNBT instanceof LocalItem item))
+		if (!(localNBT instanceof LocalItem))
 			return;
 		List<Text> lines = new ArrayList<>();
 		lines.add(lore.getText());
