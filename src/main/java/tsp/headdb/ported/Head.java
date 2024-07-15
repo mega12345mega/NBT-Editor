@@ -2,6 +2,7 @@ package tsp.headdb.ported;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.Validate;
@@ -13,8 +14,6 @@ import com.mojang.authlib.properties.Property;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 
 public class Head {
 
@@ -37,12 +36,11 @@ public class Head {
         Validate.notNull(value, "value must not be null!");
 
         ItemStack item = new ItemStack(Items.PLAYER_HEAD);
-        NbtCompound nbt = item.getOrCreateNbt();
         item.manager$setCustomName(TextInst.of(Utils.colorize(category != null ? category.getColor() + name : "&8" + name)));
         // set skull owner
         GameProfile profile = new GameProfile(uuid, name);
         profile.getProperties().put("textures", new Property("textures", value));
-        nbt.put("SkullOwner", NbtHelper.writeGameProfile(new NbtCompound(), profile));
+        ItemTagReferences.PROFILE.set(item, Optional.of(profile));
         
         ItemTagReferences.LORE.set(item, Arrays.asList(
                 Utils.colorize("&cID: " + id),

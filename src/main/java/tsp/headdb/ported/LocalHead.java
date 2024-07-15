@@ -1,6 +1,7 @@
 package tsp.headdb.ported;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.Validate;
@@ -26,7 +27,7 @@ public class LocalHead extends Head {
         
         ItemStack item = new ItemStack(Items.PLAYER_HEAD);
         item.manager$setCustomName(TextInst.of(Utils.colorize("&e" + name)));
-        item.getOrCreateNbt().putString("SkullOwner", name);
+        ItemTagReferences.PROFILE_NAME.set(item, Optional.of(name));
         ItemTagReferences.LORE.set(item, List.of(TextInst.of(Utils.colorize("&7UUID: " + uuid.toString()))));
         
         return item;
