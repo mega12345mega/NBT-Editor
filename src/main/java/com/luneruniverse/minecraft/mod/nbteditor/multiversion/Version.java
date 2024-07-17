@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+import net.minecraft.util.Identifier;
 
 public class Version {
 	
@@ -93,11 +97,11 @@ public class Version {
 		return releaseTarget;
 	}
 	
-	private static Integer worldVersion;
-	public static int getWorldVersion() {
-		if (worldVersion == null)
+	private static Integer dataVersion;
+	public static int getDataVersion() {
+		if (dataVersion == null)
 			readVersionJson();
-		return worldVersion;
+		return dataVersion;
 	}
 	
 	private static void readVersionJson() {
@@ -112,7 +116,7 @@ public class Version {
 				releaseTarget = id.split("\\+|-")[0];
 			}
 			
-			worldVersion = data.get("world_version").getAsInt();
+			dataVersion = data.get("world_version").getAsInt();
 		} catch (IOException e) {
 			throw new UncheckedIOException("Error trying to parse version.json", e);
 		}
@@ -125,6 +129,23 @@ public class Version {
 		if (parts.length == 3)
 			return parts;
 		return new int[] {parts[0], parts[1], 0};
+	}
+	
+	private static Map<String, Integer> dataVersions;
+	public static Optional<Integer> getDataVersion(String version) {
+		try {
+			return Optional.of(Integer.parseInt(version));
+		} catch (NumberFormatException e) {}
+		
+		if (dataVersions == null) {
+			try (InputStream in = MVMisc.getResource(new Identifier("nbteditor", "data_versions.json")).orElseThrow()) {
+				dataVersions = new Gson().fromJson(new InputStreamReader(in), new TypeToken<Map<String, Integer>>() {});
+			} catch (IOException e) {
+				throw new RuntimeException("Failed to parse data_versions.json", e);
+			}
+		}
+		
+		return Optional.ofNullable(dataVersions.get(version));
 	}
 	
 }

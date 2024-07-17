@@ -24,6 +24,7 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -40,8 +41,13 @@ import net.minecraft.world.World;
 
 public class LocalEntity implements LocalNBT {
 	
-	public static LocalEntity deserialize(NbtCompound nbt) {
-		return new LocalEntity(MVRegistry.ENTITY_TYPE.get(new Identifier(nbt.getString("id"))), nbt.getCompound("tag"));
+	public static LocalEntity deserialize(NbtCompound nbt, int defaultDataVersion) {
+		NbtCompound tag = nbt.getCompound("tag");
+		tag.putString("id", nbt.getString("id"));
+		tag = MainUtil.updateDynamic(TypeReferences.ENTITY, tag, nbt.get("DataVersion"), defaultDataVersion);
+		String id = tag.getString("id");
+		tag.remove("id");
+		return new LocalEntity(MVRegistry.ENTITY_TYPE.get(new Identifier(id)), tag);
 	}
 	
 	private EntityType<?> entityType;

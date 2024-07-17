@@ -9,6 +9,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -18,8 +19,9 @@ import net.minecraft.util.Identifier;
 
 public class LocalItemStack extends LocalItem {
 	
-	public static LocalItemStack deserialize(NbtCompound nbt) {
-		return new LocalItemStack(NBTManagers.ITEM.deserialize(nbt));
+	public static LocalItemStack deserialize(NbtCompound nbt, int defaultDataVersion) {
+		return new LocalItemStack(NBTManagers.ITEM.deserialize(
+				MainUtil.updateDynamic(TypeReferences.ITEM_STACK, nbt, defaultDataVersion)));
 	}
 	
 	private ItemStack item;

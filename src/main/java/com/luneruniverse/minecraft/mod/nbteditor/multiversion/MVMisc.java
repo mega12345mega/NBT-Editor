@@ -505,7 +505,7 @@ public class MVMisc {
 	public static boolean isWrittenBookContents(BookScreen.Contents contents) {
 		return Version.<Boolean>newSwitch()
 				.range("1.20.5", null, () -> MixinLink.WRITTEN_BOOK_CONTENTS.containsKey(contents))
-				.range(null, "1.20.4", Reflection.getClass("net.minecraft.class_3872$class_3933").isInstance(contents))
+				.range(null, "1.20.4", () -> Reflection.getClass("net.minecraft.class_3872$class_3933").isInstance(contents))
 				.get();
 	}
 	

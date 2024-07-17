@@ -15,11 +15,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public interface LocalNBT {
-	public static Optional<LocalNBT> deserialize(NbtCompound nbt) {
+	public static Optional<LocalNBT> deserialize(NbtCompound nbt, int defaultDataVersion) {
 		return Optional.ofNullable(switch (nbt.contains("type", NbtElement.STRING_TYPE) ? nbt.getString("type") : "item") {
-			case "item" -> LocalItemStack.deserialize(nbt);
-			case "block" -> LocalBlock.deserialize(nbt);
-			case "entity" -> LocalEntity.deserialize(nbt);
+			case "item" -> LocalItemStack.deserialize(nbt, defaultDataVersion);
+			case "block" -> LocalBlock.deserialize(nbt, defaultDataVersion);
+			case "entity" -> LocalEntity.deserialize(nbt, defaultDataVersion);
 			default -> null;
 		});
 	}

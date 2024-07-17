@@ -27,10 +27,13 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -38,11 +41,24 @@ import net.minecraft.util.math.BlockPos;
 
 public class LocalBlock implements LocalNBT {
 	
-	public static LocalBlock deserialize(NbtCompound nbt) {
-		Block block = MVRegistry.BLOCK.get(new Identifier(nbt.getString("id")));
+	public static LocalBlock deserialize(NbtCompound nbt, int defaultDataVersion) {
+		NbtElement dataVersion = nbt.get("DataVersion");
+		
+		String id = MainUtil.updateDynamic(TypeReferences.BLOCK_NAME, NbtString.of(nbt.getString("id")), dataVersion, defaultDataVersion).value;
+		Block block = MVRegistry.BLOCK.get(new Identifier(id));
+		
 		BlockStateProperties state = new BlockStateProperties(block.getDefaultState());
-		state.setValues(nbt.getCompound("state"));
-		return new LocalBlock(block, state, nbt.getCompound("tag"));
+		state.setValues(MainUtil.updateDynamic(TypeReferences.BLOCK_STATE, nbt.getCompound("state"), dataVersion, defaultDataVersion));
+		
+		NbtCompound tag = null;
+		if (nbt.contains("tag", NbtElement.COMPOUND_TYPE)) {
+			tag = nbt.getCompound("tag");
+			tag.putString("id", nbt.getString("id"));
+			tag = MainUtil.updateDynamic(TypeReferences.BLOCK_ENTITY, tag, dataVersion, defaultDataVersion);
+			tag.remove("id");
+		}
+		
+		return new LocalBlock(block, state, tag);
 	}
 	
 	private Block block;
@@ -178,7 +194,7 @@ public class LocalBlock implements LocalNBT {
 		NbtCompound output = new NbtCompound();
 		output.putString("id", getId().toString());
 		output.put("state", state.getValues());
-		if (nbt != null)
+		if (nbt != null && (!nbt.isEmpty() || isBlockEntity()))
 			output.put("tag", nbt);
 		output.putString("type", "block");
 		return output;

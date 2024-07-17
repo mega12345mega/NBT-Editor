@@ -43,6 +43,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
@@ -465,16 +466,32 @@ public class MainUtil {
 	
 	
 	// Based on DataFixTypes
-	public static NbtCompound update(TypeReference typeRef, NbtCompound nbt, int oldVersion) {
-		return (NbtCompound) client.getDataFixer().update(typeRef, new Dynamic<>(NbtOps.INSTANCE, nbt), oldVersion, Version.getWorldVersion()).getValue();
+	@SuppressWarnings("unchecked")
+	public static <T extends NbtElement> T update(TypeReference typeRef, T nbt, int oldVersion) {
+		return (T) client.getDataFixer().update(typeRef, new Dynamic<>(NbtOps.INSTANCE, nbt), oldVersion, Version.getDataVersion()).getValue();
+	}
+	/**
+	 * If a DataVersion tag exists, this updates from that - otherwise, this updates from defaultOldVersion
+	 */
+	public static <T extends NbtElement> T updateDynamic(TypeReference typeRef, T nbt, NbtElement dataVersionTag, int defaultOldVersion) {
+		int dataVersion = defaultOldVersion;
+		if (dataVersionTag != null && dataVersionTag instanceof AbstractNbtNumber num)
+			dataVersion = num.intValue();
+		else if (dataVersion == -1)
+			return nbt;
+		return update(typeRef, nbt, dataVersion);
+	}
+	/**
+	 * If a DataVersion tag exists, this updates from that - otherwise, this updates from defaultOldVersion
+	 */
+	public static NbtCompound updateDynamic(TypeReference typeRef, NbtCompound nbt, int defaultOldVersion) {
+		return updateDynamic(typeRef, nbt, nbt.get("DataVersion"), defaultOldVersion);
 	}
 	/**
 	 * If a DataVersion tag exists, this updates from that - otherwise, nbt is returned
 	 */
-	public static NbtCompound update(TypeReference typeRef, NbtCompound nbt) {
-		if (!nbt.contains("DataVersion", NbtElement.NUMBER_TYPE))
-			return nbt;
-		return update(typeRef, nbt, nbt.getInt("DataVersion"));
+	public static NbtCompound updateDynamic(TypeReference typeRef, NbtCompound nbt) {
+		return updateDynamic(typeRef, nbt, -1);
 	}
 	
 }
