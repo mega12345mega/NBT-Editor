@@ -60,41 +60,41 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 	}
 	
 	private String getBookTitle() {
-		return WrittenBookTagReferences.TITLE.get(localNBT.getItem());
+		return WrittenBookTagReferences.TITLE.get(localNBT.getEditableItem());
 	}
 	private void setBookTitle(String title) {
-		WrittenBookTagReferences.TITLE.set(localNBT.getItem(), title);
+		WrittenBookTagReferences.TITLE.set(localNBT.getEditableItem(), title);
 		checkSave();
 	}
 	
 	private String getAuthor() {
-		return WrittenBookTagReferences.AUTHOR.get(localNBT.getItem());
+		return WrittenBookTagReferences.AUTHOR.get(localNBT.getEditableItem());
 	}
 	private void setAuthor(String author) {
-		WrittenBookTagReferences.AUTHOR.set(localNBT.getItem(), author);
+		WrittenBookTagReferences.AUTHOR.set(localNBT.getEditableItem(), author);
 		checkSave();
 	}
 	
 	private Generation getGeneration() {
-		int gen = WrittenBookTagReferences.GENERATION.get(localNBT.getItem());
+		int gen = WrittenBookTagReferences.GENERATION.get(localNBT.getEditableItem());
 		if (gen < 0 || gen >= 4)
 			return Generation.TATTERED;
 		return Generation.values()[gen];
 	}
 	private void setGeneration(Generation gen) {
-		WrittenBookTagReferences.GENERATION.set(localNBT.getItem(), gen.ordinal());
+		WrittenBookTagReferences.GENERATION.set(localNBT.getEditableItem(), gen.ordinal());
 		checkSave();
 	}
 	
 	private int getPageCount() {
-		return WrittenBookTagReferences.PAGES.get(localNBT.getItem()).size();
+		return WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem()).size();
 	}
 	private Text getPage() {
-		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getItem());
+		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem());
 		return page < pages.size() ? pages.get(page) : TextInst.of("");
 	}
 	private void setPage(Text contents) {
-		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getItem());
+		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem());
 		if (page < pages.size())
 			pages.set(page, contents);
 		else {
@@ -102,25 +102,25 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 				pages.add(TextInst.of(""));
 			pages.add(contents);
 		}
-		WrittenBookTagReferences.PAGES.set(localNBT.getItem(), pages);
+		WrittenBookTagReferences.PAGES.set(localNBT.getEditableItem(), pages);
 		
 		checkSave();
 	}
 	
 	private void addPage() {
-		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getItem());
+		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem());
 		if (page < pages.size()) {
 			pages.add(page, TextInst.of(""));
-			WrittenBookTagReferences.PAGES.set(localNBT.getItem(), pages);
+			WrittenBookTagReferences.PAGES.set(localNBT.getEditableItem(), pages);
 			checkSave();
 			refresh();
 		}
 	}
 	private void removePage() {
-		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getItem());
+		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem());
 		if (page < pages.size()) {
 			pages.remove(page);
-			WrittenBookTagReferences.PAGES.set(localNBT.getItem(), pages);
+			WrittenBookTagReferences.PAGES.set(localNBT.getEditableItem(), pages);
 			checkSave();
 			refresh();
 		}
@@ -144,7 +144,7 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 	}
 	
 	private Contents getPreviewItem() {
-		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getItem());
+		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem());
 		pages.replaceAll(this::makePreviewText);
 		return MVMisc.getBookContents(pages);
 	}

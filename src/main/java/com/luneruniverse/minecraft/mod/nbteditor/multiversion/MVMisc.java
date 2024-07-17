@@ -498,7 +498,7 @@ public class MVMisc {
 				return pages.size();
 			if (method.getName().equals("method_17561")) // getPageUnchecked
 				return (StringVisitable) pages.get((int) args[0]);
-			return method.invoke(obj, args);
+			throw new IllegalArgumentException("Unknown method: " + method);
 		});
 	}
 	

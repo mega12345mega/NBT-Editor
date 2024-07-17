@@ -25,7 +25,7 @@ public class HideFlagsScreen extends LocalEditorScreen<LocalItem> {
 		
 		if (HideFlag.TOOLTIP.isInThisVersion()) {
 			config.setConfigurable(HideFlag.TOOLTIP.name(), new ConfigItem<>(HideFlag.TOOLTIP.getText(),
-					new ConfigValueBoolean(HideFlag.TOOLTIP.get(localNBT.getItem()), false, 100, ScreenTexts.ON, ScreenTexts.OFF)));
+					new ConfigValueBoolean(HideFlag.TOOLTIP.get(localNBT.getEditableItem()), false, 100, ScreenTexts.ON, ScreenTexts.OFF)));
 		}
 		
 		ConfigBar globalConfig = new ConfigBar();
@@ -37,14 +37,14 @@ public class HideFlagsScreen extends LocalEditorScreen<LocalItem> {
 			if (flag == HideFlag.TOOLTIP || !flag.isInThisVersion())
 				continue;
 			config.setConfigurable(flag.name(), new ConfigItem<>(flag.getText(),
-					new ConfigValueBoolean(flag.get(localNBT.getItem()), false, 100, ScreenTexts.ON, ScreenTexts.OFF)));
+					new ConfigValueBoolean(flag.get(localNBT.getEditableItem()), false, 100, ScreenTexts.ON, ScreenTexts.OFF)));
 		}
 		
 		config.addValueListener(source -> {
 			config.getConfigurables().forEach((flagName, path) -> {
 				if (path instanceof ConfigItem configItem && configItem.getValue() == source) {
 					HideFlag flag = HideFlag.valueOf(flagName);
-					flag.set(localNBT.getItem(), (Boolean) source.getValidValue());
+					flag.set(localNBT.getEditableItem(), (Boolean) source.getValidValue());
 					checkSave();
 				}
 			});

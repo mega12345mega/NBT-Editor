@@ -77,7 +77,7 @@ public class NBTExportCommand extends ClientCommand {
 	
 	private static String getCommand(String itemPrefix, String blockPrefix, String entityPrefix, LocalNBT nbt, boolean stripEntityUUIDs) {
 		if (nbt instanceof LocalItem item)
-			return itemPrefix + getItemArgs(item.getItem());
+			return itemPrefix + getItemArgs(item.getReadableItem());
 		else if (nbt instanceof LocalBlock block)
 			return blockPrefix + getBlockArgs(block);
 		else if (nbt instanceof LocalEntity entity)

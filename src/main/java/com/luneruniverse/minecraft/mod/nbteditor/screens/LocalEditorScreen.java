@@ -13,6 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
@@ -91,7 +92,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		if (link != null) {
 			addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
 					LocalFactoryScreen.FACTORY_ICON,
-					btn -> closeSafely(() -> client.setScreen(link.factory().apply(ref))),
+					btn -> closeSafely(() -> client.setScreen(link.factory().apply(ItemReference.toItemStackRef(ref)))),
 					new MVTooltip(link.langName())));
 		}
 		

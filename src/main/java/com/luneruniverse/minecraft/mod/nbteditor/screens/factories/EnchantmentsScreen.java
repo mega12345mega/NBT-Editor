@@ -68,7 +68,7 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 		entry.setConfigurable("level", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.level"), ConfigValueNumber.forInt(1, 1, 1, 32767)));
 		config = new ConfigList(TextInst.translatable("nbteditor.enchantments"), false, entry);
 		
-		ItemTagReferences.ENCHANTMENTS.get(localNBT.getItem()).getEnchants().forEach(enchant -> {
+		ItemTagReferences.ENCHANTMENTS.get(localNBT.getEditableItem()).getEnchants().forEach(enchant -> {
 			ConfigCategory enchantConfig = entry.clone(true);
 			getConfigEnchantment(enchantConfig).setValue(MVRegistry.ENCHANTMENT.getId(enchant.enchant()).toString());
 			getConfigLevel(enchantConfig).setValue(enchant.level());
@@ -81,7 +81,7 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 				ConfigCategory enchant = (ConfigCategory) path;
 				newEnchants.add(new Enchants.EnchantWithLevel(ENCHANTMENTS.get(getConfigEnchantment(enchant).getValidValue()), getConfigLevel(enchant).getValidValue()));
 			}
-			ItemTagReferences.ENCHANTMENTS.set(localNBT.getItem(), new Enchants(newEnchants));
+			ItemTagReferences.ENCHANTMENTS.set(localNBT.getEditableItem(), new Enchants(newEnchants));
 			checkSave();
 		});
 	}

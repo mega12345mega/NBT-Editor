@@ -17,7 +17,7 @@ import net.minecraft.util.Identifier;
 public interface LocalNBT {
 	public static Optional<LocalNBT> deserialize(NbtCompound nbt) {
 		return Optional.ofNullable(switch (nbt.contains("type", NbtElement.STRING_TYPE) ? nbt.getString("type") : "item") {
-			case "item" -> LocalItem.deserialize(nbt);
+			case "item" -> LocalItemStack.deserialize(nbt);
 			case "block" -> LocalBlock.deserialize(nbt);
 			case "entity" -> LocalEntity.deserialize(nbt);
 			default -> null;

@@ -38,7 +38,7 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		Style baseNameStyle = Style.EMPTY;
 		if (localNBT instanceof LocalItem item)
-			baseNameStyle = baseNameStyle.withFormatting(Formatting.ITALIC, item.getItem().getRarity().formatting);
+			baseNameStyle = baseNameStyle.withFormatting(Formatting.ITALIC, item.getEditableItem().getRarity().formatting);
 		else if (localNBT instanceof LocalBlock)
 			;
 		else if (localNBT instanceof LocalEntity)
@@ -56,11 +56,11 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		if (localNBT instanceof LocalItem item) {
 			lore = FormattedTextFieldWidget.create(lore, 16, nextY, width - 32, height - 16 - 20 - 4 - nextY,
-					ItemTagReferences.LORE.get(item.getItem()), Style.EMPTY.withFormatting(Formatting.ITALIC, Formatting.DARK_PURPLE), lines -> {
+					ItemTagReferences.LORE.get(item.getEditableItem()), Style.EMPTY.withFormatting(Formatting.ITALIC, Formatting.DARK_PURPLE), lines -> {
 				if (lines.size() == 1 && lines.get(0).getString().isEmpty())
-					ItemTagReferences.LORE.set(item.getItem(), new ArrayList<>());
+					ItemTagReferences.LORE.set(item.getEditableItem(), new ArrayList<>());
 				else
-					ItemTagReferences.LORE.set(item.getItem(), lines);
+					ItemTagReferences.LORE.set(item.getEditableItem(), lines);
 				checkSave();
 			});
 			addSelectableChild(name);

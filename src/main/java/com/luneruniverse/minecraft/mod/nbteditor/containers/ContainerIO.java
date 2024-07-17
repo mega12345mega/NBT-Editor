@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItemStack;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -160,8 +161,8 @@ public class ContainerIO {
 	
 	public static int getMaxSize(LocalNBT nbt) {
 		if (nbt instanceof LocalItem item) {
-			ItemContainerIO io = ITEM_IO.get(item.getItem().getItem());
-			return io == null ? 0 : io.getMaxItemSize(item.getItem());
+			ItemContainerIO io = ITEM_IO.get(item.getItemType());
+			return io == null ? 0 : io.getMaxItemSize(item.getReadableItem());
 		}
 		if (nbt instanceof LocalBlock block) {
 			BlockContainerIO io = BLOCK_IO.get(block.getBlock());
@@ -175,8 +176,8 @@ public class ContainerIO {
 	}
 	public static boolean isContainer(LocalNBT nbt) {
 		if (nbt instanceof LocalItem item) {
-			ItemContainerIO io = ITEM_IO.get(item.getItem().getItem());
-			return io != null && io.isItemReadable(item.getItem());
+			ItemContainerIO io = ITEM_IO.get(item.getItemType());
+			return io != null && io.isItemReadable(item.getReadableItem());
 		}
 		if (nbt instanceof LocalBlock block) {
 			BlockContainerIO io = BLOCK_IO.get(block.getBlock());
@@ -191,7 +192,7 @@ public class ContainerIO {
 	public static ItemStack[] read(LocalNBT container) {
 		ItemStack[] output = null;
 		if (container instanceof LocalItem item)
-			output = ITEM_IO.get(item.getItem().getItem()).readItem(item.getItem());
+			output = ITEM_IO.get(item.getItemType()).readItem(item.getReadableItem());
 		if (container instanceof LocalBlock block)
 			output = BLOCK_IO.get(block.getBlock()).readBlock(block);
 		if (container instanceof LocalEntity entity)
@@ -206,7 +207,7 @@ public class ContainerIO {
 	}
 	public static void write(LocalNBT container, ItemStack[] contents) {
 		if (container instanceof LocalItem item) {
-			ITEM_IO.get(item.getItem().getItem()).writeItem(item.getItem(), contents);
+			ITEM_IO.get(item.getItemType()).writeItem(item.getEditableItem(), contents);
 			return;
 		}
 		if (container instanceof LocalBlock block) {
@@ -240,7 +241,7 @@ public class ContainerIO {
 			ItemStack section = subContainers.get();
 			String subPath = (path == null ? i + "" : path + "." + i);
 			section.manager$setCustomName(TextInst.of(TextInst.translatable("nbteditor.hdb.section").getString() + ": " + subPath));
-			writeRecursively(new LocalItem(section), subContainers, contents.subList(i * sectionSize, Math.min(contents.size(), (i + 1) * sectionSize)), subPath);
+			writeRecursively(new LocalItemStack(section), subContainers, contents.subList(i * sectionSize, Math.min(contents.size(), (i + 1) * sectionSize)), subPath);
 			sections[i] = section;
 		}
 		
@@ -250,7 +251,7 @@ public class ContainerIO {
 		writeRecursively(container, subContainers, contents, null);
 	}
 	public static void writeRecursively(ItemStack container, List<ItemStack> contents) {
-		writeRecursively(new LocalItem(container), () -> new ItemStack(Items.SHULKER_BOX), contents);
+		writeRecursively(new LocalItemStack(container), () -> new ItemStack(Items.SHULKER_BOX), contents);
 	}
 	
 }

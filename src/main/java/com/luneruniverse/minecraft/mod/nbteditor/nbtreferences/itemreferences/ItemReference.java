@@ -1,8 +1,11 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
+import java.lang.reflect.Proxy;
 import java.util.function.Predicate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItemStack;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
@@ -72,13 +75,56 @@ public interface ItemReference extends NBTReference<LocalItem> {
 		return new ServerItemReference(slot, screen);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static <T extends LocalNBT> NBTReference<T> toItemStackRef(NBTReference<T> ref) {
+		if (ref instanceof ItemReference itemRef)
+			return (NBTReference<T>) itemRef.toStackRef();
+		return ref;
+	}
+	/**
+	 * @see #toPartsRef() for deprecation details
+	 */
+	@SuppressWarnings("unchecked")
+	@Deprecated
+	public static <T extends LocalNBT> NBTReference<T> toItemPartsRef(NBTReference<T> ref) {
+		if (ref instanceof ItemReference itemRef)
+			return (NBTReference<T>) itemRef.toPartsRef();
+		return ref;
+	}
+	
+	public default ItemReference toStackRef() {
+		return this;
+	}
+	/**
+	 * Make sure to call {@link #toStackRef()} before passing this to any code not designed for a parts ref!<br>
+	 * Also, make sure to never call {@link LocalItem#getEditableItem()}!
+	 */
+	@Deprecated
+	public default ItemReference toPartsRef() {
+		ItemReference stackRef = this;
+		return (ItemReference) Proxy.newProxyInstance(ItemReference.class.getClassLoader(),
+				new Class<?>[] {ItemReference.class}, (obj, method, args) -> {
+			if (method.getName().equals("toStackRef")) {
+				return stackRef;
+			}
+			if (method.getName().equals("toPartsRef")) {
+				return obj;
+			}
+			
+			Object output = method.invoke(stackRef, args);
+			if (output instanceof LocalItem localItem)
+				return localItem.toParts();
+			return output;
+		});
+	}
+	
 	@Override
 	public default LocalItem getLocalNBT() {
-		return new LocalItem(getItem());
+		return new LocalItemStack(getItem());
 	}
 	@Override
 	public default void saveLocalNBT(LocalItem nbt, Runnable onFinished) {
-		saveItem(nbt.getItem(), onFinished);
+		saveItem(nbt.getReadableItem(), onFinished);
 	}
 	
 	public ItemStack getItem();

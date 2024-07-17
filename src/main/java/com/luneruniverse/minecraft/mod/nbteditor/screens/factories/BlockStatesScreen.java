@@ -36,9 +36,9 @@ public class BlockStatesScreen<L extends LocalNBT> extends LocalEditorScreen<L> 
 		BlockStateProperties state;
 		Set<String> unset;
 		if (localNBT instanceof LocalItem item) {
-			defaultState = new BlockStateProperties(((BlockItem) item.getItem().getItem()).getBlock().getDefaultState());
+			defaultState = new BlockStateProperties(((BlockItem) item.getItemType()).getBlock().getDefaultState());
 			state = defaultState.copy();
-			unset = state.setValuesMap(ItemTagReferences.BLOCK_STATE.get(item.getItem()));
+			unset = state.setValuesMap(ItemTagReferences.BLOCK_STATE.get(item.getEditableItem()));
 		} else if (localNBT instanceof LocalBlock block) {
 			defaultState = new BlockStateProperties(block.getBlock().getDefaultState());
 			state = block.getState();
@@ -69,7 +69,7 @@ public class BlockStatesScreen<L extends LocalNBT> extends LocalEditorScreen<L> 
 					if (localNBT instanceof LocalItem item) {
 						Map<String, String> blockStatesMap = state.getValuesMap();
 						blockStatesMap.keySet().removeAll(unset);
-						ItemTagReferences.BLOCK_STATE.set(item.getItem(), blockStatesMap);
+						ItemTagReferences.BLOCK_STATE.set(item.getEditableItem(), blockStatesMap);
 					}
 					
 					checkSave();

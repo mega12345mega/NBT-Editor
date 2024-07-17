@@ -23,6 +23,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
@@ -121,9 +122,9 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private final MenuGenerator gen;
 	private NbtElement nbt;
 	
-	@SuppressWarnings("serial")
+	@SuppressWarnings({ "serial", "deprecation" })
 	public NBTEditorScreen(NBTReference<L> ref) {
-		super(TextInst.of("NBT Editor"), ref);
+		super(TextInst.of("NBT Editor"), ItemReference.toItemPartsRef(ref));
 		
 		this.scrollPerFolder = new HashMap<>();
 		

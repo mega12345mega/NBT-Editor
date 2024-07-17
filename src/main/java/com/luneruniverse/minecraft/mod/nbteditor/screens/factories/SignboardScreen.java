@@ -78,7 +78,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private NbtCompound getSideNbt() {
 		NbtCompound nbt;
 		if (localNBT instanceof LocalItem localItem)
-			nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getItem());
+			nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getEditableItem());
 		else {
 			nbt = localNBT.getNBT();
 			if (nbt == null)
@@ -92,16 +92,16 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private void setSideNbt(NbtCompound sideNbt) {
 		if (!newFeatures) {
 			if (localNBT instanceof LocalItem localItem)
-				ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getItem(), sideNbt);
+				ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getEditableItem(), sideNbt);
 			else
 				localNBT.setNBT(sideNbt);
 			return;
 		}
 		
 		if (localNBT instanceof LocalItem localItem) {
-			NbtCompound nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getItem());
+			NbtCompound nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getEditableItem());
 			nbt.put(back ? "back_text" : "front_text", sideNbt);
-			ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getItem(), nbt);
+			ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getEditableItem(), nbt);
 		} else {
 			NbtCompound nbt = localNBT.getNBT();
 			nbt.put(back ? "back_text" : "front_text", sideNbt);
@@ -119,9 +119,9 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			throw new IllegalStateException("Incorrect version!");
 		
 		if (localNBT instanceof LocalItem localItem) {
-			NbtCompound nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getItem());
+			NbtCompound nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getEditableItem());
 			nbt.putBoolean("is_waxed", waxed);
-			ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getItem(), nbt);
+			ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getEditableItem(), nbt);
 		} else {
 			NbtCompound nbt = localNBT.getNBT();
 			nbt.putBoolean("is_waxed", waxed);
@@ -132,7 +132,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private boolean isWaxed() {
 		NbtCompound nbt;
 		if (localNBT instanceof LocalItem localItem)
-			nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getItem());
+			nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getEditableItem());
 		else
 			nbt = localNBT.getNBT();
 		return nbt != null && nbt.getBoolean("is_waxed");

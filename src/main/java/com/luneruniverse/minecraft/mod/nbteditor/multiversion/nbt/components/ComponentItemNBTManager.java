@@ -20,7 +20,7 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 	}
 	@Override
 	public ItemStack deserialize(NbtCompound nbt) {
-		return ItemStack.CODEC.decode(NbtOps.INSTANCE, nbt).getOrThrow().getFirst();
+		return ItemStack.OPTIONAL_CODEC.decode(NbtOps.INSTANCE, nbt).getPartialOrThrow().getFirst();
 	}
 	
 	@Override
@@ -37,7 +37,7 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 	}
 	@Override
 	public void setNbt(ItemStack subject, NbtCompound nbt) {
-		ComponentChanges components = ComponentChanges.CODEC.decode(NbtOps.INSTANCE, nbt).getOrThrow().getFirst();
+		ComponentChanges components = ComponentChanges.CODEC.decode(NbtOps.INSTANCE, nbt).getPartialOrThrow().getFirst();
 		subject.getComponentChanges().entrySet().clear();
 		subject.applyChanges(components);
 	}

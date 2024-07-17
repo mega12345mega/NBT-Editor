@@ -210,7 +210,8 @@ public class MVDrawableHelper {
 	public static void renderBackground(Screen screen, MatrixStack matrices) {
 		int[] mousePos = MainUtil.getMousePos();
 		Version.newSwitch()
-				.range("1.20.2", null, () -> screen.renderBackground(MVDrawableHelper.getDrawContext(matrices), mousePos[0], mousePos[1], MainUtil.client.getTickDelta()))
+				.range("1.20.5", null, () -> screen.renderInGameBackground(getDrawContext(matrices)))
+				.range("1.20.2", "1.20.4", () -> screen.renderBackground(getDrawContext(matrices), mousePos[0], mousePos[1], MainUtil.client.getTickDelta()))
 				.range("1.20.0", "1.20.1", () -> Screen_renderBackground_DrawContext.get().invoke(screen, MVDrawableHelper.getDrawContext(matrices)))
 				.range(null, "1.19.4", () -> Screen_renderBackground_MatrixStack.get().invoke(screen, matrices))
 				.run();
