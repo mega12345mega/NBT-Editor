@@ -21,6 +21,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
@@ -117,6 +118,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private Map<String, Integer> scrollPerFolder;
 	
 	private List<String> realPath;
+	private NBTValue upValue;
 	private NBTValue selectedValue;
 	private MenuGenerator currentGen;
 	private final MenuGenerator gen;
@@ -267,6 +269,10 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 					gen.setElement(this.nbt, selectedValue.getKey(), nbt);
 					updateName();
 				});
+				if (realPath.isEmpty())
+					selectedValue.updateInvalidComponent(localNBT, null);
+				else
+					upValue.updateInvalidComponent(localNBT, realPath.get(0));
 			}
 		});
 		value.suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
@@ -356,13 +362,21 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			path.setSelectionEnd(path.getText().length());
 		}
 		
-		if (!realPath.isEmpty())
-			editor.addElement(new NBTValue(this, null, null));
+		if (realPath.isEmpty())
+			upValue = null;
+		else {
+			upValue = new NBTValue(this, null, null);
+			upValue.updateInvalidComponent(localNBT, realPath.get(0));
+			editor.addElement(upValue);
+		}
 		
 		List<NBTValue> elements = gen.getElements(this, this.nbt);
-		if (elements == null)
+		if (elements == null) {
 			selectNbt(null, true);
-		else {
+			return;
+		} else {
+			if (realPath.isEmpty())
+				elements.forEach(element -> element.updateInvalidComponent(localNBT, null));
 			elements.sort((a, b) -> a.getKey().compareToIgnoreCase(b.getKey()));
 			elements.forEach(editor::addElement);
 		}
@@ -404,7 +418,11 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	@Override
 	protected void preRenderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		MVTooltip.setOneTooltip(true, false);
 		editor.render(matrices, mouseX, mouseY, delta); // So the tab completion renders on top correctly
+		MVTooltip tooltip = MVTooltip.setOneTooltip(false, false);
+		if (tooltip != null)
+			tooltip.render(matrices, mouseX, mouseY);
 	}
 	@Override
 	protected void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {

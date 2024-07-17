@@ -69,6 +69,9 @@
 	"nbteditor.nbt.saving_air.yes": "Save",
 	"nbteditor.nbt.saving_air.no": "Cancel",
 	
+	"nbteditor.nbt.marker.unsafe": "The value cannot be converted to NBT\nand will be reverted when unselected",
+	"nbteditor.nbt.marker.invalid_component": "This component is invalid\nand will be deleted when saved",
+	
 	"nbteditor.nbt.export.copied": "§aCommand copied to clipboard!",
 	"nbteditor.nbt.export.item.error": "§cThe subject cannot be converted into an item",
 	"nbteditor.nbt.export.file.success": "Saved subject as %s",
