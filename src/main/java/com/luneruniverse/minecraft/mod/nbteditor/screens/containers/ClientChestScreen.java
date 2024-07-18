@@ -6,11 +6,14 @@ import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestPage;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ClientChestItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestDataVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
@@ -36,6 +39,13 @@ public class ClientChestScreen extends ClientHandledScreen {
 	public static void show() {
 		if (!NBTEditorClient.CLIENT_CHEST.isLoaded()) {
 			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.not_ready"), false);
+			return;
+		}
+		
+		ClientChestPage page = NBTEditorClient.CLIENT_CHEST.getPage(PAGE);
+		if (!page.isInThisVersion()) {
+			MainUtil.client.setScreen(new ClientChestDataVersionScreen(page.dataVersion().isEmpty(),
+					page.dataVersion().map(value -> value < Version.getDataVersion()).orElse(true)));
 			return;
 		}
 		
@@ -302,7 +312,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 	}
 	@Override
 	public ItemStack[] getPrevInventory() {
-		return NBTEditorClient.CLIENT_CHEST.getPage(PAGE);
+		return NBTEditorClient.CLIENT_CHEST.getPage(PAGE).getItemsOrThrow();
 	}
 	@Override
 	public void onChange() {

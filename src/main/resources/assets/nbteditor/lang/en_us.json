@@ -125,6 +125,17 @@
 	"nbteditor.client_chest.clear_page.yes": "Destroy Items",
 	"nbteditor.client_chest.clear_page.no": "Cancel",
 	
+	"nbteditor.client_chest.data_version.old": "Page #%s is from an older version of Minecraft! Update?",
+	"nbteditor.client_chest.data_version.new": "Page #%s is from a newer version of Minecraft!",
+	"nbteditor.client_chest.data_version.update_page": "Update Page",
+	"nbteditor.client_chest.data_version.update_all_pages": "Update All Pages",
+	"nbteditor.client_chest.data_version.update_all_pages.desc": "Updates all outdated pages, skipping any\nwithout a DataVersion tag if a data version\nisn't supplied above",
+	"nbteditor.client_chest.data_version.dont_update_page": "Cancel",
+	"nbteditor.client_chest.data_version.update_page_success": "§aSuccessfully updated page #%s§a! The old page was backed up just in case:",
+	"nbteditor.client_chest.data_version.update_all_pages_success": "§aSuccessfully updated all pages! The old pages were backed up just in case:",
+	"nbteditor.client_chest.data_version.update_page_error": "§cError while updating client chest page #%s§c!",
+	"nbteditor.client_chest.data_version.update_all_pages_error": "§cError while updating client chest pages!",
+	
 	"nbteditor.book.convert": "Make Writable",
 	"nbteditor.book.convert.success": "§aConverted to writable!",
 	"nbteditor.book.convert.formatting_saved": "That book contains formatting, which isn't supported by writable books. You have received a copy instead.",

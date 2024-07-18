@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.OptionalLong;
 import java.util.WeakHashMap;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 
@@ -68,7 +69,7 @@ public class ItemSize {
 			else
 				MVMisc.writeNbt(nbt, stream);
 		} catch (IOException e) {
-			e.printStackTrace();
+			NBTEditor.LOGGER.error("Error while getting the size of an item", e);
 		}
 		return stream.getCount();
 	}

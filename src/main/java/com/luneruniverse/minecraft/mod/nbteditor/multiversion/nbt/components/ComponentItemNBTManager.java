@@ -10,7 +10,9 @@ import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.util.Identifier;
 
 public class ComponentItemNBTManager implements DeserializableNBTManager<ItemStack> {
 	
@@ -20,6 +22,11 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 	}
 	@Override
 	public ItemStack deserialize(NbtCompound nbt) {
+		if (nbt.contains("id", NbtElement.STRING_TYPE) &&
+				new Identifier(nbt.getString("id")).equals(new Identifier("minecraft", "air")))
+			return ItemStack.EMPTY;
+		if (nbt.contains("count", NbtElement.INT_TYPE) && nbt.getInt("count") <= 0)
+			return ItemStack.EMPTY;
 		return ItemStack.OPTIONAL_CODEC.decode(NbtOps.INSTANCE, nbt).getPartialOrThrow().getFirst();
 	}
 	

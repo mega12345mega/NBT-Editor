@@ -7,7 +7,7 @@ import net.minecraft.item.ItemStack;
 public class SmallClientChest extends ClientChest {
 	
 	private final int maxPages;
-	private final HashMap<Integer, ItemStack[]> pages;
+	private final HashMap<Integer, ClientChestPage> pages;
 	private volatile boolean loaded;
 	
 	public SmallClientChest(int maxPages) {
@@ -44,13 +44,16 @@ public class SmallClientChest extends ClientChest {
 		return maxPages;
 	}
 	@Override
-	public ItemStack[] getPage(int page) {
+	public ClientChestPage getPage(int page) {
 		checkLoaded();
-		return pages.getOrDefault(page, new ItemStack[54]);
+		ClientChestPage output = pages.get(page);
+		if (output == null)
+			output = new ClientChestPage(new ItemStack[54]);
+		return output;
 	}
 	
 	@Override
-	protected void cachePage(int page, ItemStack[] items) {
+	protected void cachePage(int page, ClientChestPage items) {
 		pages.put(page, items);
 	}
 	@Override
