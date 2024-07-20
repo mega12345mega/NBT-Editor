@@ -225,7 +225,7 @@ public class MVMisc {
 	}
 	
 	public static boolean isValidChar(char c) {
-		return c != 'ง' && c >= ' ' && c != 127;
+		return c != 'ยง' && c >= ' ' && c != 127;
 	}
 	public static String stripInvalidChars(String str, boolean allowLinebreaks) {
 		StringBuilder output = new StringBuilder();

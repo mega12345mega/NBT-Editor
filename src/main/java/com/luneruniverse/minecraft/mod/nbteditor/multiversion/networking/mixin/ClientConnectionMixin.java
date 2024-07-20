@@ -51,6 +51,7 @@ public class ClientConnectionMixin {
 	}
 	@Inject(method = "method_10763(Lnet/minecraft/class_2547;)V", at = @At("HEAD"), remap = false)
 	@Group(name = "setPacketListener_head", min = 1)
+	@SuppressWarnings("target")
 	private void setPacketListener_head_old(PacketListener listener, CallbackInfo info) {
 		prevListener = packetListener;
 	}
@@ -61,6 +62,7 @@ public class ClientConnectionMixin {
 	}
 	@Inject(method = "method_10763(Lnet/minecraft/class_2547;)V", at = @At("RETURN"), remap = false)
 	@Group(name = "setPacketListener_return", min = 1)
+	@SuppressWarnings("target")
 	private void setPacketListener_return(PacketListener listener, CallbackInfo info) {
 		setPacketListener_return_impl(listener);
 	}

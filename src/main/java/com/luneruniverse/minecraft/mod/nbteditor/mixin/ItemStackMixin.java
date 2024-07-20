@@ -39,6 +39,7 @@ public class ItemStackMixin {
 	}
 	@Inject(at = @At("RETURN"), method = "method_7950(Lnet/minecraft/class_1657;Lnet/minecraft/class_1836;)Ljava/util/List;", remap = false)
 	@Group(name = "getTooltip", min = 1)
+	@SuppressWarnings("target")
 	private void getTooltip(PlayerEntity player, TooltipType context, CallbackInfoReturnable<List<Text>> info) {
 		modifyTooltip(info.getReturnValue());
 	}

@@ -17,6 +17,7 @@ public class CommandExecutionC2SPacketMixin {
 	}
 	@ModifyVariable(method = "<init>(Ljava/lang/String;Ljava/time/Instant;JLnet/minecraft/class_7450;Lnet/minecraft/class_7635$class_7636;)V", at = @At("HEAD"), ordinal = 0, remap = false)
 	@Group(name = "<init>", min = 1)
+	@SuppressWarnings("target")
 	private static String command_old(String value) {
 		return StringHelper.truncateChat(value);
 	}
