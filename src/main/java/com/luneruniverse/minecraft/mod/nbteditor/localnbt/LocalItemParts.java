@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -56,7 +57,7 @@ public class LocalItemParts extends LocalItem {
 	}
 	
 	private ItemStack getCachedItem() {
-		if (Objects.equals(cachedNbt, nbt)) {
+		if (cachedItem.getItem() == item && Objects.equals(cachedNbt, nbt)) {
 			cachedItem.setCount(count);
 			return cachedItem;
 		}
@@ -67,6 +68,7 @@ public class LocalItemParts extends LocalItem {
 		try {
 			cachedItem.manager$setNbt(cachedNbt);
 		} catch (Exception e) {
+			NBTEditor.LOGGER.warn("Error while updating item cache", e);
 			cachedItem = oldCachedItem;
 			cachedItem.setCount(count);
 		}
@@ -96,13 +98,26 @@ public class LocalItemParts extends LocalItem {
 	}
 	@Override
 	public void setName(Text name) {
-		if (NBTManagers.COMPONENTS_EXIST)
-			getOrCreateNBT().putString("minecraft:custom_name", TextInst.toJsonString(name));
-		else {
+		if (NBTManagers.COMPONENTS_EXIST) {
+			if (name == null) {
+				if (nbt != null) {
+					nbt.remove("custom_name");
+					nbt.remove("minecraft:custom_name");
+				}
+			} else {
+				NbtCompound nbt = getOrCreateNBT();
+				nbt.putString(nbt.contains("minecraft:custom_name") || !nbt.contains("custom_name") ?
+						"minecraft:custom_name" : "custom_name", TextInst.toJsonString(name));
+			}
+		} else {
 			NbtCompound nbt = getOrCreateNBT();
 			NbtCompound display = nbt.getCompound("display");
-			display.putString("Name", TextInst.toJsonString(name));
-			nbt.put("display", display);
+			if (name == null)
+				display.remove("Name");
+			else {
+				display.putString("Name", TextInst.toJsonString(name));
+				nbt.put("display", display);
+			}
 		}
 	}
 	@Override

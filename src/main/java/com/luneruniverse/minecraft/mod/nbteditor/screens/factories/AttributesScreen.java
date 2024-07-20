@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
@@ -156,9 +157,9 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		boolean modifiers = (ref instanceof ItemReference);
 		ConfigHiddenDataNamed<ConfigCategory, UUID> entry = (modifiers ? ATTRIBUTE_ENTRY : BASE_ATTRIBUTE_ENTRY);
-		List<AttributeData> attributes = (ref instanceof ItemReference itemRef ?
-				ItemTagReferences.ATTRIBUTES.get(itemRef.getItem()) :
-				EntityTagReferences.ATTRIBUTES.get((LocalEntity) ref.getLocalNBT()));
+		List<AttributeData> attributes = (localNBT instanceof LocalItem localItem ?
+				ItemTagReferences.ATTRIBUTES.get(localItem.getEditableItem()) :
+				EntityTagReferences.ATTRIBUTES.get((LocalEntity) localNBT));
 		
 		this.attributes = new ConfigList(TextInst.translatable("nbteditor.attributes"), false, entry);
 		for (AttributeData attribute : attributes) {
@@ -198,10 +199,10 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 					newAttributes.add(new AttributeData(attribute, amount));
 			}
 			
-			if (ref instanceof ItemReference itemRef)
-				ItemTagReferences.ATTRIBUTES.set(itemRef.getItem(), newAttributes);
+			if (localNBT instanceof LocalItem localItem)
+				ItemTagReferences.ATTRIBUTES.set(localItem.getEditableItem(), newAttributes);
 			else
-				EntityTagReferences.ATTRIBUTES.set((LocalEntity) ref.getLocalNBT(), newAttributes);
+				EntityTagReferences.ATTRIBUTES.set((LocalEntity) localNBT, newAttributes);
 			checkSave();
 		});
 	}

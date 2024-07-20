@@ -5,21 +5,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.Operation;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.Slot;
 
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.text.Text;
 
 public record AttributeData(EntityAttribute attribute, double value, Optional<AttributeModifierData> modifierData) {
 	
 	public static record AttributeModifierData(Operation operation, Slot slot, UUID uuid) {
 		
 		public enum Operation {
-			ADD("Add"),
-			MULTIPLY_BASE("Multiply Base"),
-			MULTIPLY("Multiply");
+			ADD("nbteditor.attributes.operation.add"),
+			MULTIPLY_BASE("nbteditor.attributes.operation.multiply_base"),
+			MULTIPLY("nbteditor.attributes.operation.multiply");
 			
 			public static Operation fromMinecraft(net.minecraft.entity.attribute.EntityAttributeModifier.Operation operation) {
 				return switch (operation) {
@@ -29,9 +31,9 @@ public record AttributeData(EntityAttribute attribute, double value, Optional<At
 				};
 			}
 			
-			private final String name;
-			private Operation(String name) {
-				this.name = name;
+			private final Text name;
+			private Operation(String key) {
+				this.name = TextInst.translatable(key);
 			}
 			public net.minecraft.entity.attribute.EntityAttributeModifier.Operation toMinecraft() {
 				return switch (this) {
@@ -42,21 +44,21 @@ public record AttributeData(EntityAttribute attribute, double value, Optional<At
 			}
 			@Override
 			public String toString() {
-				return name;
+				return name.getString();
 			}
 		}
 		
 		public enum Slot {
-			ANY("Any", false),
-			HAND("Any Hand", true),
-			MAINHAND("Main Hand", false),
-			OFFHAND("Off Hand", false),
-			ARMOR("Any Armor", true),
-			HEAD("Head", false),
-			CHEST("Chest", false),
-			LEGS("Legs", false),
-			FEET("Feet", false),
-			BODY("Body", true);
+			ANY("nbteditor.attributes.slot.any", false),
+			HAND("nbteditor.attributes.slot.hand", true),
+			MAINHAND("nbteditor.attributes.slot.mainhand", false),
+			OFFHAND("nbteditor.attributes.slot.offhand", false),
+			ARMOR("nbteditor.attributes.slot.armor", true),
+			HEAD("nbteditor.attributes.slot.head", false),
+			CHEST("nbteditor.attributes.slot.chest", false),
+			LEGS("nbteditor.attributes.slot.legs", false),
+			FEET("nbteditor.attributes.slot.feet", false),
+			BODY("nbteditor.attributes.slot.body", true);
 			
 			public static Slot fromMinecraft(AttributeModifierSlot slot) {
 				return switch (slot) {
@@ -76,10 +78,10 @@ public record AttributeData(EntityAttribute attribute, double value, Optional<At
 				return Arrays.stream(values()).filter(slot -> !slot.isOnlyForComponents()).toList();
 			}
 			
-			private final String name;
+			private final Text name;
 			private final boolean onlyForComponents;
-			private Slot(String name, boolean onlyForComponents) {
-				this.name = name;
+			private Slot(String key, boolean onlyForComponents) {
+				this.name = TextInst.translatable(key);
 				this.onlyForComponents = onlyForComponents;
 			}
 			public AttributeModifierSlot toMinecraft() {
@@ -104,7 +106,7 @@ public record AttributeData(EntityAttribute attribute, double value, Optional<At
 			}
 			@Override
 			public String toString() {
-				return name;
+				return name.getString();
 			}
 		}
 		

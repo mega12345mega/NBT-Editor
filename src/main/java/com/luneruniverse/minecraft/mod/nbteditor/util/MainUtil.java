@@ -115,6 +115,7 @@ public class MainUtil {
 			}
 			saveItem(slot == 40 ? 45 : slot, item);
 			if (overflow != 0) {
+				item = item.copy();
 				item.setCount(overflow);
 				get(item, false);
 			}
@@ -492,6 +493,22 @@ public class MainUtil {
 	 */
 	public static NbtCompound updateDynamic(TypeReference typeRef, NbtCompound nbt) {
 		return updateDynamic(typeRef, nbt, -1);
+	}
+	
+	public static NbtCompound fillId(NbtCompound nbt) {
+		if (!NBTManagers.COMPONENTS_EXIST)
+			return nbt;
+		if (!nbt.contains("id", NbtElement.STRING_TYPE))
+			nbt.putString("id", "");
+		return nbt;
+	}
+	
+	public static String addNamespace(String component) {
+		if (component.contains(":"))
+			return component;
+		if (component.startsWith("!"))
+			return "!minecraft:" + component.substring(1);
+		return "minecraft:" + component;
 	}
 	
 }

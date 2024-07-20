@@ -49,8 +49,8 @@ public enum HideFlag implements TagReference<Boolean, ItemStack> {
 	private static <C> ComponentTagReference<Boolean, C> getComponent(DataComponentType<C> component, Predicate<C> getter, BiFunction<C, Boolean, C> setter) {
 		return new ComponentTagReference<>(component,
 				null,
-				componentValue -> componentValue == null ? false : getter.test(componentValue),
-				(componentValue, value) -> componentValue == null ? null : setter.apply(componentValue, value == null ? false : value))
+				componentValue -> componentValue == null ? false : !getter.test(componentValue),
+				(componentValue, value) -> componentValue == null ? null : setter.apply(componentValue, value == null ? true : !value))
 				.passNullValue();
 	}
 	

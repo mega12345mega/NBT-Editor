@@ -16,6 +16,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.AbstractNbtList;
+import net.minecraft.nbt.NbtByte;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Identifier;
@@ -156,7 +157,13 @@ public class NBTValue extends List2D.List2DValue {
 	public String getKey() {
 		return key;
 	}
-	public String getValueText() {
+	public String getValueText(boolean json) {
+		if (json && value instanceof NbtByte valueByte) {
+			if (valueByte.byteValue() == 0)
+				return "false";
+			if (valueByte.byteValue() == 1)
+				return "true";
+		}
 		return value.toString();
 	}
 	
@@ -180,9 +187,7 @@ public class NBTValue extends List2D.List2DValue {
 			NbtCompound nbtOutput = localItem.getReadableItem().manager$getNbt();
 			if (component == null)
 				component = this.key;
-			if (!component.contains(":"))
-				component = "minecraft:" + component;
-			this.invalidComponent = (nbtOutput == null || !nbtOutput.contains(component));
+			this.invalidComponent = (nbtOutput == null || !nbtOutput.contains(MainUtil.addNamespace(component)));
 		}
 	}
 	public boolean isInvalidComponent() {

@@ -4,6 +4,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 
@@ -39,7 +40,8 @@ public class NBTComponentTagReference<T, C> implements TagReference<T, NbtCompou
 	
 	@Override
 	public T get(NbtCompound object) {
-		return codec.decode(NbtOps.INSTANCE, object.get(tag)).result().map(Pair::getFirst).map(getter).orElseGet(defaultValue);
+		return codec.decode(DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), object.get(tag))
+				.result().map(Pair::getFirst).map(getter).orElseGet(defaultValue);
 	}
 	
 	@Override
@@ -49,13 +51,15 @@ public class NBTComponentTagReference<T, C> implements TagReference<T, NbtCompou
 			return;
 		}
 		C componentValue = (defaultComponent == null ? null :
-			codec.decode(NbtOps.INSTANCE, object.get(tag)).result().map(Pair::getFirst).orElseGet(defaultComponent));
+			codec.decode(DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), object.get(tag))
+			.result().map(Pair::getFirst).orElseGet(defaultComponent));
 		componentValue = setter.apply(componentValue, value);
 		if (componentValue == null) {
 			object.remove(tag);
 			return;
 		}
-		object.put(tag, codec.encodeStart(NbtOps.INSTANCE, componentValue).getOrThrow());
+		object.put(tag, codec.encodeStart(
+				DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), componentValue).getOrThrow());
 	}
 	
 }

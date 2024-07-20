@@ -4,7 +4,7 @@ import net.minecraft.item.ItemStack;
 
 public interface ItemContainerIO {
 	public static ItemContainerIO forNBTIO(NBTContainerIO io) {
-		return new ItemTagContainerIO(null, io);
+		return new ItemTagContainerIO(null, false, io);
 	}
 	
 	/**

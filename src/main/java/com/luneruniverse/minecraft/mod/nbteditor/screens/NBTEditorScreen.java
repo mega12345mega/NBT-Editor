@@ -26,6 +26,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.StringMenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.TextAreaScreen;
@@ -120,6 +121,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private List<String> realPath;
 	private NBTValue upValue;
 	private NBTValue selectedValue;
+	private boolean json;
 	private MenuGenerator currentGen;
 	private final MenuGenerator gen;
 	private NbtElement nbt;
@@ -269,9 +271,12 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 					gen.setElement(this.nbt, selectedValue.getKey(), nbt);
 					updateName();
 				});
-				if (realPath.isEmpty())
-					selectedValue.updateInvalidComponent(localNBT, null);
-				else
+				if (realPath.isEmpty()) {
+					for (List2D.List2DValue element : editor.getElements()) {
+						if (element instanceof NBTValue value)
+							value.updateInvalidComponent(localNBT, null);
+					}
+				} else
 					upValue.updateInvalidComponent(localNBT, realPath.get(0));
 			}
 		});
@@ -307,7 +312,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 						.map(ac -> ac.getSuggestions(localNBT, realPath, null, str, cursor))
 						.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture())));
 			} else
-				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(), NbtFormatter.FORMATTER,
+				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(json), NbtFormatter.FORMATTER,
 						false, str -> value.setText(str)).suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
 								.map(ac -> ac.getSuggestions(localNBT, realPath, selectedValue.getKey(), str, cursor))
 								.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture())));
@@ -337,6 +342,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		editor.clearElements();
 		
 		this.nbt = localNBT.getOrCreateNBT();
+		this.json = false;
 		this.currentGen = MenuGenerator.TYPES.get(NbtElement.COMPOUND_TYPE);
 		Iterator<String> keys = realPath.iterator();
 		boolean removing = false;
@@ -351,6 +357,8 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			if ((value = this.currentGen.getElement(this.nbt, key)) != null && (generator = MenuGenerator.TYPES.get(value.getType())) != null) {
 				this.nbt = value;
 				this.currentGen = generator;
+				if (this.currentGen instanceof StringMenuGenerator)
+					this.json = true;
 			} else {
 				keys.remove();
 				removing = true;
@@ -387,8 +395,8 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		String newName = localNBT.getName().getString();
 		if (!name.text.equals(newName)) {
 			name.text = newName;
-			name.setSelectionStart(name.getText().length());
-			name.setSelectionEnd(name.getText().length());
+			name.setSelectionStart(0);
+			name.setSelectionEnd(0);
 		}
 	}
 	@Override
@@ -411,7 +419,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			genEditor();
 		} else {
 			selectedValue = key;
-			value.setText(key.getValueText());
+			value.setText(key.getValueText(json));
 			value.setEditable(true);
 		}
 	}

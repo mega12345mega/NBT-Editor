@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.Validate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -38,7 +39,7 @@ public class Head {
         ItemStack item = new ItemStack(Items.PLAYER_HEAD);
         item.manager$setCustomName(TextInst.of(Utils.colorize(category != null ? category.getColor() + name : "&8" + name)));
         // set skull owner
-        GameProfile profile = new GameProfile(uuid, name);
+        GameProfile profile = new GameProfile(uuid, NBTManagers.COMPONENTS_EXIST ? "HDB_Head" : name);
         profile.getProperties().put("textures", new Property("textures", value));
         ItemTagReferences.PROFILE.set(item, Optional.of(profile));
         

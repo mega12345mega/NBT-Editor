@@ -7,12 +7,23 @@ import com.google.common.collect.Lists;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.StringNbtWriterAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 
+import net.minecraft.nbt.NbtByte;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.nbt.visitor.StringNbtWriter;
 
-public class StringNbtWriterQuoted extends StringNbtWriter {
+public class StringJsonWriterQuoted extends StringNbtWriter {
+	
+	@Override
+	public void visitByte(NbtByte element) {
+		if (element.byteValue() == 0)
+			((StringNbtWriterAccessor) this).getResult().append(false);
+		else if (element.byteValue() == 1)
+			((StringNbtWriterAccessor) this).getResult().append(true);
+		else
+			super.visitByte(element);
+	}
 	
 	@Override
 	public void visitString(NbtString element) {
@@ -28,7 +39,7 @@ public class StringNbtWriterQuoted extends StringNbtWriter {
             if (i != 0) {
                 result.append(',');
             }
-            result.append(new StringNbtWriterQuoted().apply(element.get(i)));
+            result.append(new StringJsonWriterQuoted().apply(element.get(i)));
         }
         result.append(']');
     }
@@ -44,7 +55,7 @@ public class StringNbtWriterQuoted extends StringNbtWriter {
             if (result.length() != 1) {
                 result.append(',');
             }
-            result.append(escapeNameWithQuotes(string)).append(':').append(new StringNbtWriterQuoted().apply(compound.get(string)));
+            result.append(escapeNameWithQuotes(string)).append(':').append(new StringJsonWriterQuoted().apply(compound.get(string)));
         }
         result.append('}');
 	}

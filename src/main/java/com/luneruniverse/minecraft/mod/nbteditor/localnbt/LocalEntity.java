@@ -146,7 +146,7 @@ public class LocalEntity implements LocalNBT {
 	public Optional<ItemStack> toItem() {
 		ItemStack output = null;
 		for (Item item : MVRegistry.ITEM) {
-			if (item instanceof SpawnEggItem spawnEggItem && spawnEggItem.getEntityType(null) == entityType)
+			if (item instanceof SpawnEggItem spawnEggItem && MVMisc.getEntityType(new ItemStack(spawnEggItem)) == entityType)
 				output = new ItemStack(spawnEggItem);
 		}
 		if (output == null) {

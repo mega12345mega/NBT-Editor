@@ -11,7 +11,7 @@ public class EntityTagContainerIO extends ItemTagContainerIO implements EntityCo
 	private final NBTContainerIO entityNbtIO;
 	
 	public EntityTagContainerIO(NBTContainerIO itemNbtIO, NBTContainerIO entityNbtIO) {
-		super(TagNames.ENTITY_TAG, itemNbtIO);
+		super(TagNames.ENTITY_TAG, true, itemNbtIO);
 		this.entityNbtIO = entityNbtIO;
 	}
 	public EntityTagContainerIO(NBTContainerIO nbtIO) {

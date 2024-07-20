@@ -63,7 +63,6 @@ public class StringInputScreen extends TickableSupportingScreen {
 		value.setText(prevValue);
 		if (suggestions != null)
 			value.suggest(suggestions);
-		this.addSelectableChild(value);
 		setInitialFocus(value);
 		
 		ok = this.addDrawableChild(MVMisc.newButton(width / 2 - 104, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.ok"), btn -> {
@@ -94,7 +93,11 @@ public class StringInputScreen extends TickableSupportingScreen {
 	}
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		value.mouseClicked(mouseX, mouseY, button);
+		boolean shouldBeFocused = value.mouseClicked(mouseX, mouseY, button);
+		if (shouldBeFocused != value.isMultiFocused())
+			value.onFocusChange(shouldBeFocused);
+		if (shouldBeFocused)
+			return true;
 		return super.mouseClicked(mouseX, mouseY, button);
 	}
 	@Override

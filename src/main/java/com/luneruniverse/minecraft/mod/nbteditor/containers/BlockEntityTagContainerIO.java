@@ -11,7 +11,7 @@ public class BlockEntityTagContainerIO extends ItemTagContainerIO implements Blo
 	private final NBTContainerIO blockNbtIO;
 	
 	public BlockEntityTagContainerIO(NBTContainerIO itemNbtIO, NBTContainerIO blockNbtIO) {
-		super(TagNames.BLOCK_ENTITY_TAG, itemNbtIO);
+		super(TagNames.BLOCK_ENTITY_TAG, true, itemNbtIO);
 		this.blockNbtIO = blockNbtIO;
 	}
 	public BlockEntityTagContainerIO(NBTContainerIO nbtIO) {

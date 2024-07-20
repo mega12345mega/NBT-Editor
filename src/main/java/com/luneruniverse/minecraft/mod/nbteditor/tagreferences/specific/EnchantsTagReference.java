@@ -32,7 +32,9 @@ public class EnchantsTagReference implements TagReference<Enchants, ItemStack> {
 								.map(entry -> new Enchants.EnchantWithLevel(entry.getKey().value(), entry.getIntValue())).collect(Collectors.toList())),
 								(componentValue, enchants) -> new ItemEnchantmentsComponent(new Object2IntOpenHashMap<>(
 										enchants.getEnchants().stream().collect(Collectors.toMap(
-												enchant -> Registries.ENCHANTMENT.getEntry(enchant.enchant()), Enchants.EnchantWithLevel::level))),
+												enchant -> Registries.ENCHANTMENT.getEntry(enchant.enchant()),
+												Enchants.EnchantWithLevel::level,
+												Math::max))),
 										componentValue.showInTooltip)))
 				.range(null, "1.20.4", () -> TagReference.forLists(element -> {
 					if (!(element instanceof NbtCompound compound))

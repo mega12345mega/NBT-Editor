@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -13,10 +14,12 @@ public class ItemTagContainerIO implements ItemContainerIO {
 	}
 	
 	private final String tag;
+	private final boolean fillId;
 	private final NBTContainerIO nbtIO;
 	
-	public ItemTagContainerIO(String tag, NBTContainerIO nbtIO) {
+	public ItemTagContainerIO(String tag, boolean fillId, NBTContainerIO nbtIO) {
 		this.tag = tag;
+		this.fillId = fillId;
 		this.nbtIO = nbtIO;
 	}
 	
@@ -33,7 +36,7 @@ public class ItemTagContainerIO implements ItemContainerIO {
 		if (tag == null || nbtIO.passRootNbt(SourceContainerType.ITEM))
 			item.manager$setNbt(nbt);
 		else
-			item.manager$modifyNbt(itemNbt -> itemNbt.put(tag, nbt));
+			item.manager$modifyNbt(itemNbt -> itemNbt.put(tag, fillId ? MainUtil.fillId(nbt) : nbt));
 	}
 	
 	@Override

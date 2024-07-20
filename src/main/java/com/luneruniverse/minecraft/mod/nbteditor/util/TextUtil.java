@@ -71,8 +71,8 @@ public class TextUtil {
 		}
 	}
 	
-	public static Text parseTranslatableFormatted(String key) {
-		return parseFormattedText(TextInst.translatable(key).getString());
+	public static Text parseTranslatableFormatted(String key, Object... args) {
+		return parseFormattedText(TextInst.translatable(key, args).getString());
 	}
 	
 	public static Text substring(Text text, int start, int end) {

@@ -47,4 +47,9 @@ public class FancyConfirmScreen extends ConfirmScreen {
 		render(MVDrawableHelper.getMatrices(context), mouseX, mouseY, delta);
 	}
 	
+	@Override
+	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+		MVDrawableHelper.renderBackground(parent, MVDrawableHelper.getMatrices(context));
+	}
+	
 }

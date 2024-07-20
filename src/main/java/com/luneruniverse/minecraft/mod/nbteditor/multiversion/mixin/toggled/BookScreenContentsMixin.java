@@ -15,7 +15,7 @@ import net.minecraft.item.ItemStack;
 public class BookScreenContentsMixin {
 	@Inject(method = "create", at = @At("RETURN"))
 	private static void create(ItemStack item, CallbackInfoReturnable<BookScreen.Contents> info) {
-		if (item.get(DataComponentTypes.WRITTEN_BOOK_CONTENT) != null)
+		if (item.contains(DataComponentTypes.WRITTEN_BOOK_CONTENT))
 			MixinLink.WRITTEN_BOOK_CONTENTS.put(info.getReturnValue(), true);
 	}
 }

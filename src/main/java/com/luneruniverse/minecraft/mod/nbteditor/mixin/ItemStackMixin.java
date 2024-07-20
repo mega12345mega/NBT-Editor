@@ -15,11 +15,13 @@ import com.luneruniverse.minecraft.mod.nbteditor.async.ItemSize;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.item.TooltipType;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -47,6 +49,9 @@ public class ItemStackMixin {
 			return;
 		
 		ItemStack source = (ItemStack) (Object) this;
+		
+		if (NBTManagers.COMPONENTS_EXIST && source.contains(DataComponentTypes.HIDE_TOOLTIP))
+			return;
 		
 		ConfigScreen.ItemSizeFormat sizeConfig = ConfigScreen.getItemSizeFormat();
 		if (sizeConfig != ConfigScreen.ItemSizeFormat.HIDDEN) {

@@ -88,7 +88,7 @@
 	"nbteditor.nbt.import.desc_9": "instead of opening this screen",
 	"nbteditor.nbt.import.data_version": "Data Version",
 	"nbteditor.nbt.import.data_version.desc": "For .nbt files without a DataVersion\ntag, this is used instead\nYou can also input Minecraft versions\nThis is used to update files",
-	"nbteditor.nbt.import.data_version.missing": "§6DataVersion was missing from %s§6, so the current version of Minecraft was assumed",
+	"nbteditor.nbt.import.data_version.missing": "§6DataVersion was missing from §r%s§6, so the current version of Minecraft was assumed (use [run_command]{/nbt import}([show_text]{Click to execute}(§c/nbt import)) to specify a data version)",
 	
 	"nbteditor.img_to_lore": "Import Image(s)",
 	"nbteditor.img_to_lore.width": "Width",
@@ -197,6 +197,8 @@
 	"nbteditor.keybind.page.next_jump": "\n§6to jump to the next page!",
 	"nbteditor.keybind.page.prev_jump": "\n§6to jump to the previous page!",
 	
+	"nbteditor.skull.invalid_player_name": "§cThat player name is invalid!",
+	
 	"nbteditor.unbind_skull.no_textures": "§cThat head hasn't loaded any textures yet!",
 	"nbteditor.unbind_skull.unbound": "§aHead unbound!",
 	
@@ -208,6 +210,9 @@
 	"nbteditor.attributes": "Attributes",
 	"nbteditor.attributes.attribute": "Attribute",
 	"nbteditor.attributes.operation": "Operation",
+	"nbteditor.attributes.operation.add": "Add",
+	"nbteditor.attributes.operation.multiply_base": "Multiply Base",
+	"nbteditor.attributes.operation.multiply": "Multiply",
 	"nbteditor.attributes.base": "Base",
 	"nbteditor.attributes.amount": "Amount",
 	"nbteditor.attributes.amount.max": "Maximum",
@@ -216,6 +221,16 @@
 	"nbteditor.attributes.amount.negative_infinity": "-Infinite",
 	"nbteditor.attributes.amount.autofill_keybinds": "Hold shift for infinity\nHold ctrl for minimum",
 	"nbteditor.attributes.slot": "Slot",
+	"nbteditor.attributes.slot.any": "Any",
+	"nbteditor.attributes.slot.hand": "Any Hand",
+	"nbteditor.attributes.slot.mainhand": "Main Hand",
+	"nbteditor.attributes.slot.offhand": "Off Hand",
+	"nbteditor.attributes.slot.armor": "Any Armor",
+	"nbteditor.attributes.slot.head": "Head",
+	"nbteditor.attributes.slot.chest": "Chest",
+	"nbteditor.attributes.slot.legs": "Legs",
+	"nbteditor.attributes.slot.feet": "Feet",
+	"nbteditor.attributes.slot.body": "Body",
 	"nbteditor.attributes.new_uuids.success": "§aAttribute UUIDs randomized!",
 	"nbteditor.attributes.new_uuids.no_attributes": "§cThere are no attributes on this subject!",
 	
@@ -227,8 +242,14 @@
 	"nbteditor.unbreakable.enabled": "§aItem toggled to §9unbreakable§a!",
 	"nbteditor.unbreakable.disabled": "§aItem toggled to §7breakable§a!",
 	
-	"nbteditor.unstackable.msg": "§aItem is now unstackable! [Hover for more info]",
-	"nbteditor.unstackable.hover_msg": "A random UUID was added.\nWhen cloning the item, make\nsure to re-run this command\nfor all the individual items.",
+	"nbteditor.random_uuid.added": "§aUUID added: %s§a!",
+	"nbteditor.random_uuid.removed": "§aUUID removed!",
+	"nbteditor.random_uuid.already_removed": "§cNo UUID to remove!",
+	
+	"nbteditor.max_stack_size.added": "§aMax stack size set to %s§a!",
+	"nbteditor.max_stack_size.removed": "§aMax stack size removed!",
+	"nbteditor.max_stack_size.already_removed": "§cNo max stack size to remove!",
+	"nbteditor.max_stack_size.invalid_state": "§cItems can't be both stackable and damageable!",
 	
 	"nbteditor.named": "§aSubject's name changed to: ",
 	

@@ -50,7 +50,7 @@ public class ImportScreen extends OverlaySupportingScreen {
 				try (FileInputStream in = new FileInputStream(file)) {
 					NbtCompound nbt = MainUtil.readNBT(in);
 					if (defaultDataVersion.isEmpty() && !nbt.contains("DataVersion", NbtElement.NUMBER_TYPE))
-						MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.nbt.import.data_version.missing", file.getName()), false);
+						MainUtil.client.player.sendMessage(TextUtil.parseTranslatableFormatted("nbteditor.nbt.import.data_version.missing", file.getName()), false);
 					LocalNBT.deserialize(nbt, defaultDataVersion.orElse(Version.getDataVersion())).ifPresent(localNBT -> {
 						if (localNBT instanceof LocalItem item)
 							item.receive();

@@ -22,6 +22,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Att
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.Slot;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.CustomPotionContents;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 
@@ -45,11 +46,11 @@ import net.minecraft.text.Text;
 
 public class ItemTagReferences {
 	
-	private static TagReference<NbtCompound, ItemStack> getComponentTagRefOfNBT(DataComponentType<NbtComponent> component) {
+	private static TagReference<NbtCompound, ItemStack> getComponentTagRefOfNBT(DataComponentType<NbtComponent> component, boolean fillId) {
 		return new ComponentTagReference<>(component,
 				null,
 				componentValue -> componentValue == null ? new NbtCompound() : componentValue.copyNbt(),
-				NbtComponent::of);
+				nbt -> NbtComponent.of(fillId ? MainUtil.fillId(nbt.copy()) : nbt));
 	}
 	
 	public static final TagReference<CustomPotionContents, ItemStack> CUSTOM_POTION_CONTENTS = Version.<TagReference<CustomPotionContents, ItemStack>>newSwitch()
@@ -105,7 +106,7 @@ public class ItemTagReferences {
 			.get();
 	
 	public static final TagReference<NbtCompound, ItemStack> CUSTOM_DATA = Version.<TagReference<NbtCompound, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> getComponentTagRefOfNBT(DataComponentTypes.CUSTOM_DATA))
+			.range("1.20.5", null, () -> getComponentTagRefOfNBT(DataComponentTypes.CUSTOM_DATA, false))
 			.range(null, "1.20.4", () -> new CustomDataNBTTagReference())
 			.get();
 	
@@ -121,12 +122,12 @@ public class ItemTagReferences {
 			.get();
 	
 	public static final TagReference<NbtCompound, ItemStack> BLOCK_ENTITY_DATA = Version.<TagReference<NbtCompound, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> getComponentTagRefOfNBT(DataComponentTypes.BLOCK_ENTITY_DATA))
+			.range("1.20.5", null, () -> getComponentTagRefOfNBT(DataComponentTypes.BLOCK_ENTITY_DATA, true))
 			.range(null, "1.20.4", () -> TagReference.forItems(NbtCompound::new, new NBTTagReference<>(NbtCompound.class, "BlockEntityTag")))
 			.get();
 	
 	public static final TagReference<NbtCompound, ItemStack> ENTITY_DATA = Version.<TagReference<NbtCompound, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> getComponentTagRefOfNBT(DataComponentTypes.ENTITY_DATA))
+			.range("1.20.5", null, () -> getComponentTagRefOfNBT(DataComponentTypes.ENTITY_DATA, true))
 			.range(null, "1.20.4", () -> TagReference.forItems(NbtCompound::new, new NBTTagReference<>(NbtCompound.class, "EntityTag")))
 			.get();
 	
@@ -135,7 +136,7 @@ public class ItemTagReferences {
 	public static final TagReference<List<Text>, ItemStack> LORE = Version.<TagReference<List<Text>, ItemStack>>newSwitch()
 			.range("1.20.5", null, () -> new ComponentTagReference<>(DataComponentTypes.LORE,
 					() -> LoreComponent.DEFAULT,
-					LoreComponent::lines,
+					component -> new ArrayList<>(component.lines()),
 					lore -> new LoreComponent(lore.stream().limit(256).toList())))
 			.range(null, "1.20.4", () -> TagReference.forItems(ArrayList::new, TagReference.forLists(Text.class, new NBTTagReference<>(Text[].class, "display/Lore"))))
 			.get();
