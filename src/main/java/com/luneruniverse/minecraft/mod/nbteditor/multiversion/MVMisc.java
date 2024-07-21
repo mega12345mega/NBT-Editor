@@ -417,8 +417,11 @@ public class MVMisc {
 				})
 				.get();
 	}
-	public static VertexConsumerProvider.Immediate beginDrawingNormal() {
-		return VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+	public static VertexConsumerProvider.Immediate beginDrawingNormal(MatrixStack matrices) {
+		return Version.<VertexConsumerProvider.Immediate>newSwitch()
+				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers())
+				.range(null, "1.19.4", () -> VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer()))
+				.get();
 	}
 	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_end =
 			Reflection.getOptionalMethod(BufferBuilder.class, "method_1326", MethodType.methodType(void.class));
@@ -435,7 +438,10 @@ public class MVMisc {
 				.run();
 	}
 	public static void endDrawingNormal(VertexConsumerProvider.Immediate provider) {
-		provider.draw();
+		Version.<VertexConsumerProvider.Immediate>newSwitch()
+				.range("1.20.0", null, () -> {})
+				.range(null, "1.19.4", () -> provider.draw())
+				.run();
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> TextFieldWidget_setCursor =

@@ -109,7 +109,7 @@ public class ContainerIO {
 				.range(null, "1.19.4", () -> {})
 				.run();
 		
-		registerItemIO(Items.ARMOR_STAND, ARMOR_HANDS_IO);
+		registerEntityTagIO(Items.ARMOR_STAND, EntityType.ARMOR_STAND, ARMOR_HANDS_IO);
 		for (Item item : MVRegistry.ITEM) {
 			if (item instanceof SpawnEggItem spawnEgg)
 				registerItemIO(spawnEgg, SPAWN_EGG_IO);

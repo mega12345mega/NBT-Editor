@@ -63,6 +63,7 @@ public class StringInputScreen extends TickableSupportingScreen {
 		value.setText(prevValue);
 		if (suggestions != null)
 			value.suggest(suggestions);
+		addDrawableChild(value);
 		setInitialFocus(value);
 		
 		ok = this.addDrawableChild(MVMisc.newButton(width / 2 - 104, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.ok"), btn -> {
@@ -87,7 +88,6 @@ public class StringInputScreen extends TickableSupportingScreen {
 		matrices.translate(0.0, 0.0, 500.0);
 		super.renderBackground(matrices);
 		super.render(matrices, mouseX, mouseY, delta);
-		value.render(matrices, mouseX, mouseY, delta);
 		MainUtil.renderLogo(matrices);
 		matrices.pop();
 	}
@@ -110,8 +110,7 @@ public class StringInputScreen extends TickableSupportingScreen {
 			return true;
 		}
 		
-		boolean output = !this.value.keyPressed(keyCode, scanCode, modifiers) && !this.value.isActive()
-				? super.keyPressed(keyCode, scanCode, modifiers) : true;
+		boolean output = super.keyPressed(keyCode, scanCode, modifiers);
 		if (client.currentScreen != this)
 			client.setScreen(parent);
 		return output;

@@ -211,8 +211,9 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 					return;
 				
 				localNBT.setId(id);
-				if (localNBT instanceof LocalItem item)
-					item.setCount(count.getText().isEmpty() ? 1 : Integer.parseInt(count.getText()));
+				if (localNBT instanceof LocalItem item && item.getCount() == 0)
+					item.setCount(count.getText().isEmpty() || count.getText().equals("+") ? 1 : Integer.parseInt(count.getText()));
+				
 				genEditor();
 			});
 		}
@@ -227,6 +228,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 					return;
 				
 				item.setCount(Integer.parseInt(str));
+				checkSave();
 			});
 			count.setTextPredicate(MainUtil.intPredicate(1, Integer.MAX_VALUE, true));
 		} else {
@@ -278,6 +280,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 					}
 				} else
 					upValue.updateInvalidComponent(localNBT, realPath.get(0));
+				checkSave();
 			}
 		});
 		value.suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
@@ -333,6 +336,8 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		this.addSelectableChild(editor);
 	}
 	private void genEditor() {
+		checkSave();
+		
 		selectedValue = null;
 		value.setText("");
 		value.setEditable(false);
@@ -444,24 +449,34 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	}
 	
 	@Override
-	public void tick() {
-		super.tick();
-		checkSave();
-	}
-	@Override
 	protected void save() {
-		if (!localNBT.isEmpty() || localNBT.getNBT() == null || localNBT.getNBT().isEmpty()) {
-			super.save();
+		if (localNBT.isEmpty() && localNBT.getNBT() != null && !localNBT.getNBT().isEmpty()) {
+			MainUtil.client.setScreen(new FancyConfirmScreen(value -> {
+				if (value)
+					super.save();
+				
+				MainUtil.client.setScreen(NBTEditorScreen.this);
+			}, TextInst.translatable("nbteditor.nbt.saving_air.title"), TextInst.translatable("nbteditor.nbt.saving_air.desc"),
+					TextInst.translatable("nbteditor.nbt.saving_air.yes"), TextInst.translatable("nbteditor.nbt.saving_air.no")));
 			return;
 		}
 		
-		MainUtil.client.setScreen(new FancyConfirmScreen(value -> {
-			if (value)
-				super.save();
-			
-			MainUtil.client.setScreen(NBTEditorScreen.this);
-		}, TextInst.translatable("nbteditor.nbt.saving_air.title"), TextInst.translatable("nbteditor.nbt.saving_air.desc"),
-				TextInst.translatable("nbteditor.nbt.saving_air.yes"), TextInst.translatable("nbteditor.nbt.saving_air.no")));
+		if (localNBT instanceof LocalItem && localNBT.getNBT() != null) {
+			List<NBTValue> elements = MenuGenerator.TYPES.get(NbtElement.COMPOUND_TYPE).getElements(this, localNBT.getNBT());
+			elements.forEach(element -> element.updateInvalidComponent(localNBT, null));
+			if (elements.stream().anyMatch(NBTValue::isInvalidComponent)) {
+				MainUtil.client.setScreen(new FancyConfirmScreen(value -> {
+					if (value)
+						super.save();
+					
+					MainUtil.client.setScreen(NBTEditorScreen.this);
+				}, TextInst.translatable("nbteditor.nbt.saving_invalid_components.title"), TextInst.translatable("nbteditor.nbt.saving_invalid_components.desc"),
+						TextInst.translatable("nbteditor.nbt.saving_invalid_components.yes"), TextInst.translatable("nbteditor.nbt.saving_invalid_components.no")));
+				return;
+			}
+		}
+		
+		super.save();
 	}
 	
 	@Override

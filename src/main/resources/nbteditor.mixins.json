@@ -28,7 +28,6 @@
     "MinecraftClientMixin",
     "StringNbtReaderMixin",
     "ScreenMixin",
-    "ParentElementMixin",
     "BookScreenMixin",
     "HandledScreenMixin",
     "NativeImageMixin",

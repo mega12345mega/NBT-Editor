@@ -478,7 +478,7 @@ public class MainUtil {
 		return (T) client.getDataFixer().update(typeRef, new Dynamic<>(NbtOps.INSTANCE, nbt), oldVersion, Version.getDataVersion()).getValue();
 	}
 	/**
-	 * If a DataVersion tag exists, this updates from that - otherwise, this updates from defaultOldVersion
+	 * If dataVersionTag is not null and a number, this updates from that - otherwise, this updates from defaultOldVersion
 	 */
 	public static <T extends NbtElement> T updateDynamic(TypeReference typeRef, T nbt, NbtElement dataVersionTag, int defaultOldVersion) {
 		int dataVersion = defaultOldVersion;

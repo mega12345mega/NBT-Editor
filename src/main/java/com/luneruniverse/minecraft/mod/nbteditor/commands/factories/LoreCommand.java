@@ -18,6 +18,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
@@ -28,9 +30,11 @@ import net.minecraft.util.Formatting;
 
 public class LoreCommand extends ClientCommand {
 	
-	private static int getPos(int pos, List<Text> lore, boolean afterLast) {
+	private static int getPos(int pos, List<Text> lore, boolean afterLast) throws CommandSyntaxException {
 		if (pos < 0)
-			return pos + lore.size() + (afterLast ? 1 : 0);
+			pos = pos + lore.size() + (afterLast ? 1 : 0);
+		if (pos < 0 || pos > lore.size() || (!afterLast && pos == lore.size()))
+			throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.lore.invalid_line")).create();
 		return pos;
 	}
 	

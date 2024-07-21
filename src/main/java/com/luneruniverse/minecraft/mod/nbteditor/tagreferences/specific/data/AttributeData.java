@@ -20,14 +20,14 @@ public record AttributeData(EntityAttribute attribute, double value, Optional<At
 		
 		public enum Operation {
 			ADD("nbteditor.attributes.operation.add"),
-			MULTIPLY_BASE("nbteditor.attributes.operation.multiply_base"),
-			MULTIPLY("nbteditor.attributes.operation.multiply");
+			ADD_MULTIPLIED_BASE("nbteditor.attributes.operation.add_multiplied_base"),
+			ADD_MULTIPLIED_TOTAL("nbteditor.attributes.operation.add_multiplied_total");
 			
 			public static Operation fromMinecraft(net.minecraft.entity.attribute.EntityAttributeModifier.Operation operation) {
 				return switch (operation) {
 					case ADD_VALUE -> ADD;
-					case ADD_MULTIPLIED_BASE -> MULTIPLY_BASE;
-					case ADD_MULTIPLIED_TOTAL -> MULTIPLY;
+					case ADD_MULTIPLIED_BASE -> ADD_MULTIPLIED_BASE;
+					case ADD_MULTIPLIED_TOTAL -> ADD_MULTIPLIED_TOTAL;
 				};
 			}
 			
@@ -38,8 +38,8 @@ public record AttributeData(EntityAttribute attribute, double value, Optional<At
 			public net.minecraft.entity.attribute.EntityAttributeModifier.Operation toMinecraft() {
 				return switch (this) {
 					case ADD -> net.minecraft.entity.attribute.EntityAttributeModifier.Operation.ADD_VALUE;
-					case MULTIPLY -> net.minecraft.entity.attribute.EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE;
-					case MULTIPLY_BASE -> net.minecraft.entity.attribute.EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL;
+					case ADD_MULTIPLIED_BASE -> net.minecraft.entity.attribute.EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE;
+					case ADD_MULTIPLIED_TOTAL -> net.minecraft.entity.attribute.EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL;
 				};
 			}
 			@Override

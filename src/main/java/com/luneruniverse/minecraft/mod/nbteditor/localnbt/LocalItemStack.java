@@ -80,7 +80,7 @@ public class LocalItemStack extends LocalItem {
 	}
 	@Override
 	public void setId(Identifier id) {
-		item = MainUtil.setType(MVRegistry.ITEM.get(id), item, item.getCount());
+		item = MainUtil.setType(MVRegistry.ITEM.get(id), item);
 	}
 	@Override
 	public Set<Identifier> getIdOptions() {

@@ -81,6 +81,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 	private ButtonWidget nextPage;
 	private ButtonWidget prevPageJump;
 	private ButtonWidget nextPageJump;
+	private ItemStack[] prevInv;
 	
 	private ClientChestScreen(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
 		super(handler, inventory, title);
@@ -296,6 +297,10 @@ public class ClientChestScreen extends ClientHandledScreen {
 		if (navigationClicked)
 			return;
 		
+		prevInv = new ItemStack[this.handler.getInventory().size()];
+		for (int i = 0; i < prevInv.length; i++)
+			prevInv[i] = this.handler.getInventory().getStack(i).copy();
+		
 		super.onMouseClick(slot, slotId, button, actionType);
 	}
 	@Override
@@ -312,7 +317,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 	}
 	@Override
 	public ItemStack[] getPrevInventory() {
-		return NBTEditorClient.CLIENT_CHEST.getPage(PAGE).getItemsOrThrow();
+		return prevInv;
 	}
 	@Override
 	public void onChange() {

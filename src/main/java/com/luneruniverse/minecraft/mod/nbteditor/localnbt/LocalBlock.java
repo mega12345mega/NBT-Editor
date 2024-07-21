@@ -146,7 +146,7 @@ public class LocalBlock implements LocalNBT {
 		LocalNBT.makeRotatingIcon(renderMatrices, x, y, 1, true);
 		renderMatrices.translate(-0.5, -0.5, -0.5);
 		
-		VertexConsumerProvider.Immediate provider = MVMisc.beginDrawingNormal();
+		VertexConsumerProvider.Immediate provider = MVMisc.beginDrawingNormal(matrices);
 		BlockState state = this.state.applyTo(block.getDefaultState());
 		MVMisc.renderBlock(MainUtil.client.getBlockRenderManager(), state, new BlockPos(0, 1000, 0), MainUtil.client.world,
 				renderMatrices, provider.getBuffer(RenderLayer.getCutout()), false);

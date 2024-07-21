@@ -69,6 +69,11 @@
 	"nbteditor.nbt.saving_air.yes": "Save",
 	"nbteditor.nbt.saving_air.no": "Cancel",
 	
+	"nbteditor.nbt.saving_invalid_components.title": "Data Loss!",
+	"nbteditor.nbt.saving_invalid_components.desc": "You are saving invalid component(s), which will be deleted. Continue?",
+	"nbteditor.nbt.saving_invalid_components.yes": "Save",
+	"nbteditor.nbt.saving_invalid_components.no": "Cancel",
+	
 	"nbteditor.nbt.marker.unsafe": "The value cannot be converted to NBT\nand will be reverted when unselected",
 	"nbteditor.nbt.marker.invalid_component": "This component is invalid\nand will be deleted when saved",
 	
@@ -156,6 +161,7 @@
 	"nbteditor.sign.load_error": "§cThere was an error loading the signature, restart game",
 	
 	"nbteditor.lore.edited": "§aLore edited!",
+	"nbteditor.lore.invalid_line": "§cThat line is out of bounds!",
 	"nbteditor.lore.none": "§cThere is no lore.",
 	
 	"nbteditor.get.item": "§aReceived: ",
@@ -211,8 +217,8 @@
 	"nbteditor.attributes.attribute": "Attribute",
 	"nbteditor.attributes.operation": "Operation",
 	"nbteditor.attributes.operation.add": "Add",
-	"nbteditor.attributes.operation.multiply_base": "Multiply Base",
-	"nbteditor.attributes.operation.multiply": "Multiply",
+	"nbteditor.attributes.operation.add_multiplied_base": "Add Multiplied Base",
+	"nbteditor.attributes.operation.add_multiplied_total": "Add Multiplied Total",
 	"nbteditor.attributes.base": "Base",
 	"nbteditor.attributes.amount": "Amount",
 	"nbteditor.attributes.amount.max": "max",

@@ -130,7 +130,7 @@ public class LocalEntity implements LocalNBT {
 		RenderSystem.applyModelViewMatrix();
 		
 		DiffuseLighting.method_34742();
-		VertexConsumerProvider.Immediate provider = MVMisc.beginDrawingNormal();
+		VertexConsumerProvider.Immediate provider = MVMisc.beginDrawingNormal(matrices);
 		EntityRenderDispatcher dispatcher = MainUtil.client.getEntityRenderDispatcher();
 		dispatcher.setRenderShadows(false);
 		rotation.copy().conjugate().applyToEntityRenderDispatcher(dispatcher);
