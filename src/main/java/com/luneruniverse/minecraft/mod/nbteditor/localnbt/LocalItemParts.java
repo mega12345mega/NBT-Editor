@@ -94,7 +94,7 @@ public class LocalItemParts extends LocalItem {
 	
 	@Override
 	public Text getName() {
-		return MainUtil.getItemNameSafely(getCachedItem());
+		return MainUtil.getCustomItemNameSafely(getCachedItem());
 	}
 	@Override
 	public void setName(Text name) {
@@ -122,7 +122,7 @@ public class LocalItemParts extends LocalItem {
 	}
 	@Override
 	public String getDefaultName() {
-		return item.getName().getString();
+		return MainUtil.getBaseItemNameSafely(getCachedItem()).getString();
 	}
 	
 	@Override

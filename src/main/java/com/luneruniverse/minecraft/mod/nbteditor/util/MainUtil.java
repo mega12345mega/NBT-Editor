@@ -244,11 +244,17 @@ public class MainUtil {
 	}
 	
 	
-	public static Text getItemNameSafely(ItemStack item) {
+	public static Text getBaseItemNameSafely(ItemStack item) {
 		if (NBTManagers.COMPONENTS_EXIST) {
-			Text name = item.get(DataComponentTypes.CUSTOM_NAME);
-			return name == null ? item.getItem().getName(item) : name;
+			Text name = item.get(DataComponentTypes.ITEM_NAME);
+			if (name != null)
+				return name;
 		}
+		return item.getItem().getName();
+	}
+	public static Text getCustomItemNameSafely(ItemStack item) {
+		if (NBTManagers.COMPONENTS_EXIST)
+			return item.getName();
 		NbtCompound nbt = item.manager$getNbt();
 		if (nbt != null)
 			nbt = nbt.getCompound("display");

@@ -31,78 +31,37 @@ import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData;
 
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.attribute.ClampedEntityAttribute;
 import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.text.Text;
 
 public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
-	private static class MaxButton extends ConfigButton {
-		
-		private static final Text MAX = TextInst.translatable("nbteditor.attributes.amount.max");
-		private static final Text MIN = TextInst.translatable("nbteditor.attributes.amount.min");
-		private static final Text INFINITY = TextInst.translatable("nbteditor.attributes.amount.infinity");
-		private static final Text NEG_INFINITY = TextInst.translatable("nbteditor.attributes.amount.negative_infinity");
-		private static final MVTooltip TOOLTIP = new MVTooltip("nbteditor.attributes.amount.autofill_keybinds");
-		
-		public MaxButton() {
-			super(100, getMaxMsg(), btn -> {
-				ConfigCategory attribute = (ConfigCategory) btn.getParent().getParent();
-				EntityAttribute type = ATTRIBUTES.get(getConfigAttribute(attribute).getValidValue());
-				
-				double max = Double.MAX_VALUE;
-				double min = Double.MIN_VALUE;
-				if (type instanceof ClampedEntityAttribute clamped) {
-					max = clamped.getMaxValue();
-					min = clamped.getMinValue();
-				}
-				
-				double value;
-				boolean shift = Screen.hasShiftDown();
-				boolean ctrl = Screen.hasControlDown();
-				if (!shift) {
-					if (!ctrl)
-						value = max;
-					else
-						value = min;
-				} else {
-					if (!ctrl)
-						value = Double.MAX_VALUE;
-					else
-						value = -Double.MAX_VALUE;
-				}
-				getConfigAmount(attribute).setValue(value);
-			}, TOOLTIP);
-		}
-		private static Text getMaxMsg() {
-			boolean shift = Screen.hasShiftDown();
-			boolean ctrl = Screen.hasControlDown();
-			if (!shift) {
-				if (!ctrl)
-					return MAX;
-				else
-					return MIN;
-			} else {
-				if (!ctrl)
-					return INFINITY;
-				else
-					return NEG_INFINITY;
+	private static ConfigButton createExtremeAmountBtn(String key, boolean mostPositive, boolean infinity) {
+		return new ConfigButton(30, TextInst.translatable(key), btn -> {
+			ConfigCategory attribute = (ConfigCategory) btn.getParent().getParent();
+			EntityAttribute type = ATTRIBUTES.get(getConfigAttribute(attribute).getValidValue());
+			
+			double min = Double.MIN_VALUE;
+			double max = Double.MAX_VALUE;
+			if (type instanceof ClampedEntityAttribute clamped) {
+				min = clamped.getMinValue();
+				max = clamped.getMaxValue();
 			}
-		}
-		
-		@Override
-		public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-			setMessage(getMaxMsg());
-			super.render(matrices, mouseX, mouseY, delta);
-		}
-		
-		@Override
-		public MaxButton clone(boolean defaults) {
-			return new MaxButton();
-		}
-		
+			
+			double value;
+			if (!infinity) {
+				if (!mostPositive)
+					value = min;
+				else
+					value = max;
+			} else {
+				if (!mostPositive)
+					value = Double.NEGATIVE_INFINITY;
+				else
+					value = Double.POSITIVE_INFINITY;
+			}
+			getConfigAmount(attribute).setValue(value);
+		}, new MVTooltip(key + ".desc"));
 	}
 	
 	private static final Map<String, EntityAttribute> ATTRIBUTES;
@@ -116,8 +75,13 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		ConfigCategory visibleBase = new ConfigCategory();
 		visibleBase.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), ConfigValueDropdown.forList(
 				firstAttribute, firstAttribute, new ArrayList<>(ATTRIBUTES.keySet()))));
-		visibleBase.setConfigurable("amount", new ConfigBar().setConfigurable("number", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.base"),
-				ConfigValueNumber.forDouble(0, 0, -Double.MAX_VALUE, Double.MAX_VALUE))).setConfigurable("autofill", new MaxButton()));
+		visibleBase.setConfigurable("amount", new ConfigBar()
+				.setConfigurable("number", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.base"),
+						ConfigValueNumber.forDouble(0, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY)))
+				.setConfigurable("max", createExtremeAmountBtn("nbteditor.attributes.amount.max", true, false))
+				.setConfigurable("min", createExtremeAmountBtn("nbteditor.attributes.amount.min", false, false))
+				.setConfigurable("infinity", createExtremeAmountBtn("nbteditor.attributes.amount.infinity", true, true))
+				.setConfigurable("negative_infinity", createExtremeAmountBtn("nbteditor.attributes.amount.negative_infinity", false, true)));
 		BASE_ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visibleBase, UUID.randomUUID(), (uuid, defaults) -> UUID.randomUUID());
 		
 		ConfigCategory visible = new ConfigCategory();
@@ -125,8 +89,13 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				firstAttribute, firstAttribute, new ArrayList<>(ATTRIBUTES.keySet()))));
 		visible.setConfigurable("operation", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.operation"), ConfigValueDropdown.forEnum(
 				AttributeModifierData.Operation.ADD, AttributeModifierData.Operation.ADD, AttributeModifierData.Operation.class)));
-		visible.setConfigurable("amount", new ConfigBar().setConfigurable("number", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.amount"),
-				ConfigValueNumber.forDouble(0, 0, -Double.MAX_VALUE, Double.MAX_VALUE))).setConfigurable("autofill", new MaxButton()));
+		visible.setConfigurable("amount", new ConfigBar()
+				.setConfigurable("number", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.amount"),
+						ConfigValueNumber.forDouble(0, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY)))
+				.setConfigurable("max", createExtremeAmountBtn("nbteditor.attributes.amount.max", true, false))
+				.setConfigurable("min", createExtremeAmountBtn("nbteditor.attributes.amount.min", false, false))
+				.setConfigurable("infinity", createExtremeAmountBtn("nbteditor.attributes.amount.infinity", true, true))
+				.setConfigurable("negative_infinity", createExtremeAmountBtn("nbteditor.attributes.amount.negative_infinity", false, true)));
 		visible.setConfigurable("slot", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.slot"), ConfigValueDropdown.forFilteredEnum(
 				AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.class, AttributeModifierData.Slot::isInThisVersion)));
 		ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visible, UUID.randomUUID(), (uuid, defaults) -> UUID.randomUUID());

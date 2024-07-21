@@ -88,29 +88,32 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 		StringBuilder color = new StringBuilder();
 		StringBuilder formats = new StringBuilder();
 		boolean needsReset = false;
-		for (Map.Entry<String, JsonElement> entry : TextInst.toJsonTree(text).getAsJsonObject().entrySet()) {
-			switch (entry.getKey()) {
-				case "color" -> {
-					Formatting colorFormatting = Formatting.byName(text.getStyle().getColor().getName());
-					if (colorFormatting == null) {
-						color.append("&c");
-						errors = true;
-					} else
-						color.append("&" + colorFormatting.getCode());
+		JsonElement textJsonTree = TextInst.toJsonTree(text);
+		if (textJsonTree.isJsonObject()) {
+			for (Map.Entry<String, JsonElement> entry : textJsonTree.getAsJsonObject().entrySet()) {
+				switch (entry.getKey()) {
+					case "color" -> {
+						Formatting colorFormatting = Formatting.byName(text.getStyle().getColor().getName());
+						if (colorFormatting == null) {
+							color.append("&c");
+							errors = true;
+						} else
+							color.append("&" + colorFormatting.getCode());
+					}
+					case "bold", "italic", "strikethrough", "obfuscated" -> {
+						if (entry.getValue().getAsBoolean())
+							formats.append("&" + Formatting.byName(entry.getKey()).getCode());
+						else
+							needsReset = true;
+					}
+					case "underlined" -> { // Formatting.UNDERLINE isn't past tense
+						if (entry.getValue().getAsBoolean())
+							formats.append("&" + Formatting.UNDERLINE.getCode());
+						else
+							needsReset = true;
+					}
+					case "insertion", "font" -> errors = true;
 				}
-				case "bold", "italic", "strikethrough", "obfuscated" -> {
-					if (entry.getValue().getAsBoolean())
-						formats.append("&" + Formatting.byName(entry.getKey()).getCode());
-					else
-						needsReset = true;
-				}
-				case "underlined" -> { // Formatting.UNDERLINE isn't past tense
-					if (entry.getValue().getAsBoolean())
-						formats.append("&" + Formatting.UNDERLINE.getCode());
-					else
-						needsReset = true;
-				}
-				case "insertion", "font" -> errors = true;
 			}
 		}
 		if (needsReset)
@@ -169,6 +172,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 		}
 		
 		EditableText output = parseColors(str);
+		EditableText outputEnd = (output.getSiblings().isEmpty() ? output : (EditableText) output.getSiblings().get(output.getSiblings().size() - 1));
 		if (event) {
 			UnaryOperator<Style> eventAdder;
 			String eventType = reader.readStringUntil(']');
@@ -219,10 +223,10 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 			
 			EditableText affectedText = parseInternal(new StringReader(readUntilClosed(reader, '(', ')')));
 			affectedText.styled(eventAdder);
-			output.append(affectedText);
+			outputEnd.append(affectedText);
 		}
 		if (reader.canRead())
-			output.append(parseInternal(reader));
+			outputEnd.append(parseInternal(reader));
 		
 		return output;
 	}

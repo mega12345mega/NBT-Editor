@@ -14,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.AlertWidget;
@@ -225,10 +226,23 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 		
 		group.addDrawable(gen);
 		
+		EditableText prevKeybind = TextInst.translatable("nbteditor.keybind.page.down");
+		EditableText nextKeybind = TextInst.translatable("nbteditor.keybind.page.up");
+		if (ConfigScreen.isInvertedPageKeybinds()) {
+			EditableText temp = prevKeybind;
+			prevKeybind = nextKeybind;
+			nextKeybind = temp;
+		}
+		
 		group.addWidget(MVMisc.newButton(16, 64 + 24, 20, height - 80 - 24,
-				TextInst.translatable("nbteditor.book.back"), btn -> back())).active = (page > 0);
+				TextInst.translatable("nbteditor.book.back"), btn -> back(),
+				ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.literal("")
+						.append(prevKeybind).append(TextInst.translatable("nbteditor.keybind.page.prev")))))
+				.active = (page > 0);
 		group.addWidget(MVMisc.newButton(width - 16 - 20, 64 + 24, 20, height - 80 - 24,
-				TextInst.translatable("nbteditor.book.forward"), btn -> forward()));
+				TextInst.translatable("nbteditor.book.forward"), btn -> forward(),
+				ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.literal("")
+						.append(nextKeybind).append(TextInst.translatable("nbteditor.keybind.page.next")))));
 	}
 	
 	@Override
@@ -243,17 +257,18 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 		if (super.keyPressed(keyCode, scanCode, modifiers))
 			return true;
 		
-		return switch (keyCode) {
-			case GLFW.GLFW_KEY_PAGE_UP -> {
+		if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_DOWN);
+			if (ConfigScreen.isInvertedPageKeybinds())
+				prev = !prev;
+			if (prev)
 				back();
-				yield true;
-			}
-			case GLFW.GLFW_KEY_PAGE_DOWN -> {
+			else
 				forward();
-				yield true;
-			}
-			default -> false;
-		};
+			return true;
+		}
+		
+		return false;
 	}
 	
 	@Override

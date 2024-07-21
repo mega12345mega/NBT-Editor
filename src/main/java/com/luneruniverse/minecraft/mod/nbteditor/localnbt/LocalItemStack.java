@@ -59,7 +59,7 @@ public class LocalItemStack extends LocalItem {
 	
 	@Override
 	public Text getName() {
-		return MainUtil.getItemNameSafely(item);
+		return MainUtil.getCustomItemNameSafely(item);
 	}
 	@Override
 	public void setName(Text name) {
@@ -67,7 +67,7 @@ public class LocalItemStack extends LocalItem {
 	}
 	@Override
 	public String getDefaultName() {
-		return item.getItem().getName().getString();
+		return MainUtil.getBaseItemNameSafely(item).getString();
 	}
 	
 	@Override
