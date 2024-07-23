@@ -11,7 +11,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ClientChestItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestDataVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -44,8 +43,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 		
 		ClientChestPage page = NBTEditorClient.CLIENT_CHEST.getPage(PAGE);
 		if (!page.isInThisVersion()) {
-			MainUtil.client.setScreen(new ClientChestDataVersionScreen(page.dataVersion().isEmpty(),
-					page.dataVersion().map(value -> value < Version.getDataVersion()).orElse(true)));
+			MainUtil.client.setScreen(new ClientChestDataVersionScreen(page.getDataVersionStatus()));
 			return;
 		}
 		
@@ -178,13 +176,13 @@ public class ClientChestScreen extends ClientHandledScreen {
 		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.literal("")
 				.append(nextKeybind).append(TextInst.translatable("nbteditor.keybind.page.next")))));
 		
-		this.addDrawableChild(prevPageJump = MVMisc.newButton(this.x - 87, this.y + 46, 39, 20, TextInst.of("<<"), btn -> {
+		this.addDrawableChild(prevPageJump = MVMisc.newButton(this.x - 87, this.y + 44, 39, 20, TextInst.of("<<"), btn -> {
 			navigationClicked = true;
 			prevPageJump();
 		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.translatable("nbteditor.keybind.page.shift")
 				.append(prevKeybind).append(TextInst.translatable("nbteditor.keybind.page.prev_jump")))));
 		
-		this.addDrawableChild(nextPageJump = MVMisc.newButton(this.x - 43, this.y + 46, 39, 20, TextInst.of(">>"), btn -> {
+		this.addDrawableChild(nextPageJump = MVMisc.newButton(this.x - 43, this.y + 44, 39, 20, TextInst.of(">>"), btn -> {
 			navigationClicked = true;
 			nextPageJump();
 		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.translatable("nbteditor.keybind.page.shift")
@@ -202,22 +200,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 92, 83, 20, TextInst.translatable("nbteditor.client_chest.reload_page"), btn -> {
 			navigationClicked = true;
-			try {
-				NBTEditorClient.CLIENT_CHEST.loadSync(PAGE);
-				show();
-			} catch (Exception e) {
-				NBTEditorClient.CLIENT_CHEST.backupCorruptPage(PAGE);
-				try {
-					NBTEditorClient.CLIENT_CHEST.loadSync(PAGE);
-				} catch (Exception e2) {
-					// Prevent potential further damage to files
-					RuntimeException toThrow = new RuntimeException("Error while reloading a corrupted client chest", e2);
-					toThrow.addSuppressed(e);
-					throw toThrow;
-				}
-				show();
-				NBTEditor.LOGGER.error("Error while reloading client chest", e);
-			}
+			NBTEditorClient.CLIENT_CHEST.reloadPage(PAGE);
+			show();
 		}));
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 116, 83, 20, TextInst.translatable("nbteditor.client_chest.clear_page"), btn -> {

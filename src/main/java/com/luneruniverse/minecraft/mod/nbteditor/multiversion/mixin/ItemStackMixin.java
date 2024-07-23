@@ -5,12 +5,12 @@ import java.util.function.Supplier;
 
 import org.spongepowered.asm.mixin.Mixin;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.IntegratedNBTManager;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVItemStackParent;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -45,7 +45,7 @@ public class ItemStackMixin implements IntegratedNBTManager, MVItemStackParent {
 	@Override
 	public boolean manager$hasCustomName() {
 		if (NBTManagers.COMPONENTS_EXIST)
-			return ((ItemStack) (Object) this).contains(DataComponentTypes.CUSTOM_NAME);
+			return ((ItemStack) (Object) this).contains(MVDataComponentType.CUSTOM_NAME);
 		else
 			return ItemStack_hasCustomName.get().invoke(this);
 	}
@@ -54,7 +54,7 @@ public class ItemStackMixin implements IntegratedNBTManager, MVItemStackParent {
 	@Override
 	public ItemStack manager$setCustomName(Text name) {
 		if (NBTManagers.COMPONENTS_EXIST)
-			((ItemStack) (Object) this).set(DataComponentTypes.CUSTOM_NAME, name);
+			((ItemStack) (Object) this).set(MVDataComponentType.CUSTOM_NAME, name);
 		else
 			ItemStack_setCustomName.get().invoke(this, name);
 		return (ItemStack) (Object) this;

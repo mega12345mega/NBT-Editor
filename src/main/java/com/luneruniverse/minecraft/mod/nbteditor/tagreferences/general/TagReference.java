@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -19,6 +20,33 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 
 public interface TagReference<T, O> {
+	public static <T1, T2, O> TagReference<T2, O> mapValue(Function<T1, T2> getter, Function<T2, T1> setter, TagReference<T1, O> tagRef) {
+		return new TagReference<>() {
+			@Override
+			public T2 get(O object) {
+				return getter.apply(tagRef.get(object));
+			}
+			@Override
+			public void set(O object, T2 value) {
+				tagRef.set(object, setter.apply(value));
+			}
+		};
+	}
+	public static <T, O1, O2> TagReference<T, O2> mapObject(Function<O2, O1> getter, BiConsumer<O2, O1> setter, TagReference<T, O1> tagRef) {
+		return new TagReference<>() {
+			@Override
+			public T get(O2 object) {
+				return tagRef.get(getter.apply(object));
+			}
+			@Override
+			public void set(O2 object, T value) {
+				O1 internalObject = getter.apply(object);
+				tagRef.set(internalObject, value);
+				setter.accept(object, internalObject);
+			}
+		};
+	}
+	
 	public static <T> TagReference<T, ItemStack> forItems(Supplier<T> defaultValue, TagReference<T, NbtCompound> tagRef) {
 		return new TagReference<>() {
 			@Override
@@ -48,71 +76,60 @@ public interface TagReference<T, O> {
 			}
 		};
 	}
+	@SuppressWarnings("unchecked")
 	public static <C, O> TagReference<List<C>, O> forLists(Class<C> clazz, TagReference<C[], O> tagRef) {
-		return new TagReference<>() {
-			@Override
-			public List<C> get(O object) {
-				return new ArrayList<>(Arrays.asList(tagRef.get(object)));
-			}
-			@SuppressWarnings("unchecked")
-			@Override
-			public void set(O object, List<C> value) {
-				tagRef.set(object, value == null ? null : value.toArray(len -> (C[]) Array.newInstance(clazz, len)));
-			}
-		};
+		return mapValue(
+				array -> new ArrayList<>(Arrays.asList(array)),
+				list -> list == null ? null : list.toArray(len -> (C[]) Array.newInstance(clazz, len)),
+				tagRef);
 	}
 	public static <C, O> TagReference<List<C>, O> forLists(Function<NbtElement, C> getter, Function<C, NbtElement> setter, TagReference<NbtList, O> tagRef) {
-		return new TagReference<>() {
-			@Override
-			public List<C> get(O object) {
-				List<C> list = new ArrayList<>();
-				for (NbtElement elementNbt : tagRef.get(object)) {
-					C elementValue = getter.apply(elementNbt);
-					if (elementValue != null)
-						list.add(elementValue);
-				}
-				return list;
-			}
-			@Override
-			public void set(O object, List<C> value) {
-				NbtList listNbt = new NbtList();
-				for (C elementValue : value) {
-					NbtElement elementNbt = setter.apply(elementValue);
-					if (elementNbt != null)
-						listNbt.add(elementNbt);
-				}
-				tagRef.set(object, listNbt);
-			}
-		};
+		return mapValue(
+				nbtList -> {
+					List<C> list = new ArrayList<>();
+					for (NbtElement elementNbt : nbtList) {
+						C elementValue = getter.apply(elementNbt);
+						if (elementValue != null)
+							list.add(elementValue);
+					}
+					return list;
+				},
+				list -> {
+					if (list == null)
+						return null;
+					NbtList nbtList = new NbtList();
+					for (C elementValue : list) {
+						NbtElement elementNbt = setter.apply(elementValue);
+						if (elementNbt != null)
+							nbtList.add(elementNbt);
+					}
+					return nbtList;
+				},
+				tagRef);
 	}
 	public static <V, O> TagReference<Map<String, V>, O> forMaps(Function<NbtElement, V> getter, Function<V, NbtElement> setter, TagReference<NbtCompound, O> tagRef) {
-		return new TagReference<>() {
-			@Override
-			public Map<String, V> get(O object) {
-				NbtCompound nbt = tagRef.get(object);
-				Map<String, V> output = new HashMap<>();
-				for (String key : nbt.getKeys()) {
-					V entryValue = getter.apply(nbt.get(key));
-					if (entryValue != null)
-						output.put(key, entryValue);
-				}
-				return output;
-			}
-			@Override
-			public void set(O object, Map<String, V> value) {
-				if (value == null) {
-					tagRef.set(object, null);
-					return;
-				}
-				NbtCompound nbt = new NbtCompound();
-				value.forEach((key, entryValue) -> {
-					NbtElement entryValueNbt = setter.apply(entryValue);
-					if (entryValueNbt != null)
-						nbt.put(key, entryValueNbt);
-				});
-				tagRef.set(object, nbt);
-			}
-		};
+		return mapValue(
+				compound -> {
+					Map<String, V> output = new HashMap<>();
+					for (String key : compound.getKeys()) {
+						V entryValue = getter.apply(compound.get(key));
+						if (entryValue != null)
+							output.put(key, entryValue);
+					}
+					return output;
+				},
+				map -> {
+					if (map == null)
+						return null;
+					NbtCompound compound = new NbtCompound();
+					map.forEach((key, entryValue) -> {
+						NbtElement entryValueNbt = setter.apply(entryValue);
+						if (entryValueNbt != null)
+							compound.put(key, entryValueNbt);
+					});
+					return compound;
+				},
+				tagRef);
 	}
 	public static <T> TagReference<T, NbtCompound> alsoRemove(String path, TagReference<T, NbtCompound> tagRef) {
 		return new TagReference<>() {

@@ -7,6 +7,7 @@ import java.util.Set;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
@@ -146,7 +147,7 @@ public class LocalBlock implements LocalNBT {
 		LocalNBT.makeRotatingIcon(renderMatrices, x, y, 1, true);
 		renderMatrices.translate(-0.5, -0.5, -0.5);
 		
-		VertexConsumerProvider.Immediate provider = MVMisc.beginDrawingNormal(matrices);
+		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getVertexConsumerProvider();
 		BlockState state = this.state.applyTo(block.getDefaultState());
 		MVMisc.renderBlock(MainUtil.client.getBlockRenderManager(), state, new BlockPos(0, 1000, 0), MainUtil.client.world,
 				renderMatrices, provider.getBuffer(RenderLayer.getCutout()), false);
@@ -157,8 +158,8 @@ public class LocalBlock implements LocalNBT {
 				NBTManagers.BLOCK_ENTITY.setNbt(entity, nbt);
 			MainUtil.client.getBlockEntityRenderDispatcher().renderEntity(entity, renderMatrices, provider, 0xF000F0, OverlayTexture.DEFAULT_UV);
 		}
+		provider.draw();
 		
-		MVMisc.endDrawingNormal(provider);
 		matrices.pop();
 		
 		RenderSystem.enableCull();
@@ -175,7 +176,7 @@ public class LocalBlock implements LocalNBT {
 							BlockEntity entity = provider.createBlockEntity(new BlockPos(0, 1000, 0), state.applyTo(block.getDefaultState()));
 							entity.setWorld(MainUtil.client.world);
 							NBTManagers.BLOCK_ENTITY.setNbt(entity, nbt);
-							MainUtil.client.addBlockEntityNbt(output, entity, DynamicRegistryManagerHolder.get());
+							MainUtil.client.addBlockEntityNbt(output, entity, DynamicRegistryManagerHolder.getManager());
 						}
 					} else {
 						NbtCompound nbt = new NbtCompound();

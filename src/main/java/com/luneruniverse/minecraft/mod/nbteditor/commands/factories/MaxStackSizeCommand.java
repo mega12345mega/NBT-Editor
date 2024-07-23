@@ -37,7 +37,7 @@ public class MaxStackSizeCommand extends ClientCommand {
 				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.max_stack_size.already_removed"), false);
 			} else if (item.contains(DataComponentTypes.MAX_DAMAGE) &&
 					item.getDefaultComponents().getOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1) > 1) {
-				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.max_stack_size.invalid_state"));
+				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.max_stack_size.invalid_state"), false);
 			} else {
 				item.set(DataComponentTypes.MAX_STACK_SIZE, item.getDefaultComponents().get(DataComponentTypes.MAX_STACK_SIZE));
 				ref.saveItem(item, TextInst.translatable("nbteditor.max_stack_size.removed"));
@@ -48,7 +48,7 @@ public class MaxStackSizeCommand extends ClientCommand {
 			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			if (item.contains(DataComponentTypes.MAX_DAMAGE) && size > 1)
-				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.max_stack_size.invalid_state"));
+				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.max_stack_size.invalid_state"), false);
 			else {
 				item.set(DataComponentTypes.MAX_STACK_SIZE, size);
 				ref.saveItem(item, TextInst.translatable("nbteditor.max_stack_size.added",

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ExtendableButtonWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVButtonWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -14,7 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 
-public class ConfigValueDropdown<T> extends ExtendableButtonWidget implements ConfigValue<T, ConfigValueDropdown<T>> {
+public class ConfigValueDropdown<T> extends MVButtonWidget implements ConfigValue<T, ConfigValueDropdown<T>> {
 	
 	public static <T> ConfigValueDropdown<T> forList(T value, T defaultValue, List<T> allValues) {
 		return new ConfigValueDropdown<>(value, defaultValue, allValues, new ArrayList<>());

@@ -34,7 +34,6 @@ import com.mojang.serialization.JsonOps;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Keyboard;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -48,14 +47,12 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.command.argument.TextArgumentType;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
 import net.minecraft.entity.EntityType;
@@ -83,24 +80,35 @@ import net.minecraft.world.BlockRenderView;
 
 public class MVMisc {
 	
-	private static final Reflection.MethodInvoker ResourceFactory_getResource =
-			Reflection.getMethod(ResourceFactory.class, "method_14486",
-					MethodType.methodType(Version.<Class<?>>newSwitch()
-							.range("1.19.0", null, () -> Optional.class)
-							.range(null, "1.18.2", () -> Resource.class)
-							.get(),
-							Identifier.class));
-	@SuppressWarnings("unchecked")
+	private static final Supplier<Reflection.MethodInvoker> ResourceFactory_getResource =
+			Reflection.getOptionalMethod(ResourceFactory.class, "method_14486", MethodType.methodType(Resource.class, Identifier.class));
+	private static final Supplier<Reflection.MethodInvoker> Resource_getInputStream =
+			Reflection.getOptionalMethod(Resource.class, "method_14482", MethodType.methodType(InputStream.class));
 	public static Optional<InputStream> getResource(Identifier id) throws IOException {
-		Object output = ResourceFactory_getResource.invoke(MinecraftClient.getInstance().getResourceManager(), id);
-		if (output instanceof Optional) {
-			if (((Optional<Resource>) output).isEmpty())
-				return Optional.empty();
-			return Optional.of(((Optional<Resource>) output).get().getInputStream());
+		try {
+			return Version.<Optional<InputStream>>newSwitch()
+					.range("1.19.0", null, () -> MainUtil.client.getResourceManager().getResource(id).map(resource -> {
+						try {
+							return resource.getInputStream();
+						} catch (IOException e) {
+							throw new UncheckedIOException(e);
+						}
+					}))
+					.range(null, "1.18.2", () -> {
+						Resource resource = ResourceFactory_getResource.get().invoke(MainUtil.client.getResourceManager(), id);
+						if (resource == null)
+							return Optional.empty();
+						return Optional.of(Resource_getInputStream.get().invokeThrowable(UncheckedIOException.class, resource));
+					})
+					.get();
+		} catch (UncheckedIOException e) {
+			if (e.getMessage() != null) {
+				IOException checkedE = new IOException(e.getMessage(), e.getCause());
+				checkedE.setStackTrace(e.getStackTrace());
+				throw checkedE;
+			}
+			throw e.getCause();
 		}
-		if (output == null)
-			return Optional.empty();
-		return Optional.of(((Resource) output).getInputStream());
 	}
 	
 	public static Object registryAccess;
@@ -272,7 +280,7 @@ public class MVMisc {
 			Reflection.getOptionalMethod(SuspiciousStewItem.class, "method_8021", MethodType.methodType(void.class, ItemStack.class, StatusEffect.class, int.class));
 	public static void addEffectToStew(ItemStack item, StatusEffect effect, int duration) {
 		Version.newSwitch()
-				.range("1.20.5", null, () -> item.apply(DataComponentTypes.SUSPICIOUS_STEW_EFFECTS, new SuspiciousStewEffectsComponent(List.of()), effects -> effects.with(new StewEffect(Registries.STATUS_EFFECT.getEntry(effect), duration))))
+				.range("1.20.5", null, () -> item.apply(MVDataComponentType.SUSPICIOUS_STEW_EFFECTS, new SuspiciousStewEffectsComponent(List.of()), effects -> effects.with(new StewEffect(Registries.STATUS_EFFECT.getEntry(effect), duration))))
 				.range("1.20.2", "1.20.4", () -> SuspiciousStewItem_addEffectsToStew.get().invoke(null, item, List.of(Reflection.newInstance(StewEffect.class, new Class<?>[] {StatusEffect.class, int.class}, effect, duration))))
 				.range(null, "1.20.1", () -> SuspiciousStewItem_addEffectToStew.get().invoke(null, item, effect, duration))
 				.run();
@@ -417,12 +425,6 @@ public class MVMisc {
 				})
 				.get();
 	}
-	public static VertexConsumerProvider.Immediate beginDrawingNormal(MatrixStack matrices) {
-		return Version.<VertexConsumerProvider.Immediate>newSwitch()
-				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers())
-				.range(null, "1.19.4", () -> VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer()))
-				.get();
-	}
 	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_end =
 			Reflection.getOptionalMethod(BufferBuilder.class, "method_1326", MethodType.methodType(void.class));
 	private static final Supplier<Reflection.MethodInvoker> BufferRenderer_draw =
@@ -435,12 +437,6 @@ public class MVMisc {
 					BufferBuilder_end.get().invoke(vertexConsumer);
 					BufferRenderer_draw.get().invoke(null, vertexConsumer);
 				})
-				.run();
-	}
-	public static void endDrawingNormal(VertexConsumerProvider.Immediate provider) {
-		Version.<VertexConsumerProvider.Immediate>newSwitch()
-				.range("1.20.0", null, () -> {})
-				.range(null, "1.19.4", () -> provider.draw())
 				.run();
 	}
 	
@@ -513,6 +509,24 @@ public class MVMisc {
 				.range("1.20.5", null, () -> MixinLink.WRITTEN_BOOK_CONTENTS.containsKey(contents))
 				.range(null, "1.20.4", () -> Reflection.getClass("net.minecraft.class_3872$class_3933").isInstance(contents))
 				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> PacketDecoder_decode =
+			Reflection.getOptionalMethod(() -> Reflection.getClass("net.minecraft.class_9141"), () -> "decode", () -> MethodType.methodType(Object.class, Object.class));
+	@SuppressWarnings("unchecked")
+	public static <T> T packetCodecDecode(Object codec, Object buf) {
+		return Version.<T>newSwitch()
+				.range("1.20.5", null, () -> (T) PacketDecoder_decode.get().invoke(codec, buf))
+				.range(null, "1.20.4", () -> { throw new IllegalStateException("Not supported in this version!"); })
+				.get();
+	}
+	private static final Supplier<Reflection.MethodInvoker> PacketEncoder_encode =
+			Reflection.getOptionalMethod(() -> Reflection.getClass("net.minecraft.class_9142"), () -> "encode", () -> MethodType.methodType(void.class, Object.class, Object.class));
+	public static void packetCodecEncode(Object codec, Object buf, Object value) {
+		Version.newSwitch()
+				.range("1.20.5", null, () -> PacketEncoder_encode.get().invoke(codec, buf, value))
+				.range(null, "1.20.4", () -> { throw new IllegalStateException("Not supported in this version!"); })
+				.run();
 	}
 	
 }

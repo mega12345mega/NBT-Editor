@@ -53,12 +53,26 @@ public class SmallClientChest extends ClientChest {
 	}
 	
 	@Override
+	protected boolean isPageCached(int page) {
+		return true;
+	}
+	@Override
 	protected void cachePage(int page, ClientChestPage items) {
 		pages.put(page, items);
 	}
 	@Override
 	protected void cacheEmptyPage(int page) {
 		pages.remove(page);
+	}
+	@Override
+	protected void discardPageCache(int page) throws Exception {
+		try {
+			loadSync(page);
+		} catch (Exception e) {
+			backupCorruptPage(page);
+			pages.remove(page);
+			throw e;
+		}
 	}
 	
 	@Override

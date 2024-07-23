@@ -433,9 +433,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	protected void preRenderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		MVTooltip.setOneTooltip(true, false);
 		editor.render(matrices, mouseX, mouseY, delta); // So the tab completion renders on top correctly
-		MVTooltip tooltip = MVTooltip.setOneTooltip(false, false);
-		if (tooltip != null)
-			tooltip.render(matrices, mouseX, mouseY);
+		MVTooltip.renderOneTooltip(matrices, mouseX, mouseY);
 	}
 	@Override
 	protected void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {

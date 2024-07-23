@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -21,8 +20,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.server.ClientLink;
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.NetworkSide;
-import net.minecraft.network.NetworkState;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
@@ -34,53 +31,11 @@ import net.minecraft.util.Identifier;
 
 @SuppressWarnings("deprecation")
 @Mixin(ClientConnection.class)
-public class ClientConnectionMixin {
-	@Shadow
-	private NetworkSide side;
+public abstract class ClientConnectionMixin {
 	@Shadow
 	private PacketListener packetListener;
 	@Shadow
-	public boolean isOpen() { return false; }
-	
-	private PacketListener prevListener;
-	
-	@Inject(method = "setPacketListener", at = @At("HEAD"))
-	@Group(name = "setPacketListener_head", min = 1)
-	private void setPacketListener_head(NetworkState<?> state, PacketListener listener, CallbackInfo info) {
-		prevListener = packetListener;
-	}
-	@Inject(method = "method_10763(Lnet/minecraft/class_2547;)V", at = @At("HEAD"), remap = false)
-	@Group(name = "setPacketListener_head", min = 1)
-	@SuppressWarnings("target")
-	private void setPacketListener_head_old(PacketListener listener, CallbackInfo info) {
-		prevListener = packetListener;
-	}
-	@Inject(method = "transitionInbound", at = @At("RETURN"))
-	@Group(name = "setPacketListener_return", min = 1)
-	private void transitionInbound_return(NetworkState<?> state, PacketListener listener, CallbackInfo info) {
-		setPacketListener_return_impl(listener);
-	}
-	@Inject(method = "method_10763(Lnet/minecraft/class_2547;)V", at = @At("RETURN"), remap = false)
-	@Group(name = "setPacketListener_return", min = 1)
-	@SuppressWarnings("target")
-	private void setPacketListener_return(PacketListener listener, CallbackInfo info) {
-		setPacketListener_return_impl(listener);
-	}
-	private void setPacketListener_return_impl(PacketListener listener) {
-		if (side == NetworkSide.CLIENTBOUND) {
-			if (ClientLink.isInstanceOfClientPlayNetworkHandler(listener))
-				MVClientNetworking.PlayNetworkStateEvents.Start.EVENT.invoker().onPlayStart();
-			else if (ClientLink.isInstanceOfClientPlayNetworkHandler(prevListener))
-				MVClientNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop();
-		}
-		if (side == NetworkSide.SERVERBOUND) {
-			if (listener instanceof ServerPlayNetworkHandler handler)
-				MVServerNetworking.PlayNetworkStateEvents.Start.EVENT.invoker().onPlayStart(handler.player);
-			else if (prevListener instanceof ServerPlayNetworkHandler handler)
-				MVServerNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop(handler.player);
-		}
-		prevListener = null;
-	}
+	public abstract boolean isOpen();
 	
 	@Inject(method = "disconnect", at = @At("HEAD"))
 	private void disconnect(Text reason, CallbackInfo info) {

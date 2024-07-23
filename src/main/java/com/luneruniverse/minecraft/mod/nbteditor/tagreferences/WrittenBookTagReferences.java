@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.ComponentTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.NBTTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.TagReference;
 
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.WrittenBookContentComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.RawFilteredPair;
@@ -31,7 +31,7 @@ public class WrittenBookTagReferences {
 	}
 	
 	public static final TagReference<String, ItemStack> TITLE = Version.<TagReference<String, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> new ComponentTagReference<>(DataComponentTypes.WRITTEN_BOOK_CONTENT,
+			.range("1.20.5", null, () -> new ComponentTagReference<>(MVDataComponentType.WRITTEN_BOOK_CONTENT,
 					null,
 					content -> content == null ? "" : content.title().raw(),
 					(content, value) -> getComponent(content, () -> value, null, null, null)))
@@ -40,7 +40,7 @@ public class WrittenBookTagReferences {
 			.get();
 	
 	public static final TagReference<String, ItemStack> AUTHOR = Version.<TagReference<String, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> new ComponentTagReference<>(DataComponentTypes.WRITTEN_BOOK_CONTENT,
+			.range("1.20.5", null, () -> new ComponentTagReference<>(MVDataComponentType.WRITTEN_BOOK_CONTENT,
 					null,
 					content -> content == null ? "" : content.author(),
 					(content, value) -> getComponent(content, null, () -> value, null, null)))
@@ -48,7 +48,7 @@ public class WrittenBookTagReferences {
 			.get();
 	
 	public static final TagReference<Integer, ItemStack> GENERATION = Version.<TagReference<Integer, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> new ComponentTagReference<>(DataComponentTypes.WRITTEN_BOOK_CONTENT,
+			.range("1.20.5", null, () -> new ComponentTagReference<>(MVDataComponentType.WRITTEN_BOOK_CONTENT,
 					null,
 					content -> content == null ? 0 : content.generation(),
 					(content, value) -> getComponent(content, null, null, () -> value, null)))
@@ -56,7 +56,7 @@ public class WrittenBookTagReferences {
 			.get();
 	
 	public static final TagReference<List<Text>, ItemStack> PAGES = Version.<TagReference<List<Text>, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> new ComponentTagReference<>(DataComponentTypes.WRITTEN_BOOK_CONTENT,
+			.range("1.20.5", null, () -> new ComponentTagReference<>(MVDataComponentType.WRITTEN_BOOK_CONTENT,
 					null,
 					content -> content == null ? new ArrayList<>() : content.pages().stream().map(RawFilteredPair::raw).collect(Collectors.toList()),
 					(content, value) -> getComponent(content, null, null, null, () -> value)))

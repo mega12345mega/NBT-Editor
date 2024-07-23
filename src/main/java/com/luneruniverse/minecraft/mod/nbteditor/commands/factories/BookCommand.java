@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
@@ -26,7 +27,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.block.Blocks;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
@@ -60,7 +60,7 @@ public class BookCommand extends ClientCommand {
 		}
 		ItemTagReferences.WRITABLE_BOOK_PAGES.set(item, convertedPages);
 		if (NBTManagers.COMPONENTS_EXIST)
-			item.remove(DataComponentTypes.WRITTEN_BOOK_CONTENT);
+			item.remove(MVDataComponentType.WRITTEN_BOOK_CONTENT);
 		if (formatted) {
 			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.book.convert.formatting_saved"), false);
 			MainUtil.get(item, true);

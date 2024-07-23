@@ -22,6 +22,10 @@ public class NetworkingMixinPlugin extends BasicMixinPlugin {
 				})
 				.range(null, "1.20.1", () -> {})
 				.run();
+		Version.newSwitch()
+				.range("1.20.5", null, () -> output.add("toggled.ClientConnectionMixin_1_20_5"))
+				.range(null, "1.20.4", () -> output.add("toggled.ClientConnectionMixin_1_20_4"))
+				.run();
 	}
 	
 }

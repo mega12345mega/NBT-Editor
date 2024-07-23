@@ -14,7 +14,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-public class MVSliderWidget extends ExtendableButtonWidget {
+public class MVSliderWidget extends MVButtonWidget {
 	
 	private static final Identifier HANDLE = new Identifier("nbteditor", "textures/slider_handle.png");
 	private static final Identifier HANDLE_HIGHLIGHTED = new Identifier("nbteditor", "textures/slider_handle_highlighted.png");

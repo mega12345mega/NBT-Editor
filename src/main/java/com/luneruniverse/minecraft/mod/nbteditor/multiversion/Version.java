@@ -139,7 +139,7 @@ public class Version {
 		
 		if (dataVersions == null) {
 			try (InputStream in = MVMisc.getResource(new Identifier("nbteditor", "data_versions.json")).orElseThrow()) {
-				dataVersions = new Gson().fromJson(new InputStreamReader(in), new TypeToken<Map<String, Integer>>() {});
+				dataVersions = new Gson().fromJson(new InputStreamReader(in), new TypeToken<Map<String, Integer>>() {}.getType());
 			} catch (IOException e) {
 				throw new RuntimeException("Failed to parse data_versions.json", e);
 			}

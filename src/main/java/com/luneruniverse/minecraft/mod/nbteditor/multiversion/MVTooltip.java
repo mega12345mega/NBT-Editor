@@ -46,6 +46,13 @@ public class MVTooltip {
 		}
 		return false;
 	}
+	public static boolean renderOneTooltip(MatrixStack matrices, int mouseX, int mouseY) {
+		MVTooltip tooltip = setOneTooltip(false, false);
+		if (tooltip == null)
+			return false;
+		tooltip.render(matrices, mouseX, mouseY);
+		return true;
+	}
 	
 	private static Text combine(List<Text> lines) {
 		EditableText combined = TextInst.literal("");

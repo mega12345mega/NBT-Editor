@@ -62,12 +62,20 @@ public class LargeClientChest extends ClientChest {
 	}
 	
 	@Override
+	protected boolean isPageCached(int page) {
+		return pages.getIfPresent(page) != null;
+	}
+	@Override
 	protected void cachePage(int page, ClientChestPage items) {
 		pages.put(page, items);
 	}
 	@Override
 	protected void cacheEmptyPage(int page) {
 		pages.put(page, new ClientChestPage(new ItemStack[54]));
+	}
+	@Override
+	protected void discardPageCache(int page) throws Exception {
+		pages.invalidate(page);
 	}
 	
 	@Override

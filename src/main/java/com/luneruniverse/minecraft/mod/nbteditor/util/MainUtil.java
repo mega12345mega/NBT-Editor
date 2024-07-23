@@ -21,6 +21,7 @@ import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
@@ -38,7 +39,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
@@ -246,7 +246,7 @@ public class MainUtil {
 	
 	public static Text getBaseItemNameSafely(ItemStack item) {
 		if (NBTManagers.COMPONENTS_EXIST) {
-			Text name = item.get(DataComponentTypes.ITEM_NAME);
+			Text name = item.get(MVDataComponentType.ITEM_NAME);
 			if (name != null)
 				return name;
 		}

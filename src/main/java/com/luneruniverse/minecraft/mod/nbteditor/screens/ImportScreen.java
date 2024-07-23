@@ -99,7 +99,8 @@ public class ImportScreen extends OverlaySupportingScreen {
 		super.init();
 		dataVersion = addDrawableChild(
 				new NamedTextFieldWidget(16, 64 + textRenderer.fontHeight * msg.size() + 16, 100, 16, dataVersion)
-				.name(TextInst.translatable("nbteditor.nbt.import.data_version")));
+				.name(TextInst.translatable("nbteditor.nbt.import.data_version"))
+				.tooltip(new MVTooltip("nbteditor.nbt.import.data_version.desc")));
 		addDrawableChild(MVMisc.newButton(this.width - 116, this.height - 36, 100, 20, ScreenTexts.DONE, btn -> close()));
 	}
 	
@@ -111,8 +112,6 @@ public class ImportScreen extends OverlaySupportingScreen {
 		super.renderMain(matrices, mouseX, mouseY, delta);
 		for (int i = 0; i < msg.size(); i++)
 			MVDrawableHelper.drawText(matrices, textRenderer, msg.get(i), 16, 64 + textRenderer.fontHeight * i, -1, true);
-		if (dataVersion.isHovered())
-			new MVTooltip("nbteditor.nbt.import.data_version.desc").render(matrices, mouseX, mouseY);
 		MainUtil.renderLogo(matrices);
 	}
 	

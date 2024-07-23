@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVQuaternionf;
@@ -130,13 +131,13 @@ public class LocalEntity implements LocalNBT {
 		RenderSystem.applyModelViewMatrix();
 		
 		DiffuseLighting.method_34742();
-		VertexConsumerProvider.Immediate provider = MVMisc.beginDrawingNormal(matrices);
+		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getVertexConsumerProvider();
 		EntityRenderDispatcher dispatcher = MainUtil.client.getEntityRenderDispatcher();
 		dispatcher.setRenderShadows(false);
 		rotation.copy().conjugate().applyToEntityRenderDispatcher(dispatcher);
 		dispatcher.render(entity, 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
 		dispatcher.setRenderShadows(true);
-		MVMisc.endDrawingNormal(provider);
+		provider.draw();
 		
 		matrices.pop();
 		RenderSystem.applyModelViewMatrix();

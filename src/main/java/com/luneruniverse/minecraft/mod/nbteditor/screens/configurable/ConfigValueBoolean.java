@@ -3,12 +3,12 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ExtendableButtonWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVButtonWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 
 import net.minecraft.text.Text;
 
-public class ConfigValueBoolean extends ExtendableButtonWidget implements ConfigValue<Boolean, ConfigValueBoolean> {
+public class ConfigValueBoolean extends MVButtonWidget implements ConfigValue<Boolean, ConfigValueBoolean> {
 	
 	private final Text on;
 	private final Text off;

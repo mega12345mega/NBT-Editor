@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVPacketByteBufParent;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
@@ -15,7 +16,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
@@ -89,7 +90,7 @@ public abstract class PacketByteBufMixin implements MVPacketByteBufParent {
 	@Override
 	public ItemStack readItemStack() {
 		return Version.<ItemStack>newSwitch()
-				.range("1.20.5", null, () -> ItemStack.OPTIONAL_PACKET_CODEC.decode(new RegistryByteBuf(parent, DynamicRegistryManagerHolder.get())))
+				.range("1.20.5", null, () -> MVMisc.packetCodecDecode(ItemStack.OPTIONAL_PACKET_CODEC, createRegistryByteBuf()))
 				.range(null, "1.20.4", () -> PacketByteBuf_readItemStack.get().invoke(this))
 				.get();
 	}
@@ -98,10 +99,16 @@ public abstract class PacketByteBufMixin implements MVPacketByteBufParent {
 	@Override
 	public PacketByteBuf writeItemStack(ItemStack item) {
 		Version.<ItemStack>newSwitch()
-				.range("1.20.5", null, () -> ItemStack.OPTIONAL_PACKET_CODEC.encode(new RegistryByteBuf(parent, DynamicRegistryManagerHolder.get()), item))
+				.range("1.20.5", null, () -> MVMisc.packetCodecEncode(ItemStack.OPTIONAL_PACKET_CODEC, createRegistryByteBuf(), item))
 				.range(null, "1.20.4", () -> PacketByteBuf_writeItemStack.get().invoke(this, item))
 				.run();
 		return (PacketByteBuf) (Object) this;
+	}
+	
+	private Object createRegistryByteBuf() {
+		return Reflection.newInstance("net.minecraft.class_9129",
+				new Class<?>[] {ByteBuf.class, DynamicRegistryManager.class},
+				parent, DynamicRegistryManagerHolder.get());
 	}
 	
 }

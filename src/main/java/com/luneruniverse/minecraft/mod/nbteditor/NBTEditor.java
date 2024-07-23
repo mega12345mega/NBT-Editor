@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ContainerScreenS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
@@ -46,8 +47,10 @@ public class NBTEditor implements ModInitializer {
 		
 		SERVER = new NBTEditorServer();
 		
-		ServerLifecycleEvents.SERVER_STARTING.register(
-				server -> DynamicRegistryManagerHolder.setServerManager(server.getRegistryManager()));
+		Version.newSwitch()
+				.range("1.20.5", null, () -> ServerLifecycleEvents.SERVER_STARTING.register(DynamicRegistryManagerHolder::setServerManager))
+				.range(null, "1.20.4", () -> {})
+				.run();
 	}
 	
 }

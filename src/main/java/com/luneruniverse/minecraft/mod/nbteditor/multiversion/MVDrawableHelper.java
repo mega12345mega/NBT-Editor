@@ -20,6 +20,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
@@ -69,6 +70,10 @@ public class MVDrawableHelper {
 				.range("1.20.0", null, () -> caller.render(MVDrawableHelper.getDrawContext(matrices), mouseX, mouseY, delta))
 				.range(null, "1.19.4", () -> Drawable_render.get().invoke(caller, matrices, mouseX, mouseY, delta))
 				.run();
+	}
+	
+	public static VertexConsumerProvider.Immediate getVertexConsumerProvider() {
+		return MainUtil.client.gameRenderer.buffers.getEntityVertexConsumers();
 	}
 	
 	
