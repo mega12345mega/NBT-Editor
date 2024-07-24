@@ -33,7 +33,7 @@ public class ConfigValueText extends NamedTextFieldWidget implements ConfigValue
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		boolean output = super.mouseClicked(mouseX, mouseY, button);
-		setFocused(output);
+		setMultiFocused(output);
 		return output;
 	}
 	

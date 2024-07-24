@@ -27,6 +27,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 
+import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.component.type.BlockStateComponent;
 import net.minecraft.component.type.LoreComponent;
@@ -86,7 +87,7 @@ public class ItemTagReferences {
 									new EntityAttributeModifier(data.modifierData().get().uuid(),
 											Registries.ATTRIBUTE.getId(data.attribute()).toString(), data.value(),
 											data.modifierData().get().operation().toMinecraft()),
-									data.modifierData().get().slot().toMinecraft())).toList(),
+									(AttributeModifierSlot) data.modifierData().get().slot().toMinecraft())).toList(),
 							component == null ? true : component.showInTooltip())))
 			.range(null, "1.20.4", () -> TagReference.forItems(ArrayList::new, new AttributesNBTTagReference(true)))
 			.get();

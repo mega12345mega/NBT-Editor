@@ -236,7 +236,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		prev.setChangeListener(onChange);
 		prev.generateLines();
 		if (prev.isMultiFocused())
-			prev.onFocusChange(false);
+			prev.setMultiFocused(false);
 		prev.scrollBar = new ScrollBarWidget(x + width - 8, y, height,
 				() -> prev.scroll, scroll -> prev.scroll = scroll, prev::getMaxScroll);
 		return prev;
@@ -378,7 +378,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		
 		boolean focus = isMultiFocused();
 		if (suggestor.isMultiFocused() != focus)
-			suggestor.onFocusChange(focus);
+			suggestor.setMultiFocused(focus);
 	}
 	private void syncFromSuggestor() {
 		if (!suggestor.text.equals(text))

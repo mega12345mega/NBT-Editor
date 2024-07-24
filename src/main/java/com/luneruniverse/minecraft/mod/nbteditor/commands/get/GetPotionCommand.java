@@ -61,7 +61,7 @@ public class GetPotionCommand extends ClientCommand {
 				StatusEffectInstance effect = effects.get(0);
 				Potion potion = MVRegistry.POTION.getEntrySet().stream().map(Map.Entry::getValue)
 						.filter(testPotion -> !testPotion.getEffects().isEmpty() &&
-								testPotion.getEffects().get(0).getEffectType() == effect.getEffectType()).findFirst().orElse(null);
+								MVMisc.getEffectType(testPotion.getEffects().get(0)) == MVMisc.getEffectType(effect)).findFirst().orElse(null);
 				if (potion != null)
 					color = Optional.of(MVMisc.getEffectType(potion.getEffects().get(0)).getColor());
 			}

@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -24,7 +23,7 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
-public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements MVElement {
+public class SuggestingTextFieldWidget extends NamedTextFieldWidget {
 	
 	private final ChatInputSuggestor suggestor;
 	private BiFunction<String, Integer, CompletableFuture<Suggestions>> suggestions;
@@ -137,27 +136,9 @@ public class SuggestingTextFieldWidget extends NamedTextFieldWidget implements M
 	}
 	
 	@Override
-	public void onFocusChange(boolean focused) {
-		MVElement.super.onFocusChange(focused);
+	public void onMultiFocusedSet(boolean focused, boolean prevFocused) {
 		suggestor.setWindowActive(focused);
 		suggestor.refresh();
-	}
-	
-	@Deprecated
-	@Override
-	public void setFocused(boolean focused) {
-		onFocusChange(focused);
-	}
-	@Deprecated
-	@Override
-	public boolean isFocused() {
-		return isMultiFocused();
-	}
-	
-	public boolean method_25407(boolean lookForwards) { // changeFocus <= 1.19.3
-		if (!this.active || !this.visible)
-			return false;
-		return isMultiFocused();
 	}
 	
 }

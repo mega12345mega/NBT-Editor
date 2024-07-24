@@ -650,7 +650,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		prev.setText(text);
 		prev.setChangeListener(onChange);
 		if (prev.isMultiFocused())
-			prev.onFocusChange(false);
+			prev.setMultiFocused(false);
 		return prev;
 	}
 	public static FormattedTextFieldWidget create(FormattedTextFieldWidget prev, int x, int y, int width, int height,

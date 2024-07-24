@@ -500,6 +500,12 @@ public class MVMisc {
 				return pages.size();
 			if (method.getName().equals("method_17561")) // getPageUnchecked
 				return (StringVisitable) pages.get((int) args[0]);
+			
+			if (method.getName().equals("method_17563")) { // default getPage
+				int index = (int) args[0];
+				return (index >= 0 && index < pages.size() ? pages.get(index) : StringVisitable.EMPTY);
+			}
+			
 			throw new IllegalArgumentException("Unknown method: " + method);
 		});
 	}

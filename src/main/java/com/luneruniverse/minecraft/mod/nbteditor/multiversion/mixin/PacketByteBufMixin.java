@@ -98,7 +98,7 @@ public abstract class PacketByteBufMixin implements MVPacketByteBufParent {
 			Reflection.getOptionalMethod(PacketByteBuf.class, "method_10793", MethodType.methodType(PacketByteBuf.class, ItemStack.class));
 	@Override
 	public PacketByteBuf writeItemStack(ItemStack item) {
-		Version.<ItemStack>newSwitch()
+		Version.newSwitch()
 				.range("1.20.5", null, () -> MVMisc.packetCodecEncode(ItemStack.OPTIONAL_PACKET_CODEC, createRegistryByteBuf(), item))
 				.range(null, "1.20.4", () -> PacketByteBuf_writeItemStack.get().invoke(this, item))
 				.run();

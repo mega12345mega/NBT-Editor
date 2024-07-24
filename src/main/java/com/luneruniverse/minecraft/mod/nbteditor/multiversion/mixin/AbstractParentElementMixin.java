@@ -20,7 +20,7 @@ public class AbstractParentElementMixin {
 		boolean oldEvents = MainUtil.client.currentScreen instanceof OldEventBehavior;
 		for (Element child : ((AbstractParentElement) (Object) this).children()) {
 			if (child instanceof MVElement multiChild)
-				multiChild.onFocusChange(child == element);
+				multiChild.setMultiFocused(child == element);
 			if (oldEvents && child instanceof TextFieldWidget textChild)
 				textChild.setFocused(child == element);
 		}

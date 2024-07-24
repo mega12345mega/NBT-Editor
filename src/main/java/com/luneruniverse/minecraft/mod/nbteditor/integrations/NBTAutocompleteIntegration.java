@@ -24,6 +24,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.visitor.StringNbtWriter;
 import net.minecraft.util.Identifier;
 
 public class NBTAutocompleteIntegration extends Integration {
@@ -77,7 +78,7 @@ public class NBTAutocompleteIntegration extends Integration {
 						pathBuilder.append('=');
 					} else {
 						pathBuilder.append('{');
-						pathBuilder.append(NbtString.escape(piece));
+						pathBuilder.append(escapeKey(piece));
 						pathBuilder.append(':');
 					}
 					nbt = compound.get(piece);
@@ -106,8 +107,8 @@ public class NBTAutocompleteIntegration extends Integration {
 				if (firstKey && components)
 					pathBuilder.append(key);
 				else {
-					String escapedKey = NbtString.escape(key);
-					pathBuilder.append(escapedKey.substring(0, escapedKey.length() - 1));
+					String escapedKey = escapeKey(key);
+					pathBuilder.append(key.equals(escapedKey) ? key : escapedKey.substring(0, escapedKey.length() - 1));
 				}
 			}
 			
@@ -131,11 +132,10 @@ public class NBTAutocompleteIntegration extends Integration {
 		String pathStr = pathBuilder.toString();
 		
 		String suggestionId = type + "/" + id;
-		SuggestionsBuilder builder = new SuggestionsBuilder(pathStr, 0);
 		final int fieldStartFinal = fieldStart;
 		final String valueFinal = value;
 		final boolean firstKeyFinal = firstKey;
-		return loadFromName(suggestionId, pathStr, builder, false, components).thenApply(suggestions -> {
+		return loadFromName(suggestionId, pathStr, components).thenApply(suggestions -> {
 			List<Suggestion> shiftedSuggestions = suggestions.getList().stream()
 					.filter(suggestion ->
 							!(suggestion.getText().isEmpty()) &&
@@ -160,17 +160,22 @@ public class NBTAutocompleteIntegration extends Integration {
 			return new Suggestions(shiftRange(suggestions.getRange(), -fieldStartFinal), shiftedSuggestions);
 		});
 	}
-	private CompletableFuture<Suggestions> loadFromName(String name, String tag, SuggestionsBuilder suggestionsBuilder, boolean suggestPath, boolean components) {
+	private String escapeKey(String key) {
+		if (key.isEmpty() || StringNbtWriter.SIMPLE_NAME.matcher(key).matches())
+			return key;
+		return NbtString.escape(key);
+	}
+	private CompletableFuture<Suggestions> loadFromName(String name, String tag, boolean components) {
 		if (components) {
 			name = name.substring("item/".length());
 			int shift = name.length();
-			suggestionsBuilder = new SuggestionsBuilder(name + tag, 0);
-			return new ItemStringReader(DynamicRegistryManagerHolder.get()).getSuggestions(suggestionsBuilder).thenApply(suggestions -> {
+			SuggestionsBuilder builder = new SuggestionsBuilder(name + tag, 0);
+			return new ItemStringReader(DynamicRegistryManagerHolder.get()).getSuggestions(builder).thenApply(suggestions -> {
 				return new Suggestions(shiftRange(suggestions.getRange(), -shift), suggestions.getList().stream()
 						.map(suggestion -> shiftSuggestion(suggestion, -shift)).collect(Collectors.toList()));
 			});
 		}
-		return NbtSuggestionManager.loadFromName(name, tag, suggestionsBuilder, suggestPath);
+		return NbtSuggestionManager.loadFromName(name, tag, new SuggestionsBuilder(tag, 0), false);
 	}
 	
 	public CompletableFuture<Suggestions> getSuggestions(LocalNBT nbt, List<String> path, String key, String value, int cursor, Collection<String> otherTags) {

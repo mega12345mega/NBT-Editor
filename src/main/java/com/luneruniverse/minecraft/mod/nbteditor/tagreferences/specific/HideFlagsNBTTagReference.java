@@ -27,12 +27,12 @@ public class HideFlagsNBTTagReference implements TagReference<Boolean, ItemStack
 			throw new IllegalArgumentException("The flag " + flag + " isn't available in this version of Minecraft!");
 		
 		int flags = (object.manager$hasNbt() ? object.manager$getNbt().getInt("HideFlags") : 0);
-		flag.set(flags, value);
-		if (flags == 0) {
+		int newFlags = flag.set(flags, value);
+		if (newFlags == 0) {
 			if (object.manager$hasNbt())
 				object.manager$modifyNbt(nbt -> nbt.remove("HideFlags"));
 		} else
-			object.manager$modifyNbt(nbt -> nbt.putInt("HideFlags", flags));
+			object.manager$modifyNbt(nbt -> nbt.putInt("HideFlags", newFlags));
 	}
 	
 }

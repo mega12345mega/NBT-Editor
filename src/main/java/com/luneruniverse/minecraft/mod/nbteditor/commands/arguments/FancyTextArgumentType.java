@@ -3,7 +3,6 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands.arguments;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
@@ -122,12 +121,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 			output.append(color);
 		output.append(formats);
 		
-		StringBuilder content = new StringBuilder();
-		text.getContent().visit(str -> {
-			content.append(str);
-			return Optional.empty();
-		});
-		output.append(content.toString().replace("\\", "\\\\").replace("&", "\\&").replace("§", "\\§").replace("[", "\\["));
+		output.append(MVMisc.getContent(text).replace("\\", "\\\\").replace("&", "\\&").replace("§", "\\§").replace("[", "\\["));
 		
 		for (Text child : text.getSiblings())
 			errors |= stringifyFancyText(child, output);

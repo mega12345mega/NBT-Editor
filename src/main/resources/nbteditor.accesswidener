@@ -56,6 +56,8 @@ accessible field net/minecraft/item/trim/ArmorTrim showInTooltip Z
 
 accessible field net/minecraft/client/render/GameRenderer buffers Lnet/minecraft/client/render/BufferBuilderStorage;
 
+accessible field net/minecraft/nbt/visitor/StringNbtWriter SIMPLE_NAME Ljava/util/regex/Pattern;
+
 # Private in older versions
 accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;
 accessible method net/minecraft/client/render/RenderLayer of (Ljava/lang/String;Lnet/minecraft/client/render/VertexFormat;Lnet/minecraft/client/render/VertexFormat$DrawMode;ILnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;)Lnet/minecraft/client/render/RenderLayer$MultiPhase;

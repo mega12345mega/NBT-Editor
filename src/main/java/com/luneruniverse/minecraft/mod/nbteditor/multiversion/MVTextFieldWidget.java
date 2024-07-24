@@ -8,7 +8,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
 
-public class MVTextFieldWidget extends TextFieldWidget implements Tickable {
+public class MVTextFieldWidget extends TextFieldWidget implements Tickable, MVElement {
 	
 	/**
 	 * The selection highlight doesn't move when {@link MatrixStack#translate(double, double, double)} is called <br />
@@ -63,6 +63,17 @@ public class MVTextFieldWidget extends TextFieldWidget implements Tickable {
 	public void method_25352(MatrixStack matrices, int mouseX, int mouseY) { // renderTooltip
 		if (tooltip != null)
 			tooltip.render(matrices, mouseX, mouseY);
+	}
+	
+	@Override
+	@Deprecated
+	public void setFocused(boolean focused) {
+		setMultiFocused(focused);
+	}
+	@Override
+	@Deprecated
+	public boolean isFocused() {
+		return isMultiFocused();
 	}
 	
 }

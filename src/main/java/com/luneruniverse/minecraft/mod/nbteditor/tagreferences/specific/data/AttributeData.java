@@ -60,8 +60,8 @@ public record AttributeData(EntityAttribute attribute, double value, Optional<At
 			FEET("nbteditor.attributes.slot.feet", false),
 			BODY("nbteditor.attributes.slot.body", true);
 			
-			public static Slot fromMinecraft(AttributeModifierSlot slot) {
-				return switch (slot) {
+			public static Slot fromMinecraft(Object slot) {
+				return switch ((AttributeModifierSlot) slot) {
 					case ANY -> ANY;
 					case HAND -> HAND;
 					case MAINHAND -> MAINHAND;
@@ -84,7 +84,7 @@ public record AttributeData(EntityAttribute attribute, double value, Optional<At
 				this.name = TextInst.translatable(key);
 				this.onlyForComponents = onlyForComponents;
 			}
-			public AttributeModifierSlot toMinecraft() {
+			public Object toMinecraft() {
 				return switch (this) {
 					case ANY -> AttributeModifierSlot.ANY;
 					case HAND -> AttributeModifierSlot.HAND;
