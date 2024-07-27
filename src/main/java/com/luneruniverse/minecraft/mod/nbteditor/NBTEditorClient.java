@@ -77,7 +77,11 @@ public class NBTEditorClient implements ClientModInitializer {
 				screen -> screen instanceof CreativeInventoryScreen || (screen instanceof InventoryScreen && SERVER_CONN.isEditingExpanded()));
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.CHEST)
 				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.inventory")),
-				() -> MainUtil.client.setScreen(new InventoryScreen(MainUtil.client.player)),
+				() -> {
+					MainUtil.setRootCursorStack(MainUtil.client.player.playerScreenHandler, MainUtil.client.player.currentScreenHandler.getCursorStack());
+					MainUtil.client.player.currentScreenHandler = MainUtil.client.player.playerScreenHandler;
+					MainUtil.client.setScreen(new InventoryScreen(MainUtil.client.player));
+				},
 				screen -> screen instanceof ClientChestScreen);
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST), () -> {
 					MainUtil.client.player.closeHandledScreen();

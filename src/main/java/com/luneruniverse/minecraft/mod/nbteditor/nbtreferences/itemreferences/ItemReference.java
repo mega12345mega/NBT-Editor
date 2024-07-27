@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import java.lang.reflect.Proxy;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
@@ -70,7 +71,7 @@ public interface ItemReference extends NBTReference<LocalItem> {
 		
 		Slot slotObj = screen.getScreenHandler().getSlot(slot);
 		if (slotObj.inventory == MainUtil.client.player.getInventory()) {
-			return getInventoryOrArmorItem(slotObj.getIndex(), false).withParent(screen);
+			return getInventoryOrArmorItem(slotObj.getIndex(), false).setParent(screen);
 		}
 		return new ServerItemReference(slot, screen);
 	}
@@ -169,4 +170,9 @@ public interface ItemReference extends NBTReference<LocalItem> {
 		item.manager$setNbt(toSave);
 		saveItem(item, onFinished);
 	}
+	
+	@Override
+	public void showParent(Optional<ItemStack> cursor);
+	@Override
+	public void clearParentCursor();
 }

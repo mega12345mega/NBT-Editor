@@ -185,6 +185,11 @@ public class PagedPane extends ClientHandledScreen {
 
         pages.get(currentIndex).handleClick(event);
     }
+    
+    @Override
+    public void close() {
+    	MainUtil.client.player.closeHandledScreen();
+    }
 
     /**
      * Get the object's inventory.

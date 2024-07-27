@@ -253,14 +253,15 @@ public class MixinLink {
 							(!creativeInv && NBTEditorClient.SERVER_CONN.isScreenEditable())) &&
 					(!(source instanceof InventoryScreen) || hoveredSlot.id > 4) &&
 					(ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
+				ItemReference ref;
 				if (creativeInv) {
 					int slot = hoveredSlot.getIndex();
 					if (!MVMisc.isCreativeInventoryTabSelected())
 						slot += 36;
-					ClientHandledScreen.handleKeybind(hoveredSlot.getStack(), ItemReference.getInventoryOrArmorItem(slot, true));
-				} else {
-					ClientHandledScreen.handleKeybind(hoveredSlot.getStack(), ItemReference.getContainerItem(hoveredSlot.id, source));
-				}
+					ref = ItemReference.getInventoryOrArmorItem(slot, true);
+				} else
+					ref = ItemReference.getContainerItem(hoveredSlot.id, source);
+				ClientHandledScreen.handleKeybind(hoveredSlot.getStack(), ref, source.getScreenHandler().getCursorStack());
 				info.setReturnValue(true);
 			}
 		}

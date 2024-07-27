@@ -119,9 +119,4 @@ public class BlockReference implements NBTReference<LocalBlock> {
 		saveState(state, () -> {});
 	}
 	
-	@Override
-	public void showParent() {
-		MainUtil.client.setScreen(null);
-	}
-	
 }

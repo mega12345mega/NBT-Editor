@@ -50,7 +50,9 @@ public class ImportScreen extends OverlaySupportingScreen {
 				try (FileInputStream in = new FileInputStream(file)) {
 					NbtCompound nbt = MainUtil.readNBT(in);
 					if (defaultDataVersion.isEmpty() && !nbt.contains("DataVersion", NbtElement.NUMBER_TYPE))
-						MainUtil.client.player.sendMessage(TextUtil.parseTranslatableFormatted("nbteditor.nbt.import.data_version.missing", file.getName()), false);
+						MainUtil.client.player.sendMessage(TextUtil.parseTranslatableFormatted("nbteditor.nbt.import.data_version.unknown", file.getName()), false);
+					if (nbt.getInt("DataVersion") > Version.getDataVersion())
+						MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.nbt.import.data_version.new", file.getName()), false);
 					LocalNBT.deserialize(nbt, defaultDataVersion.orElse(Version.getDataVersion())).ifPresent(localNBT -> {
 						if (localNBT instanceof LocalItem item)
 							item.receive();
@@ -106,7 +108,8 @@ public class ImportScreen extends OverlaySupportingScreen {
 	
 	@Override
 	protected void renderMain(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		dataVersion.setValid(dataVersion.getText().isEmpty() || Version.getDataVersion(dataVersion.getText()).isPresent());
+		dataVersion.setValid(dataVersion.getText().isEmpty() ||
+				Version.getDataVersion(dataVersion.getText()).filter(value -> value <= Version.getDataVersion()).isPresent());
 		
 		super.renderBackground(matrices);
 		super.renderMain(matrices, mouseX, mouseY, delta);
@@ -117,7 +120,7 @@ public class ImportScreen extends OverlaySupportingScreen {
 	
 	@Override
 	public void filesDragged(List<Path> paths) {
-		importFiles(paths, Version.getDataVersion(dataVersion.getText()));
+		importFiles(paths, Version.getDataVersion(dataVersion.getText()).filter(value -> value <= Version.getDataVersion()));
 	}
 	
 }

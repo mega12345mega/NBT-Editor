@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
@@ -24,7 +25,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.toast.SystemToast;
 import net.minecraft.world.GameMode;
 
 public class NBTEditorServerConn implements MVClientNetworking.PlayNetworkStateEvents.Start, MVClientNetworking.PlayNetworkStateEvents.Stop {
@@ -121,9 +121,8 @@ public class NBTEditorServerConn implements MVClientNetworking.PlayNetworkStateE
 		else {
 			status = Status.INCOMPATIBLE;
 			if (ConfigScreen.isWarnIncompatibleProtocol()) {
-				MainUtil.client.getToastManager().add(new SystemToast(SystemToast.Type.PACK_LOAD_FAILURE,
-						TextInst.translatable("nbteditor.incompatible_protocol.title"),
-						TextInst.translatable("nbteditor.incompatible_protocol.desc")));
+				MVMisc.showToast(TextInst.translatable("nbteditor.incompatible_protocol.title"),
+						TextInst.translatable("nbteditor.incompatible_protocol.desc"));
 			}
 		}
 	}

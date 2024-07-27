@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -18,7 +19,6 @@ public class CursorHistoryScreen extends ClientHandledScreen {
 	
 	public CursorHistoryScreen(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
 		super(handler, inventory, title);
-		this.dropCursorOnClose = false;
 	}
 	private CursorHistoryScreen build(List<ItemStack> items) {
 		for (int i = 0; i < this.handler.getInventory().size(); i++) {
@@ -29,10 +29,15 @@ public class CursorHistoryScreen extends ClientHandledScreen {
 		
 		return this;
 	}
-	public static void show(List<ItemStack> items) {
+	public static void show(List<ItemStack> items, Optional<ItemStack> cursor) {
 		PlayerInventory inv = MainUtil.client.player.getInventory();
-		MainUtil.client.setScreen(new CursorHistoryScreen(new CursorHistoryHandler(0, inv), inv, TextInst.translatable("nbteditor.container.title")
+		CursorHistoryHandler handler = new CursorHistoryHandler(0, inv);
+		handler.setCursorStack(cursor.orElse(MainUtil.client.player.playerScreenHandler.getCursorStack()));
+		MainUtil.client.setScreen(new CursorHistoryScreen(handler, inv, TextInst.translatable("nbteditor.container.title")
 				.append(TextInst.translatable("nbteditor.get.lost_item.history"))).build(items));
+	}
+	public static void show(List<ItemStack> items) {
+		show(items, Optional.empty());
 	}
 	
 	@Override

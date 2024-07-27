@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
+import java.util.Optional;
+
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
@@ -56,10 +58,15 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		
 		return this;
 	}
-	public static <L extends LocalNBT> void show(NBTReference<L> ref) {
+	public static <L extends LocalNBT> void show(NBTReference<L> ref, Optional<ItemStack> cursor) {
 		PlayerInventory inv = MainUtil.client.player.getInventory();
-		MainUtil.client.setScreen(new ContainerScreen<L>(new ContainerHandler(0, inv), inv, TextInst.translatable("nbteditor.container.title")
+		ContainerHandler handler = new ContainerHandler(0, inv);
+		handler.setCursorStack(cursor.orElse(MainUtil.client.player.playerScreenHandler.getCursorStack()));
+		MainUtil.client.setScreen(new ContainerScreen<L>(handler, inv, TextInst.translatable("nbteditor.container.title")
 				.append(ref.getLocalNBT().getName())).build(ref));
+	}
+	public static void show(NBTReference<?> ref) {
+		show(ref, Optional.empty());
 	}
 	
 	@Override
@@ -80,7 +87,13 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		
 		addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
 				LocalFactoryScreen.FACTORY_ICON,
-				btn -> client.setScreen(new LocalFactoryScreen<>(ref)),
+				btn -> {
+					if (!handler.getCursorStack().isEmpty()) {
+						MainUtil.get(handler.getCursorStack(), true);
+						ref.clearParentCursor();
+					}
+					client.setScreen(new LocalFactoryScreen<>(ref));
+				},
 				new MVTooltip("nbteditor.factory")));
 	}
 	
@@ -145,12 +158,14 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	}
 	
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (ref.keyPressed(keyCode, scanCode, modifiers))
+		if (MainUtil.client.options.inventoryKey.matchesKey(keyCode, scanCode)) {
+			ref.showParent(Optional.of(handler.getCursorStack()));
 			return true;
+		}
 		
 		if (keyCode == GLFW.GLFW_KEY_SPACE) {
 			if (focusedSlot != null && (focusedSlot.id < numSlots || focusedSlot.inventory != this.handler.getInventory())) {
-				if (handleKeybind(keyCode, focusedSlot, slot -> new ContainerItemReference<>(ref, slot.getIndex())))
+				if (handleKeybind(keyCode, focusedSlot, slot -> new ContainerItemReference<>(ref, slot.getIndex()), handler.getCursorStack()))
 					return true;
 			}
 		}
@@ -167,6 +182,11 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		return ref;
 	}
 	
+	@Override
+	public void close() {
+		ref.escapeParent(Optional.of(handler.getCursorStack()));
+		MainUtil.client.player.closeHandledScreen();
+	}
 	@Override
 	public void removed() {
 		for (int i = numSlots; i < 27; i++) { // Items that may get deleted

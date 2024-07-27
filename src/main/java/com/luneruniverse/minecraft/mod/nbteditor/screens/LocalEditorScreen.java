@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import java.lang.invoke.MethodType;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -187,7 +188,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 	
 	@Override
 	public void close() {
-		closeSafely(() -> ref.showParent());
+		closeSafely(() -> ref.showParent(Optional.empty()));
 	}
 	
 	public void closeSafely(Runnable onClose) {

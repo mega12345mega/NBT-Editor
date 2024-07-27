@@ -175,6 +175,10 @@ public class InventoryUtils {
                     }
                 }
     		}
+    		@Override
+    		public void close() {
+    			MainUtil.client.player.closeHandledScreen();
+    		}
     	};
         Inventory inventory = screen.getScreenHandler().getInventory();
 

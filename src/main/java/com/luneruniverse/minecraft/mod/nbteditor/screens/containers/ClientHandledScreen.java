@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.lwjgl.glfw.GLFW;
@@ -9,10 +10,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.InventoryItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
@@ -64,42 +63,48 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 			}
 		}
 		if (!ItemStack.areEqual(clientCursor, SERVER_CURSOR)) {
-			if (MainUtil.client.interactionManager.getCurrentGameMode().isSurvivalLike())
-				MVClientNetworking.send(new SetCursorC2SPacket(clientCursor));
+			// Don't update server; cursor acts like the creative inventory
 			SERVER_CURSOR = clientCursor.copy();
 		}
 	}
 	
-	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, Function<Slot, ItemReference> containerRef) {
+	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, Function<Slot, ItemReference> containerRef, ItemStack cursor) {
 		if (keyCode == GLFW.GLFW_KEY_SPACE) {
 			if (hoveredSlot != null && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
 				int slot = hoveredSlot.getIndex();
 				ItemReference ref = hoveredSlot.inventory == MainUtil.client.player.getInventory() ?
 						new InventoryItemReference(slot >= 36 ? slot - 36 : slot) : containerRef.apply(hoveredSlot);
-				handleKeybind(hoveredSlot.getStack(), ref);
+				handleKeybind(hoveredSlot.getStack(), ref, cursor);
 				return true;
 			}
 		}
 		return false;
 	}
-	public static void handleKeybind(ItemStack item, ItemReference ref) {
+	public static void handleKeybind(ItemStack item, ItemReference ref, ItemStack cursor) {
 		boolean notAir = item != null && !item.isEmpty();
 		if (hasControlDown()) {
 			if (notAir && ContainerIO.isContainer(item))
-				ContainerScreen.show(ref);
+				ContainerScreen.show(ref, Optional.of(cursor));
 		} else if (hasShiftDown()) {
-			if (notAir)
+			if (notAir) {
+				if (cursor != null && !cursor.isEmpty()) {
+					MainUtil.get(cursor, true);
+					ref.clearParentCursor();
+				}
 				MainUtil.client.setScreen(new LocalFactoryScreen<>(ref));
-		} else
+			}
+		} else {
+			if (cursor != null && !cursor.isEmpty()) {
+				MainUtil.get(cursor, true);
+				ref.clearParentCursor();
+			}
 			MainUtil.client.setScreen(new NBTEditorScreen<>(ref));
+		}
 	}
 	
 	
-	protected boolean dropCursorOnClose;
-	
 	public ClientHandledScreen(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
 		super(handler, inventory, title);
-		this.dropCursorOnClose = true;
 		handler.disableSyncing();
 		MainUtil.client.player.currentScreenHandler = handler;
 	}
@@ -167,24 +172,19 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		return title;
 	}
 	
-	public final boolean isPauseScreen() { // 1.18
-		return shouldPause();
-	}
-	public boolean shouldPause() { // 1.19
+	public boolean shouldPause() {
 		return false;
 	}
 	
-	public final void onClose() { // 1.18
-		close();
-	}
-	public void close() { // 1.19
-		ItemStack cursor = this.handler.getCursorStack();
-		if (dropCursorOnClose && cursor != null && !cursor.isEmpty())
-			MainUtil.get(cursor, true);
+	public void close() {
+		MainUtil.setInventoryCursorStack(handler.getCursorStack());
+		handler.setCursorStack(ItemStack.EMPTY);
 		
-		// super.close();
-		client.player.closeHandledScreen();
-		client.setScreen(null);
+		MainUtil.client.player.closeHandledScreen();
+	}
+	@Override
+	public void removed() {
+		// Don't always drop cursor in older versions
 	}
 	
 	

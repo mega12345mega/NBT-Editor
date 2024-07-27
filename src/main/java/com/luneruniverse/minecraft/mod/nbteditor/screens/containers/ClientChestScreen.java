@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -35,7 +36,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 	public static int prevPageJumpTarget;
 	public static int nextPageJumpTarget;
 	
-	public static void show() {
+	public static void show(Optional<ItemStack> cursor) {
 		if (!NBTEditorClient.CLIENT_CHEST.isLoaded()) {
 			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.not_ready"), false);
 			return;
@@ -43,6 +44,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 		
 		ClientChestPage page = NBTEditorClient.CLIENT_CHEST.getPage(PAGE);
 		if (!page.isInThisVersion()) {
+			cursor.ifPresent(MainUtil::setInventoryCursorStack);
 			MainUtil.client.setScreen(new ClientChestDataVersionScreen(page.getDataVersionStatus()));
 			return;
 		}
@@ -54,11 +56,14 @@ public class ClientChestScreen extends ClientHandledScreen {
 		} else {
 			ClientPlayerEntity player = MainUtil.client.player;
 			ClientChestHandler handler = new ClientChestHandler(0, player.getInventory());
+			handler.setCursorStack(cursor.orElse(MainUtil.client.player.playerScreenHandler.getCursorStack()));
 			MainUtil.client.setScreen(new ClientChestScreen(handler, player.getInventory(), TextInst.translatable("nbteditor.client_chest")));
 			NBTEditorClient.CLIENT_CHEST.warnIfCorrupt();
 		}
 	}
-	
+	public static void show() {
+		show(Optional.empty());
+	}
 	
 	
 	private static record SaveRequest(int page, ItemStack[] items) {}
@@ -83,7 +88,6 @@ public class ClientChestScreen extends ClientHandledScreen {
 	
 	private ClientChestScreen(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
 		super(handler, inventory, title);
-		this.dropCursorOnClose = false;
 		this.saved = true;
 	}
 	
@@ -144,7 +148,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 		pageField.setMaxLength((NBTEditorClient.CLIENT_CHEST.getPageCount() + "").length());
 		pageField.setText((PAGE + 1) + "");
 		pageField.setChangedListener(str -> {
-			if (str.isEmpty() || str.equals("+"))
+			if (str.isEmpty() || str.equals("+") || str.equals("-"))
 				return;
 			
 			int intVal = Integer.parseInt(str);
@@ -241,9 +245,11 @@ public class ClientChestScreen extends ClientHandledScreen {
 	}
 	
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
+		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
 			close();
-		else if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+			return true;
+		}
+		if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
 			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_DOWN);
 			if (ConfigScreen.isInvertedPageKeybinds())
 				prev = !prev;
@@ -259,9 +265,10 @@ public class ClientChestScreen extends ClientHandledScreen {
 				else
 					nextPage();
 			}
+			return true;
 		}
 		
-		return !handleKeybind(keyCode, focusedSlot, slot -> new ClientChestItemReference(PAGE, slot.getIndex())) &&
+		return !handleKeybind(keyCode, focusedSlot, slot -> new ClientChestItemReference(PAGE, slot.getIndex()), handler.getCursorStack()) &&
 				!this.nameField.keyPressed(keyCode, scanCode, modifiers) && !this.nameField.isActive() &&
 				!this.pageField.keyPressed(keyCode, scanCode, modifiers) && !this.pageField.isActive()
 				? super.keyPressed(keyCode, scanCode, modifiers) : true;

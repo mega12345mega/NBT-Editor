@@ -1,6 +1,9 @@
 package com.luneruniverse.minecraft.mod.nbteditor.misc;
 
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Proxy;
+
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
@@ -22,8 +25,10 @@ public class NbtTypeModifier {
 			if (VALUES[i] == type) {
 				NbtType<T> newType = (NbtType<T>) Proxy.newProxyInstance(NbtTypeModifier.class.getClassLoader(),
 						new Class[] { NbtType.class }, (obj, method, args) -> {
-					if (method.getName().equals("isImmutable"))
+					if (method.getName().equals(Reflection.getMethodName(NbtType.class, "method_23263", MethodType.methodType(boolean.class)))) {
+						// isImmutable
 						return false;
+					}
 					
 					return method.invoke(type, args);
 				});

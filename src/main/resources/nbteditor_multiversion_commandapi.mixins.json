@@ -3,7 +3,6 @@
   "minVersion": "0.8",
   "package": "com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.mixin",
   "compatibilityLevel": "JAVA_16",
-  "plugin": "com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.mixin.client.toggled.CommandMixinPlugin",
   "mixins": [
   ],
   "client": [
@@ -11,7 +10,8 @@
     "HelpCommandAccessor",
     "client.ClientCommandSourceMixin",
     "client.ClientPlayerEntityMixin",
-    "client.ClientPlayNetworkHandlerMixin"
+    "client.ClientPlayNetworkHandlerMixin",
+    "client.ChatScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

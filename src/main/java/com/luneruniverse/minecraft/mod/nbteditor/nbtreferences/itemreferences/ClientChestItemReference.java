@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
+import java.util.Optional;
+
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -73,8 +75,11 @@ public class ClientChestItemReference implements ItemReference {
 	}
 	
 	@Override
-	public void showParent() {
-		ClientChestScreen.show();
+	public void showParent(Optional<ItemStack> cursor) {
+		ClientChestScreen.show(cursor);
 	}
+	
+	@Override
+	public void clearParentCursor() {}
 	
 }

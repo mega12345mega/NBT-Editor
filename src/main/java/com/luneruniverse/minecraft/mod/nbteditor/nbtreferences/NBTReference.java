@@ -5,8 +5,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
-import org.lwjgl.glfw.GLFW;
-
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandItemReference;
@@ -14,6 +12,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.It
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -103,17 +102,12 @@ public interface NBTReference<T extends LocalNBT> {
 		saveNBT(id, toSave, () -> {});
 	}
 	
-	public void showParent();
-	public default void escapeParent() {
+	public default void showParent(Optional<ItemStack> cursor) {
+		escapeParent(cursor);
+	}
+	public default void escapeParent(Optional<ItemStack> cursor) {
+		cursor.ifPresent(MainUtil::setInventoryCursorStack);
 		MainUtil.client.setScreen(null);
 	}
-	public default boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
-			escapeParent();
-		else if (MainUtil.client.options.inventoryKey.matchesKey(keyCode, scanCode))
-			showParent();
-		else
-			return false;
-		return true;
-	}
+	public default void clearParentCursor() {}
 }

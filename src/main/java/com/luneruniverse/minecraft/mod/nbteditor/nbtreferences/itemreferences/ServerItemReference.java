@@ -11,15 +11,14 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 
-public class ServerItemReference implements ItemReference {
+public class ServerItemReference extends HandledScreenItemReference {
 	
 	private final int slot;
-	private final HandledScreen<?> screen;
 	private ItemStack item;
 	
 	public ServerItemReference(int slot, HandledScreen<?> screen) {
+		super(screen);
 		this.slot = slot;
-		this.screen = screen;
 		
 		if (slot == -1) {
 			item = screen.getScreenHandler().getCursorStack();
@@ -35,9 +34,6 @@ public class ServerItemReference implements ItemReference {
 	public int getSlot() {
 		return slot;
 	}
-	public HandledScreen<?> getScreen() {
-		return screen;
-	}
 	
 	@Override
 	public ItemStack getItem() {
@@ -48,10 +44,10 @@ public class ServerItemReference implements ItemReference {
 	public void saveItem(ItemStack toSave, Runnable onFinished) {
 		item = toSave;
 		if (slot == -1)
-			screen.getScreenHandler().setCursorStack(toSave);
+			getParent().getScreenHandler().setCursorStack(toSave);
 		else
-			screen.getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
-		if (screen instanceof InventoryScreen || NBTEditorClient.SERVER_CONN.isContainerScreen()) {
+			getParent().getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
+		if (getParent() instanceof InventoryScreen || NBTEditorClient.SERVER_CONN.isContainerScreen()) {
 			if (slot == -1)
 				MVClientNetworking.send(new SetCursorC2SPacket(toSave));
 			else
@@ -81,13 +77,12 @@ public class ServerItemReference implements ItemReference {
 	}
 	
 	@Override
-	public void showParent() {
-		MainUtil.client.setScreen(screen);
+	public HandledScreenItemReference setParent(HandledScreen<?> parent) {
+		throw new UnsupportedOperationException("ServerItemReferences cannot have custom parents");
 	}
-	
 	@Override
-	public void escapeParent() {
-		screen.close(); // Send close packet to server
+	public HandledScreen<?> getDefaultParent() {
+		throw new UnsupportedOperationException("ServerItemReferences cannot have default parents");
 	}
 	
 }

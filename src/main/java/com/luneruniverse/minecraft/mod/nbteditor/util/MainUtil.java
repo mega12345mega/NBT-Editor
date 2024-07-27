@@ -29,6 +29,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
+import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.DSL.TypeReference;
 import com.mojang.serialization.Dynamic;
@@ -48,6 +50,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
@@ -409,8 +412,12 @@ public class MainUtil {
 	
 	public static Predicate<String> intPredicate(Supplier<Integer> min, Supplier<Integer> max, boolean allowEmpty) {
 		return str -> {
-			if (str.isEmpty() || str.equals("+") || str.equals("-"))
+			if (str.isEmpty())
 				return allowEmpty;
+			if (str.equals("+"))
+				return allowEmpty && (max == null || max.get() >= 0);
+			if (str.equals("-"))
+				return allowEmpty && (min == null || min.get() <= 0);
 			try {
 				int value = Integer.parseInt(str);
 				return (min == null || min.get() <= value) && (max == null || value <= max.get());
@@ -515,6 +522,23 @@ public class MainUtil {
 		if (component.startsWith("!"))
 			return "!minecraft:" + component.substring(1);
 		return "minecraft:" + component;
+	}
+	
+	public static void setRootCursorStack(ScreenHandler handler, ItemStack cursor) {
+		handler.setCursorStack(cursor);
+		handler.setPreviousCursorStack(cursor);
+		if (client.player.playerScreenHandler != handler || client.interactionManager.getCurrentGameMode().isSurvivalLike())
+			MVClientNetworking.send(new SetCursorC2SPacket(cursor));
+	}
+	public static void setInventoryCursorStack(ItemStack cursor) {
+		if (MainUtil.client.interactionManager.getCurrentGameMode().isCreative())
+			MainUtil.client.player.playerScreenHandler.setCursorStack(cursor);
+		else {
+			if (!cursor.isEmpty())
+				MainUtil.get(cursor, true);
+			MainUtil.client.player.playerScreenHandler.setCursorStack(ItemStack.EMPTY);
+			MVClientNetworking.send(new SetCursorC2SPacket(ItemStack.EMPTY));
+		}
 	}
 	
 }

@@ -12,7 +12,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
@@ -73,11 +72,6 @@ public class EntityReference implements NBTReference<LocalEntity> {
 	
 	public EntityType<?> getEntityType() {
 		return entityType;
-	}
-	
-	@Override
-	public void showParent() {
-		MainUtil.client.setScreen(null);
 	}
 	
 }

@@ -48,6 +48,7 @@ import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.toast.SystemToast;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgumentType;
@@ -533,6 +534,21 @@ public class MVMisc {
 				.range("1.20.5", null, () -> PacketEncoder_encode.get().invoke(codec, buf, value))
 				.range(null, "1.20.4", () -> { throw new IllegalStateException("Not supported in this version!"); })
 				.run();
+	}
+	
+	private static final Supplier<Class<?>> SystemToast$Type = Reflection.getOptionalClass("net.minecraft.class_370$class_371");
+	private static final Object SystemToast$Type_PACK_LOAD_FAILURE =
+			Version.<Object>newSwitch()
+					.range("1.20.3", null, () -> null)
+					.range(null, "1.20.2", () -> Reflection.getField(SystemToast$Type.get(), "field_21809", "Lnet/minecraft/class_370$class_371;").get(null))
+					.get();
+	public static void showToast(Text title, Text description) {
+		MainUtil.client.getToastManager().add(Version.<SystemToast>newSwitch()
+				.range("1.20.3", null, () -> new SystemToast(SystemToast.Type.PACK_LOAD_FAILURE, title, description))
+				.range(null, "1.20.2", () -> Reflection.newInstance(SystemToast.class,
+						new Class<?>[] {SystemToast$Type.get(), Text.class, Text.class},
+						SystemToast$Type_PACK_LOAD_FAILURE, title, description))
+				.get());
 	}
 	
 }

@@ -2,6 +2,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.async;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.stream.Stream;
 
@@ -9,13 +11,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.toast.SystemToast;
 
 public class UpdateCheckerThread extends Thread {
 	
@@ -24,8 +25,8 @@ public class UpdateCheckerThread extends Thread {
 	static {
 		URL url;
 		try {
-			url = new URL("https://api.modrinth.com/v2/project/5Osk0m1G/version");
-		} catch (MalformedURLException e) {
+			url = new URI("https://api.modrinth.com/v2/project/5Osk0m1G/version").toURL();
+		} catch (URISyntaxException | MalformedURLException e) {
 			NBTEditor.LOGGER.error("Unable to check for updates!", e);
 			url = null;
 		}
@@ -67,9 +68,8 @@ public class UpdateCheckerThread extends Thread {
 				UPDATE_AVAILABLE = true;
 				NBTEditor.LOGGER.warn("NBT Editor is outdated! (" + highestVersion + " > " + VERSION + ")");
 				if (versionDiff[1] <= ConfigScreen.getCheckUpdates().getLevel()) {
-					MainUtil.client.getToastManager().add(new SystemToast(SystemToast.Type.PACK_LOAD_FAILURE,
-							TextInst.translatable("nbteditor.outdated.title"),
-							TextInst.translatable("nbteditor.outdated.desc")));
+					MVMisc.showToast(TextInst.translatable("nbteditor.outdated.title"),
+							TextInst.translatable("nbteditor.outdated.desc"));
 				}
 			} else
 				NBTEditor.LOGGER.info("NBT Editor is fully updated!");
