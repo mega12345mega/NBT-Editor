@@ -447,7 +447,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	}
 	
 	@Override
-	protected void save() {
+	protected boolean save() {
 		if (localNBT.isEmpty() && localNBT.getNBT() != null && !localNBT.getNBT().isEmpty()) {
 			MainUtil.client.setScreen(new FancyConfirmScreen(value -> {
 				if (value)
@@ -455,8 +455,9 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				
 				MainUtil.client.setScreen(NBTEditorScreen.this);
 			}, TextInst.translatable("nbteditor.nbt.saving_air.title"), TextInst.translatable("nbteditor.nbt.saving_air.desc"),
-					TextInst.translatable("nbteditor.nbt.saving_air.yes"), TextInst.translatable("nbteditor.nbt.saving_air.no")));
-			return;
+					TextInst.translatable("nbteditor.nbt.saving_air.yes"), TextInst.translatable("nbteditor.nbt.saving_air.no"))
+					.setParent(this));
+			return false;
 		}
 		
 		if (localNBT instanceof LocalItem && localNBT.getNBT() != null) {
@@ -469,12 +470,13 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 					
 					MainUtil.client.setScreen(NBTEditorScreen.this);
 				}, TextInst.translatable("nbteditor.nbt.saving_invalid_components.title"), TextInst.translatable("nbteditor.nbt.saving_invalid_components.desc"),
-						TextInst.translatable("nbteditor.nbt.saving_invalid_components.yes"), TextInst.translatable("nbteditor.nbt.saving_invalid_components.no")));
-				return;
+						TextInst.translatable("nbteditor.nbt.saving_invalid_components.yes"), TextInst.translatable("nbteditor.nbt.saving_invalid_components.no"))
+						.setParent(this));
+				return false;
 			}
 		}
 		
-		super.save();
+		return super.save();
 	}
 	
 	@Override

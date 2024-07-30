@@ -138,7 +138,8 @@ public class InventoryUtils {
     }
 
     public static void openDatabase() {
-    	ClientHandledScreen screen = new ClientHandledScreen(ClientHandledScreen.createGenericScreenHandler(6), MainUtil.client.player.getInventory(), TextInst.of(Utils.colorize("&c&lHeadDB &8(" + HeadAPI.getHeads().size() + ")"))) {
+    	ClientHandledScreen screen = new ClientHandledScreen(ClientHandledScreen.createGenericScreenHandler(6),
+    			TextInst.of(Utils.colorize("&c&lHeadDB &8(" + HeadAPI.getHeads().size() + ")"))) {
     		@Override
     		protected void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
     			if (slot == null)

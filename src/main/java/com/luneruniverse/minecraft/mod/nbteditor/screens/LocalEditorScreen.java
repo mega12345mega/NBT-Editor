@@ -172,13 +172,14 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 	public boolean isSaved() {
 		return saved;
 	}
-	protected void save() {
+	protected boolean save() {
 		savedLocalNBT = LocalNBT.copy(localNBT);
 		saveBtn.setMessage(TextInst.translatable("nbteditor.editor.saving"));
 		setSaved(true);
 		ref.saveLocalNBT(savedLocalNBT, () -> {
 			saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
 		});
+		return true;
 	}
 	protected void checkSave() {
 		localNBT.getOrCreateNBT(); // Make sure both items have NBT defined, so no NBT and empty NBT comes out equal
@@ -196,10 +197,8 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 			onClose.run();
 		else {
 			client.setScreen(new FancyConfirmScreen(value -> {
-				if (value)
-					save();
-				
-				onClose.run();
+				if (!value || save())
+					onClose.run();
 			}, TextInst.translatable("nbteditor.editor.unsaved.title"), TextInst.translatable("nbteditor.editor.unsaved.desc"),
 					TextInst.translatable("nbteditor.editor.unsaved.yes"), TextInst.translatable("nbteditor.editor.unsaved.no")));
 		}

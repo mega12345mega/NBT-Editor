@@ -43,7 +43,7 @@ public class PagedPane extends ClientHandledScreen {
      * @param pageSize The page size. inventory rows - 2
      */
     public PagedPane(int pageSize, int rows, String title) {
-    	super(createGenericScreenHandler(rows), MainUtil.client.player.getInventory(), TextInst.of(MainUtil.colorize(title)));
+    	super(createGenericScreenHandler(rows), TextInst.of(MainUtil.colorize(title)));
         this.pageSize = pageSize;
         pages.put(0, new Page(pageSize));
     }

@@ -353,4 +353,7 @@ public class MixinLink {
 		}
 	}
 	
+	
+	public static HandledScreen<?> LAST_SERVER_HANDLED_SCREEN;
+	
 }

@@ -15,7 +15,7 @@ import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 
 @Mixin(ClientConnection.class)
-public class SendPacketMixin {
+public class ClientConnectionMixin {
 	
 	private static volatile boolean sendingSafe;
 	

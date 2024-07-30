@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.util;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.PassContainerSlotUpdates;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
@@ -10,9 +11,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-public class FancyConfirmScreen extends ConfirmScreen {
+public class FancyConfirmScreen extends ConfirmScreen implements PassContainerSlotUpdates {
 	
-	private final Screen parent;
+	private Screen parent;
 	
 	public FancyConfirmScreen(BooleanConsumer callback, Text title, Text message, Text yesTranslated, Text noTranslated) {
 		super(callback, title, message, yesTranslated, noTranslated);
@@ -21,6 +22,11 @@ public class FancyConfirmScreen extends ConfirmScreen {
 	public FancyConfirmScreen(BooleanConsumer callback, Text title, Text message) {
 		super(callback, title, message);
 		parent = MainUtil.client.currentScreen;
+	}
+	
+	public FancyConfirmScreen setParent(Screen parent) {
+		this.parent = parent;
+		return this;
 	}
 	
 	@Override

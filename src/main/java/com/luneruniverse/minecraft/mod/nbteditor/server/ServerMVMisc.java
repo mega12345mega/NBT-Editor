@@ -30,4 +30,22 @@ public class ServerMVMisc {
 				.get();
 	}
 	
+	private static final Supplier<Reflection.MethodInvoker> PacketDecoder_decode =
+			Reflection.getOptionalMethod(() -> Reflection.getClass("net.minecraft.class_9141"), () -> "decode", () -> MethodType.methodType(Object.class, Object.class));
+	@SuppressWarnings("unchecked")
+	public static <T> T packetCodecDecode(Object codec, Object buf) {
+		return Version.<T>newSwitch()
+				.range("1.20.5", null, () -> (T) PacketDecoder_decode.get().invoke(codec, buf))
+				.range(null, "1.20.4", () -> { throw new IllegalStateException("Not supported in this version!"); })
+				.get();
+	}
+	private static final Supplier<Reflection.MethodInvoker> PacketEncoder_encode =
+			Reflection.getOptionalMethod(() -> Reflection.getClass("net.minecraft.class_9142"), () -> "encode", () -> MethodType.methodType(void.class, Object.class, Object.class));
+	public static void packetCodecEncode(Object codec, Object buf, Object value) {
+		Version.newSwitch()
+				.range("1.20.5", null, () -> PacketEncoder_encode.get().invoke(codec, buf, value))
+				.range(null, "1.20.4", () -> { throw new IllegalStateException("Not supported in this version!"); })
+				.run();
+	}
+	
 }

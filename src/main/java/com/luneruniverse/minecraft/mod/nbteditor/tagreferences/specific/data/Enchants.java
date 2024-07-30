@@ -76,9 +76,11 @@ public class Enchants {
 		boolean found = false;
 		for (ListIterator<EnchantWithLevel> iter = enchants.listIterator(); iter.hasNext();) {
 			EnchantWithLevel enchantWithLevel = iter.next();
+			if (enchantWithLevel.enchant() != enchant)
+				continue;
 			if (found)
 				iter.remove();
-			else if (enchantWithLevel.enchant() == enchant) {
+			else {
 				iter.set(new EnchantWithLevel(enchant, level));
 				found = true;
 			}

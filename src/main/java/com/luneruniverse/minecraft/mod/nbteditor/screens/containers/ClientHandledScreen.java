@@ -9,7 +9,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.PassContainerSlotUpdates;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.InventoryItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -20,8 +22,10 @@ import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enc
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -34,7 +38,9 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class ClientHandledScreen extends GenericContainerScreen implements OldEventBehavior {
+public class ClientHandledScreen extends GenericContainerScreen implements OldEventBehavior, PassContainerSlotUpdates {
+	
+	public static final int SYNC_ID = -2718;
 	
 	private static final Identifier TEXTURE = new Identifier("textures/gui/container/generic_54.png");
 	
@@ -68,12 +74,17 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		}
 	}
 	
-	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, Function<Slot, ItemReference> containerRef, ItemStack cursor) {
+	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, HandledScreen<?> parent, Function<Slot, ItemReference> containerRef, ItemStack cursor) {
 		if (keyCode == GLFW.GLFW_KEY_SPACE) {
 			if (hoveredSlot != null && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
 				int slot = hoveredSlot.getIndex();
-				ItemReference ref = hoveredSlot.inventory == MainUtil.client.player.getInventory() ?
-						new InventoryItemReference(slot >= 36 ? slot - 36 : slot) : containerRef.apply(hoveredSlot);
+				ItemReference ref;
+				if (hoveredSlot.inventory == MainUtil.client.player.getInventory()) {
+					ref = new InventoryItemReference(slot >= 36 ? slot - 36 : slot);
+					if (parent != null)
+						((InventoryItemReference) ref).setParent(parent);
+				} else
+					ref = containerRef.apply(hoveredSlot);
 				handleKeybind(hoveredSlot.getStack(), ref, cursor);
 				return true;
 			}
@@ -103,8 +114,8 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	}
 	
 	
-	public ClientHandledScreen(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
-		super(handler, inventory, title);
+	public ClientHandledScreen(GenericContainerScreenHandler handler, Text title) {
+		super(handler, MainUtil.client.player.getInventory(), title);
 		handler.disableSyncing();
 		MainUtil.client.player.currentScreenHandler = handler;
 	}
@@ -113,17 +124,17 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		
 		switch (rows) {
 			case 1:
-				return GenericContainerScreenHandler.createGeneric9x1(0, inv);
+				return GenericContainerScreenHandler.createGeneric9x1(SYNC_ID, inv);
 			case 2:
-				return GenericContainerScreenHandler.createGeneric9x2(0, inv);
+				return GenericContainerScreenHandler.createGeneric9x2(SYNC_ID, inv);
 			case 3:
-				return GenericContainerScreenHandler.createGeneric9x3(0, inv);
+				return GenericContainerScreenHandler.createGeneric9x3(SYNC_ID, inv);
 			case 4:
-				return GenericContainerScreenHandler.createGeneric9x4(0, inv);
+				return GenericContainerScreenHandler.createGeneric9x4(SYNC_ID, inv);
 			case 5:
-				return GenericContainerScreenHandler.createGeneric9x5(0, inv);
+				return GenericContainerScreenHandler.createGeneric9x5(SYNC_ID, inv);
 			case 6:
-				return GenericContainerScreenHandler.createGeneric9x6(0, inv);
+				return GenericContainerScreenHandler.createGeneric9x6(SYNC_ID, inv);
 			default:
 				throw new IllegalArgumentException("Rows are limited to 1 to 6!");
 		}
@@ -171,6 +182,12 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	protected Text getRenderedTitle() {
 		return title;
 	}
+	
+	public void setInitialFocus(Element element) {
+		MVMisc.setInitialFocus(this, element, super::setInitialFocus);
+	}
+	@Override
+	protected void setInitialFocus() {}
 	
 	public boolean shouldPause() {
 		return false;

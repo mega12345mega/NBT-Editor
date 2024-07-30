@@ -177,6 +177,12 @@ public class LocalBlock implements LocalNBT {
 							entity.setWorld(MainUtil.client.world);
 							NBTManagers.BLOCK_ENTITY.setNbt(entity, nbt);
 							MainUtil.client.addBlockEntityNbt(output, entity, DynamicRegistryManagerHolder.getManager());
+							
+							NbtCompound blockEntityDataTag = ItemTagReferences.BLOCK_ENTITY_DATA.get(output);
+							blockEntityDataTag.remove("x");
+							blockEntityDataTag.remove("y");
+							blockEntityDataTag.remove("z");
+							ItemTagReferences.BLOCK_ENTITY_DATA.set(output, blockEntityDataTag);
 						}
 					} else {
 						NbtCompound nbt = new NbtCompound();

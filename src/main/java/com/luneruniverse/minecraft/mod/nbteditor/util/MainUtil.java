@@ -537,6 +537,7 @@ public class MainUtil {
 			if (!cursor.isEmpty())
 				MainUtil.get(cursor, true);
 			MainUtil.client.player.playerScreenHandler.setCursorStack(ItemStack.EMPTY);
+			MainUtil.client.player.playerScreenHandler.setPreviousCursorStack(ItemStack.EMPTY);
 			MVClientNetworking.send(new SetCursorC2SPacket(ItemStack.EMPTY));
 		}
 	}

@@ -33,7 +33,7 @@ public class EnchantsTagReference implements TagReference<Enchants, ItemStack> {
 								(componentValue, enchants) -> new ItemEnchantmentsComponent(new Object2IntOpenHashMap<>(
 										enchants.getEnchants().stream().collect(Collectors.toMap(
 												enchant -> Registries.ENCHANTMENT.getEntry(enchant.enchant()),
-												Enchants.EnchantWithLevel::level,
+												enchant -> Math.min(255, enchant.level()),
 												Math::max))),
 										componentValue.showInTooltip)))
 				.range(null, "1.20.4", () -> TagReference.mapValue(Enchants::new, Enchants::getEnchants,

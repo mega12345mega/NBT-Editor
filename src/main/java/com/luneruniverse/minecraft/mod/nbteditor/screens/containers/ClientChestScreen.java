@@ -22,10 +22,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
 
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
@@ -54,10 +51,9 @@ public class ClientChestScreen extends ClientHandledScreen {
 			((ClientChestHandler) screen.handler).fillPage();
 			screen.updatePageNavigation();
 		} else {
-			ClientPlayerEntity player = MainUtil.client.player;
-			ClientChestHandler handler = new ClientChestHandler(0, player.getInventory());
+			ClientChestHandler handler = new ClientChestHandler();
 			handler.setCursorStack(cursor.orElse(MainUtil.client.player.playerScreenHandler.getCursorStack()));
-			MainUtil.client.setScreen(new ClientChestScreen(handler, player.getInventory(), TextInst.translatable("nbteditor.client_chest")));
+			MainUtil.client.setScreen(new ClientChestScreen(handler));
 			NBTEditorClient.CLIENT_CHEST.warnIfCorrupt();
 		}
 	}
@@ -86,8 +82,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 	private ButtonWidget nextPageJump;
 	private ItemStack[] prevInv;
 	
-	private ClientChestScreen(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
-		super(handler, inventory, title);
+	private ClientChestScreen(ClientChestHandler handler) {
+		super(handler, TextInst.translatable("nbteditor.client_chest"));
 		this.saved = true;
 	}
 	
@@ -268,7 +264,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 			return true;
 		}
 		
-		return !handleKeybind(keyCode, focusedSlot, slot -> new ClientChestItemReference(PAGE, slot.getIndex()), handler.getCursorStack()) &&
+		return !handleKeybind(keyCode, focusedSlot, this,
+						slot -> new ClientChestItemReference(PAGE, slot.getIndex()), handler.getCursorStack()) &&
 				!this.nameField.keyPressed(keyCode, scanCode, modifiers) && !this.nameField.isActive() &&
 				!this.pageField.keyPressed(keyCode, scanCode, modifiers) && !this.pageField.isActive()
 				? super.keyPressed(keyCode, scanCode, modifiers) : true;

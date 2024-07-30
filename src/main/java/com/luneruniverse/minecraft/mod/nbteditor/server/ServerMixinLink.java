@@ -8,6 +8,7 @@ import java.util.WeakHashMap;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 public class ServerMixinLink {
 	
@@ -16,5 +17,8 @@ public class ServerMixinLink {
 	
 	
 	public static final List<Thread> BLOCK_ENTITY_WRITE_NBT_WITHOUT_IDENTIFYING_DATA = new ArrayList<>();
+	
+	
+	public static final WeakHashMap<ServerPlayerEntity, Boolean> NO_ARMOR_RESTRICTION_PLAYERS = new WeakHashMap<>();
 	
 }

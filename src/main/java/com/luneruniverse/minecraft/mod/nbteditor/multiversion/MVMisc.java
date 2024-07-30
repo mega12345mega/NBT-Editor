@@ -34,6 +34,8 @@ import com.mojang.serialization.JsonOps;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Keyboard;
+import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -518,24 +520,6 @@ public class MVMisc {
 				.get();
 	}
 	
-	private static final Supplier<Reflection.MethodInvoker> PacketDecoder_decode =
-			Reflection.getOptionalMethod(() -> Reflection.getClass("net.minecraft.class_9141"), () -> "decode", () -> MethodType.methodType(Object.class, Object.class));
-	@SuppressWarnings("unchecked")
-	public static <T> T packetCodecDecode(Object codec, Object buf) {
-		return Version.<T>newSwitch()
-				.range("1.20.5", null, () -> (T) PacketDecoder_decode.get().invoke(codec, buf))
-				.range(null, "1.20.4", () -> { throw new IllegalStateException("Not supported in this version!"); })
-				.get();
-	}
-	private static final Supplier<Reflection.MethodInvoker> PacketEncoder_encode =
-			Reflection.getOptionalMethod(() -> Reflection.getClass("net.minecraft.class_9142"), () -> "encode", () -> MethodType.methodType(void.class, Object.class, Object.class));
-	public static void packetCodecEncode(Object codec, Object buf, Object value) {
-		Version.newSwitch()
-				.range("1.20.5", null, () -> PacketEncoder_encode.get().invoke(codec, buf, value))
-				.range(null, "1.20.4", () -> { throw new IllegalStateException("Not supported in this version!"); })
-				.run();
-	}
-	
 	private static final Supplier<Class<?>> SystemToast$Type = Reflection.getOptionalClass("net.minecraft.class_370$class_371");
 	private static final Object SystemToast$Type_PACK_LOAD_FAILURE =
 			Version.<Object>newSwitch()
@@ -549,6 +533,18 @@ public class MVMisc {
 						new Class<?>[] {SystemToast$Type.get(), Text.class, Text.class},
 						SystemToast$Type_PACK_LOAD_FAILURE, title, description))
 				.get());
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> ParentElement_setInitialFocus =
+			Reflection.getOptionalMethod(ParentElement.class, "method_20085", MethodType.methodType(void.class, Element.class));
+	public static void setInitialFocus(Screen screen, Element element, Consumer<Element> superCall) {
+		Version.newSwitch()
+				.range("1.19.4", null, () -> {
+					superCall.accept(element);
+					screen.setFocused(element);
+				})
+				.range(null, "1.19.3", () -> ParentElement_setInitialFocus.get().invoke(screen, element))
+				.run();
 	}
 	
 }

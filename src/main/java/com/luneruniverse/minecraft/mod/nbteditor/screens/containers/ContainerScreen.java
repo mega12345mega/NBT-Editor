@@ -16,9 +16,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
@@ -37,8 +35,8 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	private ItemStack[] prevInv;
 	private boolean navigationClicked;
 	
-	public ContainerScreen(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
-		super(handler, inventory, title);
+	private ContainerScreen(ContainerHandler handler, Text title) {
+		super(handler, title);
 		
 		this.saved = true;
 		this.unsavedTitle = TextInst.copy(title).append("*");
@@ -59,10 +57,9 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		return this;
 	}
 	public static <L extends LocalNBT> void show(NBTReference<L> ref, Optional<ItemStack> cursor) {
-		PlayerInventory inv = MainUtil.client.player.getInventory();
-		ContainerHandler handler = new ContainerHandler(0, inv);
+		ContainerHandler handler = new ContainerHandler();
 		handler.setCursorStack(cursor.orElse(MainUtil.client.player.playerScreenHandler.getCursorStack()));
-		MainUtil.client.setScreen(new ContainerScreen<L>(handler, inv, TextInst.translatable("nbteditor.container.title")
+		MainUtil.client.setScreen(new ContainerScreen<L>(handler, TextInst.translatable("nbteditor.container.title")
 				.append(ref.getLocalNBT().getName())).build(ref));
 	}
 	public static void show(NBTReference<?> ref) {
@@ -165,8 +162,10 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		
 		if (keyCode == GLFW.GLFW_KEY_SPACE) {
 			if (focusedSlot != null && (focusedSlot.id < numSlots || focusedSlot.inventory != this.handler.getInventory())) {
-				if (handleKeybind(keyCode, focusedSlot, slot -> new ContainerItemReference<>(ref, slot.getIndex()), handler.getCursorStack()))
+				if (handleKeybind(keyCode, focusedSlot, this,
+						slot -> new ContainerItemReference<>(ref, slot.getIndex()), handler.getCursorStack())) {
 					return true;
+				}
 			}
 		}
 		

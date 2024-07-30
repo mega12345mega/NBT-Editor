@@ -40,7 +40,7 @@ public abstract class HandledScreenItemReference implements ItemReference {
 	
 	@Override
 	public void escapeParent(Optional<ItemStack> cursor) {
-		cursor.ifPresent(value -> MainUtil.setRootCursorStack(getDefaultedParent().getScreenHandler(), value));
+		cursor.ifPresent(MainUtil::setInventoryCursorStack);
 		MainUtil.client.player.closeHandledScreen();
 	}
 	

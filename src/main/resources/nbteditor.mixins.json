@@ -12,13 +12,15 @@
     "HorseScreenHandlerMixin",
     "HorseScreenHandler1and2Mixin",
     "DataTrackerMixin",
-    "ThreadExecutorMixin"
+    "ThreadExecutorMixin",
+    "ClickSlotC2SPacketMixin",
+    "PlayerScreenHandler1Mixin"
   ],
   "client": [
     "ChatScreenMixin",
     "ChatScreenAccessor",
-    "SendPacketMixin",
-    "ReceivePacketMixin",
+    "ClientConnectionMixin",
+    "ClientPlayNetworkHandlerMixin",
     "NbtStringMixin",
     "StringNbtWriterAccessor",
     "CreativeInventoryScreenMixin",
@@ -34,7 +36,6 @@
     "ScreenshotRecorderMixin",
     "UtilMixin",
     "KeyboardMixin",
-    "PlayerScreenHandler1Mixin",
     "GameRendererMixin",
     "ChatInputSuggestorMixin",
     "ClientPlayerEntityMixin",
