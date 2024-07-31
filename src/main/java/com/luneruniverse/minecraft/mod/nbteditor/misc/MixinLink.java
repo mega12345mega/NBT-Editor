@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.misc;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,14 +69,16 @@ public class MixinLink {
 	public static boolean CLIENT_LOADED = false;
 	
 	public static void addCreativeTabs(Screen source) {
-		int i = -1;
-		List<CreativeTab> tabs = new ArrayList<>();
-		for (CreativeTab.CreativeTabData tab : CreativeTab.TABS) {
-			if (tab.whenToShow().test(source))
-				tabs.add(new CreativeTab(source, (++i) * (CreativeTab.WIDTH + 2) + 10, tab.item(), tab.onClick()));
-		}
-		if (!tabs.isEmpty())
+		List<CreativeTab.CreativeTabData> tabData = CreativeTab.TABS.stream().filter(tab -> tab.whenToShow().test(source)).toList();
+		if (!tabData.isEmpty()) {
+			List<CreativeTab> tabs = new ArrayList<>();
+			for (int i = 0; i < tabData.size(); i++) {
+				CreativeTab.CreativeTabData tab = tabData.get(i);
+				Point pos = ConfigScreen.getCreativeTabsPos().position(i, tabData.size(), source.width, source.height);
+				tabs.add(new CreativeTab(ConfigScreen.getCreativeTabsPos().isTop(), pos.x, pos.y, tab.item(), tab.onClick()));
+			}
 			source.addDrawableChild(new CreativeTab.CreativeTabGroup(tabs));
+		}
 	}
 	
 	

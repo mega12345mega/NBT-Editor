@@ -58,47 +58,58 @@ public class CreativeTab {
 			.range("1.19.3", null, 26)
 			.range(null, "1.19.2", 28)
 			.get();
+	public static final int HEIGHT = 32;
 	
-	private static final Identifier TEXTURE = Version.<Identifier>newSwitch()
-			.range("1.20.2", null, () -> new Identifier("nbteditor", "textures/gui/sprites/container/creative_inventory/tab_top_unselected.png"))
-			.range(null, "1.20.1", () -> new Identifier("textures/gui/container/creative_inventory/tabs.png"))
-			.get();
+	private static final Identifier TEXTURE_TOP;
+	private static final Identifier TEXTURE_BOTTOM;
+	private static final int V_TOP;
+	private static final int V_BOTTOM;
+	static {
+		if (Version.<Boolean>newSwitch()
+				.range("1.20.2", null, true)
+				.range(null, "1.20.1", false)
+				.get()) {
+			TEXTURE_TOP = new Identifier("nbteditor", "textures/gui/sprites/container/creative_inventory/tab_top_unselected.png");
+			TEXTURE_BOTTOM = new Identifier("nbteditor", "textures/gui/sprites/container/creative_inventory/tab_bottom_unselected.png");
+			V_TOP = 0;
+			V_BOTTOM = 0;
+		} else {
+			TEXTURE_TOP = new Identifier("textures/gui/container/creative_inventory/tabs.png");
+			TEXTURE_BOTTOM = new Identifier("textures/gui/container/creative_inventory/tabs.png");
+			V_TOP = 0;
+			V_BOTTOM = 64;
+		}
+	}
 	
-	private final Screen screen;
+	private final boolean bottom;
 	private final int x;
+	private final int y;
 	private final ItemStack item;
 	private final Runnable onClick;
 	
-	public CreativeTab(Screen screen, int x, ItemStack item, Runnable onClick) {
-		this.screen = screen;
+	public CreativeTab(boolean bottom, int x, int y, ItemStack item, Runnable onClick) {
+		this.bottom = bottom;
 		this.x = x;
+		this.y = y;
 		this.item = item;
 		this.onClick = onClick;
 	}
 	
 	private void renderTab(MatrixStack matrices) {
-		int j = 0;
-		int k = 0;
-		int y = screen.height - 32;
-		
-		MVDrawableHelper.drawTexture(matrices, TEXTURE, x, y, j, k, WIDTH, 32);
+		MVDrawableHelper.drawTexture(matrices, bottom ? TEXTURE_BOTTOM : TEXTURE_TOP, x, y + (bottom ? 0 : 2), 0, bottom ? V_BOTTOM : V_TOP, WIDTH, 32);
 		
 		int xOffset = Version.<Integer>newSwitch()
 				.range("1.19.3", null, 5)
 				.range(null, "1.19.2", 6)
 				.get();
-		MVDrawableHelper.renderItem(matrices, 100.0F, false, item, x + xOffset, y + 9);
+		MVDrawableHelper.renderItem(matrices, 100.0F, false, item, x + xOffset, y + (bottom ? 5 : 11));
 	}
 	private void renderTooltip(MatrixStack matrices, int mouseX, int mouseY) {
-		int y = screen.height - 32;
-		
 		if (isHoveringOverTab(x, y, mouseX, mouseY))
 			MVDrawableHelper.renderTooltip(matrices, item.getName(), mouseX, mouseY);
 	}
 	
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		int y = screen.height - 32;
-		
 		if (isHoveringOverTab(x, y, (int) mouseX, (int) mouseY)) {
 			onClick.run();
 			return true;

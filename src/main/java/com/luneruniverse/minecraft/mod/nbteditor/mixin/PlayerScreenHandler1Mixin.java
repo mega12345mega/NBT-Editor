@@ -21,20 +21,20 @@ public class PlayerScreenHandler1Mixin {
 	private void canInsert(ItemStack stack, CallbackInfoReturnable<Boolean> info) {
 		PlayerEntity owner = ((PlayerInventory) ((Slot) (Object) this).inventory).player;
 		if (owner instanceof ServerPlayerEntity) {
-			if (owner.hasPermissionLevel(2) && ServerMixinLink.NO_ARMOR_RESTRICTION_PLAYERS.getOrDefault(owner, false))
+			if (owner.hasPermissionLevel(2) && ServerMixinLink.NO_SLOT_RESTRICTIONS_PLAYERS.getOrDefault(owner, false))
 				info.setReturnValue(true);
 		} else {
-			if (NBTEditorClient.SERVER_CONN.isEditingAllowed() && ConfigScreen.isNoArmorRestriction())
+			if (NBTEditorClient.SERVER_CONN.isEditingAllowed() && ConfigScreen.isNoSlotRestrictions())
 				info.setReturnValue(true);
 		}
 	}
 	@Inject(method = "canTakeItems", at = @At("HEAD"), cancellable = true)
 	private void canTakeItems(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
 		if (player instanceof ServerPlayerEntity) {
-			if (player.hasPermissionLevel(2) && ServerMixinLink.NO_ARMOR_RESTRICTION_PLAYERS.getOrDefault(player, false))
+			if (player.hasPermissionLevel(2) && ServerMixinLink.NO_SLOT_RESTRICTIONS_PLAYERS.getOrDefault(player, false))
 				info.setReturnValue(true);
 		} else {
-			if (NBTEditorClient.SERVER_CONN.isEditingAllowed() && ConfigScreen.isNoArmorRestriction())
+			if (NBTEditorClient.SERVER_CONN.isEditingAllowed() && ConfigScreen.isNoSlotRestrictions())
 				info.setReturnValue(true);
 		}
 	}

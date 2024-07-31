@@ -15,5 +15,5 @@ public interface ItemContainerIO {
 		return true;
 	}
 	public ItemStack[] readItem(ItemStack container);
-	public void writeItem(ItemStack container, ItemStack[] contents);
+	public int writeItem(ItemStack container, ItemStack[] contents);
 }

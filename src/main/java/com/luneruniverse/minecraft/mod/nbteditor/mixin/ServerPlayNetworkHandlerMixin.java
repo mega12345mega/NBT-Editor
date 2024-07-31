@@ -26,6 +26,6 @@ public class ServerPlayNetworkHandlerMixin {
 	
 	@Inject(method = "onClickSlot", at = @At("HEAD"))
 	private void onClickSlot(ClickSlotC2SPacket packet, CallbackInfo info) {
-		ServerMixinLink.NO_ARMOR_RESTRICTION_PLAYERS.put(player, packet.isNoArmorRestriction());
+		ServerMixinLink.NO_SLOT_RESTRICTIONS_PLAYERS.put(player, packet.isNoSlotRestrictions());
 	}
 }

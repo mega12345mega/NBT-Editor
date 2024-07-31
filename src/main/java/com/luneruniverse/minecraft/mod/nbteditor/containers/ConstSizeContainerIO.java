@@ -42,7 +42,7 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
-	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
+	public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
 		boolean itemComponent = NBTManagers.COMPONENTS_EXIST && source == SourceContainerType.ITEM;
 		
 		NbtList itemsNbt = new NbtList();
@@ -64,6 +64,8 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 			itemsNbt.add(itemNbt);
 		}
 		container.put(itemComponent ? "minecraft:container" : "Items", itemsNbt);
+		
+		return numItems;
 	}
 	
 }

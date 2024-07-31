@@ -31,10 +31,11 @@ public class BlockEntityTagContainerIO extends ItemTagContainerIO implements Blo
 		return blockNbtIO.readNBT(getNBT(container), SourceContainerType.BLOCK);
 	}
 	@Override
-	public void writeBlock(LocalBlock container, ItemStack[] contents) {
+	public int writeBlock(LocalBlock container, ItemStack[] contents) {
 		NbtCompound nbt = getNBT(container);
-		blockNbtIO.writeNBT(nbt, contents, SourceContainerType.BLOCK);
+		int output = blockNbtIO.writeNBT(nbt, contents, SourceContainerType.BLOCK);
 		container.setNBT(nbt);
+		return output;
 	}
 	
 }

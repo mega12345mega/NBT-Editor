@@ -19,6 +19,6 @@ public class ServerMixinLink {
 	public static final List<Thread> BLOCK_ENTITY_WRITE_NBT_WITHOUT_IDENTIFYING_DATA = new ArrayList<>();
 	
 	
-	public static final WeakHashMap<ServerPlayerEntity, Boolean> NO_ARMOR_RESTRICTION_PLAYERS = new WeakHashMap<>();
+	public static final WeakHashMap<ServerPlayerEntity, Boolean> NO_SLOT_RESTRICTIONS_PLAYERS = new WeakHashMap<>();
 	
 }

@@ -70,6 +70,9 @@ public class ContainerIO {
 	private static final ItemContainerIO SPAWN_EGG_IO = new SpawnEggContainerIO();
 	private static final EntityTagContainerIO ARMOR_HANDS_IO = new EntityTagContainerIO(new ArmorHandsContainerIO());
 	private static final EntityTagContainerIO HORSE_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("SaddleItem", TagNames.ARMOR_ITEM));
+	private static final EntityTagContainerIO BASIC_HORSE_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("SaddleItem"));
+	private static final EntityTagContainerIO DONKEY_IO = new EntityTagContainerIO(new ConcatNBTContainerIO(new SpecificItemsContainerIO("SaddleItem"), new DonkeyChestContainerIO(false)));
+	private static final EntityTagContainerIO LLAMA_IO = new EntityTagContainerIO(new ConcatNBTContainerIO(new SpecificItemsContainerIO(TagNames.ARMOR_ITEM), new DonkeyChestContainerIO(true)));
 	
 	public static void loadClass() {}
 	
@@ -116,6 +119,16 @@ public class ContainerIO {
 		}
 		
 		registerEntityIO(EntityType.HORSE, HORSE_IO);
+		registerEntityIO(EntityType.SKELETON_HORSE, BASIC_HORSE_IO);
+		registerEntityIO(EntityType.ZOMBIE_HORSE, BASIC_HORSE_IO);
+		Version.newSwitch()
+				.range("1.20.0", null, () -> registerEntityIO(EntityType.CAMEL, BASIC_HORSE_IO))
+				.range(null, "1.19.4", () -> {})
+				.run();
+		registerEntityIO(EntityType.DONKEY, DONKEY_IO);
+		registerEntityIO(EntityType.MULE, DONKEY_IO);
+		registerEntityIO(EntityType.LLAMA, LLAMA_IO);
+		registerEntityIO(EntityType.TRADER_LLAMA, LLAMA_IO);
 		MVClientNetworking.PlayNetworkStateEvents.Join.EVENT.register(() -> {
 			for (EntityType<?> entity : MVRegistry.ENTITY_TYPE) {
 				if (ENTITY_IO.containsKey(entity))
@@ -155,8 +168,8 @@ public class ContainerIO {
 		}
 		return output;
 	}
-	public static void write(ItemStack container, ItemStack[] contents) {
-		ITEM_IO.get(container.getItem()).writeItem(container, contents);
+	public static int write(ItemStack container, ItemStack[] contents) {
+		return ITEM_IO.get(container.getItem()).writeItem(container, contents);
 	}
 	
 	public static int getMaxSize(LocalNBT nbt) {
@@ -205,19 +218,13 @@ public class ContainerIO {
 		}
 		return output;
 	}
-	public static void write(LocalNBT container, ItemStack[] contents) {
-		if (container instanceof LocalItem item) {
-			ITEM_IO.get(item.getItemType()).writeItem(item.getEditableItem(), contents);
-			return;
-		}
-		if (container instanceof LocalBlock block) {
-			BLOCK_IO.get(block.getBlock()).writeBlock(block, contents);
-			return;
-		}
-		if (container instanceof LocalEntity entity) {
-			ENTITY_IO.get(entity.getEntityType()).writeEntity(entity, contents);
-			return;
-		}
+	public static int write(LocalNBT container, ItemStack[] contents) {
+		if (container instanceof LocalItem item)
+			return ITEM_IO.get(item.getItemType()).writeItem(item.getEditableItem(), contents);
+		if (container instanceof LocalBlock block)
+			return BLOCK_IO.get(block.getBlock()).writeBlock(block, contents);
+		if (container instanceof LocalEntity entity)
+			return ENTITY_IO.get(entity.getEntityType()).writeEntity(entity, contents);
 		throw new IllegalArgumentException("Not a container!");
 	}
 	

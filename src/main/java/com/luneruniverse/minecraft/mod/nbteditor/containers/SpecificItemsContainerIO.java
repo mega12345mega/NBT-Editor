@@ -42,13 +42,15 @@ public class SpecificItemsContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
-	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
+	public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
 		for (int i = 0; i < keys.length; i++) {
 			ItemStack item = null;
 			if (i < contents.length)
 				item = contents[i];
 			writeKey(container, keys[i], item, source);
 		}
+		
+		return keys.length;
 	}
 	
 }

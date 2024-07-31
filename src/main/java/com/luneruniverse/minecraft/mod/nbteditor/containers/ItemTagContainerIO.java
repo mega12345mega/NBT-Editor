@@ -50,10 +50,11 @@ public class ItemTagContainerIO implements ItemContainerIO {
 	}
 	
 	@Override
-	public void writeItem(ItemStack container, ItemStack[] contents) {
+	public int writeItem(ItemStack container, ItemStack[] contents) {
 		NbtCompound nbt = getNBT(container);
-		nbtIO.writeNBT(nbt, contents, SourceContainerType.ITEM);
+		int output = nbtIO.writeNBT(nbt, contents, SourceContainerType.ITEM);
 		setNBT(container, nbt);
+		return output;
 	}
 	
 }

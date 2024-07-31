@@ -12,6 +12,8 @@ public class SpawnEggContainerIO implements ItemContainerIO {
 	
 	@Override
 	public int getMaxItemSize(ItemStack item) {
+		if (item == null)
+			return 0;
 		NbtCompound nbt = item.manager$getNbt();
 		NbtCompound entityTag = (nbt == null ? new NbtCompound() : nbt.getCompound(TagNames.ENTITY_TAG));
 		return ContainerIO.getMaxSize(new LocalEntity(MVMisc.getEntityType(item), entityTag));
@@ -32,11 +34,12 @@ public class SpawnEggContainerIO implements ItemContainerIO {
 	}
 	
 	@Override
-	public void writeItem(ItemStack container, ItemStack[] contents) {
+	public int writeItem(ItemStack container, ItemStack[] contents) {
 		LocalEntity entity = new LocalEntity(MVMisc.getEntityType(container),
 				container.manager$getOrCreateNbt().getCompound(TagNames.ENTITY_TAG));
-		ContainerIO.write(entity, contents);
+		int output = ContainerIO.write(entity, contents);
 		container.manager$modifyNbt(nbt -> nbt.put(TagNames.ENTITY_TAG, MainUtil.fillId(entity.getNBT())));
+		return output;
 	}
 	
 }

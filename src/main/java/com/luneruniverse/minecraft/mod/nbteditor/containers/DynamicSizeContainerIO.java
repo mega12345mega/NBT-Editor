@@ -36,10 +36,12 @@ public class DynamicSizeContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
-	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
-		container.put(key, Arrays.stream(contents).limit(maxSize)
+	public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
+		NbtList nbt = Arrays.stream(contents).limit(maxSize)
 				.filter(item -> item != null && !item.isEmpty()).map(ItemStack::manager$serialize)
-				.collect(NbtList::new, NbtList::add, NbtList::addAll));
+				.collect(NbtList::new, NbtList::add, NbtList::addAll);
+		container.put(key, nbt);
+		return nbt.size();
 	}
 	
 }

@@ -15,5 +15,5 @@ public interface NBTContainerIO {
 		return true;
 	}
 	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source);
-	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source);
+	public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source);
 }

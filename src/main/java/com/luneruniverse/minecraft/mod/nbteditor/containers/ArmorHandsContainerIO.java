@@ -30,7 +30,7 @@ public class ArmorHandsContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
-	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
+	public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
 		ItemStack[] actualContents = new ItemStack[6];
 		for (int i = 0; i < 6; i++) {
 			ItemStack item = null;
@@ -50,6 +50,8 @@ public class ArmorHandsContainerIO implements NBTContainerIO {
 		for (int i = 0; i < 2; i++)
 			handItemsNbt.add(actualContents[4 + i].manager$serialize());
 		container.put("HandItems", handItemsNbt);
+		
+		return 6;
 	}
 	
 }

@@ -31,10 +31,11 @@ public class EntityTagContainerIO extends ItemTagContainerIO implements EntityCo
 		return entityNbtIO.readNBT(getNBT(container), SourceContainerType.ENTITY);
 	}
 	@Override
-	public void writeEntity(LocalEntity container, ItemStack[] contents) {
+	public int writeEntity(LocalEntity container, ItemStack[] contents) {
 		NbtCompound nbt = getNBT(container);
-		entityNbtIO.writeNBT(nbt, contents, SourceContainerType.ENTITY);
+		int output = entityNbtIO.writeNBT(nbt, contents, SourceContainerType.ENTITY);
 		container.setNBT(nbt);
+		return output;
 	}
 	
 }
