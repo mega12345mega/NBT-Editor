@@ -2,7 +2,6 @@ package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
@@ -67,8 +66,8 @@ public class ArmorItemReference extends HandledScreenItemReference {
 	}
 	
 	@Override
-	public HandledScreen<?> getDefaultParent() {
-		return new InventoryScreen(MainUtil.client.player);
+	public HandledScreenItemReferenceParent getDefaultParent() {
+		return HandledScreenItemReferenceParent.forRoot(new InventoryScreen(MainUtil.client.player));
 	}
 	
 }

@@ -16,8 +16,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVNetwo
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacketCustomPayload;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVServerNetworking;
-import com.luneruniverse.minecraft.mod.nbteditor.server.ClientLink;
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
@@ -40,7 +40,7 @@ public abstract class ClientConnectionMixin {
 	@Inject(method = "disconnect", at = @At("HEAD"))
 	private void disconnect(Text reason, CallbackInfo info) {
 		if (isOpen()) {
-			if (!NBTEditorServer.IS_DEDICATED && ClientLink.isInstanceOfClientPlayNetworkHandler(packetListener))
+			if (!NBTEditorServer.IS_DEDICATED && ServerMixinLink.isInstanceOfClientPlayNetworkHandlerSafely(packetListener))
 				MVClientNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop();
 			if (packetListener instanceof ServerPlayNetworkHandler handler)
 				MVServerNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop(handler.player);
@@ -57,7 +57,7 @@ public abstract class ClientConnectionMixin {
 			Reflection.getOptionalMethod(CustomPayloadC2SPacket.class, "method_36170", MethodType.methodType(PacketByteBuf.class));
 	@Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
 	private static void handlePacket(Packet<?> packet, PacketListener listener, CallbackInfo info) {
-		if (!NBTEditorServer.IS_DEDICATED && ClientLink.isInstanceOfClientPlayNetworkHandler(listener) && packet instanceof CustomPayloadS2CPacket customPacket) {
+		if (!NBTEditorServer.IS_DEDICATED && ServerMixinLink.isInstanceOfClientPlayNetworkHandlerSafely(listener) && packet instanceof CustomPayloadS2CPacket customPacket) {
 			MVPacket mvPacket = Version.<MVPacket>newSwitch()
 					.range("1.20.2", null, () -> MVPacketCustomPayload.unwrapS2C(customPacket))
 					.range(null, "1.20.1", () -> MVNetworking.readPacket(

@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -9,33 +10,62 @@ import net.minecraft.item.ItemStack;
 
 public abstract class HandledScreenItemReference implements ItemReference {
 	
-	private HandledScreen<?> parent;
+	public static interface HandledScreenItemReferenceParent {
+		public static HandledScreenItemReferenceParent create(Consumer<Optional<ItemStack>> show, Runnable clearCursor) {
+			return new HandledScreenItemReferenceParent() {
+				@Override
+				public void show(Optional<ItemStack> cursor) {
+					show.accept(cursor);
+				}
+				@Override
+				public void clearCursor() {
+					clearCursor.run();
+				}
+			};
+		}
+		public static HandledScreenItemReferenceParent forRoot(HandledScreen<?> screen) {
+			return new HandledScreenItemReferenceParent() {
+				@Override
+				public void show(Optional<ItemStack> cursor) {
+					cursor.ifPresent(value -> MainUtil.setRootCursorStack(screen.getScreenHandler(), value));
+					MainUtil.client.player.currentScreenHandler = screen.getScreenHandler();
+					MainUtil.client.setScreen(screen);
+				}
+				@Override
+				public void clearCursor() {
+					MainUtil.setRootCursorStack(screen.getScreenHandler(), ItemStack.EMPTY);
+				}
+			};
+		}
+		
+		public void show(Optional<ItemStack> cursor);
+		public void clearCursor();
+	}
 	
-	public HandledScreenItemReference(HandledScreen<?> parent) {
+	private HandledScreenItemReferenceParent parent;
+	
+	public HandledScreenItemReference(HandledScreenItemReferenceParent parent) {
 		this.parent = parent;
 	}
 	public HandledScreenItemReference() {
 		this(null);
 	}
 	
-	public HandledScreenItemReference setParent(HandledScreen<?> parent) {
+	public HandledScreenItemReference setParent(HandledScreenItemReferenceParent parent) {
 		this.parent = parent;
 		return this;
 	}
-	public HandledScreen<?> getParent() {
+	public HandledScreenItemReferenceParent getParent() {
 		return parent;
 	}
-	public HandledScreen<?> getDefaultedParent() {
+	public HandledScreenItemReferenceParent getDefaultedParent() {
 		return (parent == null ? getDefaultParent() : parent);
 	}
-	public abstract HandledScreen<?> getDefaultParent();
+	public abstract HandledScreenItemReferenceParent getDefaultParent();
 	
 	@Override
 	public void showParent(Optional<ItemStack> cursor) {
-		HandledScreen<?> newScreen = getDefaultedParent();
-		cursor.ifPresent(value -> MainUtil.setRootCursorStack(newScreen.getScreenHandler(), value));
-		MainUtil.client.player.currentScreenHandler = newScreen.getScreenHandler();
-		MainUtil.client.setScreen(newScreen);
+		getDefaultedParent().show(cursor);
 	}
 	
 	@Override
@@ -46,7 +76,7 @@ public abstract class HandledScreenItemReference implements ItemReference {
 	
 	@Override
 	public void clearParentCursor() {
-		MainUtil.setRootCursorStack(getDefaultedParent().getScreenHandler(), ItemStack.EMPTY);
+		getDefaultedParent().clearCursor();
 	}
 	
 }

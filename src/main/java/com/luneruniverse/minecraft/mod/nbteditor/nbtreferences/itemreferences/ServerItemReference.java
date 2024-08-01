@@ -14,11 +14,13 @@ import net.minecraft.screen.slot.Slot;
 public class ServerItemReference extends HandledScreenItemReference {
 	
 	private final int slot;
+	private final HandledScreen<?> screen;
 	private ItemStack item;
 	
 	public ServerItemReference(int slot, HandledScreen<?> screen) {
-		super(screen);
+		super(HandledScreenItemReferenceParent.forRoot(screen));
 		this.slot = slot;
+		this.screen = screen;
 		
 		if (slot == -1) {
 			item = screen.getScreenHandler().getCursorStack();
@@ -44,10 +46,10 @@ public class ServerItemReference extends HandledScreenItemReference {
 	public void saveItem(ItemStack toSave, Runnable onFinished) {
 		item = toSave;
 		if (slot == -1)
-			getParent().getScreenHandler().setCursorStack(toSave);
+			screen.getScreenHandler().setCursorStack(toSave);
 		else
-			getParent().getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
-		if (getParent() instanceof InventoryScreen || NBTEditorClient.SERVER_CONN.isContainerScreen()) {
+			screen.getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
+		if (screen instanceof InventoryScreen || NBTEditorClient.SERVER_CONN.isContainerScreen()) {
 			if (slot == -1)
 				MVClientNetworking.send(new SetCursorC2SPacket(toSave));
 			else
@@ -77,11 +79,11 @@ public class ServerItemReference extends HandledScreenItemReference {
 	}
 	
 	@Override
-	public HandledScreenItemReference setParent(HandledScreen<?> parent) {
+	public HandledScreenItemReference setParent(HandledScreenItemReferenceParent parent) {
 		throw new UnsupportedOperationException("ServerItemReferences cannot have custom parents");
 	}
 	@Override
-	public HandledScreen<?> getDefaultParent() {
+	public HandledScreenItemReferenceParent getDefaultParent() {
 		throw new UnsupportedOperationException("ServerItemReferences cannot have default parents");
 	}
 	

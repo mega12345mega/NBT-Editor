@@ -8,7 +8,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVServerNetworking;
-import com.luneruniverse.minecraft.mod.nbteditor.server.ClientLink;
+import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
@@ -33,10 +34,10 @@ public class ClientConnectionMixin_1_20_4 {
 	@Inject(method = "method_10763(Lnet/minecraft/class_2547;)V", at = @At("RETURN"), remap = false)
 	@SuppressWarnings("target")
 	private void setPacketListener_return(PacketListener listener, CallbackInfo info) {
-		if (side == NetworkSide.CLIENTBOUND) {
-			if (ClientLink.isInstanceOfClientPlayNetworkHandler(listener))
+		if (side == NetworkSide.CLIENTBOUND && !NBTEditorServer.IS_DEDICATED) {
+			if (ServerMixinLink.isInstanceOfClientPlayNetworkHandlerSafely(listener))
 				MVClientNetworking.PlayNetworkStateEvents.Start.EVENT.invoker().onPlayStart();
-			else if (ClientLink.isInstanceOfClientPlayNetworkHandler(prevListener))
+			else if (ServerMixinLink.isInstanceOfClientPlayNetworkHandlerSafely(prevListener))
 				MVClientNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop();
 		}
 		if (side == NetworkSide.SERVERBOUND) {

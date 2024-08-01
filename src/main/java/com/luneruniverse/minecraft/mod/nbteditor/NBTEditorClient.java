@@ -84,6 +84,7 @@ public class NBTEditorClient implements ClientModInitializer {
 				},
 				screen -> screen instanceof ClientChestScreen);
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST), () -> {
+					MainUtil.setInventoryCursorStack(MainUtil.client.player.currentScreenHandler.getCursorStack());
 					MainUtil.client.player.closeHandledScreen();
 					MVClientNetworking.send(new OpenEnderChestC2SPacket());
 				}, screen -> (screen instanceof CreativeInventoryScreen || screen instanceof InventoryScreen || screen instanceof ClientChestScreen)

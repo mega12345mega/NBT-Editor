@@ -32,6 +32,10 @@ public class HorseScreenHandler1and2Mixin {
 		PlayerEntity owner = ServerMixinLink.SLOT_OWNER.get((Slot) (Object) this);
 		if (owner == null)
 			return;
+		if (!((Slot) (Object) this).isEnabled()) {
+			info.setReturnValue(false);
+			return;
+		}
 		if (owner instanceof ServerPlayerEntity) {
 			if (owner.hasPermissionLevel(2) && ServerMixinLink.NO_SLOT_RESTRICTIONS_PLAYERS.getOrDefault(owner, false))
 				info.setReturnValue(true);

@@ -12,6 +12,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.PassContainerSlotUpdates;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandledScreenItemReference.HandledScreenItemReferenceParent;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.InventoryItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -25,7 +26,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -74,7 +74,8 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		}
 	}
 	
-	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, HandledScreen<?> parent, Function<Slot, ItemReference> containerRef, ItemStack cursor) {
+	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, HandledScreenItemReferenceParent parent,
+			Function<Slot, ItemReference> containerRef, ItemStack cursor) {
 		if (keyCode == GLFW.GLFW_KEY_SPACE) {
 			if (hoveredSlot != null && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
 				int slot = hoveredSlot.getIndex();

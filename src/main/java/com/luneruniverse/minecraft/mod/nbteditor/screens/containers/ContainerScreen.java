@@ -11,6 +11,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ContainerItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandledScreenItemReference.HandledScreenItemReferenceParent;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
@@ -57,6 +58,11 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		return this;
 	}
 	public static <L extends LocalNBT> void show(NBTReference<L> ref, Optional<ItemStack> cursor) {
+		if (ref.getLocalNBT().isEmpty()) {
+			ref.showParent(cursor);
+			return;
+		}
+		
 		ContainerHandler handler = new ContainerHandler();
 		handler.setCursorStack(cursor.orElse(MainUtil.client.player.playerScreenHandler.getCursorStack()));
 		MainUtil.client.setScreen(new ContainerScreen<L>(handler, TextInst.translatable("nbteditor.container.title")
@@ -162,7 +168,9 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		
 		if (keyCode == GLFW.GLFW_KEY_SPACE) {
 			if (focusedSlot != null && (focusedSlot.id < numSlots || focusedSlot.inventory != this.handler.getInventory())) {
-				if (handleKeybind(keyCode, focusedSlot, this,
+				if (handleKeybind(keyCode, focusedSlot,
+						HandledScreenItemReferenceParent.create(
+								cursor -> show(ref, cursor), () -> handler.setCursorStack(ItemStack.EMPTY)),
 						slot -> new ContainerItemReference<>(ref, slot.getIndex()), handler.getCursorStack())) {
 					return true;
 				}

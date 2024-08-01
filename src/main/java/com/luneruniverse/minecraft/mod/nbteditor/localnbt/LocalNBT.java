@@ -93,5 +93,6 @@ public interface LocalNBT {
 	public Text toHoverableText();
 	
 	public LocalNBT copy();
+	@Override
 	public boolean equals(Object nbt);
 }

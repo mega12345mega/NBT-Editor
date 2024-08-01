@@ -10,6 +10,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandledScreenItemReference.HandledScreenItemReferenceParent;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -71,7 +72,8 @@ public interface ItemReference extends NBTReference<LocalItem> {
 		
 		Slot slotObj = screen.getScreenHandler().getSlot(slot);
 		if (slotObj.inventory == MainUtil.client.player.getInventory()) {
-			return getInventoryOrArmorItem(slotObj.getIndex(), false).setParent(screen);
+			return getInventoryOrArmorItem(slotObj.getIndex(), false)
+					.setParent(HandledScreenItemReferenceParent.forRoot(screen));
 		}
 		return new ServerItemReference(slot, screen);
 	}

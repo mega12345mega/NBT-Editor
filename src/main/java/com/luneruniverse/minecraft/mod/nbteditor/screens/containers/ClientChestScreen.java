@@ -13,6 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ClientChestItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandledScreenItemReference.HandledScreenItemReferenceParent;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestDataVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
@@ -264,7 +265,9 @@ public class ClientChestScreen extends ClientHandledScreen {
 			return true;
 		}
 		
-		return !handleKeybind(keyCode, focusedSlot, this,
+		return !handleKeybind(keyCode, focusedSlot,
+						HandledScreenItemReferenceParent.create(
+								ClientChestScreen::show, () -> handler.setCursorStack(ItemStack.EMPTY)),
 						slot -> new ClientChestItemReference(PAGE, slot.getIndex()), handler.getCursorStack()) &&
 				!this.nameField.keyPressed(keyCode, scanCode, modifiers) && !this.nameField.isActive() &&
 				!this.pageField.keyPressed(keyCode, scanCode, modifiers) && !this.pageField.isActive()
