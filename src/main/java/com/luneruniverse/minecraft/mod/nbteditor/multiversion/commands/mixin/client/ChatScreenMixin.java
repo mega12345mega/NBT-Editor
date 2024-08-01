@@ -13,7 +13,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.util.StringHelper;
 
 @Mixin(ChatScreen.class)
 public class ChatScreenMixin {
@@ -47,6 +46,6 @@ public class ChatScreenMixin {
 				MainUtil.client.setScreen(null);
 			info.setReturnValue(true);
 		} else
-			chatField.text = StringHelper.truncateChat(text);
+			chatField.text = (text.length() <= 256 ? text : text.substring(0, 256));
 	}
 }

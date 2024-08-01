@@ -52,7 +52,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvents.Start {
 	
-	public static final int PROTOCOL_VERSION = 0;
+	public static final int PROTOCOL_VERSION = 1;
 	public static boolean IS_DEDICATED = true;
 	
 	public NBTEditorServer() {
