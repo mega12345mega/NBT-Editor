@@ -4,6 +4,7 @@ import java.lang.invoke.MethodType;
 import java.util.function.Supplier;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.text.MutableText;
@@ -45,7 +46,7 @@ public class TextInst {
 	public static Text fromJson(String json) {
 		return Version.<Text>newSwitch()
 				.range("1.20.5", null, () -> Text.Serialization.fromJson(json, DynamicRegistryManagerHolder.get()))
-				.range(null, "1.20.4", () -> Text$Serialization_fromJson.get().invoke(null, json))
+				.range(null, "1.20.4", () -> Text$Serialization_fromJson.get().invokeThrowable(JsonParseException.class, null, json))
 				.get();
 	}
 	private static final Supplier<Reflection.MethodInvoker> Text$Serialization_toJsonString =
