@@ -15,9 +15,7 @@ public class NbtStringMixin {
 	
 	@Inject(at = @At(value = "HEAD"), method = "copy", cancellable = true)
     private void copy(CallbackInfoReturnable<NbtString> info) {
-        info.setReturnValue(NbtString.of(
-        		((NbtString) (Object) this).asString()
-        	));
+        info.setReturnValue(NbtString.of(((NbtString) (Object) this).asString()));
         info.cancel();
     }
 	@Inject(at = @At(value = "HEAD"), method = "getNbtType", cancellable = true)

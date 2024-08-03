@@ -1,15 +1,21 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItemStack;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.TagNames;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.block.Block;
@@ -55,13 +61,18 @@ public class ContainerIO {
 	private static final BlockEntityTagContainerIO JUKEBOX_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("RecordItem"));
 	private static final BlockEntityTagContainerIO LECTERN_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("Book"));
 	private static final EntityTagContainerIO ITEM_FRAME_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("Item"));
-	private static final ItemContainerIO BUNDLE_IO = ItemContainerIO.forNBTIO(new DynamicSizeContainerIO(27));
+	private static final ItemContainerIO BUNDLE_IO = ItemContainerIO.forNBTIO(new DynamicSizeContainerIO(TagNames.BUNDLE_CONTENTS, 27));
 	private static final BlockEntityTagContainerIO CHISELED_BOOKSHELF_IO = new ChiseledBookshelfContainerIO();
 	private static final BlockEntityTagContainerIO SUSPICIOUS_SAND_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item"));
-	private static final BlockEntityTagContainerIO DECORATED_POT_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item"));
+	private static final BlockEntityTagContainerIO DECORATED_POT_IO = (NBTManagers.COMPONENTS_EXIST ?
+			new BlockEntityTagContainerIO(new ConstSizeContainerIO(1), new SpecificItemsContainerIO("item")) :
+				new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item")));
 	private static final ItemContainerIO SPAWN_EGG_IO = new SpawnEggContainerIO();
 	private static final EntityTagContainerIO ARMOR_HANDS_IO = new EntityTagContainerIO(new ArmorHandsContainerIO());
-	private static final EntityTagContainerIO HORSE_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("SaddleItem", "ArmorItem"));
+	private static final EntityTagContainerIO HORSE_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("SaddleItem", TagNames.ARMOR_ITEM));
+	private static final EntityTagContainerIO BASIC_HORSE_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("SaddleItem"));
+	private static final EntityTagContainerIO DONKEY_IO = new EntityTagContainerIO(new ConcatNBTContainerIO(new SpecificItemsContainerIO("SaddleItem"), new DonkeyChestContainerIO(false)));
+	private static final EntityTagContainerIO LLAMA_IO = new EntityTagContainerIO(new ConcatNBTContainerIO(new SpecificItemsContainerIO(TagNames.ARMOR_ITEM), new DonkeyChestContainerIO(true)));
 	
 	public static void loadClass() {}
 	
@@ -71,7 +82,7 @@ public class ContainerIO {
 		registerBlockEntityTagIO((BlockItem) Items.TRAPPED_CHEST, CHEST_IO);
 		registerBlockEntityTagIO((BlockItem) Items.BARREL, CHEST_IO);
 		for (Item item : MVRegistry.ITEM) {
-			if (item instanceof BlockItem blockItem && blockItem.getBlock() instanceof ShulkerBoxBlock block)
+			if (item instanceof BlockItem blockItem && blockItem.getBlock() instanceof ShulkerBoxBlock)
 				registerBlockEntityTagIO(blockItem, CHEST_IO);
 		}
 		
@@ -101,13 +112,23 @@ public class ContainerIO {
 				.range(null, "1.19.4", () -> {})
 				.run();
 		
-		registerItemIO(Items.ARMOR_STAND, ARMOR_HANDS_IO);
+		registerEntityTagIO(Items.ARMOR_STAND, EntityType.ARMOR_STAND, ARMOR_HANDS_IO);
 		for (Item item : MVRegistry.ITEM) {
 			if (item instanceof SpawnEggItem spawnEgg)
 				registerItemIO(spawnEgg, SPAWN_EGG_IO);
 		}
 		
 		registerEntityIO(EntityType.HORSE, HORSE_IO);
+		registerEntityIO(EntityType.SKELETON_HORSE, BASIC_HORSE_IO);
+		registerEntityIO(EntityType.ZOMBIE_HORSE, BASIC_HORSE_IO);
+		Version.newSwitch()
+				.range("1.20.0", null, () -> registerEntityIO(EntityType.CAMEL, BASIC_HORSE_IO))
+				.range(null, "1.19.4", () -> {})
+				.run();
+		registerEntityIO(EntityType.DONKEY, DONKEY_IO);
+		registerEntityIO(EntityType.MULE, DONKEY_IO);
+		registerEntityIO(EntityType.LLAMA, LLAMA_IO);
+		registerEntityIO(EntityType.TRADER_LLAMA, LLAMA_IO);
 		MVClientNetworking.PlayNetworkStateEvents.Join.EVENT.register(() -> {
 			for (EntityType<?> entity : MVRegistry.ENTITY_TYPE) {
 				if (ENTITY_IO.containsKey(entity))
@@ -118,6 +139,23 @@ public class ContainerIO {
 		});
 	}
 	
+	public static int getMaxSize(Item item) {
+		ItemContainerIO io = ITEM_IO.get(item);
+		return io == null ? 0 : io.getMaxItemSize(null);
+	}
+	public static int getMaxSize(Block block) {
+		BlockContainerIO io = BLOCK_IO.get(block);
+		return io == null ? 0 : io.getMaxBlockSize(null);
+	}
+	public static int getMaxSize(EntityType<?> entity) {
+		EntityContainerIO io = ENTITY_IO.get(entity);
+		return io == null ? 0 : io.getMaxEntitySize(null);
+	}
+	
+	public static int getMaxSize(ItemStack item) {
+		ItemContainerIO io = ITEM_IO.get(item.getItem());
+		return io == null ? 0 : io.getMaxItemSize(item);
+	}
 	public static boolean isContainer(ItemStack item) {
 		ItemContainerIO io = ITEM_IO.get(item.getItem());
 		return io != null && io.isItemReadable(item);
@@ -130,14 +168,29 @@ public class ContainerIO {
 		}
 		return output;
 	}
-	public static void write(ItemStack container, ItemStack[] contents) {
-		ITEM_IO.get(container.getItem()).writeItem(container, contents);
+	public static int write(ItemStack container, ItemStack[] contents) {
+		return ITEM_IO.get(container.getItem()).writeItem(container, contents);
 	}
 	
+	public static int getMaxSize(LocalNBT nbt) {
+		if (nbt instanceof LocalItem item) {
+			ItemContainerIO io = ITEM_IO.get(item.getItemType());
+			return io == null ? 0 : io.getMaxItemSize(item.getReadableItem());
+		}
+		if (nbt instanceof LocalBlock block) {
+			BlockContainerIO io = BLOCK_IO.get(block.getBlock());
+			return io == null ? 0 : io.getMaxBlockSize(block);
+		}
+		if (nbt instanceof LocalEntity entity) {
+			EntityContainerIO io = ENTITY_IO.get(entity.getEntityType());
+			return io == null ? 0 : io.getMaxEntitySize(entity);
+		}
+		return 0;
+	}
 	public static boolean isContainer(LocalNBT nbt) {
 		if (nbt instanceof LocalItem item) {
-			ItemContainerIO io = ITEM_IO.get(item.getItem().getItem());
-			return io != null && io.isItemReadable(item.getItem());
+			ItemContainerIO io = ITEM_IO.get(item.getItemType());
+			return io != null && io.isItemReadable(item.getReadableItem());
 		}
 		if (nbt instanceof LocalBlock block) {
 			BlockContainerIO io = BLOCK_IO.get(block.getBlock());
@@ -152,7 +205,7 @@ public class ContainerIO {
 	public static ItemStack[] read(LocalNBT container) {
 		ItemStack[] output = null;
 		if (container instanceof LocalItem item)
-			output = ITEM_IO.get(item.getItem().getItem()).readItem(item.getItem());
+			output = ITEM_IO.get(item.getItemType()).readItem(item.getReadableItem());
 		if (container instanceof LocalBlock block)
 			output = BLOCK_IO.get(block.getBlock()).readBlock(block);
 		if (container instanceof LocalEntity entity)
@@ -165,20 +218,47 @@ public class ContainerIO {
 		}
 		return output;
 	}
-	public static void write(LocalNBT container, ItemStack[] contents) {
-		if (container instanceof LocalItem item) {
-			ITEM_IO.get(item.getItem().getItem()).writeItem(item.getItem(), contents);
-			return;
-		}
-		if (container instanceof LocalBlock block) {
-			BLOCK_IO.get(block.getBlock()).writeBlock(block, contents);
-			return;
-		}
-		if (container instanceof LocalEntity entity) {
-			ENTITY_IO.get(entity.getEntityType()).writeEntity(entity, contents);
-			return;
-		}
+	public static int write(LocalNBT container, ItemStack[] contents) {
+		if (container instanceof LocalItem item)
+			return ITEM_IO.get(item.getItemType()).writeItem(item.getEditableItem(), contents);
+		if (container instanceof LocalBlock block)
+			return BLOCK_IO.get(block.getBlock()).writeBlock(block, contents);
+		if (container instanceof LocalEntity entity)
+			return ENTITY_IO.get(entity.getEntityType()).writeEntity(entity, contents);
 		throw new IllegalArgumentException("Not a container!");
+	}
+	
+	private static void writeRecursively(LocalNBT container, Supplier<ItemStack> subContainers, List<ItemStack> contents, String path) {
+		int maxSize = getMaxSize(container);
+		
+		if (contents.size() <= maxSize) {
+			write(container, contents.toArray(ItemStack[]::new));
+			return;
+		}
+		
+		ItemStack[] sections = new ItemStack[maxSize];
+		
+		int sectionSize = maxSize;
+		while (contents.size() / sectionSize > maxSize)
+			sectionSize *= maxSize;
+		for (int i = 0; i < maxSize; i++) {
+			if (i * sectionSize >= contents.size())
+				break;
+			
+			ItemStack section = subContainers.get();
+			String subPath = (path == null ? i + "" : path + "." + i);
+			section.manager$setCustomName(TextInst.of(TextInst.translatable("nbteditor.hdb.section").getString() + ": " + subPath));
+			writeRecursively(new LocalItemStack(section), subContainers, contents.subList(i * sectionSize, Math.min(contents.size(), (i + 1) * sectionSize)), subPath);
+			sections[i] = section;
+		}
+		
+		write(container, sections);
+	}
+	public static void writeRecursively(LocalNBT container, Supplier<ItemStack> subContainers, List<ItemStack> contents) {
+		writeRecursively(container, subContainers, contents, null);
+	}
+	public static void writeRecursively(ItemStack container, List<ItemStack> contents) {
+		writeRecursively(new LocalItemStack(container), () -> new ItemStack(Items.SHULKER_BOX), contents);
 	}
 	
 }

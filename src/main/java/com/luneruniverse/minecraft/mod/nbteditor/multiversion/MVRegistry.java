@@ -54,13 +54,17 @@ public class MVRegistry<T> implements Iterable<T> {
 				.get(null));
 	}
 	
+	public static final MVRegistry<? extends Registry<?>> REGISTRIES = getRegistry("field_11144", "field_41167", false);
 	public static final MVRegistry<ScreenHandlerType<?>> SCREEN_HANDLER = getRegistry("field_17429", "field_41187", false);
 	public static final MVRegistry<Item> ITEM = getRegistry("field_11142", "field_41178", true);
 	public static final MVRegistry<Block> BLOCK = getRegistry("field_11146", "field_41175", true);
 	public static final MVRegistry<EntityType<?>> ENTITY_TYPE = getRegistry("field_11145", "field_41177", true);
 	public static final MVRegistry<Enchantment> ENCHANTMENT = getRegistry("field_11160", "field_41176", false);
 	public static final MVRegistry<EntityAttribute> ATTRIBUTE = getRegistry("field_23781", "field_41190", false);
-	public static final MVRegistry<Potion> POTION = getRegistry("field_11143", "field_41179", true);
+	public static final MVRegistry<Potion> POTION = getRegistry("field_11143", "field_41179", Version.<Boolean>newSwitch()
+			.range("1.20.5", null, false)
+			.range(null, "1.20.4", true)
+			.get());
 	public static final MVRegistry<StatusEffect> STATUS_EFFECT = getRegistry("field_11159", "field_41174", false);
 	
 	public static <V, T extends V> T register(MVRegistry<V> registry, Identifier id, T entry) {
@@ -72,6 +76,11 @@ public class MVRegistry<T> implements Iterable<T> {
 	
 	private MVRegistry(Object value) {
 		this.value = value;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Registry<T> getInternalValue() {
+		return (Registry<T>) value;
 	}
 	
 	@SuppressWarnings("unchecked")

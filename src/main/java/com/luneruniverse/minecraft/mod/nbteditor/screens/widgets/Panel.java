@@ -63,7 +63,11 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 		boolean scissor = shouldScissor();
 		if (scissor) {
 			double scale = MainUtil.client.getWindow().getScaleFactor();
-			RenderSystem.enableScissor((int) (getPaddedX() * scale), MainUtil.client.getWindow().getHeight() - (int) ((getPaddedY() + getPaddedHeight()) * scale), (int) (getPaddedWidth() * scale), (int) (getPaddedHeight() * scale));
+			RenderSystem.enableScissor(
+					(int) (getPaddedX() * scale),
+					MainUtil.client.getWindow().getHeight() - (int) ((getPaddedY() + getPaddedHeight()) * scale),
+					(int) (getPaddedWidth() * scale),
+					(int) (getPaddedHeight() * scale));
 		}
 		
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
@@ -187,7 +191,8 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 		return Math.min(0, height - getHighestY());
 	}
 	protected int getHighestY() {
-		return StreamSupport.stream(getPanelElements().spliterator(), false).mapToInt(pos -> pos.y() + getPanelElementHeight(pos.element())).max().orElse(0);
+		return StreamSupport.stream(getPanelElements().spliterator(), false)
+				.mapToInt(pos -> pos.y() + getPanelElementHeight(pos.element())).max().orElse(0);
 	}
 	protected int getPanelElementHeight(T element) {
 		return 0;

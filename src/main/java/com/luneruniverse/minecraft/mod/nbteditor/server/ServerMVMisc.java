@@ -6,10 +6,8 @@ import java.util.function.Supplier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.vehicle.StorageMinecartEntity;
 import net.minecraft.entity.vehicle.VehicleInventory;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -32,16 +30,22 @@ public class ServerMVMisc {
 				.get();
 	}
 	
-	private static final Supplier<Reflection.MethodInvoker> BlockEntity_writeNbt =
-			Reflection.getOptionalMethod(BlockEntity.class, "method_11007", MethodType.methodType(NbtCompound.class, NbtCompound.class));
-	public static NbtCompound createNbt(BlockEntity blockEntity) {
-		return Version.<NbtCompound>newSwitch()
-				.range("1.18.0", null, () -> blockEntity.createNbt())
-				.range(null, "1.17.1", () -> {
-					ServerMixinLink.BLOCK_ENTITY_WRITE_NBT_WITHOUT_IDENTIFYING_DATA.add(Thread.currentThread());
-					return BlockEntity_writeNbt.get().invoke(blockEntity, new NbtCompound());
-				})
+	private static final Supplier<Reflection.MethodInvoker> PacketDecoder_decode =
+			Reflection.getOptionalMethod(() -> Reflection.getClass("net.minecraft.class_9141"), () -> "decode", () -> MethodType.methodType(Object.class, Object.class));
+	@SuppressWarnings("unchecked")
+	public static <T> T packetCodecDecode(Object codec, Object buf) {
+		return Version.<T>newSwitch()
+				.range("1.20.5", null, () -> (T) PacketDecoder_decode.get().invoke(codec, buf))
+				.range(null, "1.20.4", () -> { throw new IllegalStateException("Not supported in this version!"); })
 				.get();
+	}
+	private static final Supplier<Reflection.MethodInvoker> PacketEncoder_encode =
+			Reflection.getOptionalMethod(() -> Reflection.getClass("net.minecraft.class_9142"), () -> "encode", () -> MethodType.methodType(void.class, Object.class, Object.class));
+	public static void packetCodecEncode(Object codec, Object buf, Object value) {
+		Version.newSwitch()
+				.range("1.20.5", null, () -> PacketEncoder_encode.get().invoke(codec, buf, value))
+				.range(null, "1.20.4", () -> { throw new IllegalStateException("Not supported in this version!"); })
+				.run();
 	}
 	
 }

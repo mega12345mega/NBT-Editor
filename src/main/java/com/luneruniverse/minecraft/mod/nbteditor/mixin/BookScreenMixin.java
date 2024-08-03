@@ -84,14 +84,14 @@ public class BookScreenMixin extends Screen {
 		convertBtn = addDrawableChild(MVMisc.newButton(16, 64 + 24, 100, 20, TextInst.translatable("nbteditor.book.convert"),
 				btn -> getReference(BookCommand::convertBookToWritable)));
 		
-		writtenBook = (contents instanceof BookScreen.WrittenBookContents);
+		writtenBook = MVMisc.isWrittenBookContents(contents);
 		openBtn.visible = writtenBook;
 		convertBtn.visible = writtenBook;
 	}
 	
 	@Inject(method = "setPageProvider", at = @At("HEAD"))
 	private void setPageProvider(Contents contents, CallbackInfo info) {
-		writtenBook = (contents instanceof BookScreen.WrittenBookContents);
+		writtenBook = MVMisc.isWrittenBookContents(contents);
 		openBtn.visible = writtenBook;
 		convertBtn.visible = writtenBook;
 	}

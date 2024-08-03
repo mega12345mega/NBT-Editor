@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
@@ -89,13 +90,16 @@ public class ContainerItemReference<L extends LocalNBT> implements ItemReference
 	}
 	
 	@Override
-	public void showParent() {
-		ContainerScreen.show(container);
+	public void showParent(Optional<ItemStack> cursor) {
+		ContainerScreen.show(container, cursor);
 	}
 	
 	@Override
-	public void escapeParent() {
-		container.escapeParent();
+	public void escapeParent(Optional<ItemStack> cursor) {
+		container.escapeParent(cursor);
 	}
+	
+	@Override
+	public void clearParentCursor() {}
 	
 }

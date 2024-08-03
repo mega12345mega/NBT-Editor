@@ -3,7 +3,6 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands.arguments;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
@@ -24,7 +23,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
-import net.minecraft.command.argument.TextArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
@@ -49,7 +47,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	
 	public static String stringifyFancyText(Text text, boolean jsonAllowed, boolean printErrors) {
 		if (jsonAllowed && ConfigScreen.isJsonText())
-			return Text.Serialization.toJsonString(text);
+			return TextInst.toJsonString(text);
 		
 		StringBuilder output = new StringBuilder();
 		if (stringifyFancyText(text, output) && printErrors)
@@ -89,29 +87,32 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 		StringBuilder color = new StringBuilder();
 		StringBuilder formats = new StringBuilder();
 		boolean needsReset = false;
-		for (Map.Entry<String, JsonElement> entry : Text.Serialization.toJsonTree(text).getAsJsonObject().entrySet()) {
-			switch (entry.getKey()) {
-				case "color" -> {
-					Formatting colorFormatting = Formatting.byName(text.getStyle().getColor().getName());
-					if (colorFormatting == null) {
-						color.append("&c");
-						errors = true;
-					} else
-						color.append("&" + colorFormatting.getCode());
+		JsonElement textJsonTree = TextInst.toJsonTree(text);
+		if (textJsonTree.isJsonObject()) {
+			for (Map.Entry<String, JsonElement> entry : textJsonTree.getAsJsonObject().entrySet()) {
+				switch (entry.getKey()) {
+					case "color" -> {
+						Formatting colorFormatting = Formatting.byName(text.getStyle().getColor().getName());
+						if (colorFormatting == null) {
+							color.append("&c");
+							errors = true;
+						} else
+							color.append("&" + colorFormatting.getCode());
+					}
+					case "bold", "italic", "strikethrough", "obfuscated" -> {
+						if (entry.getValue().getAsBoolean())
+							formats.append("&" + Formatting.byName(entry.getKey()).getCode());
+						else
+							needsReset = true;
+					}
+					case "underlined" -> { // Formatting.UNDERLINE isn't past tense
+						if (entry.getValue().getAsBoolean())
+							formats.append("&" + Formatting.UNDERLINE.getCode());
+						else
+							needsReset = true;
+					}
+					case "insertion", "font" -> errors = true;
 				}
-				case "bold", "italic", "strikethrough", "obfuscated" -> {
-					if (entry.getValue().getAsBoolean())
-						formats.append("&" + Formatting.byName(entry.getKey()).getCode());
-					else
-						needsReset = true;
-				}
-				case "underlined" -> { // Formatting.UNDERLINE isn't past tense
-					if (entry.getValue().getAsBoolean())
-						formats.append("&" + Formatting.UNDERLINE.getCode());
-					else
-						needsReset = true;
-				}
-				case "insertion", "font" -> errors = true;
 			}
 		}
 		if (needsReset)
@@ -120,12 +121,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 			output.append(color);
 		output.append(formats);
 		
-		StringBuilder content = new StringBuilder();
-		text.getContent().visit(str -> {
-			content.append(str);
-			return Optional.empty();
-		});
-		output.append(content.toString().replace("\\", "\\\\").replace("&", "\\&").replace("§", "\\§").replace("[", "\\["));
+		output.append(MVMisc.getContent(text).replace("\\", "\\\\").replace("&", "\\&").replace("§", "\\§").replace("[", "\\["));
 		
 		for (Text child : text.getSiblings())
 			errors |= stringifyFancyText(child, output);
@@ -144,7 +140,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	@Override
 	public Text parse(StringReader reader) throws CommandSyntaxException {
 		if (jsonAllowed && ConfigScreen.isJsonText())
-			return TextArgumentType.text().parse(reader);
+			return MVMisc.getTextArg().parse(reader);
 		
 		return parseInternal(reader);
 	}
@@ -170,6 +166,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 		}
 		
 		EditableText output = parseColors(str);
+		EditableText outputEnd = (output.getSiblings().isEmpty() ? output : (EditableText) output.getSiblings().get(output.getSiblings().size() - 1));
 		if (event) {
 			UnaryOperator<Style> eventAdder;
 			String eventType = reader.readStringUntil(']');
@@ -220,10 +217,10 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 			
 			EditableText affectedText = parseInternal(new StringReader(readUntilClosed(reader, '(', ')')));
 			affectedText.styled(eventAdder);
-			output.append(affectedText);
+			outputEnd.append(affectedText);
 		}
 		if (reader.canRead())
-			output.append(parseInternal(reader));
+			outputEnd.append(parseInternal(reader));
 		
 		return output;
 	}
@@ -318,7 +315,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
 		if (jsonAllowed && ConfigScreen.isJsonText())
-			return TextArgumentType.text().listSuggestions(context, builder);
+			return MVMisc.getTextArg().listSuggestions(context, builder);
 		
 		if (builder.getRemaining().isEmpty())
 			return builder.buildFuture();

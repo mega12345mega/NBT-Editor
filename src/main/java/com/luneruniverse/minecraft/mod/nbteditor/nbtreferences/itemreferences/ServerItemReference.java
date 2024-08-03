@@ -11,13 +11,14 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 
-public class ServerItemReference implements ItemReference {
+public class ServerItemReference extends HandledScreenItemReference {
 	
 	private final int slot;
 	private final HandledScreen<?> screen;
 	private ItemStack item;
 	
 	public ServerItemReference(int slot, HandledScreen<?> screen) {
+		super(HandledScreenItemReferenceParent.forRoot(screen));
 		this.slot = slot;
 		this.screen = screen;
 		
@@ -34,9 +35,6 @@ public class ServerItemReference implements ItemReference {
 	
 	public int getSlot() {
 		return slot;
-	}
-	public HandledScreen<?> getScreen() {
-		return screen;
 	}
 	
 	@Override
@@ -81,13 +79,12 @@ public class ServerItemReference implements ItemReference {
 	}
 	
 	@Override
-	public void showParent() {
-		MainUtil.client.setScreen(screen);
+	public HandledScreenItemReference setParent(HandledScreenItemReferenceParent parent) {
+		throw new UnsupportedOperationException("ServerItemReferences cannot have custom parents");
 	}
-	
 	@Override
-	public void escapeParent() {
-		screen.close(); // Send close packet to server
+	public HandledScreenItemReferenceParent getDefaultParent() {
+		throw new UnsupportedOperationException("ServerItemReferences cannot have default parents");
 	}
 	
 }

@@ -6,15 +6,18 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVQuaternionf;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.EntityReference;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -22,6 +25,7 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -38,8 +42,13 @@ import net.minecraft.world.World;
 
 public class LocalEntity implements LocalNBT {
 	
-	public static LocalEntity deserialize(NbtCompound nbt) {
-		return new LocalEntity(MVRegistry.ENTITY_TYPE.get(new Identifier(nbt.getString("id"))), nbt.getCompound("tag"));
+	public static LocalEntity deserialize(NbtCompound nbt, int defaultDataVersion) {
+		NbtCompound tag = nbt.getCompound("tag");
+		tag.putString("id", nbt.getString("id"));
+		tag = MainUtil.updateDynamic(TypeReferences.ENTITY, tag, nbt.get("DataVersion"), defaultDataVersion);
+		String id = tag.getString("id");
+		tag.remove("id");
+		return new LocalEntity(MVRegistry.ENTITY_TYPE.get(new Identifier(id)), tag);
 	}
 	
 	private EntityType<?> entityType;
@@ -64,7 +73,7 @@ public class LocalEntity implements LocalNBT {
 		if (name == null)
 			getOrCreateNBT().remove("CustomName");
 		else
-			getOrCreateNBT().putString("CustomName", Text.Serialization.toJsonString(name));
+			getOrCreateNBT().putString("CustomName", TextInst.toJsonString(name));
 	}
 	@Override
 	public String getDefaultName() {
@@ -110,7 +119,7 @@ public class LocalEntity implements LocalNBT {
 		matrices.translate(0.0, 8.0, 0.0);
 		
 		Entity entity = entityType.create(MainUtil.client.world);
-		entity.readNbt(nbt);
+		NBTManagers.ENTITY.setNbt(entity, nbt);
 		
 		MatrixStack renderMatrices = Version.<MatrixStack>newSwitch()
 				.range("1.19.4", null, matrices)
@@ -122,13 +131,13 @@ public class LocalEntity implements LocalNBT {
 		RenderSystem.applyModelViewMatrix();
 		
 		DiffuseLighting.method_34742();
-		VertexConsumerProvider.Immediate provider = MVMisc.beginDrawingNormal();
+		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getVertexConsumerProvider();
 		EntityRenderDispatcher dispatcher = MainUtil.client.getEntityRenderDispatcher();
 		dispatcher.setRenderShadows(false);
 		rotation.copy().conjugate().applyToEntityRenderDispatcher(dispatcher);
 		dispatcher.render(entity, 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
 		dispatcher.setRenderShadows(true);
-		MVMisc.endDrawingNormal(provider);
+		provider.draw();
 		
 		matrices.pop();
 		RenderSystem.applyModelViewMatrix();
@@ -138,7 +147,7 @@ public class LocalEntity implements LocalNBT {
 	public Optional<ItemStack> toItem() {
 		ItemStack output = null;
 		for (Item item : MVRegistry.ITEM) {
-			if (item instanceof SpawnEggItem spawnEggItem && spawnEggItem.getEntityType(null) == entityType)
+			if (item instanceof SpawnEggItem spawnEggItem && MVMisc.getEntityType(new ItemStack(spawnEggItem)) == entityType)
 				output = new ItemStack(spawnEggItem);
 		}
 		if (output == null) {
@@ -150,7 +159,7 @@ public class LocalEntity implements LocalNBT {
 		
 		NbtCompound nbt = this.nbt.copy();
 		nbt.putString("id", getId().toString());
-		output.setSubNbt("EntityTag", nbt);
+		ItemTagReferences.ENTITY_DATA.set(output, nbt);
 		
 		return Optional.of(output);
 	}

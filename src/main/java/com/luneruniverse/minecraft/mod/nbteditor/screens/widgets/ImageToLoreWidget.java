@@ -4,34 +4,49 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javax.imageio.ImageIO;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.WidgetScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore.LoreConsumer;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 
 public class ImageToLoreWidget extends GroupWidget implements InitializableOverlay<Screen> {
 	
-	public static boolean openImportFiles(List<Path> paths, Function<File, LoreConsumer> loreConsumers, Runnable onDone) {
+	public static List<Text> imageToLore(BufferedImage img, int width, int height) {
+		img = MainUtil.scaleImage(img, width, height);
+		List<Text> output = new ArrayList<>();
+		for (int line = 0; line < height; line++) {
+			EditableText lineText = TextInst.literal("").styled(style -> style.withItalic(false));
+			for (int i = 0; i < width; i++) {
+				final int color = img.getRGB(i, line) & 0xFFFFFF;
+				lineText.append(TextInst.literal("█").styled(style -> style.withColor(color)));
+			}
+			output.add(lineText);
+		}
+		return output;
+	}
+	
+	public static boolean openImportFiles(List<Path> paths, BiConsumer<File, List<Text>> loreConsumers, Runnable onDone) {
 		Map<File, BufferedImage> imgs = new LinkedHashMap<>();
 		for (Path path : paths) {
 			File file = path.toFile();
@@ -65,10 +80,7 @@ public class ImageToLoreWidget extends GroupWidget implements InitializableOverl
 					height = options.height();
 				}
 				
-				LoreConsumer loreConsumer = loreConsumers.apply(file);
-				Lore lore = loreConsumer.getLore();
-				lore.addImage(img, width, height, loreConsumer.getPos());
-				loreConsumer.onLoreEdit(lore);
+				loreConsumers.accept(file, imageToLore(img, width, height));
 			});
 			
 			onDone.run();

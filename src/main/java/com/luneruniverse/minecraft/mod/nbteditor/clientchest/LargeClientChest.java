@@ -1,7 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.clientchest;
 
 import java.io.File;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +14,7 @@ import net.minecraft.item.ItemStack;
 public class LargeClientChest extends ClientChest {
 	
 	private final int importantPages;
-	private final Cache<Integer, Optional<ItemStack[]>> pages;
+	private final Cache<Integer, ClientChestPage> pages;
 	private volatile boolean loaded;
 	
 	public LargeClientChest(int importantPages) {
@@ -51,24 +50,32 @@ public class LargeClientChest extends ClientChest {
 		return Integer.MAX_VALUE;
 	}
 	@Override
-	public ItemStack[] getPage(int page) {
+	public ClientChestPage getPage(int page) {
 		try {
-			return pages.get(page, () -> Optional.ofNullable(loadSync(page))).orElseGet(() -> new ItemStack[54]);
+			return pages.get(page, () -> loadSync(page));
 		} catch (ExecutionException | UncheckedExecutionException e) {
 			backupCorruptPage(page);
 			pages.invalidate(page);
 			NBTEditor.LOGGER.error("Error loading large client chest page " + (page + 1), e);
-			return new ItemStack[54];
+			return new ClientChestPage(new ItemStack[54]);
 		}
 	}
 	
 	@Override
-	protected void cachePage(int page, ItemStack[] items) {
-		pages.put(page, Optional.of(items));
+	protected boolean isPageCached(int page) {
+		return pages.getIfPresent(page) != null;
+	}
+	@Override
+	protected void cachePage(int page, ClientChestPage items) {
+		pages.put(page, items);
 	}
 	@Override
 	protected void cacheEmptyPage(int page) {
-		pages.put(page, Optional.empty());
+		pages.put(page, new ClientChestPage(new ItemStack[54]));
+	}
+	@Override
+	protected void discardPageCache(int page) throws Exception {
+		pages.invalidate(page);
 	}
 	
 	@Override

@@ -53,12 +53,17 @@ public class MVPacketCustomPayload implements CustomPayload {
 	}
 	
 	@Override
-	public void write(PacketByteBuf payload) {
+	public Id<MVPacketCustomPayload> getId() {
+		return new Id<>(packet.getPacketId());
+	}
+	
+	// write
+	public void method_53028(PacketByteBuf payload) {
 		packet.write(payload);
 	}
 	
-	@Override
-	public Identifier id() {
+	// id
+	public Identifier comp_1678() {
 		return packet.getPacketId();
 	}
 	

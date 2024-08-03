@@ -1,5 +1,6 @@
 package tsp.headdb.ported.inventory;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Map;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.inventory.Inventory;
@@ -137,7 +138,8 @@ public class InventoryUtils {
     }
 
     public static void openDatabase() {
-    	ClientHandledScreen screen = new ClientHandledScreen(ClientHandledScreen.createGenericScreenHandler(6), MainUtil.client.player.getInventory(), TextInst.of(Utils.colorize("&c&lHeadDB &8(" + HeadAPI.getHeads().size() + ")"))) {
+    	ClientHandledScreen screen = new ClientHandledScreen(ClientHandledScreen.createGenericScreenHandler(6),
+    			TextInst.of(Utils.colorize("&c&lHeadDB &8(" + HeadAPI.getHeads().size() + ")"))) {
     		@Override
     		protected void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
     			if (slot == null)
@@ -174,15 +176,18 @@ public class InventoryUtils {
                     }
                 }
     		}
+    		@Override
+    		public void close() {
+    			MainUtil.client.player.closeHandledScreen();
+    		}
     	};
         Inventory inventory = screen.getScreenHandler().getInventory();
 
         for (Category category : Category.getValues()) {
             ItemStack item = getUIItem(category.getName(), category.getItem());
-            item.setCustomName(TextInst.of(Utils.colorize(category.getColor() + "&l" + category.getTranslatedName().toUpperCase())));
-            Lore lore = new Lore(item);
-            lore.clearLore();
-            lore.addLine(TextInst.of(Utils.colorize("&e" + TextInst.translatable("nbteditor.hdb.head_count", HeadAPI.getHeads(category).size()).getString())));
+            item.manager$setCustomName(TextInst.of(Utils.colorize(category.getColor() + "&l" + category.getTranslatedName().toUpperCase())));
+            ItemTagReferences.LORE.set(item, List.of(TextInst.of(
+            		Utils.colorize("&e" + TextInst.translatable("nbteditor.hdb.head_count", HeadAPI.getHeads(category).size()).getString()))));
             inventory.setStack(getUILocation(category.getName(), category.getLocation()), item);
         }
 
@@ -233,14 +238,8 @@ public class InventoryUtils {
     }
 
     private static ItemStack buildButton(ItemStack item, String name, String... lore) {
-        item.setCustomName(TextInst.of(Utils.colorize(name)));
-        
-        Lore list = new Lore(item);
-        list.clearLore();
-        for (String line : lore) {
-            list.addLine(TextInst.of(Utils.colorize(line)));
-        }
-        
+        item.manager$setCustomName(TextInst.of(Utils.colorize(name)));
+        ItemTagReferences.LORE.set(item, Arrays.stream(lore).map(Utils::colorize).map(TextInst::of).toList());
         return item;
     }
     

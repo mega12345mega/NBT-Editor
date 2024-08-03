@@ -19,7 +19,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -112,10 +112,10 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			
 			private int x;
 			private int y;
-			private final ConfigValueDropdownEnum<ClickAction> clickActionDropdown;
+			private final ConfigValueDropdown<ClickAction> clickActionDropdown;
 			private final TranslatedGroupWidget clickActionField;
 			private final NamedTextFieldWidget clickValueField;
-			private final ConfigValueDropdownEnum<HoverAction> hoverActionDropdown;
+			private final ConfigValueDropdown<HoverAction> hoverActionDropdown;
 			private final TranslatedGroupWidget hoverActionField;
 			private final NamedTextFieldWidget hoverValueField;
 			private final ButtonWidget ok;
@@ -129,7 +129,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 						HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, hoverEvent)
 						.result().orElseThrow().getAsJsonObject().get("contents")));
 				
-				clickActionDropdown = new ConfigValueDropdownEnum<>(ClickAction.get(clickAction), ClickAction.NONE, ClickAction.class);
+				clickActionDropdown = ConfigValueDropdown.forEnum(ClickAction.get(clickAction), ClickAction.NONE, ClickAction.class);
 				clickActionDropdown.setWidth(150);
 				clickActionField = addElement(TranslatedGroupWidget.forWidget(clickActionDropdown, 0, 0, 0));
 				clickValueField = addWidget(new NamedTextFieldWidget(0, 0, 150, 16))
@@ -137,7 +137,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				clickValueField.setMaxLength(Integer.MAX_VALUE);
 				clickValueField.setText(clickValue);
 				
-				hoverActionDropdown = new ConfigValueDropdownEnum<>(HoverAction.get(hoverAction), HoverAction.NONE, HoverAction.class);
+				hoverActionDropdown = ConfigValueDropdown.forEnum(HoverAction.get(hoverAction), HoverAction.NONE, HoverAction.class);
 				hoverActionDropdown.setWidth(150);
 				hoverActionDropdown.addValueListener(value -> updateOk());
 				hoverActionField = addElement(TranslatedGroupWidget.forWidget(hoverActionDropdown, 0, 0, 0));
@@ -578,7 +578,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		
 		@Override
 		protected String onCopy(String text, int pos, int len) {
-			return Text.Serialization.toJsonString(TextUtil.substring(this.text, pos, pos + len));
+			return TextInst.toJsonString(TextUtil.substring(this.text, pos, pos + len));
 		}
 		
 		@Override
@@ -650,7 +650,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		prev.setText(text);
 		prev.setChangeListener(onChange);
 		if (prev.isMultiFocused())
-			prev.onFocusChange(false);
+			prev.setMultiFocused(false);
 		return prev;
 	}
 	public static FormattedTextFieldWidget create(FormattedTextFieldWidget prev, int x, int y, int width, int height,

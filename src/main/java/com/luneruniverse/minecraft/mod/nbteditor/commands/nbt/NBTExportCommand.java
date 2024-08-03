@@ -16,9 +16,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.TagNames;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.Command;
@@ -64,8 +67,7 @@ public class NBTExportCommand extends ClientCommand {
 	}
 	
 	private static String getItemArgs(ItemStack item) {
-		return MVRegistry.ITEM.getId(item.getItem()).toString() +
-				(item.getNbt() == null ? "" : item.getNbt().asString()) + " " + item.getCount();
+		return MVRegistry.ITEM.getId(item.getItem()).toString() + NBTManagers.ITEM.getNbtString(item) + " " + item.getCount();
 	}
 	private static String getBlockArgs(LocalBlock block) {
 		return block.getId().toString() + block.getState().toString() + (block.getNBT() == null ? "" : block.getNBT().asString());
@@ -76,7 +78,7 @@ public class NBTExportCommand extends ClientCommand {
 	
 	private static String getCommand(String itemPrefix, String blockPrefix, String entityPrefix, LocalNBT nbt, boolean stripEntityUUIDs) {
 		if (nbt instanceof LocalItem item)
-			return itemPrefix + getItemArgs(item.getItem());
+			return itemPrefix + getItemArgs(item.getReadableItem());
 		else if (nbt instanceof LocalBlock block)
 			return blockPrefix + getBlockArgs(block);
 		else if (nbt instanceof LocalEntity entity)
@@ -101,6 +103,7 @@ public class NBTExportCommand extends ClientCommand {
 			if (!exportDir.exists())
 				Files.createDirectory(exportDir.toPath());
 			File output = new File(exportDir, PathUtil.getNextUniqueName(exportDir.toPath(), name, ".nbt"));
+			nbt.putInt("DataVersion", Version.getDataVersion());
 			MVMisc.writeCompressedNbt(nbt, output);
 			MainUtil.client.player.sendMessage(TextUtil.attachFileTextOptions(TextInst.translatable("nbteditor.nbt.export.file.success",
 					TextInst.literal(output.getName()).formatted(Formatting.UNDERLINE).styled(style ->
@@ -130,7 +133,8 @@ public class NBTExportCommand extends ClientCommand {
 			})).then(literal("cmdblock").executes(context -> {
 				NBTReference.getReference(EXPORT_FILTER, false, ref -> {
 					ItemStack cmdBlock = new ItemStack(Items.COMMAND_BLOCK);
-					cmdBlock.getOrCreateSubNbt("BlockEntityTag").putString("Command", getVanillaCommand(ref));
+					cmdBlock.manager$modifySubNbt(TagNames.BLOCK_ENTITY_TAG,
+							nbt -> MainUtil.fillId(nbt).putString("Command", getVanillaCommand(ref)));
 					MainUtil.getWithMessage(cmdBlock);
 				});
 				return Command.SINGLE_SUCCESS;

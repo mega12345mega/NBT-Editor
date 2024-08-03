@@ -2,6 +2,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.localnbt;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVQuaternionf;
 
@@ -13,11 +15,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public interface LocalNBT {
-	public static Optional<LocalNBT> deserialize(NbtCompound nbt) {
+	public static Optional<LocalNBT> deserialize(NbtCompound nbt, int defaultDataVersion) {
 		return Optional.ofNullable(switch (nbt.contains("type", NbtElement.STRING_TYPE) ? nbt.getString("type") : "item") {
-			case "item" -> LocalItem.deserialize(nbt);
-			case "block" -> LocalBlock.deserialize(nbt);
-			case "entity" -> LocalEntity.deserialize(nbt);
+			case "item" -> LocalItemStack.deserialize(nbt, defaultDataVersion);
+			case "block" -> LocalBlock.deserialize(nbt, defaultDataVersion);
+			case "entity" -> LocalEntity.deserialize(nbt, defaultDataVersion);
 			default -> null;
 		});
 	}
@@ -71,6 +73,18 @@ public interface LocalNBT {
 		}
 		return nbt;
 	}
+	public default void modifyNBT(UnaryOperator<NbtCompound> modifier) {
+		NbtCompound nbt = getNBT();
+		if (nbt == null)
+			nbt = new NbtCompound();
+		setNBT(modifier.apply(nbt));
+	}
+	public default void modifyNBT(Consumer<NbtCompound> modifier) {
+		modifyNBT(nbt -> {
+			modifier.accept(nbt);
+			return nbt;
+		});
+	}
 	
 	public void renderIcon(MatrixStack matrices, int x, int y);
 	
@@ -79,5 +93,6 @@ public interface LocalNBT {
 	public Text toHoverableText();
 	
 	public LocalNBT copy();
+	@Override
 	public boolean equals(Object nbt);
 }

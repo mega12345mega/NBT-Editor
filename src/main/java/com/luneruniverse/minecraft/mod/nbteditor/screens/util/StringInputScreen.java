@@ -63,7 +63,7 @@ public class StringInputScreen extends TickableSupportingScreen {
 		value.setText(prevValue);
 		if (suggestions != null)
 			value.suggest(suggestions);
-		this.addSelectableChild(value);
+		addSelectableChild(value);
 		setInitialFocus(value);
 		
 		ok = this.addDrawableChild(MVMisc.newButton(width / 2 - 104, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.ok"), btn -> {
@@ -75,6 +75,7 @@ public class StringInputScreen extends TickableSupportingScreen {
 		this.addDrawableChild(MVMisc.newButton(width / 2 + 4, height / 2 + 4, 100, 20, TextInst.translatable("nbteditor.cancel"), btn -> {
 			client.setScreen(parent);
 		}));
+		addDrawable(value);
 		
 		value.setChangedListener(str -> ok.active = valueValidator.test(str));
 		ok.active = valueValidator.test(value.getText());
@@ -88,13 +89,18 @@ public class StringInputScreen extends TickableSupportingScreen {
 		matrices.translate(0.0, 0.0, 500.0);
 		super.renderBackground(matrices);
 		super.render(matrices, mouseX, mouseY, delta);
-		value.render(matrices, mouseX, mouseY, delta);
 		MainUtil.renderLogo(matrices);
 		matrices.pop();
 	}
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		value.mouseClicked(mouseX, mouseY, button);
+		boolean shouldBeFocused = value.mouseClicked(mouseX, mouseY, button);
+		if (shouldBeFocused != value.isMultiFocused())
+			value.setMultiFocused(shouldBeFocused);
+		if (shouldBeFocused) {
+			setFocused(value);
+			return true;
+		}
 		return super.mouseClicked(mouseX, mouseY, button);
 	}
 	@Override
@@ -107,8 +113,9 @@ public class StringInputScreen extends TickableSupportingScreen {
 			return true;
 		}
 		
-		boolean output = !this.value.keyPressed(keyCode, scanCode, modifiers) && !this.value.isActive()
-				? super.keyPressed(keyCode, scanCode, modifiers) : true;
+		boolean output = (keyCode == GLFW.GLFW_KEY_TAB ?
+				value.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers) :
+				super.keyPressed(keyCode, scanCode, modifiers));
 		if (client.currentScreen != this)
 			client.setScreen(parent);
 		return output;

@@ -3,6 +3,8 @@ package com.luneruniverse.minecraft.mod.nbteditor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ContainerScreenS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
@@ -20,6 +22,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 public class NBTEditor implements ModInitializer {
 	
@@ -43,6 +46,11 @@ public class NBTEditor implements ModInitializer {
 		MVNetworking.registerPacket(ViewEntityS2CPacket.ID, ViewEntityS2CPacket::new);
 		
 		SERVER = new NBTEditorServer();
+		
+		Version.newSwitch()
+				.range("1.20.5", null, () -> ServerLifecycleEvents.SERVER_STARTING.register(DynamicRegistryManagerHolder::setServerManager))
+				.range(null, "1.20.4", () -> {})
+				.run();
 	}
 	
 }

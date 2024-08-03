@@ -30,6 +30,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.datafixers.DSL.TypeReference;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.Screen;
@@ -38,6 +39,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtType;
 import net.minecraft.nbt.NbtTypes;
 import net.minecraft.text.Text;
@@ -340,6 +343,46 @@ public class NBTEditorAPI {
 	 */
 	public static void setNBTFormatter(NbtFormatter.Impl formatter) {
 		NbtFormatter.FORMATTER = formatter;
+	}
+	
+	/**
+	 * Updates old NBT structures into the current Minecraft version
+	 * @see #updateNBTDynamic(TypeReference, NbtCompound)
+	 * @see #updateNBTDynamic(TypeReference, NbtCompound, int)
+	 * @see #updateNBTDynamic(TypeReference, NbtElement, NbtElement, int)
+	 */
+	public static <T extends NbtElement> T updateNBT(TypeReference typeRef, T nbt, int oldVersion) {
+		return MainUtil.update(typeRef, nbt, oldVersion);
+	}
+	/**
+	 * Updates old NBT structures into the current Minecraft version<br>
+	 * If dataVersionTag is not null and a number, this updates from that - otherwise, this updates from defaultOldVersion
+	 * @see #updateNBT(TypeReference, NbtElement, int)
+	 * @see #updateNBTDynamic(TypeReference, NbtCompound)
+	 * @see #updateNBTDynamic(TypeReference, NbtCompound, int)
+	 */
+	public static <T extends NbtElement> T updateNBTDynamic(TypeReference typeRef, T nbt, NbtElement dataVersionTag, int defaultOldVersion) {
+		return MainUtil.updateDynamic(typeRef, nbt, dataVersionTag, defaultOldVersion);
+	}
+	/**
+	 * Updates old NBT structures into the current Minecraft version<br>
+	 * If a DataVersion tag exists, this updates from that - otherwise, this updates from defaultOldVersion
+	 * @see #updateNBT(TypeReference, NbtElement, int)
+	 * @see #updateNBTDynamic(TypeReference, NbtCompound)
+	 * @see #updateNBTDynamic(TypeReference, NbtElement, NbtElement, int)
+	 */
+	public static NbtCompound updateNBTDynamic(TypeReference typeRef, NbtCompound nbt, int defaultOldVersion) {
+		return MainUtil.updateDynamic(typeRef, nbt, defaultOldVersion);
+	}
+	/**
+	 * Updates old NBT structures into the current Minecraft version<br>
+	 * If a DataVersion tag exists, this updates from that - otherwise, nbt is returned
+	 * @see #updateNBT(TypeReference, NbtElement, int)
+	 * @see #updateNBTDynamic(TypeReference, NbtCompound, int)
+	 * @see #updateNBTDynamic(TypeReference, NbtElement, NbtElement, int)
+	 */
+	public static NbtCompound updateNBTDynamic(TypeReference typeRef, NbtCompound nbt) {
+		return MainUtil.updateDynamic(typeRef, nbt);
 	}
 	
 }

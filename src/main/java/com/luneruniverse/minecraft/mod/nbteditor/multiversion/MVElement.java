@@ -16,12 +16,14 @@ public interface MVElement extends Element {
 	public default boolean isFocused() {
 		return _focused.getOrDefault(this, false);
 	}
-	public default void onFocusChange(boolean focused) {
-		_multiFocused.put(this, focused);
+	public default void setMultiFocused(boolean focused) {
+		Boolean prevFocused = _multiFocused.put(this, focused);
+		onMultiFocusedSet(focused, prevFocused == null ? false : prevFocused);
 	}
 	public default boolean isMultiFocused() {
 		return _multiFocused.getOrDefault(this, false);
 	}
+	public default void onMultiFocusedSet(boolean focused, boolean prevFocused) {}
 	
 	public default boolean method_25401(double mouseX, double mouseY, double amount) {
 		return mouseScrolled(mouseX, mouseY, 0, amount);

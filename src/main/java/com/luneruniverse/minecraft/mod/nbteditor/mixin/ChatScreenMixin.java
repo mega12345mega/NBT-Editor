@@ -1,6 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
-import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
@@ -44,11 +43,5 @@ public class ChatScreenMixin {
 			info.setReturnValue(true);
 			info.cancel();
 		}
-	}
-	
-	@Inject(method = "normalize", at = @At(value = "HEAD"), cancellable = true, require = 0)
-	private void normalize(String msg, CallbackInfoReturnable<String> info) {
-		if (ConfigScreen.isChatLimitExtended())
-			info.setReturnValue(StringUtils.normalizeSpace(msg));
 	}
 }

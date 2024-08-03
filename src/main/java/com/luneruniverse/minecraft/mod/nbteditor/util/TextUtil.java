@@ -71,8 +71,8 @@ public class TextUtil {
 		}
 	}
 	
-	public static Text parseTranslatableFormatted(String key) {
-		return parseFormattedText(TextInst.translatable(key).getString());
+	public static Text parseTranslatableFormatted(String key, Object... args) {
+		return parseFormattedText(TextInst.translatable(key, args).getString());
 	}
 	
 	public static Text substring(Text text, int start, int end) {
@@ -175,16 +175,16 @@ public class TextUtil {
 								TextInst.translatable("nbteditor.file_options.delete.desc", file.getName()))))));
 	}
 	
-	public static boolean isTextFormatted(Text text, boolean allowNonNull) {
-		return isTextFormatted(Text.Serialization.toJsonTree(text), allowNonNull);
+	public static boolean isTextFormatted(Text text, boolean allowNonNull, String baseColor) {
+		return isTextFormatted(TextInst.toJsonTree(text), allowNonNull, baseColor);
 	}
-	private static boolean isTextFormatted(JsonElement dataElement, boolean allowNonNull) {
+	private static boolean isTextFormatted(JsonElement dataElement, boolean allowNonNull, String baseColor) {
 		if (!(dataElement instanceof JsonObject data))
 			return false;
 		
 		if (data.has("extra")) {
 			for (JsonElement part : data.get("extra").getAsJsonArray()) {
-				if (isTextFormatted(part, allowNonNull))
+				if (isTextFormatted(part, allowNonNull, baseColor))
 					return true;
 			}
 		}
@@ -202,7 +202,7 @@ public class TextUtil {
 			return true;
 		if (data.has("obfuscated") && data.get("obfuscated").getAsBoolean())
 			return true;
-		if (data.has("color") && !data.get("color").getAsString().equals("white"))
+		if (data.has("color") && (baseColor == null || !data.get("color").getAsString().equals(baseColor)))
 			return true;
 		if (data.has("insertion") && data.get("insertion").getAsBoolean())
 			return true;
@@ -275,7 +275,7 @@ public class TextUtil {
 	
 	public static Text fromJsonSafely(String json) {
 		try {
-			Text output = Text.Serialization.fromJson(json);
+			Text output = TextInst.fromJson(json);
 			if (output != null)
 				return output;
 		} catch (JsonParseException e) {}

@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
+import java.util.Optional;
+
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -21,9 +23,9 @@ public class ClientChestItemReference implements ItemReference {
 		this.slot = slot;
 		
 		this.save = new SaveQueue("Client Chest", (ItemStack toSave) -> {
-			ItemStack[] items = NBTEditorClient.CLIENT_CHEST.getPage(page);
-			items[slot] = toSave;
 			try {
+				ItemStack[] items = NBTEditorClient.CLIENT_CHEST.getPage(page).getItemsOrThrow();
+				items[slot] = toSave;
 				NBTEditorClient.CLIENT_CHEST.setPage(page, items);
 				
 				if (MainUtil.client.currentScreen instanceof ClientChestScreen && ClientChestScreen.PAGE == page)
@@ -44,7 +46,7 @@ public class ClientChestItemReference implements ItemReference {
 	
 	@Override
 	public ItemStack getItem() {
-		return NBTEditorClient.CLIENT_CHEST.getPage(page)[slot];
+		return NBTEditorClient.CLIENT_CHEST.getPage(page).getItemsOrThrow()[slot];
 	}
 	
 	@Override
@@ -73,8 +75,11 @@ public class ClientChestItemReference implements ItemReference {
 	}
 	
 	@Override
-	public void showParent() {
-		ClientChestScreen.show();
+	public void showParent(Optional<ItemStack> cursor) {
+		ClientChestScreen.show(cursor);
 	}
+	
+	@Override
+	public void clearParentCursor() {}
 	
 }

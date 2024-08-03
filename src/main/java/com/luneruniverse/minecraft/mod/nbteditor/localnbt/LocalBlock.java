@@ -5,13 +5,17 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -24,10 +28,13 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -35,11 +42,24 @@ import net.minecraft.util.math.BlockPos;
 
 public class LocalBlock implements LocalNBT {
 	
-	public static LocalBlock deserialize(NbtCompound nbt) {
-		Block block = MVRegistry.BLOCK.get(new Identifier(nbt.getString("id")));
+	public static LocalBlock deserialize(NbtCompound nbt, int defaultDataVersion) {
+		NbtElement dataVersion = nbt.get("DataVersion");
+		
+		String id = MainUtil.updateDynamic(TypeReferences.BLOCK_NAME, NbtString.of(nbt.getString("id")), dataVersion, defaultDataVersion).value;
+		Block block = MVRegistry.BLOCK.get(new Identifier(id));
+		
 		BlockStateProperties state = new BlockStateProperties(block.getDefaultState());
-		state.setValues(nbt.getCompound("state"));
-		return new LocalBlock(block, state, nbt.getCompound("tag"));
+		state.setValues(MainUtil.updateDynamic(TypeReferences.BLOCK_STATE, nbt.getCompound("state"), dataVersion, defaultDataVersion));
+		
+		NbtCompound tag = null;
+		if (nbt.contains("tag", NbtElement.COMPOUND_TYPE)) {
+			tag = nbt.getCompound("tag");
+			tag.putString("id", nbt.getString("id"));
+			tag = MainUtil.updateDynamic(TypeReferences.BLOCK_ENTITY, tag, dataVersion, defaultDataVersion);
+			tag.remove("id");
+		}
+		
+		return new LocalBlock(block, state, tag);
 	}
 	
 	private Block block;
@@ -70,7 +90,7 @@ public class LocalBlock implements LocalNBT {
 		if (name == null)
 			getOrCreateNBT().remove("CustomName");
 		else
-			getOrCreateNBT().putString("CustomName", Text.Serialization.toJsonString(name));
+			getOrCreateNBT().putString("CustomName", TextInst.toJsonString(name));
 	}
 	@Override
 	public String getDefaultName() {
@@ -127,7 +147,7 @@ public class LocalBlock implements LocalNBT {
 		LocalNBT.makeRotatingIcon(renderMatrices, x, y, 1, true);
 		renderMatrices.translate(-0.5, -0.5, -0.5);
 		
-		VertexConsumerProvider.Immediate provider = MVMisc.beginDrawingNormal();
+		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getVertexConsumerProvider();
 		BlockState state = this.state.applyTo(block.getDefaultState());
 		MVMisc.renderBlock(MainUtil.client.getBlockRenderManager(), state, new BlockPos(0, 1000, 0), MainUtil.client.world,
 				renderMatrices, provider.getBuffer(RenderLayer.getCutout()), false);
@@ -135,11 +155,11 @@ public class LocalBlock implements LocalNBT {
 			BlockEntity entity = entityProvider.createBlockEntity(new BlockPos(0, 1000, 0), state);
 			entity.setWorld(MainUtil.client.world);
 			if (nbt != null)
-				entity.readNbt(nbt);
+				NBTManagers.BLOCK_ENTITY.setNbt(entity, nbt);
 			MainUtil.client.getBlockEntityRenderDispatcher().renderEntity(entity, renderMatrices, provider, 0xF000F0, OverlayTexture.DEFAULT_UV);
 		}
+		provider.draw();
 		
-		MVMisc.endDrawingNormal(provider);
 		matrices.pop();
 		
 		RenderSystem.enableCull();
@@ -150,11 +170,27 @@ public class LocalBlock implements LocalNBT {
 		for (Item item : MVRegistry.ITEM) {
 			if (item instanceof BlockItem blockItem && blockItem.getBlock() == block) {
 				ItemStack output = new ItemStack(blockItem);
-				NbtCompound nbt = new NbtCompound();
-				nbt.put("BlockStateTag", state.getValues());
-				if (nbt != null)
-					nbt.put("BlockEntityTag", this.nbt);
-				output.setNbt(nbt);
+				if (nbt != null) {
+					if (NBTManagers.COMPONENTS_EXIST) {
+						if (block instanceof BlockEntityProvider provider) {
+							BlockEntity entity = provider.createBlockEntity(new BlockPos(0, 1000, 0), state.applyTo(block.getDefaultState()));
+							entity.setWorld(MainUtil.client.world);
+							NBTManagers.BLOCK_ENTITY.setNbt(entity, nbt);
+							MainUtil.client.addBlockEntityNbt(output, entity, DynamicRegistryManagerHolder.getManager());
+							
+							NbtCompound blockEntityDataTag = ItemTagReferences.BLOCK_ENTITY_DATA.get(output);
+							blockEntityDataTag.remove("x");
+							blockEntityDataTag.remove("y");
+							blockEntityDataTag.remove("z");
+							ItemTagReferences.BLOCK_ENTITY_DATA.set(output, blockEntityDataTag);
+						}
+					} else {
+						NbtCompound nbt = new NbtCompound();
+						nbt.put("BlockEntityTag", this.nbt);
+						output.manager$setNbt(nbt);
+					}
+				}
+				ItemTagReferences.BLOCK_STATE.set(output, state.getValuesMap());
 				return Optional.of(output);
 			}
 		}
@@ -165,7 +201,7 @@ public class LocalBlock implements LocalNBT {
 		NbtCompound output = new NbtCompound();
 		output.putString("id", getId().toString());
 		output.put("state", state.getValues());
-		if (nbt != null)
+		if (nbt != null && (!nbt.isEmpty() || isBlockEntity()))
 			output.put("tag", nbt);
 		output.putString("type", "block");
 		return output;

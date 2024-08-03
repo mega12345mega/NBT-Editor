@@ -1,30 +1,36 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidget;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore.LoreConsumer;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.EntityTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
-	private FormattedTextFieldWidget name;
+	private FormattedTextFieldWidget nameFormatted;
 	private FormattedTextFieldWidget lore;
+	private boolean itemNameType;
 	
 	public DisplayScreen(NBTReference<L> ref) {
 		super(TextInst.of("Display"), ref);
@@ -35,18 +41,25 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		MVMisc.setKeyboardRepeatEvents(true);
 		
 		Style baseNameStyle = Style.EMPTY;
-		if (localNBT instanceof LocalItem item)
-			baseNameStyle = baseNameStyle.withFormatting(Formatting.ITALIC, item.getItem().getRarity().formatting);
-		else if (localNBT instanceof LocalBlock)
+		if (localNBT instanceof LocalItem item) {
+			if (!itemNameType)
+				baseNameStyle = baseNameStyle.withFormatting(Formatting.ITALIC);
+			baseNameStyle = baseNameStyle.withFormatting(item.getEditableItem().getRarity().formatting);
+		} else if (localNBT instanceof LocalBlock)
 			;
 		else if (localNBT instanceof LocalEntity)
 			baseNameStyle = baseNameStyle.withFormatting(Formatting.WHITE);
 		else
 			throw new IllegalStateException("DisplayScreen doesn't support " + localNBT.getClass().getName());
 		
-		name = FormattedTextFieldWidget.create(name, 16, 64, width - 32, 24 + textRenderer.fontHeight * 3,
-				localNBT.getName(), false, baseNameStyle, text -> {
-			localNBT.setName(text);
+		nameFormatted = FormattedTextFieldWidget.create(nameFormatted, 16, 64, width - 32, 24 + textRenderer.fontHeight * 3,
+				itemNameType ? MainUtil.getBaseItemNameSafely(((LocalItem) localNBT).getEditableItem()) : localNBT.getName(),
+						false, baseNameStyle, text -> {
+			if (itemNameType)
+				((LocalItem) localNBT).getEditableItem().set(MVDataComponentType.ITEM_NAME, text);
+			else
+				localNBT.setName(text);
+			name.setText(localNBT.getName().getString());
 			checkSave();
 		}).setOverscroll(false).setShadow(localNBT instanceof LocalItem);
 		
@@ -54,27 +67,37 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		if (localNBT instanceof LocalItem item) {
 			lore = FormattedTextFieldWidget.create(lore, 16, nextY, width - 32, height - 16 - 20 - 4 - nextY,
-					new Lore(item.getItem()).getLore(), Style.EMPTY.withFormatting(Formatting.ITALIC, Formatting.DARK_PURPLE), lines -> {
+					ItemTagReferences.LORE.get(item.getEditableItem()), Style.EMPTY.withFormatting(Formatting.ITALIC, Formatting.DARK_PURPLE), lines -> {
 				if (lines.size() == 1 && lines.get(0).getString().isEmpty())
-					new Lore(item.getItem()).clearLore();
+					ItemTagReferences.LORE.set(item.getEditableItem(), new ArrayList<>());
 				else
-					new Lore(item.getItem()).setAllLines(lines);
+					ItemTagReferences.LORE.set(item.getEditableItem(), lines);
 				checkSave();
 			});
-			addSelectableChild(name);
+			addSelectableChild(nameFormatted);
 			addSelectableChild(lore);
 			addDrawableChild(MVMisc.newButton(16, height - 16 - 20, 100, 20, TextInst.translatable("nbteditor.hide_flags"),
 					btn -> closeSafely(() -> client.setScreen(new HideFlagsScreen((ItemReference) ref)))));
+			if (NBTManagers.COMPONENTS_EXIST) {
+				addDrawableChild(MVMisc.newButton(124, height - 16 - 20, 150, 20,
+						TextInst.translatable("nbteditor.display.name_type." + (itemNameType ? "item" : "custom")), btn -> {
+							itemNameType = !itemNameType;
+							btn.setMessage(TextInst.translatable("nbteditor.display.name_type." + (itemNameType ? "item" : "custom")));
+							nameFormatted = null;
+							clearChildren();
+							init();
+						}));
+			}
 			addDrawable(lore);
 		} else
-			addSelectableChild(name);
+			addSelectableChild(nameFormatted);
 		
 		if (localNBT instanceof LocalEntity entity) {
 			addDrawableChild(MVMisc.newButton(16, nextY, 150, 20,
 					TextInst.translatable("nbteditor.display.custom_name_visible." +
-							(entity.getOrCreateNBT().getBoolean("CustomNameVisible") ? "enabled" : "disabled")), btn -> {
-				boolean customNameVisible = !entity.getOrCreateNBT().getBoolean("CustomNameVisible");
-				entity.getNBT().putBoolean("CustomNameVisible", customNameVisible);
+							(EntityTagReferences.CUSTOM_NAME_VISIBLE.get(entity) ? "enabled" : "disabled")), btn -> {
+				boolean customNameVisible = !EntityTagReferences.CUSTOM_NAME_VISIBLE.get(entity);
+				EntityTagReferences.CUSTOM_NAME_VISIBLE.set(entity, customNameVisible);
 				btn.setMessage(TextInst.translatable("nbteditor.display.custom_name_visible." + (customNameVisible ? "enabled" : "disabled")));
 				checkSave();
 			}));
@@ -85,7 +108,7 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	protected void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		matrices.push();
 		matrices.translate(0.0, 0.0, 1.0);
-		name.render(matrices, mouseX, mouseY, delta);
+		nameFormatted.render(matrices, mouseX, mouseY, delta);
 		matrices.pop();
 		
 		renderTip(matrices, "nbteditor.formatted_text.tip");
@@ -93,10 +116,14 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	@Override
 	public void filesDragged(List<Path> paths) {
-		if (!(localNBT instanceof LocalItem item))
+		if (!(localNBT instanceof LocalItem))
 			return;
-		LoreConsumer loreConsumer = LoreConsumer.createAppend(item.getItem());
-		ImageToLoreWidget.openImportFiles(paths, file -> loreConsumer, () -> lore.setText(new Lore(item.getItem()).getLore()));
+		List<Text> lines = new ArrayList<>();
+		lines.add(lore.getText());
+		ImageToLoreWidget.openImportFiles(paths, (file, imgLines) -> lines.addAll(imgLines), () -> {
+			if (lines.size() > 1)
+				lore.setText(lines);
+		});
 	}
 	
 	@Override

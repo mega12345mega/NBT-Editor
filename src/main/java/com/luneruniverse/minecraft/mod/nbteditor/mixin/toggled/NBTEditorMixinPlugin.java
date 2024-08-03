@@ -25,6 +25,10 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				.range("1.19.3", "1.19.4", () -> output.add("toggled.ScreenMixin"))
 				.range(null, "1.19.2", () -> {})
 				.run();
+		Version.newSwitch()
+				.range("1.20.5", null, () -> output.add("toggled.ItemStackMixin"))
+				.range(null, "1.20.4", () -> {})
+				.run();
 	}
 	
 }

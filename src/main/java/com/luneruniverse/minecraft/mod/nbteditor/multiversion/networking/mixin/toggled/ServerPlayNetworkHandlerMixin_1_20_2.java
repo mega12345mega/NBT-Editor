@@ -17,7 +17,8 @@ public class ServerPlayNetworkHandlerMixin_1_20_2 {
 	@Shadow
 	public ServerPlayerEntity player;
 	
-	@Inject(method = "<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/network/ClientConnection;Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/server/network/ConnectedClientData;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;setPacketListener(Lnet/minecraft/network/listener/PacketListener;)V"))
+	@Inject(method = "<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/class_2535;Lnet/minecraft/class_3222;Lnet/minecraft/class_8792;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_2535;method_10763(Lnet/minecraft/class_2547;)V"), remap = false)
+	@SuppressWarnings("target")
 	private void init(MinecraftServer server, ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo info) {
 		this.player = player;
 		player.networkHandler = (ServerPlayNetworkHandler) (Object) this;

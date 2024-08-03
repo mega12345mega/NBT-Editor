@@ -1,16 +1,12 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
-import java.lang.invoke.MethodType;
-import java.util.function.Supplier;
-
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-public class MVScreen extends Screen implements OldEventBehavior {
+public class MVScreen extends Screen implements OldEventBehavior, PassContainerSlotUpdates {
 	
 	protected MVScreen(Text title) {
 		super(title);
@@ -36,30 +32,10 @@ public class MVScreen extends Screen implements OldEventBehavior {
 		MVDrawableHelper.renderBackground((Screen) this, matrices);
 	}
 	
-	public final boolean isPauseScreen() { // 1.18
-		return shouldPause();
-	}
-	public boolean shouldPause() { // 1.19
-		return true;
-	}
-	
-	public final void onClose() { // 1.18
-		close();
-	}
-	public void close() { // 1.19
-		client.setScreen(null);
-	}
-	
-	private static final Supplier<Reflection.MethodInvoker> ParentElement_setInitialFocus =
-			Reflection.getOptionalMethod(ParentElement.class, "method_20085", MethodType.methodType(void.class, Element.class));
 	public void setInitialFocus(Element element) {
-		Version.newSwitch()
-				.range("1.19.4", null, () -> {
-					super.setInitialFocus(element);
-					setFocused(element);
-				})
-				.range(null, "1.19.3", () -> ParentElement_setInitialFocus.get().invoke(this, element))
-				.run();
+		MVMisc.setInitialFocus(this, element, super::setInitialFocus);
 	}
+	@Override
+	protected void setInitialFocus() {}
 	
 }

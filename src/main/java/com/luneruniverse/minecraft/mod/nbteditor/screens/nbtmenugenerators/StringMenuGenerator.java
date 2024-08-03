@@ -1,13 +1,12 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTValue;
-import com.luneruniverse.minecraft.mod.nbteditor.util.StringNbtWriterQuoted;
+import com.luneruniverse.minecraft.mod.nbteditor.util.StringJsonWriterQuoted;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -15,8 +14,6 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
 
 public class StringMenuGenerator implements MenuGenerator {
-	
-	public static final List<Thread> STR_BOOL_REQUESTED = new ArrayList<>();
 	
 	@Override
 	public List<NBTValue> getElements(NBTEditorScreen<?> screen, NbtElement source) {
@@ -105,17 +102,14 @@ public class StringMenuGenerator implements MenuGenerator {
 	
 	private NbtElement getRealNbt(NbtElement str) {
 		try {
-			STR_BOOL_REQUESTED.add(Thread.currentThread());
 			return MixinLink.parseSpecialElement(new StringReader(((NbtString) str).asString()));
 		} catch (CommandSyntaxException e) {
 			return null;
-		} finally {
-			STR_BOOL_REQUESTED.remove(Thread.currentThread());
 		}
 	}
 	
 	private void save(NbtElement source, NbtElement nbt) {
-		((NbtString) source).value = new StringNbtWriterQuoted().apply(nbt);
+		((NbtString) source).value = new StringJsonWriterQuoted().apply(nbt);
 	}
 	
 }

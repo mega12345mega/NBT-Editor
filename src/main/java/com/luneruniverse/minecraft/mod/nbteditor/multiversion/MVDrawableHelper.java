@@ -20,6 +20,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
@@ -69,6 +70,10 @@ public class MVDrawableHelper {
 				.range("1.20.0", null, () -> caller.render(MVDrawableHelper.getDrawContext(matrices), mouseX, mouseY, delta))
 				.range(null, "1.19.4", () -> Drawable_render.get().invoke(caller, matrices, mouseX, mouseY, delta))
 				.run();
+	}
+	
+	public static VertexConsumerProvider.Immediate getVertexConsumerProvider() {
+		return MainUtil.client.gameRenderer.buffers.getEntityVertexConsumers();
 	}
 	
 	
@@ -210,7 +215,13 @@ public class MVDrawableHelper {
 	public static void renderBackground(Screen screen, MatrixStack matrices) {
 		int[] mousePos = MainUtil.getMousePos();
 		Version.newSwitch()
-				.range("1.20.2", null, () -> screen.renderBackground(MVDrawableHelper.getDrawContext(matrices), mousePos[0], mousePos[1], MainUtil.client.getTickDelta()))
+				.range("1.20.5", null, () -> {
+					if (MainUtil.client.world == null)
+						screen.renderBackground(getDrawContext(matrices), mousePos[0], mousePos[1], MainUtil.client.getTickDelta());
+					else
+						screen.renderInGameBackground(getDrawContext(matrices));
+				})
+				.range("1.20.2", "1.20.4", () -> screen.renderBackground(getDrawContext(matrices), mousePos[0], mousePos[1], MainUtil.client.getTickDelta()))
 				.range("1.20.0", "1.20.1", () -> Screen_renderBackground_DrawContext.get().invoke(screen, MVDrawableHelper.getDrawContext(matrices)))
 				.range(null, "1.19.4", () -> Screen_renderBackground_MatrixStack.get().invoke(screen, matrices))
 				.run();

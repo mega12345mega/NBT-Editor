@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
@@ -18,12 +19,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.toast.SystemToast;
 import net.minecraft.world.GameMode;
 
 public class NBTEditorServerConn implements MVClientNetworking.PlayNetworkStateEvents.Start, MVClientNetworking.PlayNetworkStateEvents.Stop {
@@ -34,8 +35,6 @@ public class NBTEditorServerConn implements MVClientNetworking.PlayNetworkStateE
 		INCOMPATIBLE,
 		BOTH
 	}
-	
-	public static final int PROTOCOL_VERSION = 0;
 	
 	private Status status;
 	private boolean containerScreen;
@@ -117,14 +116,13 @@ public class NBTEditorServerConn implements MVClientNetworking.PlayNetworkStateE
 	}
 	
 	private void onProtocolVersionPacket(ProtocolVersionS2CPacket packet) {
-		if (packet.getVersion() == PROTOCOL_VERSION)
+		if (packet.getVersion() == NBTEditorServer.PROTOCOL_VERSION)
 			status = Status.BOTH;
 		else {
 			status = Status.INCOMPATIBLE;
 			if (ConfigScreen.isWarnIncompatibleProtocol()) {
-				MainUtil.client.getToastManager().add(new SystemToast(SystemToast.Type.PACK_LOAD_FAILURE,
-						TextInst.translatable("nbteditor.incompatible_protocol.title"),
-						TextInst.translatable("nbteditor.incompatible_protocol.desc")));
+				MVMisc.showToast(TextInst.translatable("nbteditor.incompatible_protocol.title"),
+						TextInst.translatable("nbteditor.incompatible_protocol.desc"));
 			}
 		}
 	}

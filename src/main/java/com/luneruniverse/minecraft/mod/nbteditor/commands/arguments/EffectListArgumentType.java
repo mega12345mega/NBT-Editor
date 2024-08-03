@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.mojang.brigadier.StringReader;
@@ -27,12 +28,12 @@ import net.minecraft.util.Identifier;
 public class EffectListArgumentType implements ArgumentType<Collection<StatusEffectInstance>> {
 	
 	public enum Arg {
-		DURATION("-duration", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), Integer.parseInt(str) * 20, effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), false),
-		AMPLIFIER("-amplifier", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), Integer.parseInt(str), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), false),
-		AMBIENT("-ambient", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), effect.getAmplifier(), parseBoolean(str), effect.shouldShowParticles(), effect.shouldShowIcon()), true),
-		PERMANENT("-permanent", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), -1, effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), true),
-		SHOW_PARTICLES("-showparticles", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), parseBoolean(str), effect.shouldShowIcon()), true),
-		SHOW_ICON("-showicon", (effect, str) -> new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), parseBoolean(str)), true);
+		DURATION("-duration", (effect, str) -> MVMisc.newStatusEffectInstance(MVMisc.getEffectType(effect), Integer.parseInt(str) * 20, effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), false),
+		AMPLIFIER("-amplifier", (effect, str) -> MVMisc.newStatusEffectInstance(MVMisc.getEffectType(effect), effect.getDuration(), Integer.parseInt(str), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), false),
+		AMBIENT("-ambient", (effect, str) -> MVMisc.newStatusEffectInstance(MVMisc.getEffectType(effect), effect.getDuration(), effect.getAmplifier(), parseBoolean(str), effect.shouldShowParticles(), effect.shouldShowIcon()), true),
+		PERMANENT("-permanent", (effect, str) -> MVMisc.newStatusEffectInstance(MVMisc.getEffectType(effect), -1, effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), effect.shouldShowIcon()), true),
+		SHOW_PARTICLES("-showparticles", (effect, str) -> MVMisc.newStatusEffectInstance(MVMisc.getEffectType(effect), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), parseBoolean(str), effect.shouldShowIcon()), true),
+		SHOW_ICON("-showicon", (effect, str) -> MVMisc.newStatusEffectInstance(MVMisc.getEffectType(effect), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.shouldShowParticles(), parseBoolean(str)), true);
 		
 		private static boolean parseBoolean(String str) {
 			if (str.equalsIgnoreCase("true"))
@@ -78,13 +79,13 @@ public class EffectListArgumentType implements ArgumentType<Collection<StatusEff
 				return INVALID_EFFECT_EXCEPTION.create(identifier);
 			});
 			if (!stringReader.canRead()) {
-				effects.add(new StatusEffectInstance(type, 5 * 20));
+				effects.add(MVMisc.newStatusEffectInstance(type, 5 * 20));
 				break;
 			}
 			if (stringReader.read() != ' ')
 				throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.effect_list_arg_type.expected.space")).createWithContext(stringReader);
 			
-			StatusEffectInstance effect = new StatusEffectInstance(type, 5 * 20);
+			StatusEffectInstance effect = MVMisc.newStatusEffectInstance(type, 5 * 20);
 			
 			while (stringReader.canRead() && stringReader.peek() == '-') {
 				StringBuilder arg = new StringBuilder();

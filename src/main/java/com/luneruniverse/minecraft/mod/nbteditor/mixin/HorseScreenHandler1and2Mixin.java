@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
 import net.minecraft.entity.passive.AbstractHorseEntity;
@@ -31,11 +32,15 @@ public class HorseScreenHandler1and2Mixin {
 		PlayerEntity owner = ServerMixinLink.SLOT_OWNER.get((Slot) (Object) this);
 		if (owner == null)
 			return;
+		if (!((Slot) (Object) this).isEnabled()) {
+			info.setReturnValue(false);
+			return;
+		}
 		if (owner instanceof ServerPlayerEntity) {
-			if (owner.hasPermissionLevel(2))
+			if (owner.hasPermissionLevel(2) && ServerMixinLink.NO_SLOT_RESTRICTIONS_PLAYERS.getOrDefault(owner, false))
 				info.setReturnValue(true);
 		} else {
-			if (NBTEditorClient.SERVER_CONN.isEditingExpanded())
+			if (NBTEditorClient.SERVER_CONN.isEditingExpanded() && ConfigScreen.isNoSlotRestrictions())
 				info.setReturnValue(true);
 		}
 	}

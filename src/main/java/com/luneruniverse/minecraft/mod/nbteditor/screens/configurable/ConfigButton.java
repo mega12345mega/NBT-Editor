@@ -1,11 +1,11 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.configurable;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ExtendableButtonWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVButtonWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 
 import net.minecraft.text.Text;
 
-public class ConfigButton extends ExtendableButtonWidget implements ConfigPath {
+public class ConfigButton extends MVButtonWidget implements ConfigPath {
 	
 	@FunctionalInterface
 	public interface PressAction {

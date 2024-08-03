@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,7 +35,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigTooltipSupplier;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueBoolean;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueSlider;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -150,6 +151,49 @@ public class ConfigScreen extends TickableSupportingScreen {
 		}
 	}
 	
+	public enum CreativeTabsPosition {
+		BOTTOM_LEFT("nbteditor.config.creative_tabs_pos.bottom_left"),
+		BOTTOM_CENTER("nbteditor.config.creative_tabs_pos.bottom_center"),
+		BOTTOM_RIGHT("nbteditor.config.creative_tabs_pos.bottom_right"),
+		TOP_LEFT("nbteditor.config.creative_tabs_pos.top_left"),
+		TOP_CENTER("nbteditor.config.creative_tabs_pos.top_center"),
+		TOP_RIGHT("nbteditor.config.creative_tabs_pos.top_right");
+		
+		private final Text label;
+		
+		private CreativeTabsPosition(String key) {
+			this.label = TextInst.translatable(key);
+		}
+		
+		public boolean isTop() {
+			return this == TOP_LEFT || this == TOP_CENTER || this == TOP_RIGHT;
+		}
+		
+		public Point position(int index, int numTabs, int screenWidth, int screenHeight) {
+			int x = switch (this) {
+				case BOTTOM_LEFT, TOP_LEFT -> index * (CreativeTab.WIDTH + 2) + 10;
+				case BOTTOM_CENTER, TOP_CENTER -> {
+					int tabsWidth = numTabs * (CreativeTab.WIDTH + 2) - 2;
+					int tabsStart = (screenWidth - tabsWidth) / 2;
+					yield tabsStart + index * (CreativeTab.WIDTH + 2);
+				}
+				case BOTTOM_RIGHT, TOP_RIGHT -> screenWidth - CreativeTab.WIDTH - index * (CreativeTab.WIDTH + 2) - 10;
+			};
+			
+			int y = switch (this) {
+				case BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT -> screenHeight - CreativeTab.HEIGHT;
+				case TOP_LEFT, TOP_CENTER, TOP_RIGHT -> 0;
+			};
+			
+			return new Point(x, y);
+		}
+		
+		@Override
+		public String toString() {
+			return label.getString();
+		}
+	}
+	
 	private static EnchantLevelMax enchantLevelMax;
 	private static boolean enchantNumberTypeArabic;
 	private static double keyTextSize;
@@ -166,7 +210,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 	private static boolean largeClientChest;
 	private static boolean screenshotOptions;
 	private static boolean tooltipOverflowFix;
-	private static boolean noArmorRestriction;
+	private static boolean noSlotRestrictions;
 	private static boolean hideFormatButtons;
 	private static boolean specialNumbers;
 	private static List<Alias> aliases;
@@ -176,6 +220,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 	private static boolean warnIncompatibleProtocol;
 	private static boolean enchantGlintFix;
 	private static boolean recreateBlocksAndEntities;
+	private static CreativeTabsPosition creativeTabsPos;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -193,7 +238,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		largeClientChest = false;
 		screenshotOptions = true;
 		tooltipOverflowFix = true;
-		noArmorRestriction = false;
+		noSlotRestrictions = false;
 		hideFormatButtons = false;
 		specialNumbers = true;
 		aliases = new ArrayList<>(List.of(
@@ -207,6 +252,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		warnIncompatibleProtocol = true;
 		enchantGlintFix = false;
 		recreateBlocksAndEntities = false;
+		creativeTabsPos = CreativeTabsPosition.BOTTOM_LEFT;
 		
 		try {
 			// Many config options use the old names
@@ -232,7 +278,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 			largeClientChest = settings.get("largeClientChest").getAsBoolean();
 			screenshotOptions = settings.get("screenshotOptions").getAsBoolean();
 			tooltipOverflowFix = settings.get("tooltipOverflowFix").getAsBoolean();
-			noArmorRestriction = settings.get("noArmorRestriction").getAsBoolean();
+			noSlotRestrictions = settings.get("noArmorRestriction").getAsBoolean();
 			hideFormatButtons = settings.get("hideFormatButtons").getAsBoolean();
 			specialNumbers = settings.get("specialNumbers").getAsBoolean();
 			aliases = getStream(settings.get("aliases").getAsJsonArray())
@@ -244,6 +290,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 			warnIncompatibleProtocol = settings.get("warnIncompatibleProtocol").getAsBoolean();
 			enchantGlintFix = settings.get("enchantGlintFix").getAsBoolean();
 			recreateBlocksAndEntities = settings.get("recreateBlocksAndEntities").getAsBoolean();
+			creativeTabsPos = CreativeTabsPosition.valueOf(settings.get("creativeTabsPos").getAsString());
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -269,7 +316,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		settings.addProperty("largeClientChest", largeClientChest);
 		settings.addProperty("screenshotOptions", screenshotOptions);
 		settings.addProperty("tooltipOverflowFix", tooltipOverflowFix);
-		settings.addProperty("noArmorRestriction", noArmorRestriction);
+		settings.addProperty("noArmorRestriction", noSlotRestrictions);
 		settings.addProperty("hideFormatButtons", hideFormatButtons);
 		settings.addProperty("specialNumbers", specialNumbers);
 		settings.add("aliases", aliases.stream().map(alias -> {
@@ -284,6 +331,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		settings.addProperty("warnIncompatibleProtocol", warnIncompatibleProtocol);
 		settings.addProperty("enchantGlintFix", enchantGlintFix);
 		settings.addProperty("recreateBlocksAndEntities", recreateBlocksAndEntities);
+		settings.addProperty("creativeTabsPos", creativeTabsPos.name());
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -351,8 +399,8 @@ public class ConfigScreen extends TickableSupportingScreen {
 	public static boolean isTooltipOverflowFix() {
 		return tooltipOverflowFix;
 	}
-	public static boolean isNoArmorRestriction() {
-		return noArmorRestriction;
+	public static boolean isNoSlotRestrictions() {
+		return noSlotRestrictions;
 	}
 	public static boolean isHideFormatButtons() {
 		return hideFormatButtons;
@@ -380,6 +428,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 	}
 	public static boolean isRecreateBlocksAndEntities() {
 		return recreateBlocksAndEntities;
+	}
+	public static CreativeTabsPosition getCreativeTabsPos() {
+		return creativeTabsPos;
 	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
@@ -446,7 +497,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.setTooltip("nbteditor.config.tooltip_overflow_fix.desc"));
 		
 		mc.setConfigurable("maxEnchantLevelDisplay", new ConfigItem<>(TextInst.translatable("nbteditor.config.enchant_level_max"),
-				new ConfigValueDropdownEnum<>(enchantLevelMax, EnchantLevelMax.NEVER, EnchantLevelMax.class)
+				ConfigValueDropdown.forEnum(enchantLevelMax, EnchantLevelMax.NEVER, EnchantLevelMax.class)
 				.addValueListener(value -> enchantLevelMax = value.getValidValue()))
 				.setTooltip("nbteditor.config.enchant_level_max.desc"));
 		
@@ -456,10 +507,10 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.addValueListener(value -> enchantNumberTypeArabic = value.getValidValue()))
 				.setTooltip("nbteditor.config.enchant_number_type.desc"));
 		
-		mc.setConfigurable("noArmorRestriction", new ConfigItem<>(TextInst.translatable("nbteditor.config.no_armor_restriction"),
-				new ConfigValueBoolean(noArmorRestriction, false, 100, TextInst.translatable("nbteditor.config.no_armor_restriction.enabled"), TextInst.translatable("nbteditor.config.no_armor_restriction.disabled"))
-				.addValueListener(value -> noArmorRestriction = value.getValidValue()))
-				.setTooltip("nbteditor.config.no_armor_restriction.desc"));
+		mc.setConfigurable("noSlotRestrictions", new ConfigItem<>(TextInst.translatable("nbteditor.config.no_slot_restrictions"),
+				new ConfigValueBoolean(noSlotRestrictions, false, 100, TextInst.translatable("nbteditor.config.no_slot_restrictions.enabled"), TextInst.translatable("nbteditor.config.no_slot_restrictions.disabled"))
+				.addValueListener(value -> noSlotRestrictions = value.getValidValue()))
+				.setTooltip("nbteditor.config.no_slot_restrictions.desc"));
 		
 		mc.setConfigurable("screenshotOptions", new ConfigItem<>(TextInst.translatable("nbteditor.config.screenshot_options"),
 				new ConfigValueBoolean(screenshotOptions, true, 100, TextInst.translatable("nbteditor.config.screenshot_options.enabled"), TextInst.translatable("nbteditor.config.screenshot_options.disabled"))
@@ -472,6 +523,11 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.setTooltip("nbteditor.config.enchant_glint_fix.desc"));
 		
 		// ---------- GUIs ----------
+		
+		guis.setConfigurable("creativeTabsPos", new ConfigItem<>(TextInst.translatable("nbteditor.config.creative_tabs_pos"),
+				ConfigValueDropdown.forEnum(creativeTabsPos, CreativeTabsPosition.BOTTOM_LEFT, CreativeTabsPosition.class)
+				.addValueListener(value -> creativeTabsPos = value.getValidValue()))
+				.setTooltip("nbteditor.config.creative_tabs_pos.desc"));
 		
 		guis.setConfigurable("scrollSpeed", new ConfigItem<>(TextInst.translatable("nbteditor.config.scroll_speed"),
 				ConfigValueSlider.forDouble(100, scrollSpeed, 5, 0.5, 10, 0.05, value -> TextInst.literal(String.format("%.2f", value)))
@@ -500,7 +556,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.setTooltip("nbteditor.config.page_keybinds.desc"));
 		
 		guis.setConfigurable("itemSize", new ConfigItem<>(TextInst.translatable("nbteditor.config.item_size"),
-				new ConfigValueDropdownEnum<>(itemSizeFormat, ItemSizeFormat.HIDDEN, ItemSizeFormat.class)
+				ConfigValueDropdown.forEnum(itemSizeFormat, ItemSizeFormat.HIDDEN, ItemSizeFormat.class)
 				.addValueListener(value -> itemSizeFormat = value.getValidValue()))
 				.setTooltip("nbteditor.config.item_size.desc"));
 		
@@ -510,7 +566,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.setTooltip("nbteditor.config.key_text_size.desc"));
 		
 		guis.setConfigurable("checkUpdates", new ConfigItem<>(TextInst.translatable("nbteditor.config.check_updates"),
-				new ConfigValueDropdownEnum<>(checkUpdates, CheckUpdatesLevel.MINOR, CheckUpdatesLevel.class)
+				ConfigValueDropdown.forEnum(checkUpdates, CheckUpdatesLevel.MINOR, CheckUpdatesLevel.class)
 				.addValueListener(value -> checkUpdates = value.getValidValue()))
 				.setTooltip("nbteditor.config.check_updates.desc"));
 		

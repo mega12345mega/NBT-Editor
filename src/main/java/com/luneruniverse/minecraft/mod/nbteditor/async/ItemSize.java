@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.util.OptionalLong;
 import java.util.WeakHashMap;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 
@@ -36,7 +37,7 @@ public class ItemSize {
 	private static final WeakHashMap<ItemStack, OptionalLong> compressedSizes = new WeakHashMap<>();
 	
 	public static OptionalLong getItemSize(ItemStack stack, boolean compressed) {
-		if (!stack.hasNbt()) {
+		if (!stack.manager$hasNbt()) {
 			return OptionalLong.of(calcItemSize(stack, compressed));
 		}
 		WeakHashMap<ItemStack, OptionalLong> sizes = (compressed ? compressedSizes : uncompressedSizes);
@@ -62,13 +63,13 @@ public class ItemSize {
 	private static long calcItemSize(ItemStack stack, boolean compressed) {
 		ByteCountingOutputStream stream = new ByteCountingOutputStream();
 		try {
-			NbtCompound nbt = stack.writeNbt(new NbtCompound());
+			NbtCompound nbt = stack.manager$serialize();
 			if (compressed)
 				MVMisc.writeCompressedNbt(nbt, stream);
 			else
 				MVMisc.writeNbt(nbt, stream);
 		} catch (IOException e) {
-			e.printStackTrace();
+			NBTEditor.LOGGER.error("Error while getting the size of an item", e);
 		}
 		return stream.getCount();
 	}

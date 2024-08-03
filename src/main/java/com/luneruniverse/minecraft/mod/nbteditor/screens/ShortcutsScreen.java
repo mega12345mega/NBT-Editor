@@ -46,7 +46,7 @@ public class ShortcutsScreen extends TickableSupportingScreen {
 		panel = newPanel;
 		
 		this.addDrawableChild(MVMisc.newButton(this.width - 134, this.height - 36, 100, 20, ScreenTexts.DONE, btn -> close()));
-		this.addDrawableChild(MVMisc.newButton(this.width - 134 - 108, this.height - 36, 100, 20, ScreenTexts.CANCEL, btn -> {
+		this.addDrawableChild(MVMisc.newButton(this.width - 134, this.height - 36 - 24, 100, 20, ScreenTexts.CANCEL, btn -> {
 			cancel = true;
 			close();
 		}));

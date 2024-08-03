@@ -15,6 +15,10 @@ public class MVNetworking {
 		constructors.put(id, constructor);
 	}
 	
+	public static boolean isPacket(Identifier id) {
+		return constructors.containsKey(id);
+	}
+	
 	public static MVPacket readPacket(Identifier id, PacketByteBuf payload) {
 		Function<PacketByteBuf, MVPacket> constructor = constructors.get(id);
 		if (constructor == null)

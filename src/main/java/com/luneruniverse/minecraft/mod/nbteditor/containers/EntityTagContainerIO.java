@@ -1,54 +1,41 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.TagNames;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 
-public class EntityTagContainerIO implements ItemContainerIO, EntityContainerIO {
+public class EntityTagContainerIO extends ItemTagContainerIO implements EntityContainerIO {
 	
-	private final NBTContainerIO nbtIO;
+	private final NBTContainerIO entityNbtIO;
 	
+	public EntityTagContainerIO(NBTContainerIO itemNbtIO, NBTContainerIO entityNbtIO) {
+		super(TagNames.ENTITY_TAG, true, itemNbtIO);
+		this.entityNbtIO = entityNbtIO;
+	}
 	public EntityTagContainerIO(NBTContainerIO nbtIO) {
-		this.nbtIO = nbtIO;
+		this(nbtIO, nbtIO);
 	}
 	
 	@Override
-	public boolean isItemReadable(ItemStack item) {
-		NbtCompound entityTag = item.getSubNbt("EntityTag");
-		if (entityTag == null)
-			entityTag = new NbtCompound();
-		return nbtIO.isNBTReadable(entityTag, SourceContainerType.ITEM);
+	public int getMaxEntitySize(LocalEntity entity) {
+		return entityNbtIO.getMaxNBTSize(getNBT(entity), SourceContainerType.ENTITY);
 	}
-	@Override
-	public ItemStack[] readItem(ItemStack container) {
-		NbtCompound blockEntityTag = container.getSubNbt("EntityTag");
-		if (blockEntityTag == null)
-			blockEntityTag = new NbtCompound();
-		return nbtIO.readNBT(blockEntityTag, SourceContainerType.ITEM);
-	}
-	@Override
-	public void writeItem(ItemStack container, ItemStack[] contents) {
-		nbtIO.writeNBT(container.getOrCreateSubNbt("EntityTag"), contents, SourceContainerType.ITEM);
-	}
-	
 	@Override
 	public boolean isEntityReadable(LocalEntity entity) {
-		NbtCompound entityTag = entity.getNBT();
-		if (entityTag == null)
-			entityTag = new NbtCompound();
-		return nbtIO.isNBTReadable(entityTag, SourceContainerType.ENTITY);
+		return entityNbtIO.isNBTReadable(getNBT(entity), SourceContainerType.ENTITY);
 	}
 	@Override
 	public ItemStack[] readEntity(LocalEntity container) {
-		NbtCompound entityTag = container.getNBT();
-		if (entityTag == null)
-			entityTag = new NbtCompound();
-		return nbtIO.readNBT(entityTag, SourceContainerType.ENTITY);
+		return entityNbtIO.readNBT(getNBT(container), SourceContainerType.ENTITY);
 	}
 	@Override
-	public void writeEntity(LocalEntity container, ItemStack[] contents) {
-		nbtIO.writeNBT(container.getOrCreateNBT(), contents, SourceContainerType.ENTITY);
+	public int writeEntity(LocalEntity container, ItemStack[] contents) {
+		NbtCompound nbt = getNBT(container);
+		int output = entityNbtIO.writeNBT(nbt, contents, SourceContainerType.ENTITY);
+		container.setNBT(nbt);
+		return output;
 	}
 	
 }

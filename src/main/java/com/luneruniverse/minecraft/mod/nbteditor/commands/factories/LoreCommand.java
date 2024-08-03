@@ -3,6 +3,9 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.argument;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
@@ -10,11 +13,13 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.DisplayScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
@@ -24,6 +29,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class LoreCommand extends ClientCommand {
+	
+	private static int getPos(int pos, List<Text> lore, boolean afterLast) throws CommandSyntaxException {
+		if (pos < 0)
+			pos = pos + lore.size() + (afterLast ? 1 : 0);
+		if (pos < 0 || pos > lore.size() || (!afterLast && pos == lore.size()))
+			throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.lore.invalid_line")).create();
+		return pos;
+	}
 	
 	@Override
 	public String getName() {
@@ -47,8 +60,9 @@ public class LoreCommand extends ClientCommand {
 			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			
-			Lore lore = new Lore(item);
-			lore.addLine(line, pos);
+			List<Text> lore = ItemTagReferences.LORE.get(item);
+			lore.add(getPos(pos, lore, true), line);
+			ItemTagReferences.LORE.set(item, lore);
 			ref.saveItem(item, TextInst.translatable("nbteditor.lore.edited"));
 			
 			return Command.SINGLE_SUCCESS;
@@ -62,8 +76,9 @@ public class LoreCommand extends ClientCommand {
 			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			
-			Lore lore = new Lore(item);
-			lore.removeLine(pos);
+			List<Text> lore = ItemTagReferences.LORE.get(item);
+			lore.remove(getPos(pos, lore, false));
+			ItemTagReferences.LORE.set(item, lore);
 			ref.saveItem(item, TextInst.translatable("nbteditor.lore.edited"));
 			
 			return Command.SINGLE_SUCCESS;
@@ -78,8 +93,9 @@ public class LoreCommand extends ClientCommand {
 			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			
-			Lore lore = new Lore(item);
-			lore.setLine(line, pos);
+			List<Text> lore = ItemTagReferences.LORE.get(item);
+			lore.set(getPos(pos, lore, false), line);
+			ItemTagReferences.LORE.set(item, lore);
 			ref.saveItem(item, TextInst.translatable("nbteditor.lore.edited"));
 			
 			return Command.SINGLE_SUCCESS;
@@ -88,8 +104,7 @@ public class LoreCommand extends ClientCommand {
 			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
 			
-			Lore lore = new Lore(item);
-			lore.clearLore();
+			ItemTagReferences.LORE.set(item, new ArrayList<>());
 			ref.saveItem(item, TextInst.translatable("nbteditor.lore.edited"));
 			
 			return Command.SINGLE_SUCCESS;
@@ -105,9 +120,9 @@ public class LoreCommand extends ClientCommand {
 					.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore clear"))
 							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/factory display lore clear"))))));
 			
-			Lore lore = new Lore(item);
+			List<Text> lore = ItemTagReferences.LORE.get(item);
 			int i = 0;
-			for (Text line : lore.getLore()) {
+			for (Text line : lore) {
 				final int finalI = i;
 				context.getSource().sendFeedback(TextInst.literal("[").formatted(Formatting.GRAY).append(TextInst.literal("-").formatted(Formatting.RED)).append(TextInst.literal("]").formatted(Formatting.GRAY))
 						.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore remove " + finalI))

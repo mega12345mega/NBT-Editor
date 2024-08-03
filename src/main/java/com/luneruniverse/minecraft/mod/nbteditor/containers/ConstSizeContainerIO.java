@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -14,35 +16,56 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
+	public boolean passRootNbt(SourceContainerType source) {
+		return NBTManagers.COMPONENTS_EXIST && source == SourceContainerType.ITEM;
+	}
+	
+	@Override
+	public int getMaxNBTSize(NbtCompound nbt, SourceContainerType source) {
+		return numItems;
+	}
+	
+	@Override
 	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
+		boolean itemComponent = NBTManagers.COMPONENTS_EXIST && source == SourceContainerType.ITEM;
+		
 		ItemStack[] items = new ItemStack[numItems];
-		NbtList itemsNbt = container.getList("Items", NbtElement.COMPOUND_TYPE);
+		NbtList itemsNbt = container.getList(itemComponent ? "minecraft:container" : "Items", NbtElement.COMPOUND_TYPE);
 		for (NbtElement itemNbtElement : itemsNbt) {
 			NbtCompound itemNbt = (NbtCompound) itemNbtElement;
-			int slot = itemNbt.getInt("Slot");
+			int slot = itemNbt.getInt(itemComponent ? "slot" : "Slot");
 			if (slot < 0 || slot >= numItems)
 				continue;
-			items[slot] = ItemStack.fromNbt(itemNbt);
+			items[slot] = NBTManagers.ITEM.deserialize(itemComponent ? itemNbt.getCompound("item") : itemNbt);
 		}
 		return items;
 	}
 	
 	@Override
-	public void writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
+	public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
+		boolean itemComponent = NBTManagers.COMPONENTS_EXIST && source == SourceContainerType.ITEM;
+		
 		NbtList itemsNbt = new NbtList();
 		for (int i = 0; i < contents.length; i++) {
 			ItemStack item = contents[i];
 			if (item == null || item.isEmpty())
 				continue;
-			NbtCompound itemNbt = new NbtCompound();
-			item.writeNbt(itemNbt);
+			NbtCompound itemNbt = item.manager$serialize();
+			if (itemComponent) {
+				NbtCompound wrapper = new NbtCompound();
+				wrapper.put("item", itemNbt);
+				itemNbt = wrapper;
+			}
+			String slotKey = (itemComponent ? "slot" : "Slot");
 			if (i < 128)
-				itemNbt.putByte("Slot", (byte) i);
+				itemNbt.putByte(slotKey, (byte) i);
 			else
-				itemNbt.putInt("Slot", i);
+				itemNbt.putInt(slotKey, i);
 			itemsNbt.add(itemNbt);
 		}
-		container.put("Items", itemsNbt);
+		container.put(itemComponent ? "minecraft:container" : "Items", itemsNbt);
+		
+		return numItems;
 	}
 	
 }

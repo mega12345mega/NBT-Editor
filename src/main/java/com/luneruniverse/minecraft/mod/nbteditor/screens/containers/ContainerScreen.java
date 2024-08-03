@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
+import java.util.Optional;
+
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
@@ -9,14 +11,13 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ContainerItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandledScreenItemReference.HandledScreenItemReferenceParent;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
@@ -35,8 +36,8 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	private ItemStack[] prevInv;
 	private boolean navigationClicked;
 	
-	public ContainerScreen(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
-		super(handler, inventory, title);
+	private ContainerScreen(ContainerHandler handler, Text title) {
+		super(handler, title);
 		
 		this.saved = true;
 		this.unsavedTitle = TextInst.copy(title).append("*");
@@ -56,10 +57,19 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		
 		return this;
 	}
-	public static <L extends LocalNBT> void show(NBTReference<L> ref) {
-		PlayerInventory inv = MainUtil.client.player.getInventory();
-		MainUtil.client.setScreen(new ContainerScreen<L>(new ContainerHandler(0, inv), inv, TextInst.translatable("nbteditor.container.title")
+	public static <L extends LocalNBT> void show(NBTReference<L> ref, Optional<ItemStack> cursor) {
+		if (ref.getLocalNBT().isEmpty()) {
+			ref.showParent(cursor);
+			return;
+		}
+		
+		ContainerHandler handler = new ContainerHandler();
+		handler.setCursorStack(cursor.orElse(MainUtil.client.player.playerScreenHandler.getCursorStack()));
+		MainUtil.client.setScreen(new ContainerScreen<L>(handler, TextInst.translatable("nbteditor.container.title")
 				.append(ref.getLocalNBT().getName())).build(ref));
+	}
+	public static void show(NBTReference<?> ref) {
+		show(ref, Optional.empty());
 	}
 	
 	@Override
@@ -80,7 +90,13 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		
 		addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
 				LocalFactoryScreen.FACTORY_ICON,
-				btn -> client.setScreen(new LocalFactoryScreen<>(ref)),
+				btn -> {
+					if (!handler.getCursorStack().isEmpty()) {
+						MainUtil.get(handler.getCursorStack(), true);
+						ref.clearParentCursor();
+					}
+					client.setScreen(new LocalFactoryScreen<>(ref));
+				},
 				new MVTooltip("nbteditor.factory")));
 	}
 	
@@ -145,13 +161,19 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	}
 	
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (ref.keyPressed(keyCode, scanCode, modifiers))
+		if (MainUtil.client.options.inventoryKey.matchesKey(keyCode, scanCode)) {
+			ref.showParent(Optional.of(handler.getCursorStack()));
 			return true;
+		}
 		
 		if (keyCode == GLFW.GLFW_KEY_SPACE) {
 			if (focusedSlot != null && (focusedSlot.id < numSlots || focusedSlot.inventory != this.handler.getInventory())) {
-				if (handleKeybind(keyCode, focusedSlot, slot -> new ContainerItemReference<>(ref, slot.getIndex())))
+				if (handleKeybind(keyCode, focusedSlot,
+						HandledScreenItemReferenceParent.create(
+								cursor -> show(ref, cursor), () -> handler.setCursorStack(ItemStack.EMPTY)),
+						slot -> new ContainerItemReference<>(ref, slot.getIndex()), handler.getCursorStack())) {
 					return true;
+				}
 			}
 		}
 		
@@ -167,6 +189,11 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		return ref;
 	}
 	
+	@Override
+	public void close() {
+		ref.escapeParent(Optional.of(handler.getCursorStack()));
+		MainUtil.client.player.closeHandledScreen();
+	}
 	@Override
 	public void removed() {
 		for (int i = numSlots; i < 27; i++) { // Items that may get deleted

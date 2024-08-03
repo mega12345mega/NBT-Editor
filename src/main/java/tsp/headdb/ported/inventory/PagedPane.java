@@ -15,7 +15,7 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.inventory.Inventory;
@@ -43,7 +43,7 @@ public class PagedPane extends ClientHandledScreen {
      * @param pageSize The page size. inventory rows - 2
      */
     public PagedPane(int pageSize, int rows, String title) {
-    	super(createGenericScreenHandler(rows), MainUtil.client.player.getInventory(), TextInst.of(MainUtil.colorize(title)));
+    	super(createGenericScreenHandler(rows), TextInst.of(MainUtil.colorize(title)));
         this.pageSize = pageSize;
         pages.put(0, new Page(pageSize));
     }
@@ -185,6 +185,11 @@ public class PagedPane extends ClientHandledScreen {
 
         pages.get(currentIndex).handleClick(event);
     }
+    
+    @Override
+    public void close() {
+    	MainUtil.client.player.closeHandledScreen();
+    }
 
     /**
      * Get the object's inventory.
@@ -279,9 +284,8 @@ public class PagedPane extends ClientHandledScreen {
     }
 
     protected ItemStack setMeta(ItemStack itemStack, String name, String... lore) {
-        itemStack.setCustomName(TextInst.of(Utils.colorize(name)));
-        Lore loreObj = new Lore(itemStack);
-        loreObj.setAllLines(Arrays.stream(lore).map(MainUtil::colorize).map(TextInst::of).collect(Collectors.toList()));
+        itemStack.manager$setCustomName(TextInst.of(Utils.colorize(name)));
+        ItemTagReferences.LORE.set(itemStack, Arrays.stream(lore).map(MainUtil::colorize).map(TextInst::of).collect(Collectors.toList()));
         return itemStack;
     }
 

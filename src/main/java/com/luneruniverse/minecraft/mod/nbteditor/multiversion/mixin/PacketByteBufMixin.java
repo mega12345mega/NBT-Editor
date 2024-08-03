@@ -6,13 +6,17 @@ import java.util.function.Supplier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVPacketByteBufParent;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
@@ -79,6 +83,32 @@ public abstract class PacketByteBufMixin implements MVPacketByteBufParent {
 		writeDouble(vector.getX());
 		writeDouble(vector.getY());
 		writeDouble(vector.getZ());
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> PacketByteBuf_readItemStack =
+			Reflection.getOptionalMethod(PacketByteBuf.class, "method_10819", MethodType.methodType(ItemStack.class));
+	@Override
+	public ItemStack readItemStack() {
+		return Version.<ItemStack>newSwitch()
+				.range("1.20.5", null, () -> ServerMVMisc.packetCodecDecode(ItemStack.OPTIONAL_PACKET_CODEC, createRegistryByteBuf()))
+				.range(null, "1.20.4", () -> PacketByteBuf_readItemStack.get().invoke(this))
+				.get();
+	}
+	private static final Supplier<Reflection.MethodInvoker> PacketByteBuf_writeItemStack =
+			Reflection.getOptionalMethod(PacketByteBuf.class, "method_10793", MethodType.methodType(PacketByteBuf.class, ItemStack.class));
+	@Override
+	public PacketByteBuf writeItemStack(ItemStack item) {
+		Version.newSwitch()
+				.range("1.20.5", null, () -> ServerMVMisc.packetCodecEncode(ItemStack.OPTIONAL_PACKET_CODEC, createRegistryByteBuf(), item))
+				.range(null, "1.20.4", () -> PacketByteBuf_writeItemStack.get().invoke(this, item))
+				.run();
+		return (PacketByteBuf) (Object) this;
+	}
+	
+	private Object createRegistryByteBuf() {
+		return Reflection.newInstance("net.minecraft.class_9129",
+				new Class<?>[] {ByteBuf.class, DynamicRegistryManager.class},
+				parent, DynamicRegistryManagerHolder.get());
 	}
 	
 }

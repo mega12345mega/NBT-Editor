@@ -3,8 +3,6 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -16,24 +14,19 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdownEnum;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.AlertWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.GroupWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.TranslatedGroupWidget;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore.LoreConsumer;
-import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.WrittenBookTagReferences;
 
 import net.minecraft.client.gui.screen.ingame.BookScreen.Contents;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -68,74 +61,67 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 	}
 	
 	private String getBookTitle() {
-		return localNBT.getOrCreateNBT().getString("title");
+		return WrittenBookTagReferences.TITLE.get(localNBT.getEditableItem());
 	}
 	private void setBookTitle(String title) {
-		localNBT.getOrCreateNBT().putString("title", title);
-		localNBT.getNBT().remove("filtered_title");
+		WrittenBookTagReferences.TITLE.set(localNBT.getEditableItem(), title);
 		checkSave();
 	}
 	
 	private String getAuthor() {
-		return localNBT.getOrCreateNBT().getString("author");
+		return WrittenBookTagReferences.AUTHOR.get(localNBT.getEditableItem());
 	}
 	private void setAuthor(String author) {
-		localNBT.getOrCreateNBT().putString("author", author);
+		WrittenBookTagReferences.AUTHOR.set(localNBT.getEditableItem(), author);
 		checkSave();
 	}
 	
 	private Generation getGeneration() {
-		int gen = localNBT.getOrCreateNBT().getInt("generation");
+		int gen = WrittenBookTagReferences.GENERATION.get(localNBT.getEditableItem());
 		if (gen < 0 || gen >= 4)
 			return Generation.TATTERED;
 		return Generation.values()[gen];
 	}
 	private void setGeneration(Generation gen) {
-		localNBT.getOrCreateNBT().putInt("generation", gen.ordinal());
+		WrittenBookTagReferences.GENERATION.set(localNBT.getEditableItem(), gen.ordinal());
 		checkSave();
 	}
 	
 	private int getPageCount() {
-		return localNBT.getOrCreateNBT().getList("pages", NbtElement.STRING_TYPE).size();
+		return WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem()).size();
 	}
 	private Text getPage() {
-		EditableText output = TextInst.literal("");
-		MixinLink.getActualContents(localNBT.getItem()).getPage(page).visit((style, str) -> {
-			output.append(TextInst.literal(str).setStyle(style));
-			return Optional.empty();
-		}, Style.EMPTY);
-		return output;
+		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem());
+		return page < pages.size() ? pages.get(page) : TextInst.of("");
 	}
 	private void setPage(Text contents) {
-		NbtList pages = localNBT.getOrCreateNBT().getList("pages", NbtElement.STRING_TYPE);
-		NbtString nbtContents = NbtString.of(Text.Serialization.toJsonString(contents));
+		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem());
 		if (page < pages.size())
-			pages.set(page, nbtContents);
+			pages.set(page, contents);
 		else {
 			while (page > pages.size())
-				pages.add(NbtString.of("{\"text\":\"\"}"));
-			pages.add(nbtContents);
+				pages.add(TextInst.of(""));
+			pages.add(contents);
 		}
-		localNBT.getNBT().put("pages", pages);
-		
-		if (localNBT.getNBT().contains("filtered_pages", NbtElement.COMPOUND_TYPE))
-			localNBT.getNBT().getCompound("filtered_pages").remove(page + "");
+		WrittenBookTagReferences.PAGES.set(localNBT.getEditableItem(), pages);
 		
 		checkSave();
 	}
 	
 	private void addPage() {
-		NbtList pages = localNBT.getOrCreateNBT().getList("pages", NbtElement.STRING_TYPE);
+		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem());
 		if (page < pages.size()) {
-			pages.add(page, NbtString.of("{\"text\":\"\"}"));
+			pages.add(page, TextInst.of(""));
+			WrittenBookTagReferences.PAGES.set(localNBT.getEditableItem(), pages);
 			checkSave();
 			refresh();
 		}
 	}
 	private void removePage() {
-		NbtList pages = localNBT.getOrCreateNBT().getList("pages", NbtElement.STRING_TYPE);
+		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem());
 		if (page < pages.size()) {
 			pages.remove(page);
+			WrittenBookTagReferences.PAGES.set(localNBT.getEditableItem(), pages);
 			checkSave();
 			refresh();
 		}
@@ -159,33 +145,9 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 	}
 	
 	private Contents getPreviewItem() {
-		ItemStack output = localNBT.getItem().copy();
-		if (!output.hasNbt()) {
-			return new Contents() {
-				@Override
-				public int getPageCount() {
-					return 0;
-				}
-				@Override
-				public StringVisitable getPageUnchecked(int page) {
-					return TextInst.of("");
-				}
-			};
-		}
-		NbtList pages = output.getNbt().getList("pages", NbtElement.STRING_TYPE);
-		List<Text> previewPages = new ArrayList<>();
-		for (int i = 0; i < pages.size(); i++)
-			previewPages.add(makePreviewText(TextUtil.fromJsonSafely(pages.getString(i))));
-		return new Contents() {
-			@Override
-			public int getPageCount() {
-				return previewPages.size();
-			}
-			@Override
-			public StringVisitable getPageUnchecked(int page) {
-				return previewPages.get(page);
-			}
-		};
+		List<Text> pages = WrittenBookTagReferences.PAGES.get(localNBT.getEditableItem());
+		pages.replaceAll(this::makePreviewText);
+		return MVMisc.getBookContents(pages);
 	}
 	private Text makePreviewText(Text text) {
 		EditableText output = TextInst.copy(text);
@@ -229,7 +191,7 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 		author.setChangedListener(this::setAuthor);
 		
 		gen = group.addElement(TranslatedGroupWidget.forWidget(
-				new ConfigValueDropdownEnum<>(getGeneration(), Generation.ORIGINAL, Generation.class)
+				ConfigValueDropdown.forEnum(getGeneration(), Generation.ORIGINAL, Generation.class)
 						.addValueListener(value -> setGeneration(value.getValidValue())), 16 + 108 * 2, 64, 0));
 		
 		group.addWidget(MVMisc.newButton(16 + 108 * 3 - 4, 64, 20, 20,
@@ -264,10 +226,23 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 		
 		group.addDrawable(gen);
 		
+		EditableText prevKeybind = TextInst.translatable("nbteditor.keybind.page.down");
+		EditableText nextKeybind = TextInst.translatable("nbteditor.keybind.page.up");
+		if (ConfigScreen.isInvertedPageKeybinds()) {
+			EditableText temp = prevKeybind;
+			prevKeybind = nextKeybind;
+			nextKeybind = temp;
+		}
+		
 		group.addWidget(MVMisc.newButton(16, 64 + 24, 20, height - 80 - 24,
-				TextInst.translatable("nbteditor.book.back"), btn -> back())).active = (page > 0);
+				TextInst.translatable("nbteditor.book.back"), btn -> back(),
+				ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.literal("")
+						.append(prevKeybind).append(TextInst.translatable("nbteditor.keybind.page.prev")))))
+				.active = (page > 0);
 		group.addWidget(MVMisc.newButton(width - 16 - 20, 64 + 24, 20, height - 80 - 24,
-				TextInst.translatable("nbteditor.book.forward"), btn -> forward()));
+				TextInst.translatable("nbteditor.book.forward"), btn -> forward(),
+				ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.literal("")
+						.append(nextKeybind).append(TextInst.translatable("nbteditor.keybind.page.next")))));
 	}
 	
 	@Override
@@ -282,24 +257,28 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 		if (super.keyPressed(keyCode, scanCode, modifiers))
 			return true;
 		
-		return switch (keyCode) {
-			case GLFW.GLFW_KEY_PAGE_UP -> {
+		if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_DOWN);
+			if (ConfigScreen.isInvertedPageKeybinds())
+				prev = !prev;
+			if (prev)
 				back();
-				yield true;
-			}
-			case GLFW.GLFW_KEY_PAGE_DOWN -> {
+			else
 				forward();
-				yield true;
-			}
-			default -> false;
-		};
+			return true;
+		}
+		
+		return false;
 	}
 	
 	@Override
 	public void filesDragged(List<Path> paths) {
-		AtomicReference<Text> newPage = new AtomicReference<>();
-		LoreConsumer loreConsumer = LoreConsumer.createAppendPage(getPage(), newPage::setPlain);
-		ImageToLoreWidget.openImportFiles(paths, file -> loreConsumer, () -> contents.setText(newPage.getPlain()));
+		List<Text> lines = new ArrayList<>();
+		lines.add(getPage());
+		ImageToLoreWidget.openImportFiles(paths, (file, imgLines) -> lines.addAll(imgLines), () -> {
+			if (lines.size() > 1)
+				contents.setText(lines);
+		});
 	}
 	
 	@Override

@@ -45,11 +45,8 @@ public class ConfigPanel extends Panel<ConfigPath> implements Tickable {
 		try {
 			super.render(matrices, mouseX, mouseY, delta);
 		} finally {
-			if (!prevOneTooltip) {
-				MVTooltip tooltip = MVTooltip.setOneTooltip(false, false);
-				if (tooltip != null)
-					tooltip.render(matrices, mouseX, mouseY);
-			}
+			if (!prevOneTooltip)
+				MVTooltip.renderOneTooltip(matrices, mouseX, mouseY);
 		}
 	}
 	

@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
@@ -26,6 +27,9 @@ public class Reflection {
 		} catch (ExecutionException | UncheckedExecutionException e) {
 			throw new RuntimeException("Error getting class", e);
 		}
+	}
+	public static Supplier<Class<?>> getOptionalClass(String name) {
+		return jitSupplier(() -> getClass(name));
 	}
 	
 	
@@ -98,6 +102,16 @@ public class Reflection {
 			try {
 				return (T) method.invoke(obj, args);
 			} catch (Exception e) {
+				throw new RuntimeException("Error invoking method", e);
+			}
+		}
+		@SuppressWarnings("unchecked")
+		public <E extends Throwable, T> T invokeThrowable(Class<E> possibleException, Object obj, Object... args) throws E {
+			try {
+				return (T) method.invoke(obj, args);
+			} catch (Exception e) {
+				if (e instanceof InvocationTargetException thrownE && possibleException.isInstance(thrownE.getCause()))
+					throw possibleException.cast(thrownE.getCause());
 				throw new RuntimeException("Error invoking method", e);
 			}
 		}

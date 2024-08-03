@@ -1,16 +1,20 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestPage;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ClientChestItemReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandledScreenItemReference.HandledScreenItemReferenceParent;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestDataVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
@@ -19,10 +23,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
 
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
@@ -33,9 +34,16 @@ public class ClientChestScreen extends ClientHandledScreen {
 	public static int prevPageJumpTarget;
 	public static int nextPageJumpTarget;
 	
-	public static void show() {
+	public static void show(Optional<ItemStack> cursor) {
 		if (!NBTEditorClient.CLIENT_CHEST.isLoaded()) {
 			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.not_ready"), false);
+			return;
+		}
+		
+		ClientChestPage page = NBTEditorClient.CLIENT_CHEST.getPage(PAGE);
+		if (!page.isInThisVersion()) {
+			cursor.ifPresent(MainUtil::setInventoryCursorStack);
+			MainUtil.client.setScreen(new ClientChestDataVersionScreen(page.getDataVersionStatus()));
 			return;
 		}
 		
@@ -44,13 +52,15 @@ public class ClientChestScreen extends ClientHandledScreen {
 			((ClientChestHandler) screen.handler).fillPage();
 			screen.updatePageNavigation();
 		} else {
-			ClientPlayerEntity player = MainUtil.client.player;
-			ClientChestHandler handler = new ClientChestHandler(0, player.getInventory());
-			MainUtil.client.setScreen(new ClientChestScreen(handler, player.getInventory(), TextInst.translatable("nbteditor.client_chest")));
+			ClientChestHandler handler = new ClientChestHandler();
+			handler.setCursorStack(cursor.orElse(MainUtil.client.player.playerScreenHandler.getCursorStack()));
+			MainUtil.client.setScreen(new ClientChestScreen(handler));
 			NBTEditorClient.CLIENT_CHEST.warnIfCorrupt();
 		}
 	}
-	
+	public static void show() {
+		show(Optional.empty());
+	}
 	
 	
 	private static record SaveRequest(int page, ItemStack[] items) {}
@@ -71,10 +81,10 @@ public class ClientChestScreen extends ClientHandledScreen {
 	private ButtonWidget nextPage;
 	private ButtonWidget prevPageJump;
 	private ButtonWidget nextPageJump;
+	private ItemStack[] prevInv;
 	
-	private ClientChestScreen(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
-		super(handler, inventory, title);
-		this.dropCursorOnClose = false;
+	private ClientChestScreen(ClientChestHandler handler) {
+		super(handler, TextInst.translatable("nbteditor.client_chest"));
 		this.saved = true;
 	}
 	
@@ -135,7 +145,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 		pageField.setMaxLength((NBTEditorClient.CLIENT_CHEST.getPageCount() + "").length());
 		pageField.setText((PAGE + 1) + "");
 		pageField.setChangedListener(str -> {
-			if (str.isEmpty() || str.equals("+"))
+			if (str.isEmpty() || str.equals("+") || str.equals("-"))
 				return;
 			
 			int intVal = Integer.parseInt(str);
@@ -167,13 +177,13 @@ public class ClientChestScreen extends ClientHandledScreen {
 		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.literal("")
 				.append(nextKeybind).append(TextInst.translatable("nbteditor.keybind.page.next")))));
 		
-		this.addDrawableChild(prevPageJump = MVMisc.newButton(this.x - 87, this.y + 46, 39, 20, TextInst.of("<<"), btn -> {
+		this.addDrawableChild(prevPageJump = MVMisc.newButton(this.x - 87, this.y + 44, 39, 20, TextInst.of("<<"), btn -> {
 			navigationClicked = true;
 			prevPageJump();
 		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.translatable("nbteditor.keybind.page.shift")
 				.append(prevKeybind).append(TextInst.translatable("nbteditor.keybind.page.prev_jump")))));
 		
-		this.addDrawableChild(nextPageJump = MVMisc.newButton(this.x - 43, this.y + 46, 39, 20, TextInst.of(">>"), btn -> {
+		this.addDrawableChild(nextPageJump = MVMisc.newButton(this.x - 43, this.y + 44, 39, 20, TextInst.of(">>"), btn -> {
 			navigationClicked = true;
 			nextPageJump();
 		}, ConfigScreen.isKeybindsHidden() ? null : new MVTooltip(TextInst.translatable("nbteditor.keybind.page.shift")
@@ -191,22 +201,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 92, 83, 20, TextInst.translatable("nbteditor.client_chest.reload_page"), btn -> {
 			navigationClicked = true;
-			try {
-				NBTEditorClient.CLIENT_CHEST.loadSync(PAGE);
-				show();
-			} catch (Exception e) {
-				NBTEditorClient.CLIENT_CHEST.backupCorruptPage(PAGE);
-				try {
-					NBTEditorClient.CLIENT_CHEST.loadSync(PAGE);
-				} catch (Exception e2) {
-					// Prevent potential further damage to files
-					RuntimeException toThrow = new RuntimeException("Error while reloading a corrupted client chest", e2);
-					toThrow.addSuppressed(e);
-					throw toThrow;
-				}
-				show();
-				NBTEditor.LOGGER.error("Error while reloading client chest", e);
-			}
+			NBTEditorClient.CLIENT_CHEST.reloadPage(PAGE);
+			show();
 		}));
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 116, 83, 20, TextInst.translatable("nbteditor.client_chest.clear_page"), btn -> {
@@ -246,9 +242,11 @@ public class ClientChestScreen extends ClientHandledScreen {
 	}
 	
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ESCAPE)
+		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
 			close();
-		else if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+			return true;
+		}
+		if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
 			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_DOWN);
 			if (ConfigScreen.isInvertedPageKeybinds())
 				prev = !prev;
@@ -264,9 +262,13 @@ public class ClientChestScreen extends ClientHandledScreen {
 				else
 					nextPage();
 			}
+			return true;
 		}
 		
-		return !handleKeybind(keyCode, focusedSlot, slot -> new ClientChestItemReference(PAGE, slot.getIndex())) &&
+		return !handleKeybind(keyCode, focusedSlot,
+						HandledScreenItemReferenceParent.create(
+								ClientChestScreen::show, () -> handler.setCursorStack(ItemStack.EMPTY)),
+						slot -> new ClientChestItemReference(PAGE, slot.getIndex()), handler.getCursorStack()) &&
 				!this.nameField.keyPressed(keyCode, scanCode, modifiers) && !this.nameField.isActive() &&
 				!this.pageField.keyPressed(keyCode, scanCode, modifiers) && !this.pageField.isActive()
 				? super.keyPressed(keyCode, scanCode, modifiers) : true;
@@ -286,6 +288,10 @@ public class ClientChestScreen extends ClientHandledScreen {
 		if (navigationClicked)
 			return;
 		
+		prevInv = new ItemStack[this.handler.getInventory().size()];
+		for (int i = 0; i < prevInv.length; i++)
+			prevInv[i] = this.handler.getInventory().getStack(i).copy();
+		
 		super.onMouseClick(slot, slotId, button, actionType);
 	}
 	@Override
@@ -302,7 +308,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 	}
 	@Override
 	public ItemStack[] getPrevInventory() {
-		return NBTEditorClient.CLIENT_CHEST.getPage(PAGE);
+		return prevInv;
 	}
 	@Override
 	public void onChange() {

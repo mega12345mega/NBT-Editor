@@ -1,12 +1,13 @@
 package tsp.headdb.ported;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.Validate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Lore;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -25,10 +26,9 @@ public class LocalHead extends Head {
         Validate.notNull(uuid, "uuid must not be null!");
         
         ItemStack item = new ItemStack(Items.PLAYER_HEAD);
-        item.setCustomName(TextInst.of(Utils.colorize("&e" + name)));
-        item.getOrCreateNbt().putString("SkullOwner", name);
-        Lore lore = new Lore(item);
-        lore.addLine(TextInst.of(Utils.colorize("&7UUID: " + uuid.toString())));
+        item.manager$setCustomName(TextInst.of(Utils.colorize("&e" + name)));
+        ItemTagReferences.PROFILE_NAME.set(item, Optional.of(name));
+        ItemTagReferences.LORE.set(item, List.of(TextInst.of(Utils.colorize("&7UUID: " + uuid.toString()))));
         
         return item;
     }

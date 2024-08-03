@@ -6,13 +6,15 @@
   "plugin": "com.luneruniverse.minecraft.mod.nbteditor.multiversion.mixin.toggled.MVMixinPlugin",
   "mixins": [
     "PacketByteBufMixin",
-    "BlockEntityMixin"
+    "BlockEntityMixin",
+    "ItemStackMixin"
   ],
   "client": [
     "ScreenHandlerMixin",
     "DrawableMixin",
     "ScreenMixin",
-    "AbstractParentElementMixin"
+    "AbstractParentElementMixin",
+    "ParentElementMixin"
   ],
   "injectors": {
     "defaultRequire": 1

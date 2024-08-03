@@ -1,15 +1,20 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
+import java.lang.invoke.MethodType;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
+import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
@@ -88,7 +93,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		if (link != null) {
 			addDrawableChild(MVMisc.newTexturedButton(width - 36, 22, 20, 20, 20,
 					LocalFactoryScreen.FACTORY_ICON,
-					btn -> closeSafely(() -> client.setScreen(link.factory().apply(ref))),
+					btn -> closeSafely(() -> client.setScreen(link.factory().apply(ItemReference.toItemStackRef(ref)))),
 					new MVTooltip(link.langName())));
 		}
 		
@@ -105,6 +110,8 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		MainUtil.renderLogo(matrices);
 		renderPreview(matrices);
 	}
+	private static final Supplier<Reflection.MethodInvoker> RenderSystem_getModelViewStack =
+			Reflection.getOptionalMethod(RenderSystem.class, "getModelViewStack", MethodType.methodType(MatrixStack.class));
 	private void renderPreview(MatrixStack matrices) {
 		int x = 16 + 32 + 8;
 		int y = 16;
@@ -119,7 +126,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 				.range(null, "1.19.3", true)
 				.get();
 		if (oldMatrix)
-			matrices = RenderSystem.getModelViewStack();
+			matrices = RenderSystem_getModelViewStack.get().invoke(null);
 		
 		matrices.push();
 		matrices.translate(0.0D, 0.0D, 32.0D);
@@ -165,13 +172,14 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 	public boolean isSaved() {
 		return saved;
 	}
-	protected void save() {
+	protected boolean save() {
 		savedLocalNBT = LocalNBT.copy(localNBT);
 		saveBtn.setMessage(TextInst.translatable("nbteditor.editor.saving"));
 		setSaved(true);
 		ref.saveLocalNBT(savedLocalNBT, () -> {
 			saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
 		});
+		return true;
 	}
 	protected void checkSave() {
 		localNBT.getOrCreateNBT(); // Make sure both items have NBT defined, so no NBT and empty NBT comes out equal
@@ -181,7 +189,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 	
 	@Override
 	public void close() {
-		closeSafely(() -> ref.showParent());
+		closeSafely(() -> ref.showParent(Optional.empty()));
 	}
 	
 	public void closeSafely(Runnable onClose) {
@@ -189,10 +197,8 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 			onClose.run();
 		else {
 			client.setScreen(new FancyConfirmScreen(value -> {
-				if (value)
-					save();
-				
-				onClose.run();
+				if (!value || save())
+					onClose.run();
 			}, TextInst.translatable("nbteditor.editor.unsaved.title"), TextInst.translatable("nbteditor.editor.unsaved.desc"),
 					TextInst.translatable("nbteditor.editor.unsaved.yes"), TextInst.translatable("nbteditor.editor.unsaved.no")));
 		}

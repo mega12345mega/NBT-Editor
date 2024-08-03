@@ -4,7 +4,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
@@ -22,12 +21,19 @@ import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
+import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.DSL.TypeReference;
+import com.mojang.serialization.Dynamic;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
@@ -39,11 +45,12 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.text.MutableText;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
@@ -111,6 +118,7 @@ public class MainUtil {
 			}
 			saveItem(slot == 40 ? 45 : slot, item);
 			if (overflow != 0) {
+				item = item.copy();
 				item.setCount(overflow);
 				get(item, false);
 			}
@@ -239,14 +247,26 @@ public class MainUtil {
 	}
 	
 	
-	public static Text getItemNameSafely(ItemStack item) {
-		NbtCompound nbt = item.getSubNbt(ItemStack.DISPLAY_KEY);
-		return getNbtNameSafely(nbt, ItemStack.NAME_KEY, () -> item.getItem().getName(item));
+	public static Text getBaseItemNameSafely(ItemStack item) {
+		if (NBTManagers.COMPONENTS_EXIST) {
+			Text name = item.get(MVDataComponentType.ITEM_NAME);
+			if (name != null)
+				return name;
+		}
+		return item.getItem().getName();
+	}
+	public static Text getCustomItemNameSafely(ItemStack item) {
+		if (NBTManagers.COMPONENTS_EXIST)
+			return item.getName();
+		NbtCompound nbt = item.manager$getNbt();
+		if (nbt != null)
+			nbt = nbt.getCompound("display");
+		return getNbtNameSafely(nbt, "Name", () -> item.getItem().getName(item));
 	}
 	public static Text getNbtNameSafely(NbtCompound nbt, String key, Supplier<Text> defaultName) {
 		if (nbt != null && nbt.contains(key, NbtElement.STRING_TYPE)) {
             try {
-                MutableText text = Text.Serialization.fromJson(nbt.getString(key));
+                Text text = TextInst.fromJson(nbt.getString(key));
                 if (text != null)
                     return text;
             } catch (JsonParseException e) {}
@@ -296,20 +316,28 @@ public class MainUtil {
 	
 	
 	public static ItemStack copyAirable(ItemStack item) {
+		if (NBTManagers.COMPONENTS_EXIST) {
+			ItemStack output = item.copyComponentsToNewStack(item.getItem(), item.getCount());
+			output.setBobbingAnimationTime(item.getBobbingAnimationTime());
+			return output;
+		}
+		
 		ItemStack output = new ItemStack(item.getItem(), item.getCount());
 		output.setBobbingAnimationTime(item.getBobbingAnimationTime());
-		if (item.getNbt() != null)
-			output.setNbt(item.getNbt().copy());
+		if (item.manager$hasNbt())
+			output.manager$setNbt(item.manager$getNbt());
 		return output;
 	}
 	
 	
 	public static ItemStack setType(Item type, ItemStack item, int count) {
-		NbtCompound fullData = new NbtCompound();
-		item.writeNbt(fullData);
+		if (NBTManagers.COMPONENTS_EXIST)
+			return item.copyComponentsToNewStack(type, count);
+		
+		NbtCompound fullData = item.manager$serialize();
 		fullData.putString("id", MVRegistry.ITEM.getId(type).toString());
 		fullData.putInt("Count", count);
-		return ItemStack.fromNbt(fullData);
+		return NBTManagers.ITEM.deserialize(fullData);
 	}
 	public static ItemStack setType(Item type, ItemStack item) {
 		return setType(type, item, item.getCount());
@@ -333,15 +361,11 @@ public class MainUtil {
 	
 	public static NbtCompound readNBT(InputStream in) throws IOException {
 		byte[] data = in.readAllBytes();
-		DataInputStream resetableIn = new DataInputStream(new ByteArrayInputStream(data));
-		NbtCompound nbt;
 		try {
-			nbt = MVMisc.readCompressedNbt(resetableIn);
+			return MVMisc.readCompressedNbt(new ByteArrayInputStream(data));
 		} catch (ZipException e) {
-			resetableIn.reset();
-			nbt = NbtIo.readCompound(resetableIn);
+			return MVMisc.readNbt(new ByteArrayInputStream(data));
 		}
-		return nbt;
 	}
 	
 	
@@ -388,8 +412,12 @@ public class MainUtil {
 	
 	public static Predicate<String> intPredicate(Supplier<Integer> min, Supplier<Integer> max, boolean allowEmpty) {
 		return str -> {
-			if (str.isEmpty() || str.equals("+") || str.equals("-"))
+			if (str.isEmpty())
 				return allowEmpty;
+			if (str.equals("+"))
+				return allowEmpty && (max == null || max.get() >= 0);
+			if (str.equals("-"))
+				return allowEmpty && (min == null || min.get() <= 0);
 			try {
 				int value = Integer.parseInt(str);
 				return (min == null || min.get() <= value) && (max == null || value <= max.get());
@@ -448,6 +476,70 @@ public class MainUtil {
 		RenderSystem.disableDepthTest();
 		MVMisc.endDrawingShader(matrices, vertex);
 		RenderSystem.enableDepthTest();
+	}
+	
+	
+	// Based on DataFixTypes
+	@SuppressWarnings("unchecked")
+	public static <T extends NbtElement> T update(TypeReference typeRef, T nbt, int oldVersion) {
+		return (T) client.getDataFixer().update(typeRef, new Dynamic<>(NbtOps.INSTANCE, nbt), oldVersion, Version.getDataVersion()).getValue();
+	}
+	/**
+	 * If dataVersionTag is not null and a number, this updates from that - otherwise, this updates from defaultOldVersion
+	 */
+	public static <T extends NbtElement> T updateDynamic(TypeReference typeRef, T nbt, NbtElement dataVersionTag, int defaultOldVersion) {
+		int dataVersion = defaultOldVersion;
+		if (dataVersionTag != null && dataVersionTag instanceof AbstractNbtNumber num)
+			dataVersion = num.intValue();
+		else if (dataVersion == -1)
+			return nbt;
+		return update(typeRef, nbt, dataVersion);
+	}
+	/**
+	 * If a DataVersion tag exists, this updates from that - otherwise, this updates from defaultOldVersion
+	 */
+	public static NbtCompound updateDynamic(TypeReference typeRef, NbtCompound nbt, int defaultOldVersion) {
+		return updateDynamic(typeRef, nbt, nbt.get("DataVersion"), defaultOldVersion);
+	}
+	/**
+	 * If a DataVersion tag exists, this updates from that - otherwise, nbt is returned
+	 */
+	public static NbtCompound updateDynamic(TypeReference typeRef, NbtCompound nbt) {
+		return updateDynamic(typeRef, nbt, -1);
+	}
+	
+	public static NbtCompound fillId(NbtCompound nbt) {
+		if (!NBTManagers.COMPONENTS_EXIST)
+			return nbt;
+		if (!nbt.contains("id", NbtElement.STRING_TYPE))
+			nbt.putString("id", "");
+		return nbt;
+	}
+	
+	public static String addNamespace(String component) {
+		if (component.contains(":"))
+			return component;
+		if (component.startsWith("!"))
+			return "!minecraft:" + component.substring(1);
+		return "minecraft:" + component;
+	}
+	
+	public static void setRootCursorStack(ScreenHandler handler, ItemStack cursor) {
+		handler.setCursorStack(cursor);
+		handler.setPreviousCursorStack(cursor);
+		if (client.player.playerScreenHandler != handler || client.interactionManager.getCurrentGameMode().isSurvivalLike())
+			MVClientNetworking.send(new SetCursorC2SPacket(cursor));
+	}
+	public static void setInventoryCursorStack(ItemStack cursor) {
+		if (MainUtil.client.interactionManager.getCurrentGameMode().isCreative())
+			MainUtil.client.player.playerScreenHandler.setCursorStack(cursor);
+		else {
+			if (!cursor.isEmpty())
+				MainUtil.get(cursor, true);
+			MainUtil.client.player.playerScreenHandler.setCursorStack(ItemStack.EMPTY);
+			MainUtil.client.player.playerScreenHandler.setPreviousCursorStack(ItemStack.EMPTY);
+			MVClientNetworking.send(new SetCursorC2SPacket(ItemStack.EMPTY));
+		}
 	}
 	
 }

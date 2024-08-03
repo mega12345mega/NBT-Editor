@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,7 +43,7 @@ public class ScreenMixin {
 	private void filesDragged(List<Path> paths, CallbackInfo info) {
 		Screen source = (Screen) (Object) this;
 		if (source instanceof HandledScreen || source instanceof GameMenuScreen)
-			ImportScreen.importFiles(paths);
+			ImportScreen.importFiles(paths, Optional.empty());
 	}
 	
 	@Inject(method = "handleTextClick", at = @At("HEAD"), cancellable = true)

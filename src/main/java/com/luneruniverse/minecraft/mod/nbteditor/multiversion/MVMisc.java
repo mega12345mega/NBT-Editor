@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -21,20 +22,22 @@ import java.util.function.Supplier;
 import org.joml.Vector2ic;
 
 import com.google.gson.JsonObject;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.SharedConstants;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.SuspiciousStewIngredient.StewEffect;
 import net.minecraft.client.Keyboard;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
@@ -46,24 +49,32 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.toast.SystemToast;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.command.argument.ItemStackArgumentType;
+import net.minecraft.command.argument.TextArgumentType;
+import net.minecraft.component.type.SuspiciousStewEffectsComponent;
+import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.item.SuspiciousStewItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.registry.Registries;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -72,24 +83,35 @@ import net.minecraft.world.BlockRenderView;
 
 public class MVMisc {
 	
-	private static final Reflection.MethodInvoker ResourceFactory_getResource =
-			Reflection.getMethod(ResourceFactory.class, "method_14486",
-					MethodType.methodType(Version.<Class<?>>newSwitch()
-							.range("1.19.0", null, () -> Optional.class)
-							.range(null, "1.18.2", () -> Resource.class)
-							.get(),
-							Identifier.class));
-	@SuppressWarnings("unchecked")
+	private static final Supplier<Reflection.MethodInvoker> ResourceFactory_getResource =
+			Reflection.getOptionalMethod(ResourceFactory.class, "method_14486", MethodType.methodType(Resource.class, Identifier.class));
+	private static final Supplier<Reflection.MethodInvoker> Resource_getInputStream =
+			Reflection.getOptionalMethod(Resource.class, "method_14482", MethodType.methodType(InputStream.class));
 	public static Optional<InputStream> getResource(Identifier id) throws IOException {
-		Object output = ResourceFactory_getResource.invoke(MinecraftClient.getInstance().getResourceManager(), id);
-		if (output instanceof Optional) {
-			if (((Optional<Resource>) output).isEmpty())
-				return Optional.empty();
-			return Optional.of(((Optional<Resource>) output).get().getInputStream());
+		try {
+			return Version.<Optional<InputStream>>newSwitch()
+					.range("1.19.0", null, () -> MainUtil.client.getResourceManager().getResource(id).map(resource -> {
+						try {
+							return resource.getInputStream();
+						} catch (IOException e) {
+							throw new UncheckedIOException(e);
+						}
+					}))
+					.range(null, "1.18.2", () -> {
+						Resource resource = ResourceFactory_getResource.get().invoke(MainUtil.client.getResourceManager(), id);
+						if (resource == null)
+							return Optional.empty();
+						return Optional.of(Resource_getInputStream.get().invokeThrowable(UncheckedIOException.class, resource));
+					})
+					.get();
+		} catch (UncheckedIOException e) {
+			if (e.getMessage() != null) {
+				IOException checkedE = new IOException(e.getMessage(), e.getCause());
+				checkedE.setStackTrace(e.getStackTrace());
+				throw checkedE;
+			}
+			throw e.getCause();
 		}
-		if (output == null)
-			return Optional.empty();
-		return Optional.of(((Resource) output).getInputStream());
 	}
 	
 	public static Object registryAccess;
@@ -107,6 +129,14 @@ public class MVMisc {
 		return Version.<BlockStateArgumentType>newSwitch()
 				.range("1.19.0", null, () -> BlockStateArgumentType.blockState((CommandRegistryAccess) registryAccess))
 				.range(null, "1.18.2", () -> BlockStateArgumentType_blockState.get().invoke(null)) // BlockStateArgumentType.blockState()
+				.get();
+	}
+	private static final Supplier<Reflection.MethodInvoker> TextArgumentType_text =
+			Reflection.getOptionalMethod(TextArgumentType.class, "method_9281", MethodType.methodType(TextArgumentType.class));
+	public static TextArgumentType getTextArg() {
+		return Version.<TextArgumentType>newSwitch()
+				.range("1.20.5", null, () -> TextArgumentType.text((CommandRegistryAccess) registryAccess))
+				.range(null, "1.20.4", () -> TextArgumentType_text.get().invoke(null))
 				.get();
 	}
 	
@@ -205,10 +235,13 @@ public class MVMisc {
 				.run();
 	}
 	
+	public static boolean isValidChar(char c) {
+		return c != '§' && c >= ' ' && c != 127;
+	}
 	public static String stripInvalidChars(String str, boolean allowLinebreaks) {
 		StringBuilder output = new StringBuilder();
 		for (char c : str.toCharArray()) {
-			if (SharedConstants.isValidChar(c)) {
+			if (isValidChar(c)) {
 				output.append(c);
 			} else if (allowLinebreaks && c == '\n') {
 				output.append(c);
@@ -244,11 +277,14 @@ public class MVMisc {
 				.get();
 	}
 	
+	private static final Supplier<Reflection.MethodInvoker> SuspiciousStewItem_addEffectsToStew =
+			Reflection.getOptionalMethod(SuspiciousStewItem.class, "method_53209", MethodType.methodType(void.class, ItemStack.class, List.class));
 	private static final Supplier<Reflection.MethodInvoker> SuspiciousStewItem_addEffectToStew =
 			Reflection.getOptionalMethod(SuspiciousStewItem.class, "method_8021", MethodType.methodType(void.class, ItemStack.class, StatusEffect.class, int.class));
 	public static void addEffectToStew(ItemStack item, StatusEffect effect, int duration) {
 		Version.newSwitch()
-				.range("1.20.2", null, () -> SuspiciousStewItem.addEffectsToStew(item, List.of(new StewEffect(effect, duration))))
+				.range("1.20.5", null, () -> item.apply(MVDataComponentType.SUSPICIOUS_STEW_EFFECTS, new SuspiciousStewEffectsComponent(List.of()), effects -> effects.with(new StewEffect(Registries.STATUS_EFFECT.getEntry(effect), duration))))
+				.range("1.20.2", "1.20.4", () -> SuspiciousStewItem_addEffectsToStew.get().invoke(null, item, List.of(Reflection.newInstance(StewEffect.class, new Class<?>[] {StatusEffect.class, int.class}, effect, duration))))
 				.range(null, "1.20.1", () -> SuspiciousStewItem_addEffectToStew.get().invoke(null, item, effect, duration))
 				.run();
 	}
@@ -392,9 +428,6 @@ public class MVMisc {
 				})
 				.get();
 	}
-	public static VertexConsumerProvider.Immediate beginDrawingNormal() {
-		return VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-	}
 	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_end =
 			Reflection.getOptionalMethod(BufferBuilder.class, "method_1326", MethodType.methodType(void.class));
 	private static final Supplier<Reflection.MethodInvoker> BufferRenderer_draw =
@@ -408,9 +441,6 @@ public class MVMisc {
 					BufferRenderer_draw.get().invoke(null, vertexConsumer);
 				})
 				.run();
-	}
-	public static void endDrawingNormal(VertexConsumerProvider.Immediate provider) {
-		provider.draw();
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> TextFieldWidget_setCursor =
@@ -428,6 +458,92 @@ public class MVMisc {
 		Version.newSwitch()
 				.range("1.19.0", null, () -> renderer.renderBlock(state, pos, world, matrices, vertexConsumer, cull, Random.create()))
 				.range(null, "1.18.2", () -> BlockRenderManager_renderBlock.get().invoke(renderer, state, pos, world, matrices, vertexConsumer, cull, new java.util.Random()))
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> SpawnEggItem_getEntityType =
+			Reflection.getOptionalMethod(SpawnEggItem.class, "method_8015", MethodType.methodType(EntityType.class, NbtCompound.class));
+	public static EntityType<?> getEntityType(ItemStack item) {
+		SpawnEggItem spawnEggItem = (SpawnEggItem) item.getItem();
+		return Version.<EntityType<?>>newSwitch()
+				.range("1.20.5", null, () -> spawnEggItem.getEntityType(item))
+				.range(null, "1.20.4", () -> SpawnEggItem_getEntityType.get().invoke(spawnEggItem, item.manager$getNbt()))
+				.get();
+	}
+	
+	public static StatusEffectInstance newStatusEffectInstance(StatusEffect effect, int duration) {
+		return Version.<StatusEffectInstance>newSwitch()
+				.range("1.20.5", null, () -> new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(effect), duration))
+				.range(null, "1.20.4", () -> Reflection.newInstance(StatusEffectInstance.class, new Class<?>[] {StatusEffect.class, int.class}, effect, duration))
+				.get();
+	}
+	public static StatusEffectInstance newStatusEffectInstance(StatusEffect effect, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon) {
+		return Version.<StatusEffectInstance>newSwitch()
+				.range("1.20.5", null, () -> new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(effect), duration, amplifier, ambient, showParticles, showIcon))
+				.range(null, "1.20.4", () -> Reflection.newInstance(StatusEffectInstance.class, new Class<?>[] {StatusEffect.class, int.class, int.class, boolean.class, boolean.class, boolean.class}, effect, duration, amplifier, ambient, showParticles, showIcon))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> StatusEffectInstance_getEffectType =
+			Reflection.getOptionalMethod(StatusEffectInstance.class, "method_5579", MethodType.methodType(StatusEffect.class));
+	public static StatusEffect getEffectType(StatusEffectInstance effect) {
+		return Version.<StatusEffect>newSwitch()
+				.range("1.20.5", null, () -> effect.getEffectType().value())
+				.range(null, "1.20.4", () -> StatusEffectInstance_getEffectType.get().invoke(effect))
+				.get();
+	}
+	
+	public static BookScreen.Contents getBookContents(List<Text> pages) {
+		if (NBTManagers.COMPONENTS_EXIST)
+			return new BookScreen.Contents(pages);
+		
+		return (BookScreen.Contents) Proxy.newProxyInstance(MVMisc.class.getClassLoader(),
+				new Class<?>[] {BookScreen.Contents.class}, (obj, method, args) -> {
+			if (method.getName().equals("method_17560")) // getPageCount
+				return pages.size();
+			if (method.getName().equals("method_17561")) // getPageUnchecked
+				return (StringVisitable) pages.get((int) args[0]);
+			
+			if (method.getName().equals("method_17563")) { // default getPage
+				int index = (int) args[0];
+				return (index >= 0 && index < pages.size() ? pages.get(index) : StringVisitable.EMPTY);
+			}
+			
+			throw new IllegalArgumentException("Unknown method: " + method);
+		});
+	}
+	
+	public static boolean isWrittenBookContents(BookScreen.Contents contents) {
+		return Version.<Boolean>newSwitch()
+				.range("1.20.5", null, () -> MixinLink.WRITTEN_BOOK_CONTENTS.containsKey(contents))
+				.range(null, "1.20.4", () -> Reflection.getClass("net.minecraft.class_3872$class_3933").isInstance(contents))
+				.get();
+	}
+	
+	private static final Supplier<Class<?>> SystemToast$Type = Reflection.getOptionalClass("net.minecraft.class_370$class_371");
+	private static final Object SystemToast$Type_PACK_LOAD_FAILURE =
+			Version.<Object>newSwitch()
+					.range("1.20.3", null, () -> null)
+					.range(null, "1.20.2", () -> Reflection.getField(SystemToast$Type.get(), "field_21809", "Lnet/minecraft/class_370$class_371;").get(null))
+					.get();
+	public static void showToast(Text title, Text description) {
+		MainUtil.client.getToastManager().add(Version.<SystemToast>newSwitch()
+				.range("1.20.3", null, () -> new SystemToast(SystemToast.Type.PACK_LOAD_FAILURE, title, description))
+				.range(null, "1.20.2", () -> Reflection.newInstance(SystemToast.class,
+						new Class<?>[] {SystemToast$Type.get(), Text.class, Text.class},
+						SystemToast$Type_PACK_LOAD_FAILURE, title, description))
+				.get());
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> ParentElement_setInitialFocus =
+			Reflection.getOptionalMethod(ParentElement.class, "method_20085", MethodType.methodType(void.class, Element.class));
+	public static void setInitialFocus(Screen screen, Element element, Consumer<Element> superCall) {
+		Version.newSwitch()
+				.range("1.19.4", null, () -> {
+					superCall.accept(element);
+					screen.setFocused(element);
+				})
+				.range(null, "1.19.3", () -> ParentElement_setInitialFocus.get().invoke(screen, element))
 				.run();
 	}
 	

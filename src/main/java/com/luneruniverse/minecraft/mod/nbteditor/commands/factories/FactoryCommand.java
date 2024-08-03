@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommandGroup;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
@@ -24,11 +25,16 @@ public class FactoryCommand extends ClientCommandGroup {
 				new DisplayCommand(),
 				new EnchantmentsCommand(),
 				new MaxCommand(),
+				new RandomUUIDCommand(),
 				new SignatureCommand(),
 				new SignboardCommand(),
 				new UnbindSkullCommand(),
-				new UnbreakableCommand(),
-				new UnstackableCommand())));
+				new UnbreakableCommand())));
+		
+		Version.newSwitch()
+				.range("1.20.5", null, () -> getChildren().add(new MaxStackSizeCommand()))
+				.range(null, "1.20.4", () -> {})
+				.run();
 	}
 	
 	@Override

@@ -5,9 +5,10 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.EnumArgumentType;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.util.ItemChest;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.HideFlag;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -65,17 +66,17 @@ public class GetHdbCommand extends ClientCommand {
 				.then(literal("all").then(argument("category", EnumArgumentType.options(Category.class)).executes(context -> {
 					Category category = context.getArgument("category", Category.class);
 					ItemStack shulker = ShulkerBoxBlock.getItemStack(MainUtil.getDyeColor(category.getColor()));
-					shulker.setCustomName(TextInst.of(Formatting.RESET.toString() + category.getColor() + Formatting.BOLD + category.getTranslatedName().toUpperCase()));
-					shulker.getOrCreateNbt().putByte("HideFlags", (byte) 32);
-					ItemChest.writeDatabase(shulker, HeadAPI.getHeads(category), Head::getItemStack);
+					shulker.manager$setCustomName(TextInst.of(Formatting.RESET.toString() + category.getColor() + Formatting.BOLD + category.getTranslatedName().toUpperCase()));
+					HideFlag.MISC.set(shulker, true);
+					ContainerIO.writeRecursively(shulker, HeadAPI.getHeads(category).stream().map(Head::getItemStack).toList());
 					MainUtil.getWithMessage(shulker);
 					return Command.SINGLE_SUCCESS;
 				})).then(literal("search").then(argument("query", StringArgumentType.greedyString()).executes(context -> {
 					String query = context.getArgument("query", String.class);
 					ItemStack shulker = new ItemStack(Items.BROWN_SHULKER_BOX);
-					shulker.setCustomName(TextInst.of(Formatting.RESET.toString() + Formatting.GOLD + Formatting.BOLD + TextInst.translatable("nbteditor.hdb.search").getString() + ": " + query));
-					shulker.getOrCreateNbt().putByte("HideFlags", (byte) 32);
-					ItemChest.writeDatabase(shulker, HeadAPI.getHeadsByName(query), Head::getItemStack);
+					shulker.manager$setCustomName(TextInst.of(Formatting.RESET.toString() + Formatting.GOLD + Formatting.BOLD + TextInst.translatable("nbteditor.hdb.search").getString() + ": " + query));
+					HideFlag.MISC.set(shulker, true);
+					ContainerIO.writeRecursively(shulker, HeadAPI.getHeadsByName(query).stream().map(Head::getItemStack).toList());
 					MainUtil.getWithMessage(shulker);
 					return Command.SINGLE_SUCCESS;
 				}))))

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
@@ -18,7 +19,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPane
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueNumber;
-import com.luneruniverse.minecraft.mod.nbteditor.util.Enchants;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
@@ -62,12 +64,17 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 				.map(Map.Entry::getKey).toList();
 		String firstEnchant = orderedEnchants.get(0);
 		entry.setConfigurable("enchantment", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.enchantment"),
-				new ConfigValueDropdown<>(firstEnchant, firstEnchant, orderedEnchants,
+				ConfigValueDropdown.forList(firstEnchant, firstEnchant, orderedEnchants,
 				ENCHANTMENTS.entrySet().stream().filter(enchant -> enchant.getValue().isAcceptableItem(inputItem)).map(Map.Entry::getKey).toList())));
-		entry.setConfigurable("level", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.level"), ConfigValueNumber.forInt(1, 1, 1, 32767)));
+		entry.setConfigurable("level", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.level"),
+				ConfigValueNumber.forInt(1, 1, 1,
+						Version.<Integer>newSwitch()
+								.range("1.17.1", null, 255)
+								.range(null, "1.17", 32767)
+								.get())));
 		config = new ConfigList(TextInst.translatable("nbteditor.enchantments"), false, entry);
 		
-		new Enchants(localNBT.getItem()).getEnchants().forEach(enchant -> {
+		ItemTagReferences.ENCHANTMENTS.get(localNBT.getEditableItem()).getEnchants().forEach(enchant -> {
 			ConfigCategory enchantConfig = entry.clone(true);
 			getConfigEnchantment(enchantConfig).setValue(MVRegistry.ENCHANTMENT.getId(enchant.enchant()).toString());
 			getConfigLevel(enchantConfig).setValue(enchant.level());
@@ -80,7 +87,7 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 				ConfigCategory enchant = (ConfigCategory) path;
 				newEnchants.add(new Enchants.EnchantWithLevel(ENCHANTMENTS.get(getConfigEnchantment(enchant).getValidValue()), getConfigLevel(enchant).getValidValue()));
 			}
-			new Enchants(localNBT.getItem()).replaceEnchants(newEnchants);
+			ItemTagReferences.ENCHANTMENTS.set(localNBT.getEditableItem(), new Enchants(newEnchants));
 			checkSave();
 		});
 	}

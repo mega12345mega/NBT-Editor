@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,9 +17,13 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItemStack;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.item.ItemStack;
@@ -26,10 +31,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.ClickEvent;
+import net.minecraft.text.Text;
 
 public abstract class ClientChest {
 	
-	protected static final File CLIENT_CHEST_FOLDER = new File(NBTEditorClient.SETTINGS_FOLDER, "client_chest");
+	public static final File CLIENT_CHEST_FOLDER = new File(NBTEditorClient.SETTINGS_FOLDER, "client_chest");
 	private static final File PAGE_NAMES = new File(CLIENT_CHEST_FOLDER, "page_names.json");
 	
 	private final Map<String, Integer> nameToPage;
@@ -101,34 +107,56 @@ public abstract class ClientChest {
 		loader.setDaemon(true);
 		loader.start();
 	}
-	public abstract void loadSync() throws Exception;
-	public ItemStack[] loadSync(int page) throws Exception {
+	protected abstract void loadSync() throws Exception;
+	protected ClientChestPage loadSync(int page) throws Exception {
 		File file = new File(CLIENT_CHEST_FOLDER, "page" + page + ".nbt");
 		if (!file.exists()) {
 			cacheEmptyPage(page);
-			return null;
+			return new ClientChestPage(new ItemStack[54]);
 		}
 		
-		NbtList pageNbt = MVMisc.readNbt(file).getList("items", NbtElement.COMPOUND_TYPE);
+		NbtCompound pageNbt = MVMisc.readNbt(file);
+		if (!pageNbt.contains("DataVersion", NbtElement.NUMBER_TYPE)) {
+			ClientChestPage output = new ClientChestPage(Optional.empty(), null);
+			cachePage(page, output);
+			return output;
+		}
+		int dataVersion = pageNbt.getInt("DataVersion");
+		if (dataVersion != Version.getDataVersion()) {
+			ClientChestPage output = new ClientChestPage(Optional.of(dataVersion), null);
+			cachePage(page, output);
+			return output;
+		}
+		
+		NbtList itemsNbt = pageNbt.getList("items", NbtElement.COMPOUND_TYPE);
 		ItemStack[] items = new ItemStack[54];
 		boolean empty = true;
 		int i = -1;
-		for (NbtElement item : pageNbt) {
-			items[++i] = ItemStack.fromNbt((NbtCompound) item);
+		for (NbtElement item : itemsNbt) {
+			items[++i] = NBTManagers.ITEM.deserialize((NbtCompound) item);
 			if (empty && items[i] != null && !items[i].isEmpty())
 				empty = false;
 		}
 		if (empty) {
 			cacheEmptyPage(page);
 			file.delete();
-			return null;
+			return new ClientChestPage(new ItemStack[54]);
 		} else {
-			cachePage(page, items);
-			return items;
+			ClientChestPage output = new ClientChestPage(items);
+			cachePage(page, output);
+			return output;
 		}
 	}
+	public ClientChestPage reloadPage(int page) {
+		try {
+			discardPageCache(page);
+		} catch (Exception e) {
+			NBTEditor.LOGGER.error("Error while reloading page #" + (page + 1), e);
+		}
+		return getPage(page);
+	}
 	
-	public void backupCorruptPage(int page) {
+	protected void backupCorruptPage(int page) {
 		File file = new File(CLIENT_CHEST_FOLDER, "page" + page + ".nbt");
 		if (!file.exists())
 			return;
@@ -148,9 +176,11 @@ public abstract class ClientChest {
 	private void warnCorrupt() {
 		if (MainUtil.client.player == null)
 			return;
-		MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.corrupt_warning")
-				.append(" ").append(TextInst.translatable("nbteditor.file_options.show").styled(
-						style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, CLIENT_CHEST_FOLDER.getAbsolutePath())))), false);
+		MainUtil.client.player.sendMessage(attachShowFolder(TextInst.translatable("nbteditor.client_chest.corrupt_warning")), false);
+	}
+	public Text attachShowFolder(EditableText text) {
+		return text.append(" ").append(TextInst.translatable("nbteditor.file_options.show").styled(
+				style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, CLIENT_CHEST_FOLDER.getAbsolutePath()))));
 	}
 	
 	public abstract boolean isLoaded();
@@ -160,10 +190,14 @@ public abstract class ClientChest {
 	}
 	
 	public abstract int getPageCount();
-	public abstract ItemStack[] getPage(int page);
+	public abstract ClientChestPage getPage(int page);
 	
-	public void setPage(int page, ItemStack[] items) throws IOException {
-		checkLoaded();
+	public void setPage(int page, ItemStack[] items) throws Exception {
+		// Just in-case there is a bug, this prevents loosing items (the items
+		// array is always empty when loaded from a different DataVersion)
+		if (!getPage(page).isInThisVersion())
+			throw new IllegalStateException("Cannot write to a page which has a different DataVersion!");
+		
 		if (!CLIENT_CHEST_FOLDER.exists())
 			CLIENT_CHEST_FOLDER.mkdir();
 		File file = new File(CLIENT_CHEST_FOLDER, "page" + page + ".nbt");
@@ -181,22 +215,144 @@ public abstract class ClientChest {
 			return;
 		}
 		
-		cachePage(page, items);
+		cachePage(page, new ClientChestPage(items));
+		writePage(file, items);
+	}
+	
+	public void importPage(int page) throws Exception {
+		File file = new File(CLIENT_CHEST_FOLDER, "page" + page + ".nbt");
+		if (!file.exists())
+			throw new IllegalStateException("Cannot import an up to date page!");
 		
-		NbtCompound nbt = new NbtCompound();
-		NbtList pageNbt = new NbtList();
-		for (int i = 0; i < items.length; i++)
-			pageNbt.add((items[i] == null ? ItemStack.EMPTY : items[i]).writeNbt(new NbtCompound()));
-		nbt.put("items", pageNbt);
+		NbtCompound pageNbt = MVMisc.readNbt(file);
+		if (pageNbt.contains("DataVersion", NbtElement.NUMBER_TYPE))
+			throw new IllegalStateException("Cannot import a page with a DataVersion tag!");
+		
+		Files.copy(file.toPath(), new File(CLIENT_CHEST_FOLDER, "importing_page" + page + "_" + System.currentTimeMillis() + ".nbt").toPath());
+		
+		pageNbt.putInt("DataVersion", Version.getDataVersion());
 		try {
-			MixinLink.throwHiddenException(() -> MVMisc.writeNbt(nbt, file));
+			MixinLink.throwHiddenException(() -> MVMisc.writeNbt(pageNbt, file));
+		} catch (Throwable e) {
+			throw new IOException("Error saving client chest page", e);
+		}
+		
+		discardPageCache(page);
+	}
+	public void importAllPages() throws Exception {
+		if (!CLIENT_CHEST_FOLDER.exists())
+			return;
+		
+		Exception toThrow = new Exception("Error updating page(s)");
+		for (File file : CLIENT_CHEST_FOLDER.listFiles()) {
+			if (!file.getName().matches("page[0-9]+\\.nbt"))
+				continue;
+			int page = Integer.parseInt(file.getName().substring("page".length(), file.getName().indexOf('.')));
+			if (page >= getPageCount())
+				continue;
+			if (getPage(page).dataVersion().isEmpty()) {
+				try {
+					importPage(page);
+				} catch (Exception e) {
+					toThrow.addSuppressed(new Exception("Page " + (page + 1), e));
+				}
+			}
+		}
+		if (toThrow.getSuppressed().length > 0)
+			throw toThrow;
+	}
+	
+	public ClientChestPage updatePage(int page, Optional<Integer> defaultDataVersion) throws Exception {
+		File file = new File(CLIENT_CHEST_FOLDER, "page" + page + ".nbt");
+		if (!file.exists())
+			throw new IllegalStateException("Cannot update an already up to date page!");
+		
+		NbtCompound pageNbt = MVMisc.readNbt(file);
+		int dataVersion = (pageNbt.contains("DataVersion", NbtElement.NUMBER_TYPE) ? pageNbt.getInt("DataVersion") : defaultDataVersion.orElseThrow());
+		if (dataVersion == Version.getDataVersion())
+			throw new IllegalStateException("Cannot update an already up to date page!");
+		if (dataVersion > Version.getDataVersion())
+			throw new IllegalStateException("Cannot downgrade pages!");
+		
+		Files.copy(file.toPath(), new File(CLIENT_CHEST_FOLDER, "updating_page" + page + "_" + System.currentTimeMillis() + ".nbt").toPath());
+		
+		NbtList itemsNbt = pageNbt.getList("items", NbtElement.COMPOUND_TYPE);
+		ItemStack[] items = new ItemStack[54];
+		boolean empty = true;
+		int i = -1;
+		for (NbtElement item : itemsNbt) {
+			items[++i] = LocalItemStack.deserialize((NbtCompound) item, dataVersion).getReadableItem();
+			if (empty && items[i] != null && !items[i].isEmpty())
+				empty = false;
+		}
+		if (empty) {
+			cacheEmptyPage(page);
+			file.delete();
+			return new ClientChestPage(new ItemStack[54]);
+		} else {
+			ClientChestPage output = new ClientChestPage(items);
+			cachePage(page, output);
+			writePage(file, items);
+			return output;
+		}
+	}
+	public void updateAllPages(Optional<Integer> defaultDataVersion) throws Exception {
+		if (!CLIENT_CHEST_FOLDER.exists())
+			return;
+		
+		Exception toThrow = new Exception("Error updating page(s)");
+		for (File file : CLIENT_CHEST_FOLDER.listFiles()) {
+			if (!file.getName().matches("page[0-9]+\\.nbt"))
+				continue;
+			int page = Integer.parseInt(file.getName().substring("page".length(), file.getName().indexOf('.')));
+			if (page >= getPageCount())
+				continue;
+			if (getPage(page).getDataVersionStatus().canBeUpdated(defaultDataVersion.isPresent())) {
+				try {
+					boolean cached = isPageCached(page);
+					updatePage(page, defaultDataVersion);
+					if (!cached)
+						discardPageCache(page);
+				} catch (Exception e) {
+					toThrow.addSuppressed(new Exception("Page " + (page + 1), e));
+				}
+			}
+		}
+		if (toThrow.getSuppressed().length > 0)
+			throw toThrow;
+	}
+	
+	public void discardPage(int page) throws IOException {
+		File file = new File(CLIENT_CHEST_FOLDER, "page" + page + ".nbt");
+		if (!file.exists())
+			throw new IllegalStateException("Cannot discard an up to date page!");
+		
+		NbtCompound pageNbt = MVMisc.readNbt(file);
+		if (pageNbt.contains("DataVersion", NbtElement.NUMBER_TYPE) && pageNbt.getInt("DataVersion") == Version.getDataVersion())
+			throw new IllegalStateException("Cannot discard an up to date page!");
+		
+		cacheEmptyPage(page);
+		file.delete();
+	}
+	
+	private void writePage(File file, ItemStack[] items) throws IOException {
+		NbtCompound pageNbt = new NbtCompound();
+		pageNbt.putInt("DataVersion", Version.getDataVersion());
+		NbtList itemsNbt = new NbtList();
+		for (int i = 0; i < items.length; i++)
+			itemsNbt.add((items[i] == null ? ItemStack.EMPTY : items[i]).manager$serialize());
+		pageNbt.put("items", itemsNbt);
+		try {
+			MixinLink.throwHiddenException(() -> MVMisc.writeNbt(pageNbt, file));
 		} catch (Throwable e) {
 			throw new IOException("Error saving client chest page", e);
 		}
 	}
 	
-	protected abstract void cachePage(int page, ItemStack[] items);
+	protected abstract boolean isPageCached(int page);
+	protected abstract void cachePage(int page, ClientChestPage items);
 	protected abstract void cacheEmptyPage(int page);
+	protected abstract void discardPageCache(int page) throws Exception;
 	
 	public int[] getNearestPOIs(int page) {
 		int[] output = getNearestItems(page);

@@ -114,10 +114,13 @@ public final class ClientCommandManager {
 	
 	
 	// NBT Editor stuff
+	private static final Supplier<Reflection.MethodInvoker> ClientPlayNetworkHandler_getRegistryManager_Immutable =
+			Reflection.getOptionalMethod(() -> ClientPlayNetworkHandler.class, () -> "method_29091",
+					() -> MethodType.methodType(Reflection.getClass("net.minecraft.class_5455$class_6890")));
 	private static final Supplier<Reflection.MethodInvoker> ClientCommonNetworkHandler_getRegistryManager =
 			Reflection.getOptionalMethod(() -> ClientCommonNetworkHandler.class, () -> "method_29091",
 					() -> MethodType.methodType(Reflection.getClass("net.minecraft.class_5455$class_6890"))); // Prevent Innerclasses entry
-	private static final Supplier<Reflection.MethodInvoker> ClientPlayNetworkHandler_getRegistryManager =
+	private static final Supplier<Reflection.MethodInvoker> ClientPlayNetworkHandler_getRegistryManager_DynamicRegistryManager =
 			Reflection.getOptionalMethod(() -> ClientPlayNetworkHandler.class, () -> "method_29091",
 					() -> MethodType.methodType(DynamicRegistryManager.class));
 	private static final Supplier<Reflection.MethodInvoker> GameJoinS2CPacket_registryManager =
@@ -128,11 +131,14 @@ public final class ClientCommandManager {
 		final CommandDispatcher<FabricClientCommandSource> dispatcher = new CommandDispatcher<>();
 		ClientCommandInternals.setActiveDispatcher(dispatcher);
 		Object registryAccess = Version.newSwitch()
-				.range("1.20.2", null, () -> CommandRegistryAccess.of(
+				.range("1.20.5", null, () -> CommandRegistryAccess.of(
+						ClientPlayNetworkHandler_getRegistryManager_Immutable.get().invoke(MainUtil.client.getNetworkHandler()),
+						MainUtil.client.getNetworkHandler().getEnabledFeatures()))
+				.range("1.20.2", "1.20.4", () -> CommandRegistryAccess.of(
 						ClientCommonNetworkHandler_getRegistryManager.get().invoke(MainUtil.client.getNetworkHandler()),
 						MainUtil.client.getNetworkHandler().getEnabledFeatures()))
 				.range("1.19.3", "1.20.1", () -> CommandRegistryAccess.of(
-						ClientPlayNetworkHandler_getRegistryManager.get().invoke(MainUtil.client.getNetworkHandler()),
+						ClientPlayNetworkHandler_getRegistryManager_DynamicRegistryManager.get().invoke(MainUtil.client.getNetworkHandler()),
 						MainUtil.client.getNetworkHandler().getEnabledFeatures()))
 				.range("1.19.0", "1.19.2", () -> Reflection.newInstance("net.minecraft.class_7157",
 						new Class[] {Reflection.getClass("net.minecraft.class_5455")}, // DynamicRegistryManager.class

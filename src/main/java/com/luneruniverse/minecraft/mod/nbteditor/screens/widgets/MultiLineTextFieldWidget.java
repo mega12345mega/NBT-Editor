@@ -29,7 +29,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.suggestion.Suggestions;
 
-import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.Selectable;
@@ -237,7 +236,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		prev.setChangeListener(onChange);
 		prev.generateLines();
 		if (prev.isMultiFocused())
-			prev.onFocusChange(false);
+			prev.setMultiFocused(false);
 		prev.scrollBar = new ScrollBarWidget(x + width - 8, y, height,
 				() -> prev.scroll, scroll -> prev.scroll = scroll, prev::getMaxScroll);
 		return prev;
@@ -379,7 +378,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		
 		boolean focus = isMultiFocused();
 		if (suggestor.isMultiFocused() != focus)
-			suggestor.onFocusChange(focus);
+			suggestor.setMultiFocused(focus);
 	}
 	private void syncFromSuggestor() {
 		if (!suggestor.text.equals(text))
@@ -424,7 +423,11 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 		boolean scissor = !ConfigScreen.isMacScrollPatch();
 		if (scissor) {
 			MinecraftClient client = MainUtil.client;
-			RenderSystem.enableScissor((int) (x * client.getWindow().getScaleFactor()), client.getWindow().getHeight() - (int) ((y + height) * client.getWindow().getScaleFactor()), (int) (width * client.getWindow().getScaleFactor()), (int) (height * client.getWindow().getScaleFactor()));
+			RenderSystem.enableScissor(
+					(int) (x * client.getWindow().getScaleFactor()),
+					client.getWindow().getHeight() - (int) ((y + height) * client.getWindow().getScaleFactor()),
+					(int) (width * client.getWindow().getScaleFactor()),
+					(int) (height * client.getWindow().getScaleFactor()));
 		}
 		
 		matrices.push();
@@ -936,7 +939,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	
 	@Override
 	public boolean charTyped(char chr, int modifiers) {
-		if (SharedConstants.isValidChar(chr)) {
+		if (MVMisc.isValidChar(chr)) {
 			this.write(Character.toString(chr));
 			cursorX = -1;
 			return true;

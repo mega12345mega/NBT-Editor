@@ -4,14 +4,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
+import net.minecraft.util.Identifier;
 
 public class Version {
+	
 	public static class VersionSwitch<T> {
 		private final int[] version;
 		private Supplier<T> match;
@@ -87,18 +92,33 @@ public class Version {
 	
 	private static String releaseTarget;
 	public static String getReleaseTarget() {
-		if (releaseTarget != null)
-			return releaseTarget;
-		
+		if (releaseTarget == null)
+			readVersionJson();
+		return releaseTarget;
+	}
+	
+	private static Integer dataVersion;
+	public static int getDataVersion() {
+		if (dataVersion == null)
+			readVersionJson();
+		return dataVersion;
+	}
+	
+	private static void readVersionJson() {
 		try (InputStream in = Version.class.getResourceAsStream("/version.json");
 				InputStreamReader reader = new InputStreamReader(in);) {
 			JsonObject data = new Gson().fromJson(reader, JsonObject.class);
+			
 			if (data.has("release_target"))
-				return releaseTarget = data.get("release_target").getAsString();
-			String id = data.get("id").getAsString();
-			return releaseTarget = id.split("\\+|-")[0];
+				releaseTarget = data.get("release_target").getAsString();
+			else {
+				String id = data.get("id").getAsString();
+				releaseTarget = id.split("\\+|-")[0];
+			}
+			
+			dataVersion = data.get("world_version").getAsInt();
 		} catch (IOException e) {
-			throw new UncheckedIOException("Error trying to read game version", e);
+			throw new UncheckedIOException("Error trying to parse version.json", e);
 		}
 	}
 	
@@ -110,4 +130,22 @@ public class Version {
 			return parts;
 		return new int[] {parts[0], parts[1], 0};
 	}
+	
+	private static Map<String, Integer> dataVersions;
+	public static Optional<Integer> getDataVersion(String version) {
+		try {
+			return Optional.of(Integer.parseInt(version));
+		} catch (NumberFormatException e) {}
+		
+		if (dataVersions == null) {
+			try (InputStream in = MVMisc.getResource(new Identifier("nbteditor", "data_versions.json")).orElseThrow()) {
+				dataVersions = new Gson().fromJson(new InputStreamReader(in), new TypeToken<Map<String, Integer>>() {}.getType());
+			} catch (IOException e) {
+				throw new RuntimeException("Failed to parse data_versions.json", e);
+			}
+		}
+		
+		return Optional.ofNullable(dataVersions.get(version));
+	}
+	
 }

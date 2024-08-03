@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
@@ -40,6 +41,13 @@ public interface MVPacketByteBufParent {
 	}
 	public default void writeVec3d(Vec3d vector) {
 		throw new RuntimeException("Missing implementation for MVPacketByteBufParent#writeVec3d");
+	}
+	
+	public default ItemStack readItemStack() {
+		throw new RuntimeException("Missing implementation for MVPacketByteBufParent#readItemStack");
+	}
+	public default PacketByteBuf writeItemStack(ItemStack item) {
+		throw new RuntimeException("Missing implementation for MVPacketByteBufParent#writeItemStack");
 	}
 	
 }

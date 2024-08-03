@@ -2,8 +2,12 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import java.util.function.Consumer;
 
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -12,6 +16,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.AbstractNbtList;
+import net.minecraft.nbt.NbtByte;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.Identifier;
 
@@ -42,6 +48,7 @@ public class NBTValue extends List2D.List2DValue {
 	
 	private boolean selected;
 	private boolean unsafe;
+	private boolean invalidComponent;
 	
 	public NBTValue(NBTEditorScreen<?> screen, String key, NbtElement value, AbstractNbtList<?> parentList) {
 		this.screen = screen;
@@ -88,9 +95,14 @@ public class NBTValue extends List2D.List2DValue {
 			MVDrawableHelper.drawTexture(matrices, icon, 0, 0, 0, 0, 32, 32, 32, 32);
 		
 		int color = -1;
-		if (unsafe && selected || parentList != null && parentList.getHeldType() != value.getType())
+		String tooltip = null;
+		if (unsafe && selected || parentList != null && parentList.getHeldType() != value.getType()) {
 			color = 0xFFFFAA33;
-		else if (selected)
+			tooltip = "nbteditor.nbt.marker.unsafe";
+		} else if (invalidComponent) {
+			color = 0xFF550000;
+			tooltip = "nbteditor.nbt.marker.invalid_component";
+		} else if (selected)
 			color = 0xFFDF4949;
 		else if (isHovering(mouseX, mouseY))
 			color = 0xFF257789;
@@ -100,6 +112,8 @@ public class NBTValue extends List2D.List2DValue {
 			MVDrawableHelper.fill(matrices, -4, 32, 36, 36, color);
 			MVDrawableHelper.fill(matrices, 32, -4, 36, 36, color);
 		}
+		if (tooltip != null && isHovering(mouseX, mouseY))
+			new MVTooltip(tooltip).render(matrices, mouseX, mouseY);
 		
 		if (key == null)
 			return;
@@ -143,7 +157,13 @@ public class NBTValue extends List2D.List2DValue {
 	public String getKey() {
 		return key;
 	}
-	public String getValueText() {
+	public String getValueText(boolean json) {
+		if (json && value instanceof NbtByte valueByte) {
+			if (valueByte.byteValue() == 0)
+				return "false";
+			if (valueByte.byteValue() == 1)
+				return "true";
+		}
 		return value.toString();
 	}
 	
@@ -151,11 +171,27 @@ public class NBTValue extends List2D.List2DValue {
 		this.unsafe = unsafe;
 	}
 	/**
-	 * 
 	 * @return Returns if this value has been manually set as unsafe; doesn't take into account list types
 	 */
 	public boolean isUnsafe() {
 		return unsafe;
+	}
+	
+	public void setInvalidComponent(boolean invalidComponent) {
+		this.invalidComponent = invalidComponent;
+	}
+	public void updateInvalidComponent(LocalNBT localNBT, String component) {
+		if (!NBTManagers.COMPONENTS_EXIST)
+			return;
+		if (localNBT instanceof LocalItem localItem) {
+			NbtCompound nbtOutput = localItem.getReadableItem().manager$getNbt();
+			if (component == null)
+				component = this.key;
+			this.invalidComponent = (nbtOutput == null || !nbtOutput.contains(MainUtil.addNamespace(component)));
+		}
+	}
+	public boolean isInvalidComponent() {
+		return invalidComponent;
 	}
 	
 }
