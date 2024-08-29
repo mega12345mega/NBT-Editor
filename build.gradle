@@ -43,6 +43,8 @@ dependencies {
 
 	// modImplementation "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"
 	
+	implementation files("nbteditor_1.17/build/devlibs/nbteditor_1.17-0.0.0-dev.jar")
+	
 	modImplementation "com.terraformersmc:modmenu:10.0.0"
 	modImplementation "curse.maven:nbt-autocomplete-813557:5483080"
 }
@@ -69,10 +71,59 @@ java {
 	targetCompatibility = JavaVersion.VERSION_16
 }
 
+compileJava.dependsOn ":nbteditor_1.17:jar"
+remapSourcesJar.dependsOn ":nbteditor_1.17:jar"
+
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
+def checkRefmap(Map json) {
+	if (!(json.keySet() - ["mappings", "data"]).isEmpty())
+		return false;
+	if (!(json.data.keySet() - ["named:intermediary"]).isEmpty())
+		return false;
+	return true;
+}
+
+task mergeRefmapJson {
+	doLast {
+		File mainRefmap = file("build/classes/java/main/nbteditor-refmap.json")
+		File additionalRefmap = file("nbteditor_1.17/build/classes/java/main/nbteditor_1.17-refmap.json")
+		
+		if (!mainRefmap.exists())
+			throw new GradleException("Missing main refmap!");
+		if (!additionalRefmap.exists())
+			throw new GradleException("Missing 1.17 refmap!");
+		
+		def parser = new JsonSlurper()
+		def mainJson = parser.parse(mainRefmap)
+		def additionalJson = parser.parse(additionalRefmap)
+		
+		if (!checkRefmap(mainJson))
+			throw new GradleException("Main refmap is invalid!");
+		if (!checkRefmap(additionalJson))
+			throw new GradleException("1.17 refmap is invalid!");
+		
+		mainJson.mappings += additionalJson.mappings
+		mainJson.data["named:intermediary"] += additionalJson.data["named:intermediary"]
+		
+		mainRefmap.text = JsonOutput.prettyPrint(JsonOutput.toJson(mainJson))
+		
+		println mainRefmap.text
+	}
+}
+mergeRefmapJson.dependsOn(classes)
+mergeRefmapJson.dependsOn(":nbteditor_1.17:classes")
+
 jar {
 	from("LICENSE") {
 		rename { "${it}_${project.base.archivesName.get()}"}
 	}
+	
+	from(files("nbteditor_1.17/build/classes/java/main")) {
+		exclude "nbteditor_1.17-refmap.json"
+	}
+	dependsOn mergeRefmapJson
 }
 
 // configure the maven publication

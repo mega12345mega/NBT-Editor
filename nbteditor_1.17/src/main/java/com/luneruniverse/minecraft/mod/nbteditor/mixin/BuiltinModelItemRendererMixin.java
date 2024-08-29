@@ -18,28 +18,28 @@ import net.minecraft.item.ItemStack;
 public class BuiltinModelItemRendererMixin {
 	private ItemStack item;
 	
-	@ModifyVariable(method = "render", at = @At("HEAD"), ordinal = 0)
+	@ModifyVariable(method = "method_3166(Lnet/minecraft/class_1799;Lnet/minecraft/class_811;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;II)V", at = @At("HEAD"), ordinal = 0, remap = false)
 	@Group(name = "render_ItemStack", min = 1)
+	@SuppressWarnings("target")
 	private ItemStack render_ItemStack(ItemStack item) {
 		this.item = item;
 		return item;
 	}
-	@ModifyVariable(method = "method_3166(Lnet/minecraft/class_1799;Lnet/minecraft/class_809$class_811;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;II)V", at = @At("HEAD"), ordinal = 0, remap = false)
+	@ModifyVariable(method = "render", at = @At("HEAD"), ordinal = 0)
 	@Group(name = "render_ItemStack", min = 1)
-	@SuppressWarnings("target")
 	private ItemStack render_ItemStack_old(ItemStack item) {
 		this.item = item;
 		return item;
 	}
 	
-	@ModifyVariable(method = "render", at = @At("HEAD"), ordinal = 0)
+	@ModifyVariable(method = "method_3166(Lnet/minecraft/class_1799;Lnet/minecraft/class_811;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;II)V", at = @At("HEAD"), ordinal = 0, remap = false)
 	@Group(name = "render_VertexConsumerProvider", min = 1)
+	@SuppressWarnings("target")
 	private VertexConsumerProvider render_VertexConsumerProvider(VertexConsumerProvider provider) {
 		return render_VertexConsumerProvider_impl(provider);
 	}
-	@ModifyVariable(method = "method_3166(Lnet/minecraft/class_1799;Lnet/minecraft/class_809$class_811;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;II)V", at = @At("HEAD"), ordinal = 0, remap = false)
+	@ModifyVariable(method = "render", at = @At("HEAD"), ordinal = 0)
 	@Group(name = "render_VertexConsumerProvider", min = 1)
-	@SuppressWarnings("target")
 	private VertexConsumerProvider render_VertexConsumerProvider_old(VertexConsumerProvider provider) {
 		return render_VertexConsumerProvider_impl(provider);
 	}
