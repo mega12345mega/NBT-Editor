@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVPacketByteBufParent;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
@@ -48,7 +49,7 @@ public abstract class PacketByteBufMixin implements MVPacketByteBufParent {
 	
 	@Override
 	public Identifier readIdentifier() {
-		return new Identifier(readString());
+		return IdentifierInst.of(readString());
 	}
 	@Override
 	public PacketByteBuf writeIdentifier(Identifier id) {

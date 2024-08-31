@@ -16,6 +16,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.CommandHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVEnchantments;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
@@ -29,7 +30,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import tsp.headdb.ported.HeadAPI;
@@ -71,7 +71,7 @@ public class NBTEditorClient implements ClientModInitializer {
 		
 		ItemStack clientChestIcon = new ItemStack(Items.ENDER_CHEST)
 				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));
-		clientChestIcon.addEnchantment(Enchantments.LOYALTY, 1);
+		MVEnchantments.addEnchantment(clientChestIcon, MVEnchantments.LOYALTY, 1);
 		MixinLink.ENCHANT_GLINT_FIX.add(clientChestIcon);
 		NBTEditorAPI.registerInventoryTab(clientChestIcon, ClientChestScreen::show,
 				screen -> screen instanceof CreativeInventoryScreen || (screen instanceof InventoryScreen && SERVER_CONN.isEditingExpanded()));

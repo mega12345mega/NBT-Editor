@@ -4,6 +4,7 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVEnchantments;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
@@ -51,8 +52,8 @@ public class MaxCommand extends ClientCommand {
 		Enchants enchants = ItemTagReferences.ENCHANTMENTS.get(item);
 		
 		enchants.removeDuplicates();
-		MVRegistry.ENCHANTMENT.forEach(enchant -> {
-			if ((allEnchants || enchant.isAcceptableItem(item)) && (cursed || !enchant.isCursed()))
+		MVRegistry.getEnchantmentRegistry().forEach(enchant -> {
+			if ((allEnchants || enchant.isAcceptableItem(item)) && (cursed || !MVEnchantments.isCursed(enchant)))
 				enchants.setEnchant(enchant, enchantLevel == -1 ? enchant.getMaxLevel() : enchantLevel, true);
 		});
 		

@@ -1,22 +1,32 @@
 package com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data;
 
+import java.lang.invoke.MethodType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.AttributeModifierId;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.Operation;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.Slot;
 
 import net.minecraft.component.type.AttributeModifierSlot;
+import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public record AttributeData(EntityAttribute attribute, double value, Optional<AttributeModifierData> modifierData) {
 	
-	public static record AttributeModifierData(Operation operation, Slot slot, UUID uuid) {
+	public static record AttributeModifierData(Operation operation, Slot slot, AttributeModifierId id) {
 		
 		public enum Operation {
 			ADD("nbteditor.attributes.operation.add"),
@@ -110,13 +120,90 @@ public record AttributeData(EntityAttribute attribute, double value, Optional<At
 			}
 		}
 		
+		public static class AttributeModifierId {
+			
+			public static final boolean ID_IS_IDENTIFIER = Version.<Boolean>newSwitch()
+					.range("1.21.0", null, true)
+					.range(null, "1.20.6", false)
+					.get();
+			
+			public static AttributeModifierId randomUUID() {
+				return new AttributeModifierId(UUID.randomUUID());
+			}
+			
+			private static final Supplier<Reflection.MethodInvoker> EntityAttributeModifier_uuid =
+					Reflection.getOptionalMethod(EntityAttributeModifier.class, "comp_2447", MethodType.methodType(UUID.class));
+			public static AttributeModifierId fromMinecraft(EntityAttributeModifier modifier) {
+				if (ID_IS_IDENTIFIER)
+					return new AttributeModifierId(modifier.id());
+				return new AttributeModifierId((UUID) EntityAttributeModifier_uuid.get().invoke(modifier));
+			}
+			
+			private final Object id;
+			
+			public AttributeModifierId(UUID id) {
+				this.id = id;
+			}
+			public AttributeModifierId(Identifier id) {
+				if (!ID_IS_IDENTIFIER)
+					throw new IllegalArgumentException("Attribute IDs are UUIDs in this version!");
+				this.id = id;
+			}
+			
+			public UUID getUUID() {
+				return (UUID) id;
+			}
+			
+			public Identifier getIdentifier() {
+				if (id instanceof UUID uuid)
+					return IdentifierInst.of("minecraft", uuid.toString());
+				return (Identifier) id;
+			}
+			
+			public EntityAttributeModifier toMinecraft(String name, double value, net.minecraft.entity.attribute.EntityAttributeModifier.Operation operation) {
+				if (ID_IS_IDENTIFIER)
+					return new EntityAttributeModifier(getIdentifier(), value, operation);
+				
+				return Reflection.newInstance(
+						EntityAttributeModifier.class,
+						new Class<?>[] {UUID.class, String.class, double.class, net.minecraft.entity.attribute.EntityAttributeModifier.Operation.class},
+						getUUID(), name, value, operation);
+			}
+			
+		}
+		
+		public static AttributeModifierData fromMinecraft(EntityAttributeModifier modifier, AttributeModifierSlot slot) {
+			return new AttributeModifierData(
+					Operation.fromMinecraft(modifier.operation()),
+					Slot.fromMinecraft(slot),
+					AttributeModifierId.fromMinecraft(modifier));
+		}
+		
+		public EntityAttributeModifier toMinecraft(String name, double value) {
+			return id.toMinecraft(name, value, operation.toMinecraft());
+		}
+		
+	}
+	
+	public static AttributeData fromComponentEntry(AttributeModifiersComponent.Entry entry) {
+		return new AttributeData(
+				entry.attribute().value(),
+				entry.modifier().value(),
+				Optional.of(AttributeModifierData.fromMinecraft(entry.modifier(), entry.slot())));
 	}
 	
 	public AttributeData(EntityAttribute attribute, double value) {
 		this(attribute, value, Optional.empty());
 	}
-	public AttributeData(EntityAttribute attribute, double value, Operation operation, Slot slot, UUID uuid) {
-		this(attribute, value, Optional.of(new AttributeModifierData(operation, slot, uuid)));
+	public AttributeData(EntityAttribute attribute, double value, Operation operation, Slot slot, AttributeModifierId id) {
+		this(attribute, value, Optional.of(new AttributeModifierData(operation, slot, id)));
+	}
+	
+	public AttributeModifiersComponent.Entry toComponentEntry() {
+		return new AttributeModifiersComponent.Entry(
+				Registries.ATTRIBUTE.getEntry(attribute),
+				modifierData.get().toMinecraft(Registries.ATTRIBUTE.getId(attribute).toString(), value),
+				(AttributeModifierSlot) modifierData.get().slot().toMinecraft());
 	}
 	
 }

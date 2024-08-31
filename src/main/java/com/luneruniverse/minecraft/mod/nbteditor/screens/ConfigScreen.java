@@ -25,6 +25,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVEnchantments;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
@@ -44,9 +45,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 public class ConfigScreen extends TickableSupportingScreen {
 	
@@ -79,7 +78,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		public MVTooltip getTooltip() {
 			List<Text> output = new ArrayList<>();
 			for (int lvl = 1; lvl <= 3; lvl++)
-				output.add(getEnchantNameWithMax(Enchantments.FIRE_ASPECT, lvl, this));
+				output.add(getEnchantNameWithMax(MVEnchantments.FIRE_ASPECT, lvl, this));
 			return new MVTooltip(output);
 		}
 	}
@@ -434,12 +433,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
-		EditableText output = TextInst.translatable(enchant.getTranslationKey());
-        if (enchant.isCursed()) {
-            output.formatted(Formatting.RED);
-        } else {
-            output.formatted(Formatting.GRAY);
-        }
+		EditableText output = TextInst.copy(MVEnchantments.getEnchantmentName(enchant));
         if (level != 1 || enchant.getMaxLevel() != 1 || enchantLevelMax == EnchantLevelMax.ALWAYS) {
             output.append(" ");
             if (isEnchantNumberTypeArabic())

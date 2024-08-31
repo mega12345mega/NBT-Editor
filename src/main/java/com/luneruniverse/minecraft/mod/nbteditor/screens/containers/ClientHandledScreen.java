@@ -8,6 +8,7 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
@@ -42,7 +43,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	
 	public static final int SYNC_ID = -2718;
 	
-	private static final Identifier TEXTURE = new Identifier("textures/gui/container/generic_54.png");
+	private static final Identifier TEXTURE = IdentifierInst.of("textures/gui/container/generic_54.png");
 	
 	private static Inventory SERVER_INV;
 	private static ItemStack SERVER_CURSOR;

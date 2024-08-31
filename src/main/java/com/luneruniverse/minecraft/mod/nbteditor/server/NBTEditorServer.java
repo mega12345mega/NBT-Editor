@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -292,7 +293,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 			Identifier passengerId = null;
 			if (passengerNbt.contains("id", NbtElement.STRING_TYPE)) {
 				try {
-					passengerId = new Identifier(passengerNbt.getString("id"));
+					passengerId = IdentifierInst.of(passengerNbt.getString("id"));
 					if (!MVRegistry.ENTITY_TYPE.containsId(passengerId))
 						passengerId = null;
 				} catch (InvalidIdentifierException e) {}

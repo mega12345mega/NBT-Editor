@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVNetworking;
@@ -19,12 +20,18 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.SetSlotC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewBlockS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 public class NBTEditor implements ModInitializer {
+	
+	static {
+		MC_1_17_Link.MixinLink.ENCHANT_GLINT_FIX = MixinLink.ENCHANT_GLINT_FIX;
+		MC_1_17_Link.ConfigScreen.isEnchantGlintFix_impl = ConfigScreen::isEnchantGlintFix;
+	}
 	
 	public static final Logger LOGGER = LogManager.getLogger("nbteditor");
 	public static NBTEditorServer SERVER;

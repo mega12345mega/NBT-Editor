@@ -28,6 +28,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCom
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.JsonOps;
@@ -49,6 +50,7 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.client.util.math.MatrixStack;
@@ -59,6 +61,7 @@ import net.minecraft.command.argument.TextArgumentType;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemGroup;
@@ -283,7 +286,7 @@ public class MVMisc {
 			Reflection.getOptionalMethod(SuspiciousStewItem.class, "method_8021", MethodType.methodType(void.class, ItemStack.class, StatusEffect.class, int.class));
 	public static void addEffectToStew(ItemStack item, StatusEffect effect, int duration) {
 		Version.newSwitch()
-				.range("1.20.5", null, () -> item.apply(MVDataComponentType.SUSPICIOUS_STEW_EFFECTS, new SuspiciousStewEffectsComponent(List.of()), effects -> effects.with(new StewEffect(Registries.STATUS_EFFECT.getEntry(effect), duration))))
+				.range("1.20.5", null, () -> item.apply(MVComponentType.SUSPICIOUS_STEW_EFFECTS, new SuspiciousStewEffectsComponent(List.of()), effects -> effects.with(new StewEffect(Registries.STATUS_EFFECT.getEntry(effect), duration))))
 				.range("1.20.2", "1.20.4", () -> SuspiciousStewItem_addEffectsToStew.get().invoke(null, item, List.of(Reflection.newInstance(StewEffect.class, new Class<?>[] {StatusEffect.class, int.class}, effect, duration))))
 				.range(null, "1.20.1", () -> SuspiciousStewItem_addEffectToStew.get().invoke(null, item, effect, duration))
 				.run();
@@ -417,13 +420,17 @@ public class MVMisc {
 				.get();
 	}
 	
+	private static final Supplier<Reflection.MethodInvoker> Tessellator_getBuffer =
+			Reflection.getOptionalMethod(Tessellator.class, "method_1349", MethodType.methodType(BufferBuilder.class));
+	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_begin =
+			Reflection.getOptionalMethod(BufferBuilder.class, "method_1328", MethodType.methodType(void.class, VertexFormat.DrawMode.class, VertexFormat.class));
 	public static VertexConsumer beginDrawingShader(MatrixStack matrices, MVShader shader) {
 		return Version.<VertexConsumer>newSwitch()
 				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().getBuffer(shader.layer()))
 				.range(null, "1.19.4", () -> {
 					RenderSystem.setShader(shader.shader());
-					BufferBuilder builder = Tessellator.getInstance().getBuffer();
-					builder.begin(shader.layer().getDrawMode(), shader.layer().getVertexFormat());
+					BufferBuilder builder = Tessellator_getBuffer.get().invoke(Tessellator.getInstance());
+					BufferBuilder_begin.get().invoke(builder, shader.layer().getDrawMode(), shader.layer().getVertexFormat());
 					return builder;
 				})
 				.get();
@@ -545,6 +552,41 @@ public class MVMisc {
 				})
 				.range(null, "1.19.3", () -> ParentElement_setInitialFocus.get().invoke(screen, element))
 				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> VertexConsumer_next =
+			Reflection.getOptionalMethod(VertexConsumer.class, "method_1344", MethodType.methodType(void.class));
+	public static void nextVertex(VertexConsumer vertexConsumer) {
+		Version.newSwitch()
+				.range("1.21.0", null, () -> {})
+				.range(null, "1.20.6", () -> VertexConsumer_next.get().invoke(vertexConsumer))
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> VertexConsumer_vertex =
+			Reflection.getOptionalMethod(VertexConsumer.class, "method_22912", MethodType.methodType(VertexConsumer.class, double.class, double.class, double.class));
+	public static VertexConsumer startVertex(VertexConsumer vertexConsumer, double x, double y, double z) {
+		return Version.<VertexConsumer>newSwitch()
+				.range("1.21.0", null, () -> vertexConsumer.vertex((float) x, (float) y, (float) z))
+				.range(null, "1.20.6", () -> VertexConsumer_vertex.get().invoke(vertexConsumer, x, y, z))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> MinecraftClient_getTickDelta =
+			Reflection.getOptionalMethod(MinecraftClient.class, "method_1488", MethodType.methodType(float.class));
+	public static float getTickDelta() {
+		return Version.<Float>newSwitch()
+				.range("1.21.0", null, () -> MainUtil.client.getRenderTickCounter().getTickDelta(true))
+				.range(null, "1.20.6", () -> MinecraftClient_getTickDelta.get().invoke(MainUtil.client))
+				.get();
+	}
+	
+	public static EquipmentSlot getEquipmentSlot(EquipmentSlot.Type type, int entityId) {
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			if (slot.getType() == type && slot.getEntitySlotId() == entityId)
+				return slot;
+		}
+		throw new IllegalArgumentException("Unknown equipment slot: type=" + type + ", entityId=" + entityId);
 	}
 	
 }

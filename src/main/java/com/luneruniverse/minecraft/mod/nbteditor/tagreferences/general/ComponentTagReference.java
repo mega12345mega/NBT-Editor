@@ -4,14 +4,14 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Unit;
 
 public class ComponentTagReference<T, C> implements TagReference<T, ItemStack> {
 	
-	public static <C> ComponentTagReference<Boolean, C> forExistance(MVDataComponentType<C> component, Supplier<C> supplier) {
+	public static <C> ComponentTagReference<Boolean, C> forExistance(MVComponentType<C> component, Supplier<C> supplier) {
 		return new ComponentTagReference<>(component, null, componentValue -> componentValue != null, (componentValue, value) -> {
 			if (value == null)
 				value = false;
@@ -20,24 +20,24 @@ public class ComponentTagReference<T, C> implements TagReference<T, ItemStack> {
 			return value ? supplier.get() : null;
 		});
 	}
-	public static ComponentTagReference<Boolean, Unit> forExistance(MVDataComponentType<Unit> component) {
+	public static ComponentTagReference<Boolean, Unit> forExistance(MVComponentType<Unit> component) {
 		return forExistance(component, () -> Unit.INSTANCE);
 	}
 	
-	private final MVDataComponentType<C> component;
+	private final MVComponentType<C> component;
 	private final Supplier<C> defaultComponent;
 	private final Function<C, T> getter;
 	private final BiFunction<C, T, C> setter;
 	private boolean passNullValue;
 	
-	public ComponentTagReference(MVDataComponentType<C> component, Supplier<C> defaultComponent, Function<C, T> getter, BiFunction<C, T, C> setter) {
+	public ComponentTagReference(MVComponentType<C> component, Supplier<C> defaultComponent, Function<C, T> getter, BiFunction<C, T, C> setter) {
 		this.component = component;
 		this.defaultComponent = defaultComponent;
 		this.getter = getter;
 		this.setter = setter;
 		this.passNullValue = false;
 	}
-	public ComponentTagReference(MVDataComponentType<C> component, Supplier<C> defaultComponent, Function<C, T> getter, Function<T, C> setter) {
+	public ComponentTagReference(MVComponentType<C> component, Supplier<C> defaultComponent, Function<C, T> getter, Function<T, C> setter) {
 		this(component, defaultComponent, getter, (componentValue, value) -> setter.apply(value));
 	}
 	

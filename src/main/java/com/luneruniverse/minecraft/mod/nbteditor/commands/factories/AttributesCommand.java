@@ -3,7 +3,6 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands.factories;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
 import java.util.List;
-import java.util.UUID;
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -14,6 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.It
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.AttributesScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.AttributeModifierId;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -50,7 +50,7 @@ public class AttributesCommand extends ClientCommand {
 				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.attributes.new_uuids.no_attributes"), false);
 			else {
 				attributes.replaceAll(attribute -> new AttributeData(attribute.attribute(), attribute.value(),
-						attribute.modifierData().get().operation(), attribute.modifierData().get().slot(), UUID.randomUUID()));
+						attribute.modifierData().get().operation(), attribute.modifierData().get().slot(), AttributeModifierId.randomUUID()));
 				ItemTagReferences.ATTRIBUTES.set(item, attributes);
 				ref.saveItem(item, () -> MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.attributes.new_uuids.success"), false));
 			}

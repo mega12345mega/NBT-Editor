@@ -21,7 +21,8 @@ import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
@@ -131,8 +132,8 @@ public class MainUtil {
 	
 	
 	
-	private static final Identifier LOGO = new Identifier("nbteditor", "textures/logo.png");
-	private static final Identifier LOGO_UPDATE_AVAILABLE = new Identifier("nbteditor", "textures/logo_update_available.png");
+	private static final Identifier LOGO = IdentifierInst.of("nbteditor", "textures/logo.png");
+	private static final Identifier LOGO_UPDATE_AVAILABLE = IdentifierInst.of("nbteditor", "textures/logo_update_available.png");
 	public static void renderLogo(MatrixStack matrices) {
 		MVDrawableHelper.drawTexture(matrices,
 				UpdateCheckerThread.UPDATE_AVAILABLE ? LOGO_UPDATE_AVAILABLE : LOGO, 16, 16, 0, 0, 32, 32, 32, 32);
@@ -249,7 +250,7 @@ public class MainUtil {
 	
 	public static Text getBaseItemNameSafely(ItemStack item) {
 		if (NBTManagers.COMPONENTS_EXIST) {
-			Text name = item.get(MVDataComponentType.ITEM_NAME);
+			Text name = item.get(MVComponentType.ITEM_NAME);
 			if (name != null)
 				return name;
 		}
@@ -455,26 +456,26 @@ public class MainUtil {
 		int y2 = y + height;
 		
 		MVMatrix4f matrix = MVMatrix4f.getPositionMatrix(matrices.peek());
-		VertexConsumer vertex = MVMisc.beginDrawingShader(matrices, shader);
+		VertexConsumer vertexConsumer = MVMisc.beginDrawingShader(matrices, shader);
 		
-		matrix.applyToVertex(vertex, x1, y1, 0).texture(0, 0);
-		data.accept(vertex);
-		vertex.next();
+		matrix.applyToVertex(vertexConsumer, x1, y1, 0).texture(0, 0);
+		data.accept(vertexConsumer);
+		MVMisc.nextVertex(vertexConsumer);
 		
-		matrix.applyToVertex(vertex, x1, y2, 0).texture(0, 1);
-		data.accept(vertex);
-		vertex.next();
+		matrix.applyToVertex(vertexConsumer, x1, y2, 0).texture(0, 1);
+		data.accept(vertexConsumer);
+		MVMisc.nextVertex(vertexConsumer);
 		
-		matrix.applyToVertex(vertex, x2, y2, 0).texture(1, 1);
-		data.accept(vertex);
-		vertex.next();
+		matrix.applyToVertex(vertexConsumer, x2, y2, 0).texture(1, 1);
+		data.accept(vertexConsumer);
+		MVMisc.nextVertex(vertexConsumer);
 		
-		matrix.applyToVertex(vertex, x2, y1, 0).texture(1, 0);
-		data.accept(vertex);
-		vertex.next();
+		matrix.applyToVertex(vertexConsumer, x2, y1, 0).texture(1, 0);
+		data.accept(vertexConsumer);
+		MVMisc.nextVertex(vertexConsumer);
 		
 		RenderSystem.disableDepthTest();
-		MVMisc.endDrawingShader(matrices, vertex);
+		MVMisc.endDrawingShader(matrices, vertexConsumer);
 		RenderSystem.enableDepthTest();
 	}
 	

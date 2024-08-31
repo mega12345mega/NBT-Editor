@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
@@ -56,7 +57,7 @@ public class ColorSelectorWidget extends GroupWidget {
 		
 	}
 	
-	private static final Identifier HUES = new Identifier("nbteditor", "textures/hues.png");
+	private static final Identifier HUES = IdentifierInst.of("nbteditor", "textures/hues.png");
 	
 	private class ColorArea implements MVDrawable, MVElement {
 		@Override

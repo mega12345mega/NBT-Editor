@@ -5,8 +5,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.MC_1_17_Link.ConfigScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.MC_1_17_Link.MixinLink;
 
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.BuiltinModelItemRenderer;

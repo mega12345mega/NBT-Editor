@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
 import java.util.UUID;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistryKeys;
 
 import net.minecraft.nbt.NbtCompound;
@@ -12,7 +13,7 @@ import net.minecraft.world.World;
 
 public class ViewEntityS2CPacket implements ResponsePacket {
 	
-	public static final Identifier ID = new Identifier("nbteditor", "view_entity");
+	public static final Identifier ID = IdentifierInst.of("nbteditor", "view_entity");
 	
 	private final int requestId;
 	private final RegistryKey<World> world;

@@ -13,8 +13,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
-import net.minecraft.util.Identifier;
-
 public class Version {
 	
 	public static class VersionSwitch<T> {
@@ -138,7 +136,7 @@ public class Version {
 		} catch (NumberFormatException e) {}
 		
 		if (dataVersions == null) {
-			try (InputStream in = MVMisc.getResource(new Identifier("nbteditor", "data_versions.json")).orElseThrow()) {
+			try (InputStream in = MVMisc.getResource(IdentifierInst.of("nbteditor", "data_versions.json")).orElseThrow()) {
 				dataVersions = new Gson().fromJson(new InputStreamReader(in), new TypeToken<Map<String, Integer>>() {}.getType());
 			} catch (IOException e) {
 				throw new RuntimeException("Failed to parse data_versions.json", e);

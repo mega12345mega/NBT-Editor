@@ -24,7 +24,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.ChatScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.HandledScreenAccessor;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -232,7 +232,7 @@ public class MixinLink {
 						armor = true;
 					
 					if (armor)
-						MainUtil.saveItem(EquipmentSlot.fromTypeIndex(EquipmentSlot.Type.ARMOR, 8 - slotId), item);
+						MainUtil.saveItem(MVMisc.getEquipmentSlot(EquipmentSlot.Type.HUMANOID_ARMOR, 8 - slotId), item);
 					else
 						MainUtil.saveItemInvSlot(slotId, item);
 					source.getScreenHandler().setCursorStack(ItemStack.EMPTY);
@@ -286,7 +286,7 @@ public class MixinLink {
 		if (MainUtil.client.world == null)
 			return;
 		
-		if (NBTManagers.COMPONENTS_EXIST && source.contains(MVDataComponentType.HIDE_TOOLTIP))
+		if (NBTManagers.COMPONENTS_EXIST && source.contains(MVComponentType.HIDE_TOOLTIP))
 			return;
 		
 		ConfigScreen.ItemSizeFormat sizeConfig = ConfigScreen.getItemSizeFormat();

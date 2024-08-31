@@ -19,6 +19,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.integrations.NBTAutocompleteInt
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
@@ -201,7 +202,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			type.setChangedListener(str -> {
 				Identifier id;
 				try {
-					id = new Identifier(str);
+					id = IdentifierInst.of(str);
 				} catch (InvalidIdentifierException e) {
 					return;
 				}
