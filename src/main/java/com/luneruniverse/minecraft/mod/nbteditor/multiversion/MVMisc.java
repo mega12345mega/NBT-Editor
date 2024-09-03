@@ -589,4 +589,11 @@ public class MVMisc {
 		throw new IllegalArgumentException("Unknown equipment slot: type=" + type + ", entityId=" + entityId);
 	}
 	
+	public static void onRegistriesLoad(Runnable callback) {
+		Version.newSwitch()
+				.range("1.20.5", null, () -> DynamicRegistryManagerHolder.onDefaultManagerLoad(callback))
+				.range(null, "1.20.4", callback)
+				.run();
+	}
+	
 }

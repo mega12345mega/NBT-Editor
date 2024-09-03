@@ -14,12 +14,13 @@ import net.minecraft.screen.HorseScreenHandler;
 
 @Mixin(HorseScreenHandler.class)
 public class HorseScreenHandlerMixin {
-	@Inject(method = "<init>(ILnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/inventory/Inventory;Lnet/minecraft/entity/passive/AbstractHorseEntity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Inventory;onOpen(Lnet/minecraft/entity/player/PlayerEntity;)V"))
-	private void initHead(int syncId, PlayerInventory playerInventory, Inventory inventory, AbstractHorseEntity horse, CallbackInfo info) {
+	@Inject(method = "<init>(ILnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/inventory/Inventory;Lnet/minecraft/entity/passive/AbstractHorseEntity;I)V", at = @At("HEAD"), require = 0)
+	private static void initHead(int syncId, PlayerInventory playerInventory, Inventory inventory, AbstractHorseEntity horse, int slotColumnCount, CallbackInfo info) {
 		ServerMixinLink.SCREEN_HANDLER_OWNER.put(Thread.currentThread(), playerInventory.player);
 	}
-	@Inject(method = "<init>(ILnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/inventory/Inventory;Lnet/minecraft/entity/passive/AbstractHorseEntity;)V", at = @At("RETURN"))
-	private void initReturn(int syncId, PlayerInventory playerInventory, Inventory inventory, AbstractHorseEntity horse, CallbackInfo info) {
+	
+	@Inject(method = "<init>(ILnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/inventory/Inventory;Lnet/minecraft/entity/passive/AbstractHorseEntity;I)V", at = @At("RETURN"), require = 0)
+	private void initReturn(int syncId, PlayerInventory playerInventory, Inventory inventory, AbstractHorseEntity horse, int slotColumnCount, CallbackInfo info) {
 		ServerMixinLink.SCREEN_HANDLER_OWNER.remove(Thread.currentThread());
 	}
 }

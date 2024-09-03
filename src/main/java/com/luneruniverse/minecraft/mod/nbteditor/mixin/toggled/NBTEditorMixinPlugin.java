@@ -16,6 +16,19 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				.range("1.19.3", null, () -> output.add("toggled.ServerPlayNetworkHandlerMixin"))
 				.range(null, "1.19.2", () -> {})
 				.run();
+		Version.newSwitch()
+				.range("1.21.0", null, () -> output.add("toggled.ArmorSlotMixin"))
+				.range(null, "1.20.6", () -> output.add("toggled.PlayerScreenHandler1Mixin"))
+				.run();
+		// https://github.com/SpongePowered/Mixin/issues/677
+		Version.newSwitch()
+				.range("1.21.0", null, () -> {})
+				.range(null, "1.20.6", () -> output.add("toggled.HorseScreenHandlerMixin"))
+				.run();
+		Version.newSwitch()
+				.range("1.21.0", null, () -> {})
+				.range(null, "1.20.6", () -> output.add("toggled.HorseScreenHandler2Mixin"))
+				.run();
 		
 		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER)
 			return;

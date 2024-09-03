@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
@@ -71,7 +70,7 @@ public class MVRegistry<T> implements Iterable<T> {
 	private static MVRegistry<Enchantment> ENCHANTMENT;
 	public static MVRegistry<Enchantment> getEnchantmentRegistry() {
 		if (MVEnchantments.DATA_PACK_ENCHANTMENTS) {
-			Registry<Enchantment> registry = MainUtil.client.getNetworkHandler().getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+			Registry<Enchantment> registry = DynamicRegistryManagerHolder.getManager().get(RegistryKeys.ENCHANTMENT);
 			if (ENCHANTMENT == null || ENCHANTMENT.getInternalValue() != registry)
 				ENCHANTMENT = new MVRegistry<>(registry);
 		} else {

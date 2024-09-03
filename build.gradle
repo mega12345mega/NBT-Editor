@@ -45,8 +45,8 @@ dependencies {
 	
 	implementation files("nbteditor_1.17/build/devlibs/nbteditor_1.17-0.0.0-dev.jar")
 	
-	modImplementation "com.terraformersmc:modmenu:10.0.0"
-	modImplementation "curse.maven:nbt-autocomplete-813557:5483080"
+	modImplementation "com.terraformersmc:modmenu:11.0.2"
+	modImplementation "curse.maven:nbt-autocomplete-813557:5555359"
 }
 
 processResources {
@@ -108,8 +108,6 @@ task mergeRefmapJson {
 		mainJson.data["named:intermediary"] += additionalJson.data["named:intermediary"]
 		
 		mainRefmap.text = JsonOutput.prettyPrint(JsonOutput.toJson(mainJson))
-		
-		println mainRefmap.text
 	}
 }
 mergeRefmapJson.dependsOn(classes)

@@ -359,4 +359,11 @@ public class MixinLink {
 	
 	public static HandledScreen<?> LAST_SERVER_HANDLED_SCREEN;
 	
+	
+	public static final WeakHashMap<Runnable, Boolean> CATCH_BYPASSING_TASKS = new WeakHashMap<>();
+	public static void executeCrashableTask(Runnable task) {
+		CATCH_BYPASSING_TASKS.put(task, true);
+		MainUtil.client.execute(task);
+	}
+	
 }

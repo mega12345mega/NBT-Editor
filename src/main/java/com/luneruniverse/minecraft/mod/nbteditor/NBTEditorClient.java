@@ -17,6 +17,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVEnchantments;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
@@ -55,6 +56,10 @@ public class NBTEditorClient implements ClientModInitializer {
 		if (!SETTINGS_FOLDER.exists())
 			SETTINGS_FOLDER.mkdir();
 		
+		MVMisc.onRegistriesLoad(this::onRegistriesLoad);
+	}
+	
+	private void onRegistriesLoad() {
 		NbtTypeModifier.loadClass();
 		CommandHandler.registerCommands();
 		try {

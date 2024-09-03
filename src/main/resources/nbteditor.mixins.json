@@ -10,11 +10,11 @@
     "ShulkerBoxSlotMixin",
     "ShulkerBoxScreenHandlerMixin",
     "HorseScreenHandlerMixin",
-    "HorseScreenHandler1and2Mixin",
+    "HorseScreenHandler1Mixin",
+    "HorseScreenHandler2Mixin",
     "DataTrackerMixin",
     "ThreadExecutorMixin",
-    "ClickSlotC2SPacketMixin",
-    "PlayerScreenHandler1Mixin"
+    "ClickSlotC2SPacketMixin"
   ],
   "client": [
     "ChatScreenMixin",
@@ -40,7 +40,8 @@
     "ChatInputSuggestorMixin",
     "ClientPlayerEntityMixin",
     "BuiltinModelItemRendererMixin",
-    "EnchantmentMixin"
+    "EnchantmentMixin",
+    "SplashOverlayMixin"
   ],
   "injectors": {
     "defaultRequire": 1

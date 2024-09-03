@@ -10,6 +10,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -17,11 +19,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.HorseScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 
-@Mixin(targets = {"net.minecraft.screen.HorseScreenHandler$1", "net.minecraft.screen.HorseScreenHandler$2"})
-public class HorseScreenHandler1and2Mixin {
-	@Inject(method = "<init>", at = @At("RETURN"))
-	private void init(HorseScreenHandler handler, Inventory inventory, int index, int x, int y, AbstractHorseEntity horse, CallbackInfo info) {
+@Mixin(targets = {"net.minecraft.screen.HorseScreenHandler$2"})
+public class HorseScreenHandler2Mixin {
+	@Inject(method = "<init>(Lnet/minecraft/screen/HorseScreenHandler;Lnet/minecraft/inventory/Inventory;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/EquipmentSlot;IIILnet/minecraft/util/Identifier;Lnet/minecraft/entity/passive/AbstractHorseEntity;)V", at = @At("RETURN"), require = 0)
+	private void init(HorseScreenHandler handler, Inventory inventory, LivingEntity entity, EquipmentSlot slot, int index, int x, int y, Identifier backgroundSprite, AbstractHorseEntity horse, CallbackInfo info) {
 		PlayerEntity owner = ServerMixinLink.SCREEN_HANDLER_OWNER.get(Thread.currentThread());
 		if (owner == null)
 			return;
