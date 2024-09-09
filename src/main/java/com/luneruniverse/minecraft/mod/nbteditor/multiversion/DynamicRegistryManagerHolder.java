@@ -72,7 +72,7 @@ public class DynamicRegistryManagerHolder {
 	}
 	
 	public static DynamicRegistryManager getManager() {
-		if (NBTEditorServer.IS_DEDICATED) {
+		if (NBTEditorServer.isOnServerThread()) {
 			if (serverManager == null)
 				throw new IllegalStateException("The server manager hasn't been set yet!");
 			return serverManager;

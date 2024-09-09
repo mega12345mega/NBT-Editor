@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.network.ClientConnection;
@@ -19,7 +20,7 @@ public class ClientConnectionMixin {
 	
 	private static volatile boolean sendingSafe;
 	
-	@Inject(at = @At(value = "HEAD"), method = "send(Lnet/minecraft/network/packet/Packet;)V", cancellable = true)
+	@Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"), cancellable = true)
 	private void send(Packet<?> packet, CallbackInfo info) {
 		if (((ClientConnection) (Object) this).getSide() != NetworkSide.CLIENTBOUND)
 			return;
@@ -41,6 +42,13 @@ public class ClientConnectionMixin {
 				sendingSafe = false;
 			}
 		}
+	}
+	
+	@Inject(method = "<init>", at = @At("HEAD"))
+	private static void init(NetworkSide side, CallbackInfo info) {
+		// When on a dedicated server, all threads are already server threads
+		if (side == NetworkSide.SERVERBOUND)
+			NBTEditorServer.registerServerThread(Thread.currentThread());
 	}
 	
 }

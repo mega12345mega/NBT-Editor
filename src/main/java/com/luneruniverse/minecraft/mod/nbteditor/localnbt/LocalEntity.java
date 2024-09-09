@@ -135,7 +135,7 @@ public class LocalEntity implements LocalNBT {
 		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getVertexConsumerProvider();
 		EntityRenderDispatcher dispatcher = MainUtil.client.getEntityRenderDispatcher();
 		dispatcher.setRenderShadows(false);
-		rotation.copy().conjugate().applyToEntityRenderDispatcher(dispatcher);
+		rotation.copy().conjugate().rotateY((float) Math.PI).applyToEntityRenderDispatcher(dispatcher);
 		dispatcher.render(entity, 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
 		dispatcher.setRenderShadows(true);
 		provider.draw();
