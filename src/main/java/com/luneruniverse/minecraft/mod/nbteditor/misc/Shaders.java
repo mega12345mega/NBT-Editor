@@ -22,7 +22,7 @@ public class Shaders {
 	private static VertexFormatElement getElement(String oldElement, Supplier<VertexFormatElement> newElement) {
 		return Version.<VertexFormatElement>newSwitch()
 				.range("1.21.0", null, newElement)
-				.range(null, "1.20.6", () -> Reflection.getField(VertexFormats.class, oldElement, "Lnet/minecraft/class_296;"))
+				.range(null, "1.20.6", () -> Reflection.getField(VertexFormats.class, oldElement, "Lnet/minecraft/class_296;").get(null))
 				.get();
 	}
 	
