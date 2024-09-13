@@ -129,13 +129,20 @@ public class LocalEntity implements LocalNBT {
 		
 		MVMatrix4f.ofScale(1, 1, -1).applyToPositionMatrix(matrices);
 		MVQuaternionf rotation = LocalNBT.makeRotatingIcon(renderMatrices, x, y, 0.75f, true);
+		rotation.conjugate();
+		if (Version.<Boolean>newSwitch()
+				.range("1.21.0", null, true)
+				.range(null, "1.20.6", false)
+				.get()) {
+			rotation.rotateY((float) Math.PI);
+		}
 		RenderSystem.applyModelViewMatrix();
 		
 		DiffuseLighting.method_34742();
 		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getVertexConsumerProvider();
 		EntityRenderDispatcher dispatcher = MainUtil.client.getEntityRenderDispatcher();
 		dispatcher.setRenderShadows(false);
-		rotation.copy().conjugate().rotateY((float) Math.PI).applyToEntityRenderDispatcher(dispatcher);
+		rotation.applyToEntityRenderDispatcher(dispatcher);
 		dispatcher.render(entity, 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
 		dispatcher.setRenderShadows(true);
 		provider.draw();

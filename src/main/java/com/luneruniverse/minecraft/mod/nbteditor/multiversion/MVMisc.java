@@ -596,4 +596,13 @@ public class MVMisc {
 				.run();
 	}
 	
+	private static final Supplier<Reflection.MethodInvoker> VertexConsumer_light =
+			Reflection.getOptionalMethod(VertexConsumer.class, "method_22916", MethodType.methodType(VertexConsumer.class, int.class));
+	public static void setVertexLight(VertexConsumer vertexConsumer, int uv) {
+		Version.newSwitch()
+				.range("1.21.0", null, () -> vertexConsumer.light(uv))
+				.range(null, "1.20.6", () -> VertexConsumer_light.get().invoke(vertexConsumer, uv))
+				.run();
+	}
+	
 }
