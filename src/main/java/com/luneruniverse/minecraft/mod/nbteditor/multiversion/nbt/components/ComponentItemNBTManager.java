@@ -90,7 +90,8 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 	}
 	@SuppressWarnings("unchecked")
 	private <T> DataResult<NbtElement> encodeComponent(ComponentType<T> component, Object value) {
-		return component.getCodecOrThrow().encodeStart(NbtOps.INSTANCE, (T) value);
+		return component.getCodecOrThrow().encodeStart(
+				DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), (T) value);
 	}
 	
 }
