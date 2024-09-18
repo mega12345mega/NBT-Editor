@@ -335,10 +335,10 @@ public class MainUtil {
 		if (NBTManagers.COMPONENTS_EXIST)
 			return item.copyComponentsToNewStack(type, count);
 		
-		NbtCompound fullData = item.manager$serialize();
+		NbtCompound fullData = item.manager$serialize(true);
 		fullData.putString("id", MVRegistry.ITEM.getId(type).toString());
 		fullData.putInt("Count", count);
-		return NBTManagers.ITEM.deserialize(fullData);
+		return NBTManagers.ITEM.deserialize(fullData, true);
 	}
 	public static ItemStack setType(Item type, ItemStack item) {
 		return setType(type, item, item.getCount());

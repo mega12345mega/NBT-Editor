@@ -37,7 +37,7 @@ public class GetPresetCommand extends ClientCommand {
 	private static ItemStack getItem(String name) {
 		try {
 			return NBTManagers.ITEM.deserialize(MainUtil.updateDynamic(TypeReferences.ITEM_STACK, MainUtil.readNBT(
-					MVMisc.getResource(IdentifierInst.of("nbteditor", "presetitems/" + name + ".nbt")).orElseThrow())));
+					MVMisc.getResource(IdentifierInst.of("nbteditor", "presetitems/" + name + ".nbt")).orElseThrow())), true);
 		} catch (Exception e) {
 			NBTEditor.LOGGER.error("Error while loading preset item '" + name + "'", e);
 			return null;

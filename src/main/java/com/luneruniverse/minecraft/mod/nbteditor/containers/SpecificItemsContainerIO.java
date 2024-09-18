@@ -19,16 +19,16 @@ public class SpecificItemsContainerIO implements NBTContainerIO {
 	private ItemStack readKey(NbtCompound container, String key) {
 		if (!container.contains(key, NbtElement.COMPOUND_TYPE))
 			return null;
-		return NBTManagers.ITEM.deserialize(container.getCompound(key));
+		return NBTManagers.ITEM.deserialize(container.getCompound(key), true);
 	}
 	private void writeKey(NbtCompound container, String key, ItemStack item, SourceContainerType source) {
 		if (item == null || item.isEmpty()) {
 			if (source == SourceContainerType.ITEM || NBTManagers.COMPONENTS_EXIST)
 				container.remove(key);
 			else
-				container.put(key, ItemStack.EMPTY.manager$serialize());
+				container.put(key, ItemStack.EMPTY.manager$serialize(true));
 		} else
-			container.put(key, item.manager$serialize());
+			container.put(key, item.manager$serialize(true));
 	}
 	
 	@Override

@@ -1,7 +1,10 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
@@ -9,6 +12,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.CompletableFutureCache;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.listener.PacketListener;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryLoader;
@@ -29,7 +33,9 @@ public class DynamicRegistryManagerHolder {
 	private static final CompletableFutureCache<DynamicRegistryManager> defaultManagerCache =
 			new CompletableFutureCache<>(DynamicRegistryManagerHolder::loadDefaultManagerImpl);
 	private static volatile ResourceReload defaultManagerResourcesMonitor;
+	private static final Set<Thread> defaultManagerForced = ConcurrentHashMap.newKeySet();
 	
+	private static volatile DynamicRegistryManager clientManager;
 	private static volatile DynamicRegistryManager serverManager;
 	
 	private static CompletableFuture<DynamicRegistryManager> loadDefaultManagerImpl() {
@@ -78,9 +84,8 @@ public class DynamicRegistryManagerHolder {
 			return serverManager;
 		}
 		
-		ClientPlayNetworkHandler networkHandler = MainUtil.client.getNetworkHandler();
-		if (networkHandler != null)
-			return networkHandler.getRegistryManager();
+		if (!defaultManagerForced.contains(Thread.currentThread()) && clientManager != null)
+			return clientManager;
 		
 		if (MainUtil.client.isOnThread() && defaultManagerCache.getStatus() != CompletableFutureCache.Status.LOADED)
 			throw new RuntimeException("Cannot synchronously load the default manager on the main thread");
@@ -90,8 +95,29 @@ public class DynamicRegistryManagerHolder {
 		return getManager();
 	}
 	
+	public static void setClientManager(PacketListener listener) {
+		clientManager = (listener == null ? null : ((ClientPlayNetworkHandler) listener).getRegistryManager());
+	}
 	public static void setServerManager(MinecraftServer server) {
 		serverManager = server.getRegistryManager();
+	}
+	
+	public static <T> T withDefaultManager(Supplier<T> callback) {
+		if (NBTEditorServer.isOnServerThread())
+			throw new IllegalStateException("Cannot use withDefaultManager on the server!");
+		
+		defaultManagerForced.add(Thread.currentThread());
+		try {
+			return callback.get();
+		} finally {
+			defaultManagerForced.remove(Thread.currentThread());
+		}
+	}
+	public static void withDefaultManager(Runnable callback) {
+		withDefaultManager(() -> {
+			callback.run();
+			return null;
+		});
 	}
 	
 }

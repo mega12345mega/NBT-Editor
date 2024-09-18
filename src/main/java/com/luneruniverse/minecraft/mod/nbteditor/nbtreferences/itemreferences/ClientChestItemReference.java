@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestPage;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
@@ -24,9 +25,10 @@ public class ClientChestItemReference implements ItemReference {
 		
 		this.save = new SaveQueue("Client Chest", (ItemStack toSave) -> {
 			try {
-				ItemStack[] items = NBTEditorClient.CLIENT_CHEST.getPage(page).getItemsOrThrow();
-				items[slot] = toSave;
-				NBTEditorClient.CLIENT_CHEST.setPage(page, items);
+				ClientChestPage pageData = NBTEditorClient.CLIENT_CHEST.getPage(page);
+				pageData.getItemsOrThrow()[slot] = toSave;
+				pageData.dynamicItems().remove(slot);
+				NBTEditorClient.CLIENT_CHEST.setPage(page, pageData.items(), pageData.dynamicItems());
 				
 				if (MainUtil.client.currentScreen instanceof ClientChestScreen && ClientChestScreen.PAGE == page)
 					((ClientChestScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);

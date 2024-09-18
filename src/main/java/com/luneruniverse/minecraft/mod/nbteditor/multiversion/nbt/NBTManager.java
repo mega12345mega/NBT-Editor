@@ -6,7 +6,11 @@ import net.minecraft.nbt.NbtCompound;
  * The NBT returned from the methods is a copy and the NBT passed into the methods will be copied
  */
 public interface NBTManager<T> {
-	public NbtCompound serialize(T subject);
+	public Attempt<NbtCompound> trySerialize(T subject);
+	public default NbtCompound serialize(T subject, boolean requireSuccess) {
+		Attempt<NbtCompound> attempt = trySerialize(subject);
+		return requireSuccess ? attempt.getSuccessOrThrow() : attempt.getAttemptOrThrow();
+	}
 	
 	/**
 	 * Note: If this returns false, {@link #getNbt(T)} may still return an empty {@link NbtCompound} rather than null!

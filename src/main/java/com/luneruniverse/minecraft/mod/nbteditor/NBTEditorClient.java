@@ -61,6 +61,7 @@ public class NBTEditorClient implements ClientModInitializer {
 	
 	private void onRegistriesLoad() {
 		NbtTypeModifier.loadClass();
+		MVClientNetworking.init();
 		CommandHandler.registerCommands();
 		try {
 			HeadAPI.loadFavorites();
@@ -73,6 +74,7 @@ public class NBTEditorClient implements ClientModInitializer {
 		
 		CLIENT_CHEST = ConfigScreen.isLargeClientChest() ? new LargeClientChest(5) : new SmallClientChest(100);
 		CLIENT_CHEST.loadAync();
+		MVClientNetworking.PlayNetworkStateEvents.Start.EVENT.register(networkHandler -> CLIENT_CHEST.tryLoadDynamicItemsAsync());
 		
 		ItemStack clientChestIcon = new ItemStack(Items.ENDER_CHEST)
 				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));

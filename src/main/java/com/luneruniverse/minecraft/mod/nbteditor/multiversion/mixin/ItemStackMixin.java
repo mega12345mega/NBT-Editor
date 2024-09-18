@@ -18,8 +18,8 @@ import net.minecraft.text.Text;
 @Mixin(ItemStack.class)
 public class ItemStackMixin implements IntegratedNBTManager, MVItemStackParent {
 	@Override
-	public NbtCompound manager$serialize() {
-		return NBTManagers.ITEM.serialize((ItemStack) (Object) this);
+	public NbtCompound manager$serialize(boolean requireSuccess) {
+		return NBTManagers.ITEM.serialize((ItemStack) (Object) this, requireSuccess);
 	}
 	
 	@Override

@@ -8,7 +8,9 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestPage;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.DynamicItems;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -23,6 +25,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
 
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -47,14 +50,16 @@ public class ClientChestScreen extends ClientHandledScreen {
 			return;
 		}
 		
-		if (MainUtil.client.currentScreen instanceof ClientChestScreen) {
-			ClientChestScreen screen = (ClientChestScreen) MainUtil.client.currentScreen;
+		if (MainUtil.client.currentScreen instanceof ClientChestScreen screen) {
 			((ClientChestHandler) screen.handler).fillPage();
+			screen.dynamicItems = NBTEditorClient.CLIENT_CHEST.getPage(PAGE).dynamicItems();
 			screen.updatePageNavigation();
 		} else {
 			ClientChestHandler handler = new ClientChestHandler();
 			handler.setCursorStack(cursor.orElse(MainUtil.client.player.playerScreenHandler.getCursorStack()));
-			MainUtil.client.setScreen(new ClientChestScreen(handler));
+			ClientChestScreen screen = new ClientChestScreen(handler);
+			screen.dynamicItems = NBTEditorClient.CLIENT_CHEST.getPage(PAGE).dynamicItems();
+			MainUtil.client.setScreen(screen);
 			NBTEditorClient.CLIENT_CHEST.warnIfCorrupt();
 		}
 	}
@@ -63,10 +68,10 @@ public class ClientChestScreen extends ClientHandledScreen {
 	}
 	
 	
-	private static record SaveRequest(int page, ItemStack[] items) {}
+	private static record SaveRequest(int page, ItemStack[] items, DynamicItems dynamicItems) {}
 	private final SaveQueue saveQueue = new SaveQueue("Client Chest", (SaveRequest request) -> {
 		try {
-			NBTEditorClient.CLIENT_CHEST.setPage(request.page(), request.items());
+			NBTEditorClient.CLIENT_CHEST.setPage(request.page(), request.items(), request.dynamicItems());
 		} catch (Exception e) {
 			NBTEditor.LOGGER.error("Error while saving client chest", e);
 			this.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
@@ -74,6 +79,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 	}, true);
 	private boolean saved;
 	
+	private DynamicItems dynamicItems;
 	private boolean navigationClicked;
 	private NamedTextFieldWidget nameField;
 	private ButtonWidget prevPage;
@@ -324,7 +330,14 @@ public class ClientChestScreen extends ClientHandledScreen {
 		
 		saveQueue.save(() -> {
 			saved = true;
-		}, new SaveRequest(PAGE, items));
+		}, new SaveRequest(PAGE, items, dynamicItems.copy()));
+	}
+	
+	@Override
+	protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
+		for (int slot : dynamicItems.getLockedSlots())
+			MVDrawableHelper.drawSlotHighlight(matrices, handler.getSlot(slot).x, handler.getSlot(slot).y, 0x60FF0000);
+		super.drawForeground(matrices, mouseX, mouseY);
 	}
 	
 	@Override

@@ -17,7 +17,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItemStack;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
@@ -26,6 +25,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
+import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -112,41 +112,65 @@ public abstract class ClientChest {
 		File file = new File(CLIENT_CHEST_FOLDER, "page" + page + ".nbt");
 		if (!file.exists()) {
 			cacheEmptyPage(page);
-			return new ClientChestPage(new ItemStack[54]);
+			return new ClientChestPage();
 		}
 		
 		NbtCompound pageNbt = MVMisc.readNbt(file);
 		if (!pageNbt.contains("DataVersion", NbtElement.NUMBER_TYPE)) {
-			ClientChestPage output = new ClientChestPage(Optional.empty(), null);
+			ClientChestPage output = ClientChestPage.unknownDataVersion();
 			cachePage(page, output);
 			return output;
 		}
 		int dataVersion = pageNbt.getInt("DataVersion");
 		if (dataVersion != Version.getDataVersion()) {
-			ClientChestPage output = new ClientChestPage(Optional.of(dataVersion), null);
+			ClientChestPage output = ClientChestPage.wrongDataVersion(dataVersion);
 			cachePage(page, output);
 			return output;
 		}
 		
 		NbtList itemsNbt = pageNbt.getList("items", NbtElement.COMPOUND_TYPE);
 		ItemStack[] items = new ItemStack[54];
+		DynamicItems dynamicItems = new DynamicItems();
 		boolean empty = true;
 		int i = -1;
-		for (NbtElement item : itemsNbt) {
-			items[++i] = NBTManagers.ITEM.deserialize((NbtCompound) item);
-			if (empty && items[i] != null && !items[i].isEmpty())
+		for (NbtElement itemElementNbt : itemsNbt) {
+			i++;
+			NbtCompound itemNbt = (NbtCompound) itemElementNbt;
+			if (itemNbt.contains("dynamic", NbtElement.BYTE_TYPE) && itemNbt.getBoolean("dynamic")) {
+				itemNbt.remove("dynamic");
+				dynamicItems.add(i, itemNbt, false);
 				empty = false;
+			} else {
+				items[i] = NBTManagers.ITEM.deserialize(itemNbt, true);
+				if (empty && items[i] != null && !items[i].isEmpty())
+					empty = false;
+			}
 		}
 		if (empty) {
 			cacheEmptyPage(page);
 			file.delete();
-			return new ClientChestPage(new ItemStack[54]);
+			return new ClientChestPage();
 		} else {
-			ClientChestPage output = new ClientChestPage(items);
+			ClientChestPage output = new ClientChestPage(items, dynamicItems);
+			output.tryLoadDynamicItems();
 			cachePage(page, output);
 			return output;
 		}
 	}
+	
+	public void tryLoadDynamicItemsAsync() {
+		Thread loader = new Thread(() -> {
+			try {
+				tryLoadDynamicItemsSync();
+			} catch (Exception e) {
+				NBTEditor.LOGGER.error("Unable to load dynamic items in the client chest!", e);
+			}
+		}, "NBTEditor/Async/ClientChestLoader");
+		loader.setDaemon(true);
+		loader.start();
+	}
+	protected abstract void tryLoadDynamicItemsSync();
+	
 	public ClientChestPage reloadPage(int page) {
 		try {
 			discardPageCache(page);
@@ -192,7 +216,7 @@ public abstract class ClientChest {
 	public abstract int getPageCount();
 	public abstract ClientChestPage getPage(int page);
 	
-	public void setPage(int page, ItemStack[] items) throws Exception {
+	public void setPage(int page, ItemStack[] items, DynamicItems prevDynamicItems) throws Exception {
 		// Just in-case there is a bug, this prevents loosing items (the items
 		// array is always empty when loaded from a different DataVersion)
 		if (!getPage(page).isInThisVersion())
@@ -202,11 +226,13 @@ public abstract class ClientChest {
 			CLIENT_CHEST_FOLDER.mkdir();
 		File file = new File(CLIENT_CHEST_FOLDER, "page" + page + ".nbt");
 		
-		boolean allAir = true;
-		for (ItemStack item : items) {
-			if (item != null && !item.isEmpty()) {
-				allAir = false;
-				break;
+		boolean allAir = prevDynamicItems.getLockedSlots().isEmpty();
+		if (allAir) {
+			for (ItemStack item : items) {
+				if (item != null && !item.isEmpty()) {
+					allAir = false;
+					break;
+				}
 			}
 		}
 		if (allAir) {
@@ -215,8 +241,17 @@ public abstract class ClientChest {
 			return;
 		}
 		
-		cachePage(page, new ClientChestPage(items));
-		writePage(file, items);
+		DynamicItems dynamicItems = new DynamicItems();
+		for (int i = 0; i < items.length; i++) {
+			if (prevDynamicItems.isSlotLocked(i))
+				dynamicItems.add(i, prevDynamicItems.getOriginalNbt(i), false);
+			else if (items[i] != null)
+				dynamicItems.tryAdd(i, items[i]);
+		}
+		
+		ClientChestPage pageData = new ClientChestPage(items, dynamicItems);
+		cachePage(page, pageData);
+		writePage(file, pageData);
 	}
 	
 	public void importPage(int page) throws Exception {
@@ -278,21 +313,36 @@ public abstract class ClientChest {
 		
 		NbtList itemsNbt = pageNbt.getList("items", NbtElement.COMPOUND_TYPE);
 		ItemStack[] items = new ItemStack[54];
+		DynamicItems dynamicItems = new DynamicItems();
 		boolean empty = true;
 		int i = -1;
-		for (NbtElement item : itemsNbt) {
-			items[++i] = LocalItemStack.deserialize((NbtCompound) item, dataVersion).getReadableItem();
-			if (empty && items[i] != null && !items[i].isEmpty())
+		for (NbtElement itemElementNbt : itemsNbt) {
+			i++;
+			NbtCompound itemNbt = (NbtCompound) itemElementNbt;
+			boolean dynamic = (itemNbt.contains("dynamic", NbtElement.BYTE_TYPE) && itemNbt.getBoolean("dynamic"));
+			if (dynamic)
+				itemNbt.remove("dynamic");
+			
+			itemNbt = MainUtil.updateDynamic(TypeReferences.ITEM_STACK, itemNbt, dataVersion);
+			
+			if (dynamic) {
+				dynamicItems.add(i, itemNbt, false);
 				empty = false;
+			} else {
+				items[i] = NBTManagers.ITEM.deserialize(itemNbt, true);
+				if (empty && items[i] != null && !items[i].isEmpty())
+					empty = false;
+			}
 		}
 		if (empty) {
 			cacheEmptyPage(page);
 			file.delete();
-			return new ClientChestPage(new ItemStack[54]);
+			return new ClientChestPage();
 		} else {
-			ClientChestPage output = new ClientChestPage(items);
+			ClientChestPage output = new ClientChestPage(items, dynamicItems);
+			output.tryLoadDynamicItems();
 			cachePage(page, output);
-			writePage(file, items);
+			writePage(file, output);
 			return output;
 		}
 	}
@@ -335,13 +385,31 @@ public abstract class ClientChest {
 		file.delete();
 	}
 	
-	private void writePage(File file, ItemStack[] items) throws IOException {
+	private void writePage(File file, ClientChestPage page) throws IOException {
+		ItemStack[] items = page.getItemsOrThrow();
+		DynamicItems dynamicItems = page.dynamicItems();
+		
 		NbtCompound pageNbt = new NbtCompound();
 		pageNbt.putInt("DataVersion", Version.getDataVersion());
+		
 		NbtList itemsNbt = new NbtList();
-		for (int i = 0; i < items.length; i++)
-			itemsNbt.add((items[i] == null ? ItemStack.EMPTY : items[i]).manager$serialize());
+		for (int i = 0; i < items.length; i++) {
+			NbtCompound itemNbt;
+			if (dynamicItems.isSlotLocked(i))
+				itemNbt = dynamicItems.getOriginalNbt(i);
+			else
+				itemNbt = (items[i] == null ? ItemStack.EMPTY : items[i]).manager$serialize(true);
+			
+			if (dynamicItems.isSlot(i)) {
+				itemNbt = itemNbt.copy();
+				itemNbt.putByte("dynamic", (byte) 1);
+			}
+			
+			itemsNbt.add(itemNbt);
+		}
+		
 		pageNbt.put("items", itemsNbt);
+		
 		try {
 			MixinLink.throwHiddenException(() -> MVMisc.writeNbt(pageNbt, file));
 		} catch (Throwable e) {

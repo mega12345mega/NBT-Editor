@@ -8,7 +8,7 @@ import net.minecraft.nbt.NbtCompound;
  * Convenience interface to avoid <code>NBTManagers.ITEM.getNbt(item)</code>
  */
 public interface IntegratedNBTManager {
-	public default NbtCompound manager$serialize() {
+	public default NbtCompound manager$serialize(boolean requireSuccess) {
 		throw new RuntimeException("Missing implementation for IntegratedNBTManager#manager$serialize");
 	}
 	

@@ -63,12 +63,12 @@ public class ItemSize {
 	private static long calcItemSize(ItemStack stack, boolean compressed) {
 		ByteCountingOutputStream stream = new ByteCountingOutputStream();
 		try {
-			NbtCompound nbt = stack.manager$serialize();
+			NbtCompound nbt = stack.manager$serialize(true);
 			if (compressed)
 				MVMisc.writeCompressedNbt(nbt, stream);
 			else
 				MVMisc.writeNbt(nbt, stream);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			NBTEditor.LOGGER.error("Error while getting the size of an item", e);
 		}
 		return stream.getCount();

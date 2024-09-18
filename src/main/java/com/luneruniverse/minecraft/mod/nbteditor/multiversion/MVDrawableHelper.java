@@ -20,6 +20,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -224,6 +225,21 @@ public class MVDrawableHelper {
 				.range("1.20.2", "1.20.4", () -> screen.renderBackground(getDrawContext(matrices), mousePos[0], mousePos[1], MVMisc.getTickDelta()))
 				.range("1.20.0", "1.20.1", () -> Screen_renderBackground_DrawContext.get().invoke(screen, MVDrawableHelper.getDrawContext(matrices)))
 				.range(null, "1.19.4", () -> Screen_renderBackground_MatrixStack.get().invoke(screen, matrices))
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> DrawableHelper_fillGradient =
+			Reflection.getOptionalMethod(DrawContext.class, "method_33284", MethodType.methodType(void.class, MatrixStack.class, int.class, int.class, int.class, int.class, int.class, int.class, int.class));
+	public static void drawSlotHighlight(MatrixStack matrices, int x, int y, int color) {
+		Version.newSwitch()
+				.range("1.20.0", null, () -> getDrawContext(matrices).fillGradient(RenderLayer.getGuiOverlay(), x, y, x + 16, y + 16, color, color, 0))
+				.range(null, "1.19.4", () -> {
+					RenderSystem.disableDepthTest();
+					RenderSystem.colorMask(true, true, true, false);
+					DrawableHelper_fillGradient.get().invoke(matrices, x, y, x + 16, y + 16, color, color, 0);
+					RenderSystem.colorMask(true, true, true, true);
+					RenderSystem.enableDepthTest();
+				})
 				.run();
 	}
 	

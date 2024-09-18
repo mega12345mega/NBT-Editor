@@ -36,7 +36,7 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 			int slot = itemNbt.getInt(itemComponent ? "slot" : "Slot");
 			if (slot < 0 || slot >= numItems)
 				continue;
-			items[slot] = NBTManagers.ITEM.deserialize(itemComponent ? itemNbt.getCompound("item") : itemNbt);
+			items[slot] = NBTManagers.ITEM.deserialize(itemComponent ? itemNbt.getCompound("item") : itemNbt, true);
 		}
 		return items;
 	}
@@ -50,7 +50,7 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 			ItemStack item = contents[i];
 			if (item == null || item.isEmpty())
 				continue;
-			NbtCompound itemNbt = item.manager$serialize();
+			NbtCompound itemNbt = item.manager$serialize(true);
 			if (itemComponent) {
 				NbtCompound wrapper = new NbtCompound();
 				wrapper.put("item", itemNbt);

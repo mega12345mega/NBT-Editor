@@ -9,8 +9,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 
-import net.minecraft.item.ItemStack;
-
 public class LargeClientChest extends ClientChest {
 	
 	private final int importantPages;
@@ -41,6 +39,14 @@ public class LargeClientChest extends ClientChest {
 	}
 	
 	@Override
+	protected void tryLoadDynamicItemsSync() {
+		checkLoaded();
+		loaded = false;
+		pages.asMap().values().forEach(ClientChestPage::tryLoadDynamicItems);
+		loaded = true;
+	}
+	
+	@Override
 	public boolean isLoaded() {
 		return loaded;
 	}
@@ -57,7 +63,7 @@ public class LargeClientChest extends ClientChest {
 			backupCorruptPage(page);
 			pages.invalidate(page);
 			NBTEditor.LOGGER.error("Error loading large client chest page " + (page + 1), e);
-			return new ClientChestPage(new ItemStack[54]);
+			return new ClientChestPage();
 		}
 	}
 	
@@ -71,7 +77,7 @@ public class LargeClientChest extends ClientChest {
 	}
 	@Override
 	protected void cacheEmptyPage(int page) {
-		pages.put(page, new ClientChestPage(new ItemStack[54]));
+		pages.put(page, new ClientChestPage());
 	}
 	@Override
 	protected void discardPageCache(int page) throws Exception {

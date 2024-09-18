@@ -2,8 +2,6 @@ package com.luneruniverse.minecraft.mod.nbteditor.clientchest;
 
 import java.util.HashMap;
 
-import net.minecraft.item.ItemStack;
-
 public class SmallClientChest extends ClientChest {
 	
 	private final int maxPages;
@@ -35,6 +33,14 @@ public class SmallClientChest extends ClientChest {
 	}
 	
 	@Override
+	protected void tryLoadDynamicItemsSync() {
+		checkLoaded();
+		loaded = false;
+		pages.values().forEach(ClientChestPage::tryLoadDynamicItems);
+		loaded = true;
+	}
+	
+	@Override
 	public boolean isLoaded() {
 		return loaded;
 	}
@@ -48,7 +54,7 @@ public class SmallClientChest extends ClientChest {
 		checkLoaded();
 		ClientChestPage output = pages.get(page);
 		if (output == null)
-			output = new ClientChestPage(new ItemStack[54]);
+			output = new ClientChestPage();
 		return output;
 	}
 	
