@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientScreenHandler;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
@@ -30,7 +30,7 @@ public class MinecraftClientMixin {
 	private void setScreen(Screen screen, CallbackInfo info) {
 		if (screen instanceof HandledScreen<?> handledScreen) {
 			int syncId = handledScreen.getScreenHandler().syncId;
-			if (syncId != 0 && syncId != ClientHandledScreen.SYNC_ID)
+			if (syncId != 0 && syncId != ClientScreenHandler.SYNC_ID)
 				MixinLink.LAST_SERVER_HANDLED_SCREEN = handledScreen;
 		}
 	}

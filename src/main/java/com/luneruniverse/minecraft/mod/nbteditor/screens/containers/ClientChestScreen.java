@@ -10,7 +10,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestPage;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.DynamicItems;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -25,7 +24,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
 
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -87,7 +85,6 @@ public class ClientChestScreen extends ClientHandledScreen {
 	private ButtonWidget nextPage;
 	private ButtonWidget prevPageJump;
 	private ButtonWidget nextPageJump;
-	private ItemStack[] prevInv;
 	
 	private ClientChestScreen(ClientChestHandler handler) {
 		super(handler, TextInst.translatable("nbteditor.client_chest"));
@@ -248,6 +245,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 	}
 	
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		navigationClicked = false;
+		
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
 			close();
 			return true;
@@ -294,27 +293,24 @@ public class ClientChestScreen extends ClientHandledScreen {
 		if (navigationClicked)
 			return;
 		
-		prevInv = new ItemStack[this.handler.getInventory().size()];
-		for (int i = 0; i < prevInv.length; i++)
-			prevInv[i] = this.handler.getInventory().getStack(i).copy();
-		
 		super.onMouseClick(slot, slotId, button, actionType);
 	}
 	@Override
-	public boolean allowEnchantmentCombine(Slot slot) {
-		return !ConfigScreen.isLockSlots() || slot.inventory == MainUtil.client.player.getInventory();
+	public boolean allowEnchantmentCombine() {
+		return true;
 	}
 	@Override
 	public void onEnchantmentCombine(Slot slot) {
 		save();
 	}
 	@Override
-	public SlotLockType getSlotLockType() {
-		return ConfigScreen.isLockSlots() ? SlotLockType.ITEMS_LOCKED : SlotLockType.UNLOCKED;
-	}
-	@Override
-	public ItemStack[] getPrevInventory() {
-		return prevInv;
+	public LockedSlotsInfo getLockedSlotsInfo() {
+		LockedSlotsInfo info = (ConfigScreen.isLockSlots() ? LockedSlotsInfo.ITEMS_LOCKED : LockedSlotsInfo.NONE).copy();
+		
+		for (int slot : dynamicItems.getLockedSlots())
+			info.addContainerSlot(slot);
+		
+		return info;
 	}
 	@Override
 	public void onChange() {
@@ -331,13 +327,6 @@ public class ClientChestScreen extends ClientHandledScreen {
 		saveQueue.save(() -> {
 			saved = true;
 		}, new SaveRequest(PAGE, items, dynamicItems.copy()));
-	}
-	
-	@Override
-	protected void drawForeground(MatrixStack matrices, int mouseX, int mouseY) {
-		for (int slot : dynamicItems.getLockedSlots())
-			MVDrawableHelper.drawSlotHighlight(matrices, handler.getSlot(slot).x, handler.getSlot(slot).y, 0x60FF0000);
-		super.drawForeground(matrices, mouseX, mouseY);
 	}
 	
 	@Override

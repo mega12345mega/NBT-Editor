@@ -41,7 +41,8 @@
     "ClientPlayerEntityMixin",
     "BuiltinModelItemRendererMixin",
     "EnchantmentMixin",
-    "SplashOverlayMixin"
+    "SplashOverlayMixin",
+    "ScreenHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

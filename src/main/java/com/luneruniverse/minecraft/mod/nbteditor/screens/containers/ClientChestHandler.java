@@ -1,17 +1,13 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
 
-public class ClientChestHandler extends GenericContainerScreenHandler {
+public class ClientChestHandler extends ClientScreenHandler {
 	
 	public ClientChestHandler() {
-		super(ScreenHandlerType.GENERIC_9X6, ClientHandledScreen.SYNC_ID, MainUtil.client.player.getInventory(), new SimpleInventory(54), 6);
+		super(6);
 		fillPage();
 	}
 	

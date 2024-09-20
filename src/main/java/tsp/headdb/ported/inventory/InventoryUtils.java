@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientScreenHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -138,7 +139,7 @@ public class InventoryUtils {
     }
 
     public static void openDatabase() {
-    	ClientHandledScreen screen = new ClientHandledScreen(ClientHandledScreen.createGenericScreenHandler(6),
+    	ClientHandledScreen screen = new ClientHandledScreen(new ClientScreenHandler(6),
     			TextInst.of(Utils.colorize("&c&lHeadDB &8(" + HeadAPI.getHeads().size() + ")"))) {
     		@Override
     		protected void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
