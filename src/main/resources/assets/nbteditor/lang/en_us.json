@@ -11,6 +11,8 @@
 	
 	"nbteditor.ok": "Ok",
 	"nbteditor.cancel": "Cancel",
+	"nbteditor.loading": "Loading ...",
+	"nbteditor.hide": "Run In Background",
 	
 	"nbteditor.no_ref.unknown": "§cFailed to find what you're trying to edit!",
 	"nbteditor.no_ref.to_edit": "§cYou must be holding an item or looking at a block/entity to edit!",
@@ -116,8 +118,10 @@
 	"itemGroup.nbteditor.client_chest": "Client Chest",
 	"itemGroup.nbteditor.inventory": "Inventory",
 	"nbteditor.client_chest": "Nbt Editor >> Client Chest",
+	"nbteditor.client_chest.load_error": "§cError while loading the client chest!",
 	"nbteditor.client_chest.save_error": "§cError while saving the client chest!",
-	"nbteditor.client_chest.not_ready": "§cThe client chest hasn't finished loading! Does it have a lot of data?",
+	"nbteditor.client_chest.import_error": "§cError while importing the client chest!",
+	"nbteditor.client_chest.update_error": "§cError while updating the client chest!",
 	"nbteditor.client_chest.corrupt_warning": "§cSome page(s) appear to be corrupt and have been backed up separately.",
 	"nbteditor.client_chest.slots.lock": "Lock Slots",
 	"nbteditor.client_chest.slots.unlock": "Unlock Slots",
@@ -147,8 +151,6 @@
 	"nbteditor.client_chest.data_version.dont_update_page": "Cancel",
 	"nbteditor.client_chest.data_version.update_page_success": "§aSuccessfully imported/updated page #%s§a! The old page was backed up just in case:",
 	"nbteditor.client_chest.data_version.update_all_pages_success": "§aSuccessfully imported/updated all pages! The old pages were backed up just in case:",
-	"nbteditor.client_chest.data_version.update_page_error": "§cError while importing/updating client chest page #%s§c!",
-	"nbteditor.client_chest.data_version.update_all_pages_error": "§cError while importing/updating client chest pages!",
 	
 	"nbteditor.book.convert": "Make Writable",
 	"nbteditor.book.convert.success": "§aConverted to writable!",

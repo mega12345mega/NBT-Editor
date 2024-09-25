@@ -22,8 +22,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChest;
-import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChestPageCache;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChestPageCache;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVEnchantments;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
@@ -645,10 +645,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 	@Override
 	public void removed() {
 		saveSettings();
-		if (largeClientChest != (NBTEditorClient.CLIENT_CHEST instanceof LargeClientChest)) {
-			NBTEditorClient.CLIENT_CHEST = largeClientChest ? new LargeClientChest(5) : new SmallClientChest(100);
+		if (largeClientChest != (NBTEditorClient.CLIENT_CHEST.getCache() instanceof LargeClientChestPageCache)) {
+			NBTEditorClient.CLIENT_CHEST.setCache(largeClientChest ? new LargeClientChestPageCache(5) : new SmallClientChestPageCache(100));
 			ClientChestScreen.PAGE = Math.min(ClientChestScreen.PAGE, NBTEditorClient.CLIENT_CHEST.getPageCount() - 1);
-			NBTEditorClient.CLIENT_CHEST.loadAync();
 		}
 	}
 	

@@ -7,24 +7,27 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 
 import net.minecraft.item.ItemStack;
 
-public record ClientChestPage(Optional<Integer> dataVersion, ItemStack[] items, DynamicItems dynamicItems) {
+public record ClientChestPage(Optional<Integer> dataVersion, ItemStack[] items, DynamicItems dynamicItems, PageLoadLevel loadLevel) {
 	
+	public static ClientChestPage unloaded() {
+		return new ClientChestPage(Optional.empty(), null, null, PageLoadLevel.UNLOADED);
+	}
 	public static ClientChestPage unknownDataVersion() {
-		return new ClientChestPage(Optional.empty(), null, null);
+		return new ClientChestPage(Optional.empty(), null, null, PageLoadLevel.DYNAMIC_ITEMS);
 	}
 	public static ClientChestPage wrongDataVersion(int dataVersion) {
-		return new ClientChestPage(Optional.of(dataVersion), null, null);
+		return new ClientChestPage(Optional.of(dataVersion), null, null, PageLoadLevel.DYNAMIC_ITEMS);
 	}
 	
 	public ClientChestPage {
 		if (items != null && items.length != 54)
 			throw new IllegalArgumentException("The number of items must be exactly 54");
 	}
-	public ClientChestPage(ItemStack[] items, DynamicItems dynamicItems) {
-		this(Optional.of(Version.getDataVersion()), items, dynamicItems);
+	public ClientChestPage(ItemStack[] items, DynamicItems dynamicItems, PageLoadLevel loadLevel) {
+		this(Optional.of(Version.getDataVersion()), items, dynamicItems, loadLevel);
 	}
 	public ClientChestPage() {
-		this(new ItemStack[54], new DynamicItems());
+		this(new ItemStack[54], new DynamicItems(), PageLoadLevel.DYNAMIC_ITEMS);
 	}
 	
 	public boolean isInThisVersion() {
@@ -38,14 +41,6 @@ public record ClientChestPage(Optional<Integer> dataVersion, ItemStack[] items, 
 		if (isInThisVersion())
 			return items;
 		throw new IllegalStateException("Cannot get the items of a page in a different DataVersion!");
-	}
-	
-	public void tryLoadDynamicItems() {
-		if (!isInThisVersion())
-			return;
-		
-		for (int slot : dynamicItems.getSlots())
-			items[slot] = dynamicItems.tryLoad(slot);
 	}
 	
 }

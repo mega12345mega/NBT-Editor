@@ -54,7 +54,7 @@ public class ItemSize {
 			synchronized (sizes) {
 				sizes.put(stack, OptionalLong.of(knownSize));
 			}
-		}, "Item Size Processor [" + MVRegistry.ITEM.getId(stack.getItem()) + "]");
+		}, "NBTEditor/Async/ItemSizeProcessor [" + MVRegistry.ITEM.getId(stack.getItem()) + "]");
 		thread.setDaemon(true);
 		thread.start();
 		return size;

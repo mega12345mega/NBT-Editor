@@ -16,13 +16,13 @@ public class ContainerItemReference<L extends LocalNBT> implements ItemReference
 	
 	private final NBTReference<L> container;
 	private final int slot;
-	private final SaveQueue save;
+	private final SaveQueue<ItemStack> save;
 	
 	public ContainerItemReference(NBTReference<L> container, int slot) {
 		this.container = container;
 		this.slot = slot;
 		
-		this.save = new SaveQueue("Container", (ItemStack toSave) -> {
+		this.save = new SaveQueue<>("Container", toSave -> {
 			L containerValue = LocalNBT.copy(container.getLocalNBT());
 			ItemStack[] contents = ContainerIO.read(containerValue);
 			contents[slot] = toSave;

@@ -1,14 +1,14 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestPage;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.DynamicItems;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.PageLoadLevel;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
@@ -17,10 +17,10 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.Cl
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandledScreenItemReference.HandledScreenItemReferenceParent;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestDataVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.LoadingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
 
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -36,46 +36,52 @@ public class ClientChestScreen extends ClientHandledScreen {
 	public static int nextPageJumpTarget;
 	
 	public static void show(Optional<ItemStack> cursor) {
-		if (!NBTEditorClient.CLIENT_CHEST.isLoaded()) {
-			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.not_ready"), false);
-			return;
-		}
+		Runnable close = () -> {
+			if (MainUtil.client.currentScreen instanceof ClientChestScreen screen)
+				screen.close();
+			else
+				cursor.ifPresent(MainUtil::setInventoryCursorStack);
+		};
 		
-		ClientChestPage page = NBTEditorClient.CLIENT_CHEST.getPage(PAGE);
-		if (!page.isInThisVersion()) {
-			cursor.ifPresent(MainUtil::setInventoryCursorStack);
-			MainUtil.client.setScreen(new ClientChestDataVersionScreen(page.getDataVersionStatus()));
-			return;
-		}
-		
-		if (MainUtil.client.currentScreen instanceof ClientChestScreen screen) {
-			((ClientChestHandler) screen.handler).fillPage();
-			screen.dynamicItems = NBTEditorClient.CLIENT_CHEST.getPage(PAGE).dynamicItems();
-			screen.updatePageNavigation();
-		} else {
-			ClientChestHandler handler = new ClientChestHandler();
-			handler.setCursorStack(cursor.orElse(MainUtil.client.player.playerScreenHandler.getCursorStack()));
-			ClientChestScreen screen = new ClientChestScreen(handler);
-			screen.dynamicItems = NBTEditorClient.CLIENT_CHEST.getPage(PAGE).dynamicItems();
-			MainUtil.client.setScreen(screen);
-			NBTEditorClient.CLIENT_CHEST.warnIfCorrupt();
-		}
+		LoadingScreen.show(
+				ClientChestHelper.getPage(PAGE, PageLoadLevel.DYNAMIC_ITEMS),
+				close,
+				(loaded, optional) -> {
+					if (optional.isEmpty()) {
+						if (!loaded)
+							close.run();
+						MainUtil.client.setScreen(null);
+						return;
+					}
+					
+					ClientChestPage pageData = optional.get();
+					
+					if (!pageData.isInThisVersion()) {
+						if (!loaded)
+							cursor.ifPresent(MainUtil::setInventoryCursorStack);
+						MainUtil.client.setScreen(new ClientChestDataVersionScreen(pageData.getDataVersionStatus()));
+						return;
+					}
+					
+					if (MainUtil.client.currentScreen instanceof ClientChestScreen screen) {
+						((ClientChestHandler) screen.handler).fillPage(pageData);
+						screen.dynamicItems = pageData.dynamicItems();
+						screen.updatePageNavigation();
+					} else {
+						ClientChestHandler handler = new ClientChestHandler(pageData);
+						handler.setCursorStack(cursor.filter(item -> !loaded).orElse(
+								MainUtil.client.player.playerScreenHandler.getCursorStack()));
+						ClientChestScreen screen = new ClientChestScreen(handler);
+						screen.dynamicItems = pageData.dynamicItems();
+						MainUtil.client.setScreen(screen);
+						NBTEditorClient.CLIENT_CHEST.warnIfCorrupt();
+					}
+				});
 	}
 	public static void show() {
 		show(Optional.empty());
 	}
 	
-	
-	private static record SaveRequest(int page, ItemStack[] items, DynamicItems dynamicItems) {}
-	private final SaveQueue saveQueue = new SaveQueue("Client Chest", (SaveRequest request) -> {
-		try {
-			NBTEditorClient.CLIENT_CHEST.setPage(request.page(), request.items(), request.dynamicItems());
-		} catch (Exception e) {
-			NBTEditor.LOGGER.error("Error while saving client chest", e);
-			this.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
-		}
-	}, true);
-	private boolean saved;
 	
 	private DynamicItems dynamicItems;
 	private boolean navigationClicked;
@@ -88,7 +94,6 @@ public class ClientChestScreen extends ClientHandledScreen {
 	
 	private ClientChestScreen(ClientChestHandler handler) {
 		super(handler, TextInst.translatable("nbteditor.client_chest"));
-		this.saved = true;
 	}
 	
 	@Override
@@ -109,12 +114,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 			public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 				if (keyCode == GLFW.GLFW_KEY_ENTER && !nameField.isValid()) {
 					nameField.setValid(true);
-					try {
-						NBTEditorClient.CLIENT_CHEST.setNameOfPage(PAGE, nameField.getText());
-					} catch (IOException e) {
-						NBTEditor.LOGGER.error("Error while saving client chest", e);
-						client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
-					}
+					ClientChestHelper.setNameOfPage(PAGE, nameField.getText());
 					return true;
 				}
 				return super.keyPressed(keyCode, scanCode, modifiers);
@@ -127,12 +127,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 				return;
 			}
 			nameField.setValid(true);
-			try {
-				NBTEditorClient.CLIENT_CHEST.setNameOfPage(PAGE, name);
-			} catch (IOException e) {
-				NBTEditor.LOGGER.error("Error while saving client chest", e);
-				client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
-			}
+			ClientChestHelper.setNameOfPage(PAGE, name);
 		});
 		this.addDrawableChild(nameField);
 		
@@ -204,8 +199,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 92, 83, 20, TextInst.translatable("nbteditor.client_chest.reload_page"), btn -> {
 			navigationClicked = true;
-			NBTEditorClient.CLIENT_CHEST.reloadPage(PAGE);
-			show();
+			LoadingScreen.show(ClientChestHelper.reloadPage(PAGE), this::close, (loaded, pageData) -> show());
 		}));
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 116, 83, 20, TextInst.translatable("nbteditor.client_chest.clear_page"), btn -> {
@@ -318,21 +312,17 @@ public class ClientChestScreen extends ClientHandledScreen {
 	}
 	
 	private void save() {
-		saved = false;
-		
 		ItemStack[] items = new ItemStack[54];
 		for (int i = 0; i < this.handler.getInventory().size(); i++)
 			items[i] = this.handler.getInventory().getStack(i).copy();
 		
-		saveQueue.save(() -> {
-			saved = true;
-		}, new SaveRequest(PAGE, items, dynamicItems.copy()));
+		ClientChestHelper.setPage(PAGE, items, dynamicItems);
 	}
 	
 	@Override
 	protected Text getRenderedTitle() {
 		EditableText title = TextInst.copy(this.title).append(" (" + (PAGE + 1) + ")");
-		return saved ? title : title.append("*");
+		return NBTEditorClient.CLIENT_CHEST.isProcessingPage(PAGE) ? title.append("*") : title;
 	}
 	
 	@Override

@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -541,6 +542,16 @@ public class MainUtil {
 			MainUtil.client.player.playerScreenHandler.setPreviousCursorStack(ItemStack.EMPTY);
 			MVClientNetworking.send(new SetCursorC2SPacket(ItemStack.EMPTY));
 		}
+	}
+	
+	public static <T> CompletableFuture<T> mergeFutures(List<CompletableFuture<T>> futures) {
+		CompletableFuture<T> output = new CompletableFuture<>();
+		output.thenAccept(value -> futures.forEach(future -> future.complete(value)));
+		output.exceptionally(e -> {
+			futures.forEach(future -> future.completeExceptionally(e));
+			return null;
+		});
+		return output;
 	}
 	
 }

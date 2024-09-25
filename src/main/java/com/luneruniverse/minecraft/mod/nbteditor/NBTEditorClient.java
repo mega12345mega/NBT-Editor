@@ -10,8 +10,10 @@ import com.luneruniverse.minecraft.mod.nbteditor.addons.NBTEditorAPI;
 import com.luneruniverse.minecraft.mod.nbteditor.addons.NBTEditorAddon;
 import com.luneruniverse.minecraft.mod.nbteditor.async.HeadRefreshThread;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChest;
-import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChest;
-import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChestPageCache;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.PageLoadLevel;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChestPageCache;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.CommandHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
@@ -72,9 +74,9 @@ public class NBTEditorClient implements ClientModInitializer {
 		new HeadRefreshThread().start();
 		ConfigScreen.loadSettings();
 		
-		CLIENT_CHEST = ConfigScreen.isLargeClientChest() ? new LargeClientChest(5) : new SmallClientChest(100);
-		CLIENT_CHEST.loadAync();
-		MVClientNetworking.PlayNetworkStateEvents.Start.EVENT.register(networkHandler -> CLIENT_CHEST.tryLoadDynamicItemsAsync());
+		CLIENT_CHEST = new ClientChest(ConfigScreen.isLargeClientChest() ? new LargeClientChestPageCache(5) : new SmallClientChestPageCache(100));
+		ClientChestHelper.loadDefaultPages(PageLoadLevel.NORMAL_ITEMS);
+		MVClientNetworking.PlayNetworkStateEvents.Start.EVENT.register(networkHandler -> ClientChestHelper.loadDefaultPages(PageLoadLevel.DYNAMIC_ITEMS));
 		
 		ItemStack clientChestIcon = new ItemStack(Items.ENDER_CHEST)
 				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));

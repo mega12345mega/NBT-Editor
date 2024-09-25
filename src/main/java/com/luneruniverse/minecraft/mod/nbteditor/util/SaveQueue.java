@@ -1,21 +1,24 @@
 package com.luneruniverse.minecraft.mod.nbteditor.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 
-public class SaveQueue {
+public class SaveQueue<T> {
 	
 	private final String name;
-	private final Consumer<Object> onSave;
+	private final Consumer<T> onSave;
 	private volatile boolean saving;
 	private volatile boolean queuedSave;
 	private volatile Thread saveThread;
-	private final Queue<Optional<Object>> infos;
-	private final Queue<Optional<Runnable>> onFinished;
+	private final Queue<Optional<T>> infos;
+	private final Queue<CompletableFuture<Void>> onFinished;
 	private final boolean waitToCallFinish;
 	
 	/**
@@ -26,10 +29,9 @@ public class SaveQueue {
 	 * @param onSave What to call when a save is requested
 	 * @param waitToCallFinish If onFinished should be called after everything is done or after the requested one is done
 	 */
-	@SuppressWarnings("unchecked")
-	public <T> SaveQueue(String name, Consumer<T> onSave, boolean waitToCallFinish) {
+	public SaveQueue(String name, Consumer<T> onSave, boolean waitToCallFinish) {
 		this.name = name;
-		this.onSave = info -> onSave.accept((T) info);
+		this.onSave = onSave;
 		this.infos = new ConcurrentLinkedQueue<>();
 		this.onFinished = new ConcurrentLinkedQueue<>();
 		this.waitToCallFinish = waitToCallFinish;
@@ -47,9 +49,11 @@ public class SaveQueue {
 		this(name, info -> onSave.run(), waitToCallFinish);
 	}
 	
-	public void save(Runnable onFinished, Object info) {
-		this.infos.add(Optional.ofNullable(info));
-		this.onFinished.add(Optional.ofNullable(onFinished));
+	public synchronized CompletableFuture<Void> save(T info) {
+		CompletableFuture<Void> output = new CompletableFuture<>();
+		
+		infos.add(Optional.ofNullable(info));
+		onFinished.add(output);
 		
 		if (saving) {
 			queuedSave = true;
@@ -57,37 +61,68 @@ public class SaveQueue {
 		} else {
 			saving = true;
 			saveThread = new Thread(() -> {
-				try {
-					onSave.accept(infos.remove().orElse(null));
-				} catch (RuntimeException e) {
-					NBTEditor.LOGGER.error("Error while calling save queue", e);
-				}
-				synchronized (this) {
-					int maxSize = queuedSave ? 1 : 0;
-					if (!queuedSave || !waitToCallFinish) {
-						while (this.onFinished.size() > maxSize)
-							this.onFinished.remove().ifPresent(Runnable::run);
+				boolean rerun;
+				do {
+					rerun = false;
+					
+					Throwable exception;
+					try {
+						onSave.accept(infos.remove().orElse(null));
+						exception = null;
+					} catch (Throwable e) {
+						exception = e;
 					}
-					while (this.infos.size() > maxSize)
-						this.infos.remove();
-					if (queuedSave) {
-						queuedSave = false;
-						saveThread.run();
+					
+					synchronized (this) {
+						if (!queuedSave || !waitToCallFinish) {
+							if (exception == null)
+								onFinished.remove().complete(null);
+							else
+								onFinished.remove().completeExceptionally(exception);
+						}
+						if (onFinished.size() > 1) {
+							// Merge currently queued onFinished callbacks, so that,
+							// if waitToCallFinish is false, everything up until and
+							// including the queued save will be called when the
+							// queued save completes
+							List<CompletableFuture<Void>> currentOnFinished = new ArrayList<>();
+							while (!onFinished.isEmpty())
+								currentOnFinished.add(onFinished.remove());
+							onFinished.add(MainUtil.mergeFutures(currentOnFinished));
+						}
+						
+						int maxSize = queuedSave ? 1 : 0;
+						while (infos.size() > maxSize)
+							infos.remove();
+						
+						if (queuedSave) {
+							queuedSave = false;
+							rerun = true;
+						} else
+							saving = false;
 					}
-					saving = false;
-				}
-			}, "SaveQueue:" + name);
+				} while (rerun);
+			}, "NBTEditor/Async/SaveQueue:" + name);
 			saveThread.start();
 		}
+		
+		return output;
+	}
+	public CompletableFuture<Void> save() {
+		return save((T) null);
+	}
+	public void save(Runnable onFinished, T info) {
+		save(info).thenAccept(v -> onFinished.run()).exceptionally(e -> {
+			NBTEditor.LOGGER.error("Error saving something", e);
+			return null;
+		});
 	}
 	public void save(Runnable onFinished) {
 		save(onFinished, null);
 	}
-	public void save(Object info) {
-		save(null, info);
-	}
-	public void save() {
-		save(null, null);
+	
+	public boolean isSaving() {
+		return saving;
 	}
 	
 }

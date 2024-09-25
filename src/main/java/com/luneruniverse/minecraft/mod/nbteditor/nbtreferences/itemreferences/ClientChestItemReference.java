@@ -2,10 +2,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import java.util.Optional;
 
-import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
-import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestPage;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.PageLoadLevel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -17,25 +15,18 @@ public class ClientChestItemReference implements ItemReference {
 	
 	private final int page;
 	private final int slot;
-	private final SaveQueue save;
+	private final SaveQueue<ItemStack> save;
 	
 	public ClientChestItemReference(int page, int slot) {
 		this.page = page;
 		this.slot = slot;
 		
-		this.save = new SaveQueue("Client Chest", (ItemStack toSave) -> {
-			try {
-				ClientChestPage pageData = NBTEditorClient.CLIENT_CHEST.getPage(page);
+		this.save = new SaveQueue<>("ClientChest/" + (page + 1) + "/" + slot, toSave -> {
+			ClientChestHelper.getPage(page, PageLoadLevel.DYNAMIC_ITEMS).join().ifPresent(pageData -> {
 				pageData.getItemsOrThrow()[slot] = toSave;
 				pageData.dynamicItems().remove(slot);
-				NBTEditorClient.CLIENT_CHEST.setPage(page, pageData.items(), pageData.dynamicItems());
-				
-				if (MainUtil.client.currentScreen instanceof ClientChestScreen && ClientChestScreen.PAGE == page)
-					((ClientChestScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
-			} catch (Exception e) {
-				NBTEditor.LOGGER.error("Error while saving client chest", e);
-				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
-			}
+				ClientChestHelper.setPage(page, pageData.items(), pageData.dynamicItems()).join();
+			});
 		}, true);
 	}
 	
@@ -48,11 +39,13 @@ public class ClientChestItemReference implements ItemReference {
 	
 	@Override
 	public ItemStack getItem() {
-		return NBTEditorClient.CLIENT_CHEST.getPage(page).getItemsOrThrow()[slot];
+		return ClientChestHelper.getPage(page, PageLoadLevel.DYNAMIC_ITEMS).join().orElseThrow().getItemsOrThrow()[slot];
 	}
 	
 	@Override
 	public void saveItem(ItemStack toSave, Runnable onFinished) {
+		if (MainUtil.client.currentScreen instanceof ClientChestScreen && ClientChestScreen.PAGE == page)
+			((ClientChestScreen) MainUtil.client.currentScreen).getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
 		save.save(onFinished, toSave.copy());
 	}
 	
