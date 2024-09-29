@@ -232,7 +232,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 						}
 						case QUICK_MOVE -> {
 							ItemStack prevItem = slot.getStack().copy();
-							handler.onSlotClick(slot.id, button, actionType, MainUtil.client.player);
+							LockableSlot.unlockDuring(() -> handler.onSlotClick(slot.id, button, actionType, MainUtil.client.player));
 							slot.setStack(prevItem);
 							updateServerInventory();
 						}
@@ -255,9 +255,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		if (!(this instanceof CursorHistoryScreen))
 			GetLostItemCommand.addToHistory(handler.getCursorStack());
 		
-		if (slot != null && allowEnchantmentCombine() && Screen.hasControlDown() && tryCombineEnchantments(slot, actionType))
-			onEnchantmentCombine(slot);
-		else
+		if (!(slot != null && allowEnchantmentCombine() && Screen.hasControlDown() && tryCombineEnchantments(slot, actionType)))
 			handler.onSlotClick(slot == null ? slotId : slot.id, button, actionType, MainUtil.client.player);
 		
 		if (!(this instanceof CursorHistoryScreen))
@@ -294,9 +292,6 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	}
 	public boolean allowEnchantmentCombine() {
 		return false;
-	}
-	public void onEnchantmentCombine(Slot slot) {
-		
 	}
 	
 	public LockedSlotsInfo getLockedSlotsInfo() {

@@ -15,8 +15,10 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryLoader;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.LifecycledResourceManagerImpl;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceReload;
@@ -84,7 +86,7 @@ public class DynamicRegistryManagerHolder {
 			return serverManager;
 		}
 		
-		if (!defaultManagerForced.contains(Thread.currentThread()) && clientManager != null)
+		if (hasClientManager())
 			return clientManager;
 		
 		if (MainUtil.client.isOnThread() && defaultManagerCache.getStatus() != CompletableFutureCache.Status.LOADED)
@@ -102,6 +104,10 @@ public class DynamicRegistryManagerHolder {
 		serverManager = server.getRegistryManager();
 	}
 	
+	public static boolean hasClientManager() {
+		return !defaultManagerForced.contains(Thread.currentThread()) && clientManager != null;
+	}
+	
 	public static <T> T withDefaultManager(Supplier<T> callback) {
 		if (NBTEditorServer.isOnServerThread())
 			throw new IllegalStateException("Cannot use withDefaultManager on the server!");
@@ -117,6 +123,19 @@ public class DynamicRegistryManagerHolder {
 		withDefaultManager(() -> {
 			callback.run();
 			return null;
+		});
+	}
+	
+	public static <T> boolean isOwnedByDefaultManager(RegistryEntry.Reference<T> entry) {
+		if (NBTEditorServer.isOnServerThread() || defaultManagerCache.getStatus() != CompletableFutureCache.Status.LOADED)
+			return false;
+		
+		return withDefaultManager(() -> {
+			return entry.getKey()
+					.map(RegistryKey::getRegistryRef)
+					.flatMap(registryKey -> getManager().getOptionalWrapper(registryKey))
+					.map(entry.owner::ownerEquals)
+					.orElse(false);
 		});
 	}
 	

@@ -77,6 +77,7 @@ public class NBTEditorClient implements ClientModInitializer {
 		CLIENT_CHEST = new ClientChest(ConfigScreen.isLargeClientChest() ? new LargeClientChestPageCache(5) : new SmallClientChestPageCache(100));
 		ClientChestHelper.loadDefaultPages(PageLoadLevel.NORMAL_ITEMS);
 		MVClientNetworking.PlayNetworkStateEvents.Start.EVENT.register(networkHandler -> ClientChestHelper.loadDefaultPages(PageLoadLevel.DYNAMIC_ITEMS));
+		MVClientNetworking.PlayNetworkStateEvents.Stop.EVENT.register(() -> ClientChestHelper.unloadAllPages(PageLoadLevel.NORMAL_ITEMS));
 		
 		ItemStack clientChestIcon = new ItemStack(Items.ENDER_CHEST)
 				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));

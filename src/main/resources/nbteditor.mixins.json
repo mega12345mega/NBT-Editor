@@ -42,7 +42,9 @@
     "BuiltinModelItemRendererMixin",
     "EnchantmentMixin",
     "SplashOverlayMixin",
-    "ScreenHandlerMixin"
+    "ScreenHandlerMixin",
+    "RegistryEntryReferenceMixin",
+    "Registry1Mixin"
   ],
   "injectors": {
     "defaultRequire": 1

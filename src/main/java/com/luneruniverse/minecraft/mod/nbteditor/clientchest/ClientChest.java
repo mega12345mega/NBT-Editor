@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DataVersionStatus;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -177,6 +179,10 @@ public class ClientChest {
 		}
 	}
 	
+	public void stop() {
+		lock.stop();
+	}
+	
 	public boolean isProcessingPage(int page) {
 		if (lock.isLocked(page) || isUncachedProcessingPage(page))
 			return true;
@@ -233,14 +239,14 @@ public class ClientChest {
 		return cache.getCachedPage(page).loadLevel();
 	}
 	
-	public CompletableFuture<ClientChestPage> getPage(int page, PageLoadLevel level) {
+	public CompletableFuture<ClientChestPage> getPage(int page, PageLoadLevel loadLevel) {
 		if (!isUncachedProcessingPage(page)) {
 			ClientChestPage cachedPage = cache.getCachedPage(page);
-			if (level.ordinal() <= cachedPage.loadLevel().ordinal())
+			if (loadLevel.ordinal() <= cachedPage.loadLevel().ordinal())
 				return CompletableFuture.completedFuture(cachedPage);
 		}
 		
-		return loadQueues.getUnchecked(page).load(level.ordinal());
+		return loadQueues.getUnchecked(page).load(loadLevel.ordinal());
 	}
 	
 	public CompletableFuture<Void> setPage(int page, ItemStack[] items, DynamicItems prevDynamicItems) {
@@ -281,13 +287,76 @@ public class ClientChest {
 			if (prevDynamicItems.isSlotLocked(i))
 				dynamicItems.add(i, prevDynamicItems.getOriginalNbt(i), false);
 			else if (items[i] != null)
-				dynamicItems.tryAdd(i, items[i]);
+				items[i] = dynamicItems.tryAdd(i, items[i]);
 		}
 		
 		ClientChestPage pageData = new ClientChestPage(items, dynamicItems, PageLoadLevel.DYNAMIC_ITEMS);
 		cache.cachePage(page, pageData);
 		
 		return saveQueues.getUnchecked(page).save(pageData);
+	}
+	
+	public CompletableFuture<Void> unloadAllPages(PageLoadLevel loadLevel) {
+		if (loadLevel == PageLoadLevel.DYNAMIC_ITEMS)
+			return CompletableFuture.completedFuture(null);
+		
+		startUncachedProcessingAll();
+		CompletableFuture<Void> future = new CompletableFuture<>();
+		Thread thread = new Thread(() -> {
+			lock.lockAll();
+			try {
+				Exception toThrow = new Exception("Error unloading page(s)");
+				for (File file : CLIENT_CHEST_FOLDER.listFiles()) {
+					if (!file.getName().matches("page[0-9]+\\.nbt"))
+						continue;
+					int page = Integer.parseInt(file.getName().substring("page".length(), file.getName().indexOf('.')));
+					if (page >= cache.getPageCount())
+						continue;
+					if (getDataVersionStatus(page).map(status -> status == DataVersionStatus.CURRENT).orElse(false)) {
+						try {
+							unloadPageSync(page, loadLevel);
+						} catch (Throwable e) {
+							toThrow.addSuppressed(new Exception("Page " + (page + 1), e));
+						}
+					}
+				}
+				if (toThrow.getSuppressed().length > 0) {
+					NBTEditor.LOGGER.error("Error unloading the client chest!", toThrow);
+					future.completeExceptionally(toThrow);
+				} else
+					future.complete(null);
+			} finally {
+				lock.unlockAll();
+				finishUncachedProcessingAll();
+			}
+		}, "NBTEditor/Async/ClientChest/Unloading");
+		thread.start();
+		return future;
+	}
+	
+	public CompletableFuture<ClientChestPage> unloadPage(int page, PageLoadLevel loadLevel) {
+		if (!isUncachedProcessingPage(page)) {
+			ClientChestPage cachedPage = cache.getCachedPage(page);
+			if (cachedPage.loadLevel().ordinal() <= loadLevel.ordinal() || !cachedPage.isInThisVersion())
+				return CompletableFuture.completedFuture(cachedPage);
+		}
+		
+		startUncachedProcessing(page);
+		CompletableFuture<ClientChestPage> future = new CompletableFuture<>();
+		Thread thread = new Thread(() -> {
+			lock.lock(page);
+			try {
+				future.complete(unloadPageSync(page, loadLevel));
+			} catch (Throwable e) {
+				NBTEditor.LOGGER.error("Error unloading client chest page " + (page + 1), e);
+				future.completeExceptionally(e);
+			} finally {
+				lock.unlock(page);
+				finishUncachedProcessing(page);
+			}
+		}, "NBTEditor/Async/ClientChest/Unloading/" + page);
+		thread.start();
+		return future;
 	}
 	
 	public CompletableFuture<ClientChestPage> reloadPage(int page) {
@@ -562,7 +631,7 @@ public class ClientChest {
 				dynamicItems.add(i, itemNbt, false);
 				empty = false;
 			} else {
-				items[i] = NBTManagers.ITEM.deserialize(itemNbt, true);
+				items[i] = DynamicRegistryManagerHolder.withDefaultManager(() -> NBTManagers.ITEM.deserialize(itemNbt, true));
 				if (empty && items[i] != null && !items[i].isEmpty())
 					empty = false;
 			}
@@ -601,7 +670,7 @@ public class ClientChest {
 		NbtList itemsNbt = new NbtList();
 		for (int i = 0; i < items.length; i++) {
 			NbtCompound itemNbt;
-			if (pageData.loadLevel() == PageLoadLevel.DYNAMIC_ITEMS ? dynamicItems.isSlotLocked(i) : dynamicItems.isSlot(i))
+			if (dynamicItems.isSlot(i))
 				itemNbt = dynamicItems.getOriginalNbt(i);
 			else
 				itemNbt = (items[i] == null ? ItemStack.EMPTY : items[i]).manager$serialize(true);
@@ -618,7 +687,29 @@ public class ClientChest {
 		
 		if (!CLIENT_CHEST_FOLDER.exists())
 			CLIENT_CHEST_FOLDER.mkdir();
-		MixinLink.throwHiddenException(() -> MVMisc.writeNbt(pageNbt, getFile(page)));
+		File file = getFile(page);
+		File tmpFile = new File(CLIENT_CHEST_FOLDER, "saving_page" + page + "_" + System.currentTimeMillis() + ".nbt");
+		MixinLink.throwHiddenException(() -> MVMisc.writeNbt(pageNbt, tmpFile));
+		Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+	}
+	
+	private ClientChestPage unloadPageSync(int page, PageLoadLevel loadLevel) {
+		ClientChestPage cachedPage = cache.getCachedPage(page);
+		
+		if (cachedPage.loadLevel().ordinal() <= loadLevel.ordinal() || !cachedPage.isInThisVersion())
+			return cache.getCachedPage(page);
+		
+		if (loadLevel == PageLoadLevel.UNLOADED) {
+			cache.discardPageCache(page);
+			return ClientChestPage.unloaded();
+		}
+		
+		DynamicItems dynamicItems = cachedPage.dynamicItems().copy();
+		dynamicItems.unloadAll();
+		
+		cachedPage = new ClientChestPage(cachedPage.items(), dynamicItems, PageLoadLevel.NORMAL_ITEMS);
+		cache.cachePage(page, cachedPage);
+		return cachedPage;
 	}
 	
 	private void importPageSync(int page, boolean ignoreInvalidDataVersion) throws Throwable {
@@ -687,7 +778,8 @@ public class ClientChest {
 				dynamicItems.add(i, itemNbt, false);
 				empty = false;
 			} else {
-				items[i] = NBTManagers.ITEM.deserialize(itemNbt, true);
+				final NbtCompound finalItemNbt = itemNbt;
+				items[i] = DynamicRegistryManagerHolder.withDefaultManager(() -> NBTManagers.ITEM.deserialize(finalItemNbt, true));
 				if (empty && items[i] != null && !items[i].isEmpty())
 					empty = false;
 			}

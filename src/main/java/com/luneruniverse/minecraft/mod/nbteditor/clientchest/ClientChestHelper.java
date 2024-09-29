@@ -67,6 +67,32 @@ public class ClientChestHelper {
 		}
 	}
 	
+	public static CompletableFuture<Boolean> unloadAllPages(PageLoadLevel loadLevel) {
+		try {
+			return NBTEditorClient.CLIENT_CHEST.unloadAllPages(loadLevel).thenApply(v -> true).exceptionally(e -> {
+				trySend("nbteditor.client_chest.unload_error");
+				return false;
+			});
+		} catch (RuntimeException e) {
+			NBTEditor.LOGGER.error("Error unloading the client chest!", e);
+			trySend("nbteditor.client_chest.unload_error");
+			return CompletableFuture.completedFuture(false);
+		}
+	}
+	
+	public static CompletableFuture<Optional<ClientChestPage>> unloadPage(int page, PageLoadLevel loadLevel) {
+		try {
+			return NBTEditorClient.CLIENT_CHEST.unloadPage(page, loadLevel).thenApply(Optional::of).exceptionally(e -> {
+				trySend("nbteditor.client_chest.unload_error");
+				return Optional.empty();
+			});
+		} catch (RuntimeException e) {
+			NBTEditor.LOGGER.error("Error unloading client chest page " + (page + 1), e);
+			trySend("nbteditor.client_chest.unload_error");
+			return CompletableFuture.completedFuture(Optional.empty());
+		}
+	}
+	
 	public static CompletableFuture<Optional<ClientChestPage>> reloadPage(int page) {
 		try {
 			return NBTEditorClient.CLIENT_CHEST.reloadPage(page).thenApply(Optional::of).exceptionally(e -> {

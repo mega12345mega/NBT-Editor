@@ -1,10 +1,11 @@
 package com.luneruniverse.minecraft.mod.nbteditor.server;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 
@@ -15,11 +16,11 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 public class ServerMixinLink {
 	
-	public static final Map<Thread, PlayerEntity> SCREEN_HANDLER_OWNER = new HashMap<>();
+	public static final Map<Thread, PlayerEntity> SCREEN_HANDLER_OWNER = new ConcurrentHashMap<>();
 	public static final WeakHashMap<Slot, PlayerEntity> SLOT_OWNER = new WeakHashMap<>();
 	
 	
-	public static final List<Thread> BLOCK_ENTITY_WRITE_NBT_WITHOUT_IDENTIFYING_DATA = new ArrayList<>();
+	public static final Set<Thread> BLOCK_ENTITY_WRITE_NBT_WITHOUT_IDENTIFYING_DATA = Collections.synchronizedSet(new HashSet<>());
 	
 	
 	public static final WeakHashMap<ServerPlayerEntity, Boolean> NO_SLOT_RESTRICTIONS_PLAYERS = new WeakHashMap<>();

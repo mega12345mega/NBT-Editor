@@ -25,13 +25,19 @@ public class DynamicItems {
 	public void add(int slot, NbtCompound nbt, boolean successfullyLoaded) {
 		items.put(slot, Map.entry(nbt, successfullyLoaded));
 	}
-	public void tryAdd(int slot, ItemStack item) {
+	public ItemStack tryAdd(int slot, ItemStack item) {
 		if (item.isEmpty())
-			return;
+			return ItemStack.EMPTY;
 		
-		if (DynamicRegistryManagerHolder.withDefaultManager(() -> NBTManagers.ITEM.trySerialize(item).isSuccessful()))
-			return;
-		add(slot, NBTManagers.ITEM.serialize(item, true), true);
+		NbtCompound nbt = NBTManagers.ITEM.serialize(item, true);
+		Attempt<ItemStack> defaultRegistryItem = DynamicRegistryManagerHolder
+				.withDefaultManager(() -> NBTManagers.ITEM.tryDeserialize(nbt));
+		
+		if (defaultRegistryItem.isSuccessful())
+			return defaultRegistryItem.getSuccessOrThrow();
+		
+		add(slot, nbt, true);
+		return item;
 	}
 	public void remove(int slot) {
 		items.remove(slot);
@@ -46,6 +52,10 @@ public class DynamicItems {
 		Attempt<ItemStack> attempt = NBTManagers.ITEM.tryDeserialize(nbt);
 		items.put(slot, Map.entry(nbt, attempt.isSuccessful()));
 		return attempt.value().orElse(ItemStack.EMPTY);
+	}
+	
+	public void unloadAll() {
+		items.replaceAll((slot, entry) -> Map.entry(entry.getKey(), false));
 	}
 	
 	public List<Integer> getSlots() {

@@ -62,6 +62,8 @@ accessible method net/minecraft/block/entity/BlockEntity writeNbt (Lnet/minecraf
 accessible method net/minecraft/block/entity/BlockEntity writeIdToNbt (Lnet/minecraft/nbt/NbtCompound;)V
 accessible class net/minecraft/block/entity/BlockEntity$Components
 
+accessible field net/minecraft/registry/entry/RegistryEntry$Reference owner Lnet/minecraft/registry/entry/RegistryEntryOwner;
+
 # Private in older versions
 accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;
 accessible method net/minecraft/client/render/RenderLayer of (Ljava/lang/String;Lnet/minecraft/client/render/VertexFormat;Lnet/minecraft/client/render/VertexFormat$DrawMode;ILnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;)Lnet/minecraft/client/render/RenderLayer$MultiPhase;

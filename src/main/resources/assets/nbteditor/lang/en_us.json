@@ -120,6 +120,7 @@
 	"nbteditor.client_chest": "Nbt Editor >> Client Chest",
 	"nbteditor.client_chest.load_error": "§cError while loading the client chest!",
 	"nbteditor.client_chest.save_error": "§cError while saving the client chest!",
+	"nbteditor.client_chest.unload_error": "§cError while unloading the client chest!",
 	"nbteditor.client_chest.import_error": "§cError while importing the client chest!",
 	"nbteditor.client_chest.update_error": "§cError while updating the client chest!",
 	"nbteditor.client_chest.corrupt_warning": "§cSome page(s) appear to be corrupt and have been backed up separately.",

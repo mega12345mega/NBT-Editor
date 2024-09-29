@@ -116,10 +116,6 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		return true;
 	}
 	@Override
-	public void onEnchantmentCombine(Slot slot) {
-		save();
-	}
-	@Override
 	public LockedSlotsInfo getLockedSlotsInfo() {
 		LockedSlotsInfo info = (ref instanceof ItemReference itemRef && itemRef.isLocked()
 				? LockedSlotsInfo.ITEMS_LOCKED : LockedSlotsInfo.NONE).copy();

@@ -294,10 +294,6 @@ public class ClientChestScreen extends ClientHandledScreen {
 		return true;
 	}
 	@Override
-	public void onEnchantmentCombine(Slot slot) {
-		save();
-	}
-	@Override
 	public LockedSlotsInfo getLockedSlotsInfo() {
 		LockedSlotsInfo info = (ConfigScreen.isLockSlots() ? LockedSlotsInfo.ITEMS_LOCKED : LockedSlotsInfo.NONE).copy();
 		
