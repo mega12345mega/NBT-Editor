@@ -540,7 +540,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		
 		guis.setConfigurable("hideKeybinds", new ConfigItem<>(TextInst.translatable("nbteditor.config.keybinds"),
 				new ConfigValueBoolean(keybindsHidden, false, 100, TextInst.translatable("nbteditor.config.keybinds.hidden"), TextInst.translatable("nbteditor.config.keybinds.shown"),
-				new MVTooltip("nbteditor.keybind.edit", "nbteditor.keybind.factory", "nbteditor.keybind.container", "nbteditor.keybind.enchant"))
+				new MVTooltip("nbteditor.keybind.edit", "nbteditor.keybind.factory", "nbteditor.keybind.container", "nbteditor.keybind.enchant", "nbteditor.keybind.delete"))
 				.addValueListener(value -> keybindsHidden = value.getValidValue()))
 				.setTooltip("nbteditor.config.keybinds.desc"));
 		

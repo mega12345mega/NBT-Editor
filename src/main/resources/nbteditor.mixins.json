@@ -44,7 +44,8 @@
     "SplashOverlayMixin",
     "ScreenHandlerMixin",
     "RegistryEntryReferenceMixin",
-    "Registry1Mixin"
+    "Registry1Mixin",
+    "TooltipMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -149,8 +149,8 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 			return true;
 		}
 		
-		if (keyCode == GLFW.GLFW_KEY_SPACE) {
-			if (focusedSlot != null && (focusedSlot.id < numSlots || focusedSlot.inventory != this.handler.getInventory())) {
+		if (focusedSlot != null && (focusedSlot.id < numSlots || focusedSlot.inventory != this.handler.getInventory())) {
+			if (keyCode != GLFW.GLFW_KEY_DELETE || !getLockedSlotsInfo().isBlocked(focusedSlot, true)) {
 				if (handleKeybind(keyCode, focusedSlot,
 						HandledScreenItemReferenceParent.create(
 								cursor -> show(ref, cursor), () -> handler.setCursorStack(ItemStack.EMPTY)),

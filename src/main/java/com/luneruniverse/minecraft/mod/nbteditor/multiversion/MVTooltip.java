@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL20;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -99,6 +100,7 @@ public class MVTooltip {
 		
 		Tooltip output = Tooltip.of(combined);
 		Reflection.getField(Tooltip.class, "field_41103", "Ljava/util/List;").set(output, lines);
+		MixinLink.NEW_TOOLTIPS.put(output, true);
 		return output;
 	}
 	Object toOldTooltip() {

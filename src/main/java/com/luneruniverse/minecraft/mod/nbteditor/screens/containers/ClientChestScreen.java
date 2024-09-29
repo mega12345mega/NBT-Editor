@@ -264,11 +264,22 @@ public class ClientChestScreen extends ClientHandledScreen {
 			return true;
 		}
 		
-		return !handleKeybind(keyCode, focusedSlot,
+		if (focusedSlot != null) {
+			boolean lockedSlot = (focusedSlot.inventory == handler.getInventory() &&
+					dynamicItems.isSlotLocked(focusedSlot.getIndex()));
+			if (!lockedSlot || keyCode == GLFW.GLFW_KEY_DELETE) {
+				if (handleKeybind(keyCode, focusedSlot,
 						HandledScreenItemReferenceParent.create(
 								ClientChestScreen::show, () -> handler.setCursorStack(ItemStack.EMPTY)),
-						slot -> new ClientChestItemReference(PAGE, slot.getIndex()), handler.getCursorStack()) &&
-				!this.nameField.keyPressed(keyCode, scanCode, modifiers) && !this.nameField.isActive() &&
+						slot -> new ClientChestItemReference(PAGE, slot.getIndex()), handler.getCursorStack())) {
+					if (keyCode == GLFW.GLFW_KEY_DELETE && lockedSlot)
+						dynamicItems.remove(focusedSlot.getIndex());
+					return true;
+				}
+			}
+		}
+		
+		return !this.nameField.keyPressed(keyCode, scanCode, modifiers) && !this.nameField.isActive() &&
 				!this.pageField.keyPressed(keyCode, scanCode, modifiers) && !this.pageField.isActive()
 				? super.keyPressed(keyCode, scanCode, modifiers) : true;
 	}

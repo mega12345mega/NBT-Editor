@@ -26,6 +26,8 @@ public class DynamicItems {
 		items.put(slot, Map.entry(nbt, successfullyLoaded));
 	}
 	public ItemStack tryAdd(int slot, ItemStack item) {
+		if (!NBTManagers.COMPONENTS_EXIST)
+			return item;
 		if (item.isEmpty())
 			return ItemStack.EMPTY;
 		

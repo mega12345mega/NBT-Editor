@@ -207,6 +207,7 @@
 	"nbteditor.keybind.edit": "§6§lSpace§r§6 to edit!",
 	"nbteditor.keybind.container": "§6§lCtrl + Space§r§6 to open container!",
 	"nbteditor.keybind.factory": "§6§lShift + Space§r§6 to open the factory!",
+	"nbteditor.keybind.delete": "§6§lDelete§r§6 to delete!",
 	"nbteditor.keybind.page.up": "§6§lPage Up",
 	"nbteditor.keybind.page.down": "§6§lPage Down",
 	"nbteditor.keybind.page.shift": "§6§lShift+",

@@ -84,23 +84,31 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	
 	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, HandledScreenItemReferenceParent parent,
 			Function<Slot, ItemReference> containerRef, ItemStack cursor) {
-		if (keyCode == GLFW.GLFW_KEY_SPACE) {
-			if (hoveredSlot != null && (ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
-				int slot = hoveredSlot.getIndex();
-				ItemReference ref;
-				if (hoveredSlot.inventory == MainUtil.client.player.getInventory()) {
-					ref = new InventoryItemReference(slot >= 36 ? slot - 36 : slot);
-					if (parent != null)
-						((InventoryItemReference) ref).setParent(parent);
-				} else
-					ref = containerRef.apply(hoveredSlot);
-				handleKeybind(hoveredSlot.getStack(), ref, cursor);
-				return true;
-			}
+		if (hoveredSlot != null &&
+				(ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
+			int slot = hoveredSlot.getIndex();
+			ItemReference ref;
+			if (hoveredSlot.inventory == MainUtil.client.player.getInventory()) {
+				ref = new InventoryItemReference(slot >= 36 ? slot - 36 : slot);
+				if (parent != null)
+					((InventoryItemReference) ref).setParent(parent);
+			} else
+				ref = containerRef.apply(hoveredSlot);
+			return handleKeybind(keyCode, hoveredSlot.getStack(), ref, cursor);
 		}
 		return false;
 	}
-	public static void handleKeybind(ItemStack item, ItemReference ref, ItemStack cursor) {
+	public static boolean handleKeybind(int keyCode, ItemStack item, ItemReference ref, ItemStack cursor) {
+		if (keyCode == GLFW.GLFW_KEY_DELETE) {
+			if (item == null || item.isEmpty())
+				return false;
+			GetLostItemCommand.addToHistory(item);
+			ref.saveItem(ItemStack.EMPTY);
+			return true;
+		}
+		if (keyCode != GLFW.GLFW_KEY_SPACE)
+			return false;
+		
 		boolean notAir = item != null && !item.isEmpty();
 		if (hasControlDown()) {
 			if (notAir && ContainerIO.isContainer(item))
@@ -120,6 +128,8 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 			}
 			MainUtil.client.setScreen(new NBTEditorScreen<>(ref));
 		}
+		
+		return true;
 	}
 	
 	public ClientHandledScreen(GenericContainerScreenHandler handler, Text title) {

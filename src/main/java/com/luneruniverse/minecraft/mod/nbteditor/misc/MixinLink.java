@@ -14,7 +14,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -47,6 +46,7 @@ import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -249,24 +249,22 @@ public class MixinLink {
 	public static void keyPressed(HandledScreen<?> source, int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> info) {
 		boolean creativeInv = (source instanceof CreativeInventoryScreen);
 		
-		if (keyCode == GLFW.GLFW_KEY_SPACE) {
-			Slot hoveredSlot = ((HandledScreenAccessor) source).getFocusedSlot();
-			if (hoveredSlot != null &&
-					((creativeInv && hoveredSlot.inventory == MainUtil.client.player.getInventory()) ||
-							(!creativeInv && NBTEditorClient.SERVER_CONN.isScreenEditable())) &&
-					(!(source instanceof InventoryScreen) || hoveredSlot.id > 4) &&
-					(ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
-				ItemReference ref;
-				if (creativeInv) {
-					int slot = hoveredSlot.getIndex();
-					if (!MVMisc.isCreativeInventoryTabSelected())
-						slot += 36;
-					ref = ItemReference.getInventoryOrArmorItem(slot, true);
-				} else
-					ref = ItemReference.getContainerItem(hoveredSlot.id, source);
-				ClientHandledScreen.handleKeybind(hoveredSlot.getStack(), ref, source.getScreenHandler().getCursorStack());
+		Slot hoveredSlot = ((HandledScreenAccessor) source).getFocusedSlot();
+		if (hoveredSlot != null &&
+				((creativeInv && hoveredSlot.inventory == MainUtil.client.player.getInventory()) ||
+						(!creativeInv && NBTEditorClient.SERVER_CONN.isScreenEditable())) &&
+				(!(source instanceof InventoryScreen) || hoveredSlot.id > 4) &&
+				(ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
+			ItemReference ref;
+			if (creativeInv) {
+				int slot = hoveredSlot.getIndex();
+				if (!MVMisc.isCreativeInventoryTabSelected())
+					slot += 36;
+				ref = ItemReference.getInventoryOrArmorItem(slot, true);
+			} else
+				ref = ItemReference.getContainerItem(hoveredSlot.id, source);
+			if (ClientHandledScreen.handleKeybind(keyCode, hoveredSlot.getStack(), ref, source.getScreenHandler().getCursorStack()))
 				info.setReturnValue(true);
-			}
 		}
 	}
 	
@@ -352,6 +350,7 @@ public class MixinLink {
 					tooltip.add(TextInst.translatable("nbteditor.keybind.container"));
 				if (source.getItem() == Items.ENCHANTED_BOOK)
 					tooltip.add(TextInst.translatable("nbteditor.keybind.enchant"));
+				tooltip.add(TextInst.translatable("nbteditor.keybind.delete"));
 			}
 		}
 	}
@@ -365,5 +364,8 @@ public class MixinLink {
 		CATCH_BYPASSING_TASKS.put(task, true);
 		MainUtil.client.execute(task);
 	}
+	
+	
+	public static final WeakHashMap<Tooltip, Boolean> NEW_TOOLTIPS = new WeakHashMap<>();
 	
 }
