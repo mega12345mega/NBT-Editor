@@ -59,7 +59,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 					if (!pageData.isInThisVersion()) {
 						if (!loaded)
 							cursor.ifPresent(MainUtil::setInventoryCursorStack);
-						MainUtil.client.setScreen(new ClientChestDataVersionScreen(pageData.getDataVersionStatus()));
+						MainUtil.client.setScreen(new ClientChestDataVersionScreen(pageData.dataVersion()));
 						return;
 					}
 					

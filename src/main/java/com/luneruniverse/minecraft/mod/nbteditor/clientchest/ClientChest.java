@@ -6,15 +6,17 @@ import java.io.FileWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -50,6 +52,7 @@ public class ClientChest {
 	private static final File PAGE_NAMES = new File(CLIENT_CHEST_FOLDER, "page_names.json");
 	
 	private volatile ClientChestPageCache cache;
+	private final Queue<Integer> cachePageCounts;
 	
 	private final Map<String, Integer> nameToPage;
 	private final Map<Integer, String> pageToName;
@@ -62,6 +65,7 @@ public class ClientChest {
 	@SuppressWarnings("serial")
 	public ClientChest(ClientChestPageCache cache) {
 		this.cache = cache;
+		this.cachePageCounts = new ConcurrentLinkedQueue<>();
 		
 		if (PAGE_NAMES.exists()) {
 			try (FileReader reader = new FileReader(PAGE_NAMES, Charset.forName("UTF-8"))) {
@@ -119,12 +123,15 @@ public class ClientChest {
 	}
 	
 	public CompletableFuture<Void> setCache(ClientChestPageCache cache) {
+		cachePageCounts.add(cache.getPageCount());
+		
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Thread thread = new Thread(() -> {
 			lock.lockAll();
 			try {
 				this.cache.transferTo(cache);
 				this.cache = cache;
+				cachePageCounts.remove();
 				future.complete(null);
 			} finally {
 				lock.unlockAll();
@@ -137,27 +144,22 @@ public class ClientChest {
 		return cache;
 	}
 	public int getPageCount() {
-		return cache.getPageCount();
+		return Math.min(cache.getPageCount(), cachePageCounts.stream().mapToInt(pageCount -> pageCount).min().orElse(Integer.MAX_VALUE));
 	}
 	
 	public Integer getPageFromName(String name) {
-		Integer page = nameToPage.get(name);
-		if (page != null && page >= cache.getPageCount())
-			return null;
-		return page;
+		return nameToPage.get(name);
 	}
 	public String getNameFromPage(int page) {
-		if (page >= cache.getPageCount())
-			return "";
 		return pageToName.getOrDefault(page, "");
 	}
-	public Set<String> getAllPageNames() {
-		return nameToPage.entrySet().stream().filter(entry -> entry.getValue() < cache.getPageCount())
-				.map(Map.Entry::getKey).collect(Collectors.toUnmodifiableSet());
+	public List<String> getAllPageNames(boolean withinPageCount) {
+		if (!withinPageCount)
+			return new ArrayList<>(nameToPage.keySet());
+		return nameToPage.entrySet().stream().filter(entry -> entry.getValue() < getPageCount()).map(Map.Entry::getKey).toList();
 	}
 	public boolean isNameUsedByOther(String name, int page) {
-		Integer matchingPage = getPageFromName(name);
-		return matchingPage != null && matchingPage != page;
+		return nameToPage.getOrDefault(name, page) != page;
 	}
 	@SuppressWarnings("serial")
 	public void setNameOfPage(int page, String name) throws Exception {
@@ -831,7 +833,7 @@ public class ClientChest {
 			return;
 		MainUtil.client.player.sendMessage(attachShowFolder(TextInst.translatable("nbteditor.client_chest.corrupt_warning")), false);
 	}
-	public Text attachShowFolder(EditableText text) {
+	public static Text attachShowFolder(EditableText text) {
 		return text.append(" ").append(TextInst.translatable("nbteditor.file_options.show").styled(
 				style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, CLIENT_CHEST_FOLDER.getAbsolutePath()))));
 	}

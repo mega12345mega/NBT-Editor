@@ -48,15 +48,20 @@ public class DonkeyChestContainerIO implements NBTContainerIO {
 		
 		int output = chest.writeNBT(container, shiftedContents, SourceContainerType.ENTITY) - (ITEMS_SHIFTED ? 2 : 0);
 		
+		for (ItemStack item : contents) {
+			if (item != null && !item.isEmpty()) {
+				container.putBoolean("ChestedHorse", true);
+				break;
+			}
+		}
+		
 		if (llama) {
 			int columns = 1;
 			for (int i = 3; i < contents.length; i++) {
 				if (contents[i] != null && !contents[i].isEmpty())
 					columns = (i / 3) + 1;
 			}
-			if (columns == 1)
-				return output;
-			if (container.getInt("Strength") < columns)
+			if (columns != 1 && container.getInt("Strength") < columns)
 				container.putInt("Strength", columns);
 		}
 		

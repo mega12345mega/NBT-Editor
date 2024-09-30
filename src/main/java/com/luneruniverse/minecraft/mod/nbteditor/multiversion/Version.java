@@ -7,6 +7,7 @@ import java.io.UncheckedIOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.gson.Gson;
@@ -120,6 +121,33 @@ public class Version {
 		}
 	}
 	
+	private static Map<String, Integer> dataVersions;
+	public static Optional<Integer> getDataVersion(String version) {
+		try {
+			return Optional.of(Integer.parseInt(version));
+		} catch (NumberFormatException e) {}
+		
+		if (dataVersions == null)
+			readDataVersionsJson();
+		return Optional.ofNullable(dataVersions.get(version));
+	}
+	
+	private static Map<Integer, String> mcVersions;
+	public static Optional<String> getMCVersion(int dataVersion) {
+		if (mcVersions == null)
+			readDataVersionsJson();
+		return Optional.ofNullable(mcVersions.get(dataVersion));
+	}
+	
+	private static void readDataVersionsJson() {
+		try (InputStream in = MVMisc.getResource(IdentifierInst.of("nbteditor", "data_versions.json")).orElseThrow()) {
+			dataVersions = new Gson().fromJson(new InputStreamReader(in), new TypeToken<Map<String, Integer>>() {}.getType());
+			mcVersions = dataVersions.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to parse data_versions.json", e);
+		}
+	}
+	
 	private static int[] parseVersion(String version) {
 		int[] parts = Stream.of(version.split("\\.")).mapToInt(Integer::parseInt).toArray();
 		if (parts[0] != 1 || parts.length < 2 || parts.length > 3)
@@ -127,23 +155,6 @@ public class Version {
 		if (parts.length == 3)
 			return parts;
 		return new int[] {parts[0], parts[1], 0};
-	}
-	
-	private static Map<String, Integer> dataVersions;
-	public static Optional<Integer> getDataVersion(String version) {
-		try {
-			return Optional.of(Integer.parseInt(version));
-		} catch (NumberFormatException e) {}
-		
-		if (dataVersions == null) {
-			try (InputStream in = MVMisc.getResource(IdentifierInst.of("nbteditor", "data_versions.json")).orElseThrow()) {
-				dataVersions = new Gson().fromJson(new InputStreamReader(in), new TypeToken<Map<String, Integer>>() {}.getType());
-			} catch (IOException e) {
-				throw new RuntimeException("Failed to parse data_versions.json", e);
-			}
-		}
-		
-		return Optional.ofNullable(dataVersions.get(version));
 	}
 	
 }

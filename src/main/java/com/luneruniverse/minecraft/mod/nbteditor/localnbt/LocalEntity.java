@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.localnbt;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -55,9 +56,24 @@ public class LocalEntity implements LocalNBT {
 	private EntityType<?> entityType;
 	private NbtCompound nbt;
 	
+	private Entity cachedEntity;
+	private NbtCompound cachedNbt;
+	
 	public LocalEntity(EntityType<?> entityType, NbtCompound nbt) {
 		this.entityType = entityType;
 		this.nbt = nbt;
+	}
+	
+	private Entity getCachedEntity() {
+		if (cachedEntity != null && cachedEntity.getType() == entityType && Objects.equals(cachedNbt, nbt))
+			return cachedEntity;
+		
+		cachedEntity = entityType.create(MainUtil.client.world);
+		NBTManagers.ENTITY.setNbt(cachedEntity, nbt);
+		
+		cachedNbt = nbt.copy();
+		
+		return cachedEntity;
 	}
 	
 	@Override
@@ -119,9 +135,6 @@ public class LocalEntity implements LocalNBT {
 		matrices.push();
 		matrices.translate(0.0, 8.0, 0.0);
 		
-		Entity entity = entityType.create(MainUtil.client.world);
-		NBTManagers.ENTITY.setNbt(entity, nbt);
-		
 		MatrixStack renderMatrices = Version.<MatrixStack>newSwitch()
 				.range("1.19.4", null, matrices)
 				.range(null, "1.19.3", MatrixStack::new)
@@ -143,7 +156,7 @@ public class LocalEntity implements LocalNBT {
 		EntityRenderDispatcher dispatcher = MainUtil.client.getEntityRenderDispatcher();
 		dispatcher.setRenderShadows(false);
 		rotation.applyToEntityRenderDispatcher(dispatcher);
-		dispatcher.render(entity, 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
+		dispatcher.render(getCachedEntity(), 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
 		dispatcher.setRenderShadows(true);
 		provider.draw();
 		

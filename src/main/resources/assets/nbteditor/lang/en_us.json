@@ -137,9 +137,9 @@
 	"nbteditor.client_chest.clear_page.no": "Cancel",
 	
 	"nbteditor.client_chest.data_version.unknown": "Page #%s is from an unknown version of Minecraft! Import/Update?",
-	"nbteditor.client_chest.data_version.old": "Page #%s is from an older version of Minecraft! Update?",
-	"nbteditor.client_chest.data_version.new": "Page #%s is from a newer version of Minecraft!",
-	"nbteditor.client_chest.data_version.import": "Saved in %s",
+	"nbteditor.client_chest.data_version.old": "Page #%s is from an older version of Minecraft (%s)! Update?",
+	"nbteditor.client_chest.data_version.new": "Page #%s is from a newer version of Minecraft (%s)!",
+	"nbteditor.client_chest.data_version.import": "If saved in %s",
 	"nbteditor.client_chest.data_version.import_page": "Import Page",
 	"nbteditor.client_chest.data_version.import_page.desc": "Sets the current page's\nDataVersion to the current\nMinecraft version",
 	"nbteditor.client_chest.data_version.import_all_pages": "Import All Pages",
@@ -150,6 +150,8 @@
 	"nbteditor.client_chest.data_version.update_all_pages": "Update All Pages",
 	"nbteditor.client_chest.data_version.update_all_pages.desc": "Updates all outdated pages,\nskipping any without a\nDataVersion tag if a data\nversion isn't supplied above",
 	"nbteditor.client_chest.data_version.dont_update_page": "Cancel",
+	"nbteditor.client_chest.data_version.update_page_confirm_1.20.5_1.20.6.title": "Warning!",
+	"nbteditor.client_chest.data_version.update_page_confirm_1.20.5_1.20.6.desc": "Updating pages into 1.20.5 or 1.20.6 may cause data loss due to a Minecraft bug! Continue?",
 	"nbteditor.client_chest.data_version.update_page_success": "§aSuccessfully imported/updated page #%s§a! The old page was backed up just in case:",
 	"nbteditor.client_chest.data_version.update_all_pages_success": "§aSuccessfully imported/updated all pages! The old pages were backed up just in case:",
 	
