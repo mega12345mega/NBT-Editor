@@ -14,6 +14,6 @@ import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 public class ClientPlayNetworkHandlerMixin {
 	@Inject(method = "onGameJoin", at = @At("RETURN"))
 	private void onGameJoin(GameJoinS2CPacket packet, CallbackInfo info) {
-		MVClientNetworking.PlayNetworkStateEvents.Join.EVENT.invoker().onPlayJoin();
+		MVClientNetworking.onPlayJoin();
 	}
 }

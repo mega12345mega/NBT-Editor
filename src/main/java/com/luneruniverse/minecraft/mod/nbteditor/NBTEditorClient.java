@@ -63,7 +63,6 @@ public class NBTEditorClient implements ClientModInitializer {
 	
 	private void onRegistriesLoad() {
 		NbtTypeModifier.loadClass();
-		MVClientNetworking.init();
 		CommandHandler.registerCommands();
 		try {
 			HeadAPI.loadFavorites();

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 
@@ -32,8 +32,7 @@ public class DynamicItems {
 			return ItemStack.EMPTY;
 		
 		NbtCompound nbt = NBTManagers.ITEM.serialize(item, true);
-		Attempt<ItemStack> defaultRegistryItem = DynamicRegistryManagerHolder
-				.withDefaultManager(() -> NBTManagers.ITEM.tryDeserialize(nbt));
+		Attempt<ItemStack> defaultRegistryItem = MVMisc.withDefaultRegistryManager(() -> NBTManagers.ITEM.tryDeserialize(nbt));
 		
 		if (defaultRegistryItem.isSuccessful())
 			return defaultRegistryItem.getSuccessOrThrow();

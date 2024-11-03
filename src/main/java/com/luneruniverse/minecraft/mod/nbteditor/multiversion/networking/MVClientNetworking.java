@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -23,42 +22,54 @@ import net.minecraft.util.Identifier;
 public class MVClientNetworking {
 	
 	public static class PlayNetworkStateEvents {
-		private static final Identifier INTERNAL_PHASE = IdentifierInst.of("nbteditor", "networking");
-		
 		public static interface Start {
-			public static final Event<Start> EVENT = EventFactory.createWithPhases(Start.class, listeners -> networkHandler -> {
+			public static final Event<Start> EVENT = EventFactory.createArrayBacked(Start.class, listeners -> networkHandler -> {
 				for (Start listener : listeners)
 					listener.onPlayStart(networkHandler);
-			}, INTERNAL_PHASE, Event.DEFAULT_PHASE);
+			});
 			public void onPlayStart(ClientPlayNetworkHandler networkHandler);
 		}
 		public static interface Join {
-			public static final Event<Join> EVENT = EventFactory.createWithPhases(Join.class, listeners -> () -> {
+			public static final Event<Join> EVENT = EventFactory.createArrayBacked(Join.class, listeners -> () -> {
 				for (Join listener : listeners)
 					listener.onPlayJoin();
-			}, INTERNAL_PHASE, Event.DEFAULT_PHASE);
+			});
 			public void onPlayJoin();
 		}
 		public static interface Stop {
-			public static final Event<Stop> EVENT = EventFactory.createWithPhases(Stop.class, listeners -> () -> {
+			public static final Event<Stop> EVENT = EventFactory.createArrayBacked(Stop.class, listeners -> () -> {
 				for (Stop listener : listeners)
 					listener.onPlayStop();
-			}, Event.DEFAULT_PHASE, INTERNAL_PHASE);
+			});
 			public void onPlayStop();
 		}
 	}
 	
-	private static final Map<Identifier, List<Consumer<MVPacket>>> listeners = new HashMap<>();
-	
-	public static void init() {
+	public static void onPlayStart(ClientPlayNetworkHandler networkHandler) {
 		Version.newSwitch()
 				.range("1.20.5", null, () -> {
-					PlayNetworkStateEvents.Start.EVENT.register(PlayNetworkStateEvents.INTERNAL_PHASE, DynamicRegistryManagerHolder::setClientManager);
-					PlayNetworkStateEvents.Stop.EVENT.register(PlayNetworkStateEvents.INTERNAL_PHASE, () -> DynamicRegistryManagerHolder.setClientManager(null));
+					DynamicRegistryManagerHolder.setClientManager(networkHandler);
+				})
+				.range(null, "1.20.4", () -> {})
+				.run();
+		
+		PlayNetworkStateEvents.Start.EVENT.invoker().onPlayStart(networkHandler);
+	}
+	public static void onPlayJoin() {
+		PlayNetworkStateEvents.Join.EVENT.invoker().onPlayJoin();
+	}
+	public static void onPlayStop() {
+		PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop();
+		
+		Version.newSwitch()
+				.range("1.20.5", null, () -> {
+					DynamicRegistryManagerHolder.setClientManager(null);
 				})
 				.range(null, "1.20.4", () -> {})
 				.run();
 	}
+	
+	private static final Map<Identifier, List<Consumer<MVPacket>>> listeners = new HashMap<>();
 	
 	@SuppressWarnings("deprecation")
 	public static void send(MVPacket packet) {

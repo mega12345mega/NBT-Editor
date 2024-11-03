@@ -2,10 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
@@ -31,14 +28,14 @@ import net.minecraft.util.Identifier;
 
 public class MVDrawableHelper {
 	
-	private static final Map<MatrixStack, DrawContext> drawContexts = Collections.synchronizedMap(new WeakHashMap<>());
+	private static final Cache<MatrixStack, DrawContext> drawContexts = CacheBuilder.newBuilder().weakKeys().weakValues().build();
 	public static MatrixStack getMatrices(DrawContext context) {
 		MatrixStack matrices = context.getMatrices();
 		drawContexts.put(matrices, context);
 		return matrices;
 	}
 	public static DrawContext getDrawContext(MatrixStack matrices) {
-		return drawContexts.get(matrices);
+		return drawContexts.getIfPresent(matrices);
 	}
 	
 	public static void super_render(Class<?> callerClass, Drawable caller, MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -236,7 +233,7 @@ public class MVDrawableHelper {
 				.range(null, "1.19.4", () -> {
 					RenderSystem.disableDepthTest();
 					RenderSystem.colorMask(true, true, true, false);
-					DrawableHelper_fillGradient.get().invoke(matrices, x, y, x + 16, y + 16, color, color, 0);
+					DrawableHelper_fillGradient.get().invoke(null, matrices, x, y, x + 16, y + 16, color, color, 0);
 					RenderSystem.colorMask(true, true, true, true);
 					RenderSystem.enableDepthTest();
 				})

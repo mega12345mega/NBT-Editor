@@ -605,4 +605,16 @@ public class MVMisc {
 				.run();
 	}
 	
+	public static <T> T withDefaultRegistryManager(Supplier<T> callback) {
+		if (NBTManagers.COMPONENTS_EXIST)
+			return DynamicRegistryManagerHolder.withDefaultManager(callback);
+		return callback.get();
+	}
+	public static void withDefaultRegistryManager(Runnable callback) {
+		if (NBTManagers.COMPONENTS_EXIST)
+			DynamicRegistryManagerHolder.withDefaultManager(callback);
+		else
+			callback.run();
+	}
+	
 }

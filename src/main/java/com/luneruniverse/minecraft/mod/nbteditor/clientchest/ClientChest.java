@@ -27,7 +27,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DataVersionStatus;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -532,9 +531,13 @@ public class ClientChest {
 	}
 	
 	public int[] getNearestPOIs(int page) {
+		int pageCount = getPageCount();
 		int[] output = cache.getNearestItems(page);
+		if (output[1] >= pageCount)
+			output[1] = -1;
+		
 		for (int namedPage : pageToName.keySet()) {
-			if (namedPage >= cache.getPageCount())
+			if (namedPage >= pageCount)
 				continue;
 			if (namedPage < page && namedPage > output[0])
 				output[0] = namedPage;
@@ -633,7 +636,7 @@ public class ClientChest {
 				dynamicItems.add(i, itemNbt, false);
 				empty = false;
 			} else {
-				items[i] = DynamicRegistryManagerHolder.withDefaultManager(() -> NBTManagers.ITEM.deserialize(itemNbt, true));
+				items[i] = MVMisc.withDefaultRegistryManager(() -> NBTManagers.ITEM.deserialize(itemNbt, true));
 				if (empty && items[i] != null && !items[i].isEmpty())
 					empty = false;
 			}
@@ -781,7 +784,7 @@ public class ClientChest {
 				empty = false;
 			} else {
 				final NbtCompound finalItemNbt = itemNbt;
-				items[i] = DynamicRegistryManagerHolder.withDefaultManager(() -> NBTManagers.ITEM.deserialize(finalItemNbt, true));
+				items[i] = MVMisc.withDefaultRegistryManager(() -> NBTManagers.ITEM.deserialize(finalItemNbt, true));
 				if (empty && items[i] != null && !items[i].isEmpty())
 					empty = false;
 			}
