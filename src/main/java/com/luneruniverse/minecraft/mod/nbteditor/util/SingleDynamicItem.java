@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.misc;
+package com.luneruniverse.minecraft.mod.nbteditor.util;
 
 import java.util.WeakHashMap;
 

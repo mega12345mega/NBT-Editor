@@ -10,12 +10,13 @@ import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 import com.luneruniverse.minecraft.mod.nbteditor.util.CompletableFutureCache;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.RegistryCache;
 
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryLoader;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -36,6 +37,7 @@ public class DynamicRegistryManagerHolder {
 			new CompletableFutureCache<>(DynamicRegistryManagerHolder::loadDefaultManagerImpl);
 	private static volatile ResourceReload defaultManagerResourcesMonitor;
 	private static final Set<Thread> defaultManagerForced = ConcurrentHashMap.newKeySet();
+	private static volatile RegistryCache defaultManagerRegistryCache;
 	
 	private static volatile DynamicRegistryManager clientManager;
 	private static volatile DynamicRegistryManager serverManager;
@@ -130,13 +132,15 @@ public class DynamicRegistryManagerHolder {
 		if (NBTEditorServer.isOnServerThread() || defaultManagerCache.getStatus() != CompletableFutureCache.Status.LOADED)
 			return false;
 		
-		return withDefaultManager(() -> {
-			return entry.getKey()
-					.map(RegistryKey::getRegistryRef)
-					.flatMap(registryKey -> getManager().getOptionalWrapper(registryKey))
-					.map(entry.owner::ownerEquals)
-					.orElse(false);
-		});
+		if (defaultManagerRegistryCache == null)
+			defaultManagerRegistryCache = new RegistryCache(defaultManagerCache.get().join());
+		
+		@SuppressWarnings("unchecked")
+		Registry<T> registry = (Registry<T>) defaultManagerRegistryCache.getRegistry(entry.registryKey().getRegistry()).orElse(null);
+		if (registry == null)
+			return false;
+		
+		return entry.owner.ownerEquals(registry.getReadOnlyWrapper());
 	}
 	
 }
