@@ -370,4 +370,11 @@ public class MixinLink {
 	
 	public static final WeakHashMap<Tooltip, Boolean> NEW_TOOLTIPS = new WeakHashMap<>();
 	
+	
+	// MinecraftClient#thread is set after the ClientModInitializers are run
+	public static volatile Thread MAIN_THREAD;
+	public static boolean isOnMainThread() {
+		return Thread.currentThread() == MAIN_THREAD;
+	}
+	
 }

@@ -90,7 +90,7 @@ public class DynamicRegistryManagerHolder {
 		if (hasClientManager())
 			return clientManager;
 		
-		if (MainUtil.client.isOnThread() && defaultManagerCache.getStatus() != CompletableFutureCache.Status.LOADED)
+		if (MixinLink.isOnMainThread() && defaultManagerCache.getStatus() != CompletableFutureCache.Status.LOADED)
 			throw new RuntimeException("Cannot synchronously load the default manager on the main thread");
 		return defaultManagerCache.get().join();
 	}
