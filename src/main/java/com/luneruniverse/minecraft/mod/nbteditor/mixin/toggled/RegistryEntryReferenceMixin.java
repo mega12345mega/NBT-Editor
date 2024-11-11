@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.mixin;
+package com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled;
 
 import java.util.stream.Stream;
 
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
-import com.luneruniverse.minecraft.mod.nbteditor.util.RegistryCache;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.RegistryCache;
 
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;

@@ -8,6 +8,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -56,22 +57,28 @@ public class LocalItemParts extends LocalItem {
 		return this;
 	}
 	
+	private void setCachedItemCount() {
+		Version.newSwitch()
+				.range("1.21.0", null, () -> cachedItem.setCount(Math.min(count, cachedItem.getMaxCount())))
+				.range(null, "1.20.6", () -> cachedItem.setCount(count))
+				.run();
+	}
 	private ItemStack getCachedItem() {
 		if (cachedItem.getItem() == item && Objects.equals(cachedNbt, nbt)) {
-			cachedItem.setCount(count);
+			setCachedItemCount();
 			return cachedItem;
 		}
 		
 		ItemStack oldCachedItem = cachedItem;
-		cachedItem = new ItemStack(item, count);
+		cachedItem = new ItemStack(item, 1);
 		cachedNbt = (nbt == null ? null : nbt.copy());
 		try {
 			cachedItem.manager$setNbt(cachedNbt);
 		} catch (Exception e) {
 			NBTEditor.LOGGER.warn("Error while updating item cache", e);
 			cachedItem = oldCachedItem;
-			cachedItem.setCount(count);
 		}
+		setCachedItemCount();
 		return cachedItem;
 	}
 	@Override

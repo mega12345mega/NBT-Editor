@@ -48,7 +48,7 @@ public class BookCommand extends ClientCommand {
 			TextInst.translatable("nbteditor.no_ref.book"),
 			TextInst.translatable("nbteditor.no_hand.no_item.book"));
 	
-	public static void convertBookToWritable(ItemReference ref) {
+	public static boolean convertBookToWritable(ItemReference ref) {
 		ItemStack item = MainUtil.setType(Items.WRITABLE_BOOK, ref.getItem(), 1);
 		boolean formatted = false;
 		List<Text> pages = WrittenBookTagReferences.PAGES.get(item);
@@ -66,6 +66,7 @@ public class BookCommand extends ClientCommand {
 			MainUtil.get(item, true);
 		} else
 			ref.saveItem(item, TextInst.translatable("nbteditor.book.convert.success"));
+		return !formatted;
 	}
 	
 	@Override

@@ -17,6 +17,8 @@ import java.util.WeakHashMap;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.ItemSize;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
@@ -275,7 +277,7 @@ public class MixinLink {
 	/**
 	 * Only in 1.20.5 or higher
 	 */
-	public static final WeakHashMap<BookScreen.Contents, Boolean> WRITTEN_BOOK_CONTENTS = new WeakHashMap<>();
+	public static final Cache<BookScreen.Contents, Boolean> WRITTEN_BOOK_CONTENTS = CacheBuilder.newBuilder().weakKeys().build();
 	
 	
 	public static void modifyTooltip(ItemStack source, List<Text> tooltip) {

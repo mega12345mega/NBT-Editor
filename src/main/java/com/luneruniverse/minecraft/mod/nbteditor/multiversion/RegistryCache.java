@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.util;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registry;

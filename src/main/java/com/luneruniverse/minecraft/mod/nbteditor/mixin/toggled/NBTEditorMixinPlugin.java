@@ -47,6 +47,17 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				.range("1.20.5", null, () -> output.add("toggled.ItemStackMixin"))
 				.range(null, "1.20.4", () -> {})
 				.run();
+		Version.newSwitch()
+				.range("1.20.5", null, () -> {
+					output.add("toggled.RegistryEntryReferenceMixin");
+					output.add("toggled.Registry1Mixin");
+				})
+				.range(null, "1.20.4", () -> {})
+				.run();
+		Version.newSwitch()
+				.range("1.21.0", null, () -> output.add("toggled.TooltipMixin"))
+				.range(null, "1.20.6", () -> {})
+				.run();
 	}
 	
 }

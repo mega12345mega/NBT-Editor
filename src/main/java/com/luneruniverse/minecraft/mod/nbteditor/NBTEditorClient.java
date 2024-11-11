@@ -39,6 +39,11 @@ import tsp.headdb.ported.HeadAPI;
 
 public class NBTEditorClient implements ClientModInitializer {
 	
+	static {
+		MC_1_17_Link.MixinLink.ENCHANT_GLINT_FIX = MixinLink.ENCHANT_GLINT_FIX;
+		MC_1_17_Link.ConfigScreen.isEnchantGlintFix_impl = ConfigScreen::isEnchantGlintFix;
+	}
+	
 	public static final File SETTINGS_FOLDER = new File("nbteditor");
 	public static ClientChest CLIENT_CHEST;
 	public static NBTEditorServerConn SERVER_CONN;

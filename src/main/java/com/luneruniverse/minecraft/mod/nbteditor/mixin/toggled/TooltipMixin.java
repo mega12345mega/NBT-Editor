@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.mixin;
+package com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled;
 
 import java.util.List;
 

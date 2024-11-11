@@ -72,9 +72,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.StringVisitable;
@@ -522,7 +524,7 @@ public class MVMisc {
 	
 	public static boolean isWrittenBookContents(BookScreen.Contents contents) {
 		return Version.<Boolean>newSwitch()
-				.range("1.20.5", null, () -> MixinLink.WRITTEN_BOOK_CONTENTS.containsKey(contents))
+				.range("1.20.5", null, () -> MixinLink.WRITTEN_BOOK_CONTENTS.getIfPresent(contents) != null)
 				.range(null, "1.20.4", () -> Reflection.getClass("net.minecraft.class_3872$class_3933").isInstance(contents))
 				.get();
 	}
@@ -615,6 +617,15 @@ public class MVMisc {
 			DynamicRegistryManagerHolder.withDefaultManager(callback);
 		else
 			callback.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> ScreenHandler_setStackInSlot =
+			Reflection.getOptionalMethod(ScreenHandler.class, "method_7619", MethodType.methodType(void.class, int.class, ItemStack.class));
+	public static void setStackInSlot(ScreenHandler screenHandler, ScreenHandlerSlotUpdateS2CPacket packet) {
+		Version.newSwitch()
+				.range("1.17.1", null, () -> screenHandler.setStackInSlot(packet.getSlot(), packet.getRevision(), packet.getStack()))
+				.range(null, "1.17", () -> ScreenHandler_setStackInSlot.get().invoke(screenHandler, packet.getSlot(), packet.getStack()))
+				.run();
 	}
 	
 }

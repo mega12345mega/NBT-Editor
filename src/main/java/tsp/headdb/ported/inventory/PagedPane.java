@@ -117,7 +117,7 @@ public class PagedPane extends ClientHandledScreen {
     public void selectPage(int index) {
         if (index < 0 || index >= getPageAmount()) {
             throw new IllegalArgumentException(
-                    "Index out of bounds s: " + index + " [" + 0 + " " + getPageAmount() + ")"
+                    "Index out of bounds s: " + index + " [" + 0 + ", " + getPageAmount() + ")"
             );
         }
         if (index == currentIndex) {
@@ -258,16 +258,8 @@ public class PagedPane extends ClientHandledScreen {
                     "&7Right-Click to go to a &6Specific Page");
             controlMain = new Button(itemStack, event -> {
                 if (event.getClickType() == ClickTypeMod.RIGHT) {
-                	new StringInputScreen(this, (text) -> {
-                        int i = Integer.parseInt(text);
-                        selectPage(i - 1);
-                	}, (text) -> {
-                		try {
-                			return Integer.parseInt(text) <= getPageAmount();
-                		} catch (NumberFormatException e) {
-                			return false;
-                		}
-                	}).show("Page number...");
+                	new StringInputScreen(this, page -> selectPage(Integer.parseInt(page) - 1),
+                			MainUtil.intPredicate(1, getPageAmount(), false)).show("Page number");
                 } else {
                     InventoryUtils.openDatabase();
                 }

@@ -1,11 +1,11 @@
-package com.luneruniverse.minecraft.mod.nbteditor.mixin;
+package com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
-import com.luneruniverse.minecraft.mod.nbteditor.util.RegistryCache;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.RegistryCache;
 
 import net.minecraft.registry.entry.RegistryEntry;
 
