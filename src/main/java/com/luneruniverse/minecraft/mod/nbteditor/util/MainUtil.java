@@ -554,4 +554,16 @@ public class MainUtil {
 		return output;
 	}
 	
+	public static void enableScissor(int x, int y, int width, int height) {
+		double scale = client.getWindow().getScaleFactor();
+		RenderSystem.enableScissor(
+				(int) (x * scale),
+				client.getWindow().getHeight() - (int) ((y + height) * scale),
+				(int) (width * scale),
+				(int) (height * scale));
+	}
+	public static void disableScissor() {
+		RenderSystem.disableScissor();
+	}
+	
 }
