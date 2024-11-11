@@ -558,7 +558,7 @@ public class MainUtil {
 		double scale = client.getWindow().getScaleFactor();
 		RenderSystem.enableScissor(
 				(int) (x * scale),
-				client.getWindow().getHeight() - (int) ((y + height) * scale),
+				(int) (y * scale),
 				(int) (width * scale),
 				(int) (height * scale));
 	}

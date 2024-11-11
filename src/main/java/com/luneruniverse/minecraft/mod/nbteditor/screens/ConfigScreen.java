@@ -372,7 +372,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		return singleQuotesAllowed;
 	}
 	public static boolean isMacScrollPatch() {
-		return macScrollPatch;
+		return false;
 	}
 	public static double getScrollSpeed() {
 		return scrollSpeed;
