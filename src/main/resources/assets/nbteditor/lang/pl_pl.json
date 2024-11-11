@@ -209,7 +209,7 @@
 	"nbteditor.keybind.edit": "§6§lSpacja§r§6, aby edytować!",
 	"nbteditor.keybind.container": "§6§lCtrl + Spacja§r§6, aby otworzyć kontener!",
 	"nbteditor.keybind.factory": "§6§lShift + Spacja§r§6, aby otworzyć fabrykę!",
-	"nbteditor.keybind.delete": "§6§lUsuń§r§6, aby usunąć!",
+	"nbteditor.keybind.delete": "§6§lDelete§r§6, aby usunąć!",
 	"nbteditor.keybind.page.up": "§6§lStrona w górę",
 	"nbteditor.keybind.page.down": "§6§lStrona w dół",
 	"nbteditor.keybind.page.shift": "§6§lShift+",
