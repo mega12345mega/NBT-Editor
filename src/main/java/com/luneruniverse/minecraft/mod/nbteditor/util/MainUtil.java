@@ -396,7 +396,7 @@ public class MainUtil {
 	
 	
 	public static int[] getMousePos() {
-		double scale = (double) client.getWindow().getScaledWidth() / client.getWindow().getWidth();
+		double scale = client.getWindow().getScaleFactor();
 		int x = (int) (client.mouse.getX() * scale);
 		int y = (int) (client.mouse.getY() * scale);
 		return new int[] {x, y};
@@ -552,6 +552,18 @@ public class MainUtil {
 			return null;
 		});
 		return output;
+	}
+	
+	public static void enableScissor(int x, int y, int width, int height) {
+		double scale = client.getWindow().getScaleFactor();
+		RenderSystem.enableScissor(
+				(int) (x * scale),
+				(int) ((client.getWindow().getScaledHeight() - (y + height)) * scale),
+				(int) (width * scale),
+				(int) (height * scale));
+	}
+	public static void disableScissor() {
+		RenderSystem.disableScissor();
 	}
 	
 }

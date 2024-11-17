@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.lang3.SystemUtils;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -41,7 +39,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
@@ -200,7 +197,6 @@ public class ConfigScreen extends TickableSupportingScreen {
 	private static boolean lockSlots; // Not shown in screen
 	private static boolean chatLimitExtended;
 	private static boolean singleQuotesAllowed;
-	private static boolean macScrollPatch;
 	private static double scrollSpeed;
 	private static boolean airEditable;
 	private static boolean jsonText;
@@ -228,7 +224,6 @@ public class ConfigScreen extends TickableSupportingScreen {
 		keybindsHidden = false;
 		chatLimitExtended = false;
 		singleQuotesAllowed = false;
-		macScrollPatch = MinecraftClient.IS_SYSTEM_MAC;
 		scrollSpeed = 5;
 		airEditable = false;
 		jsonText = false;
@@ -264,7 +259,6 @@ public class ConfigScreen extends TickableSupportingScreen {
 			lockSlots = settings.get("lockSlots").getAsBoolean();
 			chatLimitExtended = settings.get("extendChatLimit").getAsBoolean();
 			singleQuotesAllowed = settings.get("allowSingleQuotes").getAsBoolean();
-			macScrollPatch = !settings.get("keySkizzers").getAsBoolean();
 			scrollSpeed = settings.get("scrollSpeed").getAsDouble();
 			airEditable = settings.get("airEditable").getAsBoolean();
 			jsonText = settings.get("jsonText").getAsBoolean();
@@ -306,7 +300,6 @@ public class ConfigScreen extends TickableSupportingScreen {
 		settings.addProperty("lockSlots", lockSlots);
 		settings.addProperty("extendChatLimit", chatLimitExtended);
 		settings.addProperty("allowSingleQuotes", singleQuotesAllowed);
-		settings.addProperty("keySkizzers", !macScrollPatch);
 		settings.addProperty("scrollSpeed", scrollSpeed);
 		settings.addProperty("airEditable", airEditable);
 		settings.addProperty("jsonText", jsonText);
@@ -370,9 +363,6 @@ public class ConfigScreen extends TickableSupportingScreen {
 	}
 	public static boolean isSingleQuotesAllowed() {
 		return singleQuotesAllowed;
-	}
-	public static boolean isMacScrollPatch() {
-		return macScrollPatch;
 	}
 	public static double getScrollSpeed() {
 		return scrollSpeed;
@@ -533,11 +523,6 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.addValueListener(value -> hideFormatButtons = value.getValidValue()))
 				.setTooltip("nbteditor.config.hide_format_buttons.desc"));
 		
-		guis.setConfigurable("macScrollPatch", new ConfigItem<>(TextInst.translatable("nbteditor.config.mac_scroll_patch" + (SystemUtils.IS_OS_MAC ? ".on_mac" : "")),
-				new ConfigValueBoolean(macScrollPatch, SystemUtils.IS_OS_MAC, 100, TextInst.translatable("nbteditor.config.mac_scroll_patch.enabled"), TextInst.translatable("nbteditor.config.mac_scroll_patch.disabled"))
-				.addValueListener(value -> macScrollPatch = value.getValidValue()))
-				.setTooltip("nbteditor.config.mac_scroll_patch.desc"));
-		
 		guis.setConfigurable("hideKeybinds", new ConfigItem<>(TextInst.translatable("nbteditor.config.keybinds"),
 				new ConfigValueBoolean(keybindsHidden, false, 100, TextInst.translatable("nbteditor.config.keybinds.hidden"), TextInst.translatable("nbteditor.config.keybinds.shown"),
 				new MVTooltip("nbteditor.keybind.edit", "nbteditor.keybind.factory", "nbteditor.keybind.container", "nbteditor.keybind.enchant", "nbteditor.keybind.delete"))
@@ -618,14 +603,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 	
 	@Override
 	protected void init() {
-		ConfigPanel newPanel = addDrawableChild(new ConfigPanel(16, 16, width - 32, height - 32, config) {
-			@Override
-			protected boolean shouldScissor() {
-				// If Mac Scroll Patch needs to be enabled, then the config menu would render incorrectly too
-				// So always use scroll patch on config so the patch can be enabled without issues
-				return false;
-			}
-		});
+		ConfigPanel newPanel = addDrawableChild(new ConfigPanel(16, 16, width - 32, height - 32, config));
 		if (panel != null)
 			newPanel.setScroll(panel.getScroll());
 		panel = newPanel;
