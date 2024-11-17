@@ -21,7 +21,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -418,9 +417,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		MVDrawableHelper.fill(matrices, x, y, x + width, y + height, bgColor);
 		
-		boolean scissor = !ConfigScreen.isMacScrollPatch();
-		if (scissor)
-			MainUtil.enableScissor(x, y, width, height);
+		MainUtil.enableScissor(x, y, width, height);
 		
 		matrices.push();
 		matrices.translate(0.0, scroll, 0.0);
@@ -455,8 +452,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 			suggestor.render(matrices, mouseX, mouseY, delta);
 		}
 		
-		if (scissor)
-			MainUtil.disableScissor();
+		MainUtil.disableScissor();
 	}
 	protected void renderHighlightsBelow(MatrixStack matrices, int mouseX, int mouseY, float delta) {}
 	protected void renderHighlightsAbove(MatrixStack matrices, int mouseX, int mouseY, float delta) {}
