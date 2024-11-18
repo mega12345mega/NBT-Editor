@@ -46,6 +46,21 @@ public class Reflection {
 	public static <T> T newInstance(String clazz, Class<?>[] parameters, Object... args) {
 		return (T) newInstance(getClass(clazz), parameters, args);
 	}
+	public static <E extends Throwable, T> T newInstanceThrowable(Class<E> possibleException, Class<T> clazz, Class<?>[] parameters, Object... args) throws E {
+		try {
+			Constructor<T> constructor = clazz.getDeclaredConstructor(parameters);
+			constructor.setAccessible(true);
+			return constructor.newInstance(args);
+		} catch (Exception e) {
+			if (e instanceof InvocationTargetException thrownE && possibleException.isInstance(thrownE.getCause()))
+				throw possibleException.cast(thrownE.getCause());
+			throw new RuntimeException("Error creating new instance of class", e);
+		}
+	}
+	@SuppressWarnings("unchecked")
+	public static <E extends Throwable, T> T newInstanceThrowable(Class<E> possibleException, String clazz, Class<?>[] parameters, Object... args) throws E {
+		return (T) newInstanceThrowable(possibleException, getClass(clazz), parameters, args);
+	}
 	
 	
 	public static class FieldReference {

@@ -397,8 +397,8 @@ public class MainUtil {
 	
 	public static int[] getMousePos() {
 		double scale = client.getWindow().getScaleFactor();
-		int x = (int) (client.mouse.getX() * scale);
-		int y = (int) (client.mouse.getY() * scale);
+		int x = (int) (client.mouse.getX() / scale);
+		int y = (int) (client.mouse.getY() / scale);
 		return new int[] {x, y};
 	}
 	

@@ -448,9 +448,9 @@ public class ClientChest {
 						continue;
 					if (getDataVersionStatus(page).map(status -> status.canBeUpdated(defaultDataVersion.isPresent())).orElse(true)) {
 						try {
-							boolean cached = cache.isPageCached(page);
+							boolean unloaded = (getLoadLevel(page) == PageLoadLevel.UNLOADED);
 							if (updatePageSync(page, defaultDataVersion, true) != null) {
-								if (!cached)
+								if (unloaded)
 									cache.discardPageCache(page);
 							}
 						} catch (Throwable e) {
@@ -737,7 +737,9 @@ public class ClientChest {
 		pageNbt.putInt("DataVersion", Version.getDataVersion());
 		MixinLink.throwHiddenException(() -> MVMisc.writeNbt(pageNbt, file));
 		
+		PageLoadLevel loadLevel = getLoadLevel(page);
 		cache.discardPageCache(page);
+		readPageSync(page, loadLevel);
 	}
 	
 	private ClientChestPage updatePageSync(int page, Optional<Integer> defaultDataVersion, boolean ignoreInvalidDataVersion) throws Throwable {

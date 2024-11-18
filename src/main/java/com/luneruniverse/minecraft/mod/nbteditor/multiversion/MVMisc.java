@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 
 import org.joml.Vector2ic;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
@@ -28,13 +29,13 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCom
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Keyboard;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.screen.Screen;
@@ -412,6 +413,14 @@ public class MVMisc {
 		// Should be .byName() until 1.20.2 and doesn't have a clear replacement at and after 1.20.3
 		// But this seems to be equivalent (at least currently)
 		return ClickEvent.Action.valueOf(name.toUpperCase());
+	}
+	private static final Supplier<Reflection.MethodInvoker> HoverEvent$Action_contentsToJson =
+			Reflection.getOptionalMethod(HoverEvent.Action.class, "method_27669", MethodType.methodType(JsonElement.class, Object.class));
+	public static JsonElement getHoverEventContentsJson(HoverEvent event) {
+		return Version.<JsonElement>newSwitch()
+				.range("1.20.3", null, () -> HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, event).result().orElseThrow().getAsJsonObject().get("contents"))
+				.range(null, "1.20.2", () -> HoverEvent$Action_contentsToJson.get().invoke(event.getAction(), event.getValue(event.getAction())))
+				.get();
 	}
 	private static final Supplier<Reflection.MethodInvoker> HoverEvent_fromJson =
 			Reflection.getOptionalMethod(HoverEvent.class, "method_27664", MethodType.methodType(HoverEvent.class, JsonObject.class));

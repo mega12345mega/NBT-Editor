@@ -8,10 +8,6 @@ public interface ClientChestPageCache {
 	public void cachePage(int page, ClientChestPage pageData);
 	public void cacheEmptyPage(int page);
 	public void discardPageCache(int page);
-	public default boolean isPageCached(int page) {
-		ClientChestPage pageData = getCachedPage(page);
-		return pageData != null && pageData.loadLevel() != PageLoadLevel.UNLOADED;
-	}
 	
 	public int[] getNearestItems(int page);
 	
