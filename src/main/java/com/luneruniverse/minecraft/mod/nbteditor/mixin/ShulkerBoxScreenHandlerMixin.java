@@ -13,8 +13,8 @@ import net.minecraft.screen.ShulkerBoxScreenHandler;
 
 @Mixin(ShulkerBoxScreenHandler.class)
 public class ShulkerBoxScreenHandlerMixin {
-	@Inject(method = "<init>(ILnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/inventory/Inventory;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Inventory;onOpen(Lnet/minecraft/entity/player/PlayerEntity;)V"))
-	private void initHead(int syncId, PlayerInventory playerInventory, Inventory inventory, CallbackInfo info) {
+	@Inject(method = "<init>(ILnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/inventory/Inventory;)V", at = @At("HEAD"))
+	private static void initHead(int syncId, PlayerInventory playerInventory, Inventory inventory, CallbackInfo info) {
 		ServerMixinLink.SCREEN_HANDLER_OWNER.put(Thread.currentThread(), playerInventory.player);
 	}
 	@Inject(method = "<init>(ILnet/minecraft/entity/player/PlayerInventory;Lnet/minecraft/inventory/Inventory;)V", at = @At("RETURN"))

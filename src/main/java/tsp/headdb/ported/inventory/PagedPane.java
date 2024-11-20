@@ -14,6 +14,7 @@ import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientScreenHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -43,7 +44,7 @@ public class PagedPane extends ClientHandledScreen {
      * @param pageSize The page size. inventory rows - 2
      */
     public PagedPane(int pageSize, int rows, String title) {
-    	super(createGenericScreenHandler(rows), TextInst.of(MainUtil.colorize(title)));
+    	super(new ClientScreenHandler(rows), TextInst.of(MainUtil.colorize(title)));
         this.pageSize = pageSize;
         pages.put(0, new Page(pageSize));
     }
@@ -116,7 +117,7 @@ public class PagedPane extends ClientHandledScreen {
     public void selectPage(int index) {
         if (index < 0 || index >= getPageAmount()) {
             throw new IllegalArgumentException(
-                    "Index out of bounds s: " + index + " [" + 0 + " " + getPageAmount() + ")"
+                    "Index out of bounds s: " + index + " [" + 0 + ", " + getPageAmount() + ")"
             );
         }
         if (index == currentIndex) {
@@ -257,16 +258,8 @@ public class PagedPane extends ClientHandledScreen {
                     "&7Right-Click to go to a &6Specific Page");
             controlMain = new Button(itemStack, event -> {
                 if (event.getClickType() == ClickTypeMod.RIGHT) {
-                	new StringInputScreen(this, (text) -> {
-                        int i = Integer.parseInt(text);
-                        selectPage(i - 1);
-                	}, (text) -> {
-                		try {
-                			return Integer.parseInt(text) <= getPageAmount();
-                		} catch (NumberFormatException e) {
-                			return false;
-                		}
-                	}).show("Page number...");
+                	new StringInputScreen(this, page -> selectPage(Integer.parseInt(page) - 1),
+                			MainUtil.intPredicate(1, getPageAmount(), false)).show("Page number");
                 } else {
                     InventoryUtils.openDatabase();
                 }

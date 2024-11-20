@@ -8,7 +8,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
@@ -56,7 +56,7 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				itemNameType ? MainUtil.getBaseItemNameSafely(((LocalItem) localNBT).getEditableItem()) : localNBT.getName(),
 						false, baseNameStyle, text -> {
 			if (itemNameType)
-				((LocalItem) localNBT).getEditableItem().set(MVDataComponentType.ITEM_NAME, text);
+				((LocalItem) localNBT).getEditableItem().set(MVComponentType.ITEM_NAME, text);
 			else
 				localNBT.setName(text);
 			name.setText(localNBT.getName().getString());

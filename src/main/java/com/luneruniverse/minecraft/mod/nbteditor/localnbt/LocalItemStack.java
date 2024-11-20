@@ -21,7 +21,7 @@ public class LocalItemStack extends LocalItem {
 	
 	public static LocalItemStack deserialize(NbtCompound nbt, int defaultDataVersion) {
 		return new LocalItemStack(NBTManagers.ITEM.deserialize(
-				MainUtil.updateDynamic(TypeReferences.ITEM_STACK, nbt, defaultDataVersion)));
+				MainUtil.updateDynamic(TypeReferences.ITEM_STACK, nbt, defaultDataVersion), true));
 	}
 	
 	private ItemStack item;
@@ -120,7 +120,7 @@ public class LocalItemStack extends LocalItem {
 	}
 	@Override
 	public NbtCompound serialize() {
-		NbtCompound output = item.manager$serialize();
+		NbtCompound output = item.manager$serialize(true);
 		output.putString("type", "item");
 		return output;
 	}

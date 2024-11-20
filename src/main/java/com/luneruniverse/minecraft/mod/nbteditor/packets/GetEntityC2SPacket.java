@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
 import java.util.UUID;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistryKeys;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
 
@@ -12,7 +13,7 @@ import net.minecraft.world.World;
 
 public class GetEntityC2SPacket implements MVPacket {
 	
-	public static final Identifier ID = new Identifier("nbteditor", "get_entity");
+	public static final Identifier ID = IdentifierInst.of("nbteditor", "get_entity");
 	
 	private final int requestId;
 	private final RegistryKey<World> world;

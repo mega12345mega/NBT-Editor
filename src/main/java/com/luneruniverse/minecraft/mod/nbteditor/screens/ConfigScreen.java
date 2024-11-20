@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.lang3.SystemUtils;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -22,9 +20,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChest;
-import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChest;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChestPageCache;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChestPageCache;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVEnchantments;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
@@ -40,13 +40,10 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 public class ConfigScreen extends TickableSupportingScreen {
 	
@@ -79,7 +76,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		public MVTooltip getTooltip() {
 			List<Text> output = new ArrayList<>();
 			for (int lvl = 1; lvl <= 3; lvl++)
-				output.add(getEnchantNameWithMax(Enchantments.FIRE_ASPECT, lvl, this));
+				output.add(getEnchantNameWithMax(MVEnchantments.FIRE_ASPECT, lvl, this));
 			return new MVTooltip(output);
 		}
 	}
@@ -201,7 +198,6 @@ public class ConfigScreen extends TickableSupportingScreen {
 	private static boolean lockSlots; // Not shown in screen
 	private static boolean chatLimitExtended;
 	private static boolean singleQuotesAllowed;
-	private static boolean macScrollPatch;
 	private static double scrollSpeed;
 	private static boolean airEditable;
 	private static boolean jsonText;
@@ -229,7 +225,6 @@ public class ConfigScreen extends TickableSupportingScreen {
 		keybindsHidden = false;
 		chatLimitExtended = false;
 		singleQuotesAllowed = false;
-		macScrollPatch = MinecraftClient.IS_SYSTEM_MAC;
 		scrollSpeed = 5;
 		airEditable = false;
 		jsonText = false;
@@ -265,7 +260,6 @@ public class ConfigScreen extends TickableSupportingScreen {
 			lockSlots = settings.get("lockSlots").getAsBoolean();
 			chatLimitExtended = settings.get("extendChatLimit").getAsBoolean();
 			singleQuotesAllowed = settings.get("allowSingleQuotes").getAsBoolean();
-			macScrollPatch = !settings.get("keySkizzers").getAsBoolean();
 			scrollSpeed = settings.get("scrollSpeed").getAsDouble();
 			airEditable = settings.get("airEditable").getAsBoolean();
 			jsonText = settings.get("jsonText").getAsBoolean();
@@ -307,7 +301,6 @@ public class ConfigScreen extends TickableSupportingScreen {
 		settings.addProperty("lockSlots", lockSlots);
 		settings.addProperty("extendChatLimit", chatLimitExtended);
 		settings.addProperty("allowSingleQuotes", singleQuotesAllowed);
-		settings.addProperty("keySkizzers", !macScrollPatch);
 		settings.addProperty("scrollSpeed", scrollSpeed);
 		settings.addProperty("airEditable", airEditable);
 		settings.addProperty("jsonText", jsonText);
@@ -372,9 +365,6 @@ public class ConfigScreen extends TickableSupportingScreen {
 	public static boolean isSingleQuotesAllowed() {
 		return singleQuotesAllowed;
 	}
-	public static boolean isMacScrollPatch() {
-		return macScrollPatch;
-	}
 	public static double getScrollSpeed() {
 		return scrollSpeed;
 	}
@@ -434,12 +424,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
-		EditableText output = TextInst.translatable(enchant.getTranslationKey());
-        if (enchant.isCursed()) {
-            output.formatted(Formatting.RED);
-        } else {
-            output.formatted(Formatting.GRAY);
-        }
+		EditableText output = TextInst.copy(MVEnchantments.getEnchantmentName(enchant));
         if (level != 1 || enchant.getMaxLevel() != 1 || enchantLevelMax == EnchantLevelMax.ALWAYS) {
             output.append(" ");
             if (isEnchantNumberTypeArabic())
@@ -539,14 +524,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 				.addValueListener(value -> hideFormatButtons = value.getValidValue()))
 				.setTooltip("nbteditor.config.hide_format_buttons.desc"));
 		
-		guis.setConfigurable("macScrollPatch", new ConfigItem<>(TextInst.translatable("nbteditor.config.mac_scroll_patch" + (SystemUtils.IS_OS_MAC ? ".on_mac" : "")),
-				new ConfigValueBoolean(macScrollPatch, SystemUtils.IS_OS_MAC, 100, TextInst.translatable("nbteditor.config.mac_scroll_patch.enabled"), TextInst.translatable("nbteditor.config.mac_scroll_patch.disabled"))
-				.addValueListener(value -> macScrollPatch = value.getValidValue()))
-				.setTooltip("nbteditor.config.mac_scroll_patch.desc"));
-		
 		guis.setConfigurable("hideKeybinds", new ConfigItem<>(TextInst.translatable("nbteditor.config.keybinds"),
 				new ConfigValueBoolean(keybindsHidden, false, 100, TextInst.translatable("nbteditor.config.keybinds.hidden"), TextInst.translatable("nbteditor.config.keybinds.shown"),
-				new MVTooltip("nbteditor.keybind.edit", "nbteditor.keybind.factory", "nbteditor.keybind.container", "nbteditor.keybind.enchant"))
+				new MVTooltip("nbteditor.keybind.edit", "nbteditor.keybind.factory", "nbteditor.keybind.container", "nbteditor.keybind.enchant", "nbteditor.keybind.delete"))
 				.addValueListener(value -> keybindsHidden = value.getValidValue()))
 				.setTooltip("nbteditor.config.keybinds.desc"));
 		
@@ -624,14 +604,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 	
 	@Override
 	protected void init() {
-		ConfigPanel newPanel = addDrawableChild(new ConfigPanel(16, 16, width - 32, height - 32, config) {
-			@Override
-			protected boolean shouldScissor() {
-				// If Mac Scroll Patch needs to be enabled, then the config menu would render incorrectly too
-				// So always use scroll patch on config so the patch can be enabled without issues
-				return false;
-			}
-		});
+		ConfigPanel newPanel = addDrawableChild(new ConfigPanel(16, 16, width - 32, height - 32, config));
 		if (panel != null)
 			newPanel.setScroll(panel.getScroll());
 		panel = newPanel;
@@ -651,10 +624,10 @@ public class ConfigScreen extends TickableSupportingScreen {
 	@Override
 	public void removed() {
 		saveSettings();
-		if (largeClientChest != (NBTEditorClient.CLIENT_CHEST instanceof LargeClientChest)) {
-			NBTEditorClient.CLIENT_CHEST = largeClientChest ? new LargeClientChest(5) : new SmallClientChest(100);
+		if (largeClientChest != (NBTEditorClient.CLIENT_CHEST.getCache() instanceof LargeClientChestPageCache)) {
+			NBTEditorClient.CLIENT_CHEST.setCache(largeClientChest ? new LargeClientChestPageCache(5) : new SmallClientChestPageCache(100))
+					.thenAccept(v -> ClientChestHelper.loadDefaultPages(NBTEditorClient.CLIENT_CHEST.getLoadLevel(0)));
 			ClientChestScreen.PAGE = Math.min(ClientChestScreen.PAGE, NBTEditorClient.CLIENT_CHEST.getPageCount() - 1);
-			NBTEditorClient.CLIENT_CHEST.loadAync();
 		}
 	}
 	

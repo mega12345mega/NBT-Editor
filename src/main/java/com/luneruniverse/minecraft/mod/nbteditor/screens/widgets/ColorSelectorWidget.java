@@ -6,9 +6,11 @@ import java.util.function.Consumer;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVSliderWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -56,12 +58,12 @@ public class ColorSelectorWidget extends GroupWidget {
 		
 	}
 	
-	private static final Identifier HUES = new Identifier("nbteditor", "textures/hues.png");
+	private static final Identifier HUES = IdentifierInst.of("nbteditor", "textures/hues.png");
 	
 	private class ColorArea implements MVDrawable, MVElement {
 		@Override
 		public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-			MainUtil.fillShader(matrices, Shaders.POSITION_HSV, vertex -> vertex.light(hueValue), x, y, areaSize, areaSize);
+			MainUtil.fillShader(matrices, Shaders.POSITION_HSV, vertex -> MVMisc.setVertexLight(vertex, hueValue), x, y, areaSize, areaSize);
 		}
 		@Override
 		public boolean mouseClicked(double mouseX, double mouseY, int button) {

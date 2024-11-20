@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -42,7 +43,7 @@ public class SignboardArgumentType implements ArgumentType<SignItem> {
 		while (stringReader.canRead() && stringReader.peek() != ' ')
 			value.append(stringReader.read());
 		
-		SignItem output = signs.get(new Identifier(value.toString()));
+		SignItem output = signs.get(IdentifierInst.of(value.toString()));
 		if (output == null)
 			throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(stringReader);
 		return output;

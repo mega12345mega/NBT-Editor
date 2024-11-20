@@ -5,8 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientScreenHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -16,6 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.util.Unit;
 import tsp.headdb.ported.Category;
 import tsp.headdb.ported.Head;
 import tsp.headdb.ported.HeadAPI;
@@ -138,7 +142,7 @@ public class InventoryUtils {
     }
 
     public static void openDatabase() {
-    	ClientHandledScreen screen = new ClientHandledScreen(ClientHandledScreen.createGenericScreenHandler(6),
+    	ClientHandledScreen screen = new ClientHandledScreen(new ClientScreenHandler(6),
     			TextInst.of(Utils.colorize("&c&lHeadDB &8(" + HeadAPI.getHeads().size() + ")"))) {
     		@Override
     		protected void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
@@ -226,6 +230,9 @@ public class InventoryUtils {
         ItemStack item = getUIItem("fill", new ItemStack(Items.BLACK_STAINED_GLASS_PANE));
         // Do not bother filling the inventory if item to fill it with is AIR.
         if (item == null || item.isEmpty()) return;
+        
+        if (NBTManagers.COMPONENTS_EXIST)
+        	item.set(MVComponentType.HIDE_TOOLTIP, Unit.INSTANCE);
 
         // Fill any non-empty inventory slots with the given item.
         int size = inv.size();

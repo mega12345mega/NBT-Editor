@@ -4,11 +4,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -26,6 +27,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.SetSlotC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewBlockS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.util.BlockStateProperties;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -54,6 +57,23 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	
 	public static final int PROTOCOL_VERSION = 1;
 	public static boolean IS_DEDICATED = true;
+	
+	private static final WeakHashMap<Thread, Boolean> serverThreads = new WeakHashMap<>();
+	public static void registerServerThread(Thread thread) {
+		serverThreads.put(thread, true);
+	}
+	public static void unregisterServerThread(Thread thread) {
+		serverThreads.remove(thread);
+	}
+	public static boolean isOnServerThread() {
+		if (IS_DEDICATED)
+			return true;
+		if (MainUtil.client.getServer() == null)
+			return false;
+		if (MainUtil.client.getServer().isOnThread())
+			return true;
+		return serverThreads.containsKey(Thread.currentThread());
+	}
 	
 	public NBTEditorServer() {
 		MVServerNetworking.registerListener(SetCursorC2SPacket.ID, this::onSetCursorPacket);
@@ -292,7 +312,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 			Identifier passengerId = null;
 			if (passengerNbt.contains("id", NbtElement.STRING_TYPE)) {
 				try {
-					passengerId = new Identifier(passengerNbt.getString("id"));
+					passengerId = IdentifierInst.of(passengerNbt.getString("id"));
 					if (!MVRegistry.ENTITY_TYPE.containsId(passengerId))
 						passengerId = null;
 				} catch (InvalidIdentifierException e) {}

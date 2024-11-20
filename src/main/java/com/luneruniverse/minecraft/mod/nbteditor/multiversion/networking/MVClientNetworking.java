@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -13,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
 import net.minecraft.util.Identifier;
@@ -21,11 +23,11 @@ public class MVClientNetworking {
 	
 	public static class PlayNetworkStateEvents {
 		public static interface Start {
-			public static final Event<Start> EVENT = EventFactory.createArrayBacked(Start.class, listeners -> () -> {
+			public static final Event<Start> EVENT = EventFactory.createArrayBacked(Start.class, listeners -> networkHandler -> {
 				for (Start listener : listeners)
-					listener.onPlayStart();
+					listener.onPlayStart(networkHandler);
 			});
-			public void onPlayStart();
+			public void onPlayStart(ClientPlayNetworkHandler networkHandler);
 		}
 		public static interface Join {
 			public static final Event<Join> EVENT = EventFactory.createArrayBacked(Join.class, listeners -> () -> {
@@ -41,6 +43,30 @@ public class MVClientNetworking {
 			});
 			public void onPlayStop();
 		}
+	}
+	
+	public static void onPlayStart(ClientPlayNetworkHandler networkHandler) {
+		Version.newSwitch()
+				.range("1.20.5", null, () -> {
+					DynamicRegistryManagerHolder.setClientManager(networkHandler);
+				})
+				.range(null, "1.20.4", () -> {})
+				.run();
+		
+		PlayNetworkStateEvents.Start.EVENT.invoker().onPlayStart(networkHandler);
+	}
+	public static void onPlayJoin() {
+		PlayNetworkStateEvents.Join.EVENT.invoker().onPlayJoin();
+	}
+	public static void onPlayStop() {
+		PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop();
+		
+		Version.newSwitch()
+				.range("1.20.5", null, () -> {
+					DynamicRegistryManagerHolder.setClientManager(null);
+				})
+				.range(null, "1.20.4", () -> {})
+				.run();
 	}
 	
 	private static final Map<Identifier, List<Consumer<MVPacket>>> listeners = new HashMap<>();

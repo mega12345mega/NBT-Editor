@@ -33,7 +33,7 @@ public class MaxStackSizeCommand extends ClientCommand {
 		builder.then(literal("default").executes(context -> {
 			ItemReference ref = ItemReference.getHeldItem();
 			ItemStack item = ref.getItem();
-			if (item.getComponentChanges().get(DataComponentTypes.MAX_STACK_SIZE).isEmpty()) {
+			if (item.getComponentChanges().get(DataComponentTypes.MAX_STACK_SIZE) == null) {
 				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.max_stack_size.already_removed"), false);
 			} else if (item.contains(DataComponentTypes.MAX_DAMAGE) &&
 					item.getDefaultComponents().getOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1) > 1) {

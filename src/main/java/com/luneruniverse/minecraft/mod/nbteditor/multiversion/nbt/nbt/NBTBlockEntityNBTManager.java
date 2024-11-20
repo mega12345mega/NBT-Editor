@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManager;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
@@ -19,11 +20,11 @@ public class NBTBlockEntityNBTManager implements NBTManager<BlockEntity> {
 	private static final Supplier<Reflection.MethodInvoker> BlockEntity_createNbtWithId =
 			Reflection.getOptionalMethod(BlockEntity.class, "method_38243", MethodType.methodType(NbtCompound.class));
 	@Override
-	public NbtCompound serialize(BlockEntity subject) {
-		return Version.<NbtCompound>newSwitch()
+	public Attempt<NbtCompound> trySerialize(BlockEntity subject) {
+		return new Attempt<>(Version.<NbtCompound>newSwitch()
 				.range("1.18.0", null, () -> BlockEntity_createNbtWithId.get().invoke(subject))
 				.range(null, "1.17.1", () -> BlockEntity_writeNbt.get().invoke(subject, new NbtCompound()))
-				.get();
+				.get());
 	}
 	
 	@Override

@@ -2,10 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
@@ -20,6 +17,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -30,14 +28,14 @@ import net.minecraft.util.Identifier;
 
 public class MVDrawableHelper {
 	
-	private static final Map<MatrixStack, DrawContext> drawContexts = Collections.synchronizedMap(new WeakHashMap<>());
+	private static final Cache<MatrixStack, DrawContext> drawContexts = CacheBuilder.newBuilder().weakKeys().weakValues().build();
 	public static MatrixStack getMatrices(DrawContext context) {
 		MatrixStack matrices = context.getMatrices();
 		drawContexts.put(matrices, context);
 		return matrices;
 	}
 	public static DrawContext getDrawContext(MatrixStack matrices) {
-		return drawContexts.get(matrices);
+		return drawContexts.getIfPresent(matrices);
 	}
 	
 	public static void super_render(Class<?> callerClass, Drawable caller, MatrixStack matrices, int mouseX, int mouseY, float delta) {
@@ -217,13 +215,28 @@ public class MVDrawableHelper {
 		Version.newSwitch()
 				.range("1.20.5", null, () -> {
 					if (MainUtil.client.world == null)
-						screen.renderBackground(getDrawContext(matrices), mousePos[0], mousePos[1], MainUtil.client.getTickDelta());
+						screen.renderBackground(getDrawContext(matrices), mousePos[0], mousePos[1], MVMisc.getTickDelta());
 					else
 						screen.renderInGameBackground(getDrawContext(matrices));
 				})
-				.range("1.20.2", "1.20.4", () -> screen.renderBackground(getDrawContext(matrices), mousePos[0], mousePos[1], MainUtil.client.getTickDelta()))
+				.range("1.20.2", "1.20.4", () -> screen.renderBackground(getDrawContext(matrices), mousePos[0], mousePos[1], MVMisc.getTickDelta()))
 				.range("1.20.0", "1.20.1", () -> Screen_renderBackground_DrawContext.get().invoke(screen, MVDrawableHelper.getDrawContext(matrices)))
 				.range(null, "1.19.4", () -> Screen_renderBackground_MatrixStack.get().invoke(screen, matrices))
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> DrawableHelper_fillGradient =
+			Reflection.getOptionalMethod(DrawContext.class, "method_33284", MethodType.methodType(void.class, MatrixStack.class, int.class, int.class, int.class, int.class, int.class, int.class, int.class));
+	public static void drawSlotHighlight(MatrixStack matrices, int x, int y, int color) {
+		Version.newSwitch()
+				.range("1.20.0", null, () -> getDrawContext(matrices).fillGradient(RenderLayer.getGuiOverlay(), x, y, x + 16, y + 16, color, color, 0))
+				.range(null, "1.19.4", () -> {
+					RenderSystem.disableDepthTest();
+					RenderSystem.colorMask(true, true, true, false);
+					DrawableHelper_fillGradient.get().invoke(null, matrices, x, y, x + 16, y + 16, color, color, 0);
+					RenderSystem.colorMask(true, true, true, true);
+					RenderSystem.enableDepthTest();
+				})
 				.run();
 	}
 	

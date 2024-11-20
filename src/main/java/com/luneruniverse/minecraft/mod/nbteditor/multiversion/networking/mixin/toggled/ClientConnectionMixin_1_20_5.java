@@ -11,6 +11,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVServe
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.NetworkState;
@@ -35,15 +36,15 @@ public class ClientConnectionMixin_1_20_5 {
 	private void transitionInbound_return(NetworkState<?> state, PacketListener listener, CallbackInfo info) {
 		if (side == NetworkSide.CLIENTBOUND && !NBTEditorServer.IS_DEDICATED) {
 			if (ServerMixinLink.isInstanceOfClientPlayNetworkHandlerSafely(listener))
-				MVClientNetworking.PlayNetworkStateEvents.Start.EVENT.invoker().onPlayStart();
+				MVClientNetworking.onPlayStart((ClientPlayNetworkHandler) listener);
 			else if (ServerMixinLink.isInstanceOfClientPlayNetworkHandlerSafely(prevListener))
-				MVClientNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop();
+				MVClientNetworking.onPlayStop();
 		}
 		if (side == NetworkSide.SERVERBOUND) {
 			if (listener instanceof ServerPlayNetworkHandler handler)
-				MVServerNetworking.PlayNetworkStateEvents.Start.EVENT.invoker().onPlayStart(handler.player);
+				MVServerNetworking.onPlayStart(handler.player);
 			else if (prevListener instanceof ServerPlayNetworkHandler handler)
-				MVServerNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop(handler.player);
+				MVServerNetworking.onPlayStop(handler.player);
 		}
 		prevListener = null;
 	}

@@ -8,6 +8,8 @@ import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
@@ -20,7 +22,7 @@ import net.minecraft.util.Identifier;
 
 @Mixin(TextFieldWidget.class)
 public abstract class TextFieldWidgetMixin implements Tickable {
-	private static final Identifier TEXT_FIELD_INVALID = new Identifier("nbteditor", "widget/text_field_invalid");
+	private static final Identifier TEXT_FIELD_INVALID = IdentifierInst.of("nbteditor", "widget/text_field_invalid");
 	@ModifyArg(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V", ordinal = 0), index = 0)
 	@Group(name = "renderButton", min = 1)
 	private Identifier drawGuiTexture(Identifier texture) {
@@ -50,7 +52,7 @@ public abstract class TextFieldWidgetMixin implements Tickable {
 	@SuppressWarnings("target")
 	private VertexConsumer vertex(BufferBuilder buffer, double x, double y, double z) {
 		if (NamedTextFieldWidget.matrix == null)
-			return buffer.vertex(x, y, z);
+			return MVMisc.startVertex(buffer, x, y, z);
 		return NamedTextFieldWidget.matrix.applyToVertex(buffer, (float) x, (float) y, (float) z);
 	}
 	

@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 
 import org.lwjgl.opengl.GL20;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
+import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -99,6 +101,7 @@ public class MVTooltip {
 		
 		Tooltip output = Tooltip.of(combined);
 		Reflection.getField(Tooltip.class, "field_41103", "Ljava/util/List;").set(output, lines);
+		MixinLink.NEW_TOOLTIPS.put(output, true);
 		return output;
 	}
 	Object toOldTooltip() {
@@ -128,7 +131,7 @@ public class MVTooltip {
 		float[] translation = MVMatrix4f.getTranslation(matrices);
 		matrices.push();
 		matrices.translate(-translation[0], -translation[1], 0.0);
-		boolean scissor = GL20.glGetBoolean(GL20.GL_SCISSOR_TEST);
+		boolean scissor = GlStateManager.SCISSOR.capState.state;
 		if (scissor)
 			GL20.glDisable(GL20.GL_SCISSOR_TEST);
 		

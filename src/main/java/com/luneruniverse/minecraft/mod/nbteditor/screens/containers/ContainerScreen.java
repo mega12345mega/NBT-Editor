@@ -29,11 +29,8 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	
 	private NBTReference<L> ref;
 	private L localNBT;
-	private int blockedInvSlot;
-	private int blockedHotbarSlot;
 	private int numSlots;
 	
-	private ItemStack[] prevInv;
 	private boolean navigationClicked;
 	
 	private ContainerScreen(ContainerHandler handler, Text title) {
@@ -45,10 +42,6 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	private ContainerScreen<L> build(NBTReference<L> ref) {
 		this.ref = ref;
 		this.localNBT = LocalNBT.copy(ref.getLocalNBT());
-		this.blockedInvSlot = (ref instanceof ItemReference item ? item.getBlockedInvSlot() : -1);
-		if (this.blockedInvSlot != -1)
-			this.blockedInvSlot += 27;
-		this.blockedHotbarSlot = (ref instanceof ItemReference item ? item.getBlockedHotbarSlot() : -1);
 		
 		ItemStack[] contents = ContainerIO.read(localNBT);
 		for (int i = 0; i < contents.length; i++)
@@ -115,34 +108,24 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	protected void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
 		if (navigationClicked)
 			return;
-		if (slot != null && slot.id == this.blockedInvSlot)
-			return;
-		if (actionType == SlotActionType.SWAP && button == blockedHotbarSlot)
-			return;
-		if (slot != null && slot.id >= numSlots && slot.inventory == this.handler.getInventory() && (slot.getStack() == null || slot.getStack().isEmpty()))
-			return;
-		
-		prevInv = new ItemStack[this.handler.getInventory().size()];
-		for (int i = 0; i < prevInv.length; i++)
-			prevInv[i] = this.handler.getInventory().getStack(i).copy();
 		
 		super.onMouseClick(slot, slotId, button, actionType);
 	}
 	@Override
-	public boolean allowEnchantmentCombine(Slot slot) {
-		return slot.id != this.blockedInvSlot;
+	public boolean allowEnchantmentCombine() {
+		return true;
 	}
 	@Override
-	public void onEnchantmentCombine(Slot slot) {
-		save();
-	}
-	@Override
-	public SlotLockType getSlotLockType() {
-		return ref instanceof ItemReference item && item.isLocked() ? SlotLockType.ITEMS_LOCKED : SlotLockType.UNLOCKED;
-	}
-	@Override
-	public ItemStack[] getPrevInventory() {
-		return prevInv;
+	public LockedSlotsInfo getLockedSlotsInfo() {
+		LockedSlotsInfo info = (ref instanceof ItemReference itemRef && itemRef.isLocked()
+				? LockedSlotsInfo.ITEMS_LOCKED : LockedSlotsInfo.NONE).copy();
+		if (ref instanceof ItemReference itemRef)
+			info.addPlayerSlot(itemRef);
+		
+		for (int slot = numSlots; slot < 27; slot++)
+			info.addContainerSlot(slot);
+		
+		return info;
 	}
 	@Override
 	public void onChange() {
@@ -166,8 +149,8 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 			return true;
 		}
 		
-		if (keyCode == GLFW.GLFW_KEY_SPACE) {
-			if (focusedSlot != null && (focusedSlot.id < numSlots || focusedSlot.inventory != this.handler.getInventory())) {
+		if (focusedSlot != null && (focusedSlot.id < numSlots || focusedSlot.inventory != this.handler.getInventory())) {
+			if (keyCode != GLFW.GLFW_KEY_DELETE || !getLockedSlotsInfo().isBlocked(focusedSlot, true)) {
 				if (handleKeybind(keyCode, focusedSlot,
 						HandledScreenItemReferenceParent.create(
 								cursor -> show(ref, cursor), () -> handler.setCursorStack(ItemStack.EMPTY)),

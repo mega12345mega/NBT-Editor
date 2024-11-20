@@ -6,7 +6,6 @@ import java.util.function.Function;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
@@ -15,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.GetLecternBlockC2SPacke
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewBlockS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.util.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.block.Block;

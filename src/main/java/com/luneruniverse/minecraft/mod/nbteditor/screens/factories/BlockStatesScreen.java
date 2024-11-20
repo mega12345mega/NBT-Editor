@@ -9,7 +9,6 @@ import java.util.Set;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
@@ -19,6 +18,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigItem
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPanel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.util.BlockStateProperties;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.BlockItem;

@@ -11,7 +11,7 @@ public class ArmorItemReference extends HandledScreenItemReference {
 	private final EquipmentSlot slot;
 	
 	public ArmorItemReference(EquipmentSlot slot) {
-		if (slot.getType() != EquipmentSlot.Type.ARMOR)
+		if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR)
 			throw new IllegalArgumentException("Invalid armor slot");
 		
 		this.slot = slot;

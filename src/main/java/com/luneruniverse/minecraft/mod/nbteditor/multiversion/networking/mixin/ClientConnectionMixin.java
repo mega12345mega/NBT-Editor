@@ -41,9 +41,9 @@ public abstract class ClientConnectionMixin {
 	private void disconnect(Text reason, CallbackInfo info) {
 		if (isOpen()) {
 			if (!NBTEditorServer.IS_DEDICATED && ServerMixinLink.isInstanceOfClientPlayNetworkHandlerSafely(packetListener))
-				MVClientNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop();
+				MVClientNetworking.onPlayStop();
 			if (packetListener instanceof ServerPlayNetworkHandler handler)
-				MVServerNetworking.PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop(handler.player);
+				MVServerNetworking.onPlayStop(handler.player);
 		}
 	}
 	

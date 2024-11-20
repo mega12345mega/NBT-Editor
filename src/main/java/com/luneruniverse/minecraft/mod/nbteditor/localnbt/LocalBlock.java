@@ -4,9 +4,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import com.luneruniverse.minecraft.mod.nbteditor.misc.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
@@ -16,12 +16,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.util.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.OverlayTexture;
@@ -46,7 +46,7 @@ public class LocalBlock implements LocalNBT {
 		NbtElement dataVersion = nbt.get("DataVersion");
 		
 		String id = MainUtil.updateDynamic(TypeReferences.BLOCK_NAME, NbtString.of(nbt.getString("id")), dataVersion, defaultDataVersion).value;
-		Block block = MVRegistry.BLOCK.get(new Identifier(id));
+		Block block = MVRegistry.BLOCK.get(IdentifierInst.of(id));
 		
 		BlockStateProperties state = new BlockStateProperties(block.getDefaultState());
 		state.setValues(MainUtil.updateDynamic(TypeReferences.BLOCK_STATE, nbt.getCompound("state"), dataVersion, defaultDataVersion));
@@ -66,10 +66,34 @@ public class LocalBlock implements LocalNBT {
 	private BlockStateProperties state;
 	private NbtCompound nbt;
 	
+	private BlockEntity cachedBlockEntity;
+	private BlockStateProperties cachedState;
+	private NbtCompound cachedNbt;
+	
 	public LocalBlock(Block block, BlockStateProperties state, NbtCompound nbt) {
 		this.block = block;
 		this.state = state;
 		this.nbt = nbt;
+	}
+	
+	private BlockEntity getCachedBlockEntity() {
+		if (!(block instanceof BlockEntityProvider entityProvider))
+			return null;
+		
+		if (cachedBlockEntity != null && cachedBlockEntity.getCachedState().getBlock() == block &&
+				cachedState.equals(state) && Objects.equals(cachedNbt, nbt)) {
+			return cachedBlockEntity;
+		}
+		
+		cachedBlockEntity = entityProvider.createBlockEntity(new BlockPos(0, 1000, 0), state.applyTo(block.getDefaultState()));
+		cachedBlockEntity.setWorld(MainUtil.client.world);
+		if (nbt != null)
+			NBTManagers.BLOCK_ENTITY.setNbt(cachedBlockEntity, nbt);
+		
+		cachedState = state.copy();
+		cachedNbt = nbt.copy();
+		
+		return cachedBlockEntity;
 	}
 	
 	public boolean isBlockEntity() {
@@ -148,15 +172,12 @@ public class LocalBlock implements LocalNBT {
 		renderMatrices.translate(-0.5, -0.5, -0.5);
 		
 		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getVertexConsumerProvider();
-		BlockState state = this.state.applyTo(block.getDefaultState());
-		MVMisc.renderBlock(MainUtil.client.getBlockRenderManager(), state, new BlockPos(0, 1000, 0), MainUtil.client.world,
-				renderMatrices, provider.getBuffer(RenderLayer.getCutout()), false);
-		if (block instanceof BlockEntityProvider entityProvider) {
-			BlockEntity entity = entityProvider.createBlockEntity(new BlockPos(0, 1000, 0), state);
-			entity.setWorld(MainUtil.client.world);
-			if (nbt != null)
-				NBTManagers.BLOCK_ENTITY.setNbt(entity, nbt);
-			MainUtil.client.getBlockEntityRenderDispatcher().renderEntity(entity, renderMatrices, provider, 0xF000F0, OverlayTexture.DEFAULT_UV);
+		MVMisc.renderBlock(MainUtil.client.getBlockRenderManager(), state.applyTo(block.getDefaultState()),
+				new BlockPos(0, 1000, 0), MainUtil.client.world, renderMatrices,
+				provider.getBuffer(RenderLayer.getCutout()), false);
+		if (isBlockEntity()) {
+			MainUtil.client.getBlockEntityRenderDispatcher().renderEntity(getCachedBlockEntity(),
+					renderMatrices, provider, 0xF000F0, OverlayTexture.DEFAULT_UV);
 		}
 		provider.draw();
 		

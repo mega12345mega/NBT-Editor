@@ -21,6 +21,7 @@ import net.minecraft.item.Item;
 import net.minecraft.potion.Potion;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
 
@@ -59,13 +60,25 @@ public class MVRegistry<T> implements Iterable<T> {
 	public static final MVRegistry<Item> ITEM = getRegistry("field_11142", "field_41178", true);
 	public static final MVRegistry<Block> BLOCK = getRegistry("field_11146", "field_41175", true);
 	public static final MVRegistry<EntityType<?>> ENTITY_TYPE = getRegistry("field_11145", "field_41177", true);
-	public static final MVRegistry<Enchantment> ENCHANTMENT = getRegistry("field_11160", "field_41176", false);
 	public static final MVRegistry<EntityAttribute> ATTRIBUTE = getRegistry("field_23781", "field_41190", false);
 	public static final MVRegistry<Potion> POTION = getRegistry("field_11143", "field_41179", Version.<Boolean>newSwitch()
 			.range("1.20.5", null, false)
 			.range(null, "1.20.4", true)
 			.get());
 	public static final MVRegistry<StatusEffect> STATUS_EFFECT = getRegistry("field_11159", "field_41174", false);
+	
+	private static MVRegistry<Enchantment> ENCHANTMENT;
+	public static MVRegistry<Enchantment> getEnchantmentRegistry() {
+		if (MVEnchantments.DATA_PACK_ENCHANTMENTS) {
+			Registry<Enchantment> registry = DynamicRegistryManagerHolder.getManager().get(RegistryKeys.ENCHANTMENT);
+			if (ENCHANTMENT == null || ENCHANTMENT.getInternalValue() != registry)
+				ENCHANTMENT = new MVRegistry<>(registry);
+		} else {
+			if (ENCHANTMENT == null)
+				ENCHANTMENT = getRegistry("field_11160", "field_41176", false);
+		}
+		return ENCHANTMENT;
+	}
 	
 	public static <V, T extends V> T register(MVRegistry<V> registry, Identifier id, T entry) {
 		return call(null, "method_10230", MethodType.methodType(Object.class, REGISTRY_CLASS, Identifier.class, Object.class), registry.value, id, entry);

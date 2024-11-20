@@ -4,7 +4,7 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.ComponentTagReference;
@@ -22,31 +22,31 @@ import net.minecraft.text.Text;
 
 public enum HideFlag implements TagReference<Boolean, ItemStack> {
 	ENCHANTMENTS(TextInst.translatable("nbteditor.hide_flags.enchantments"), 1,
-			getComponent(MVDataComponentType.ENCHANTMENTS, () -> component -> component.showInTooltip, () -> ItemEnchantmentsComponent::withShowInTooltip)),
+			getComponent(MVComponentType.ENCHANTMENTS, () -> component -> component.showInTooltip, () -> ItemEnchantmentsComponent::withShowInTooltip)),
 	ATTRIBUTE_MODIFIERS(TextInst.translatable("nbteditor.hide_flags.attribute_modifiers"), 2,
-			getComponent(MVDataComponentType.ATTRIBUTE_MODIFIERS, () -> AttributeModifiersComponent::showInTooltip, () -> AttributeModifiersComponent::withShowInTooltip)),
+			getComponent(MVComponentType.ATTRIBUTE_MODIFIERS, () -> AttributeModifiersComponent::showInTooltip, () -> AttributeModifiersComponent::withShowInTooltip)),
 	UNBREAKABLE(TextInst.translatable("nbteditor.hide_flags.unbreakable"), 4,
-			getComponent(MVDataComponentType.UNBREAKABLE, () -> UnbreakableComponent::showInTooltip, () -> UnbreakableComponent::withShowInTooltip)),
+			getComponent(MVComponentType.UNBREAKABLE, () -> UnbreakableComponent::showInTooltip, () -> UnbreakableComponent::withShowInTooltip)),
 	CAN_BREAK(TextInst.translatable("nbteditor.hide_flags.can_" + (NBTManagers.COMPONENTS_EXIST ? "break" : "destroy")), 8,
-			getComponent(MVDataComponentType.CAN_BREAK, () -> BlockPredicatesChecker::showInTooltip, () -> BlockPredicatesChecker::withShowInTooltip)),
+			getComponent(MVComponentType.CAN_BREAK, () -> BlockPredicatesChecker::showInTooltip, () -> BlockPredicatesChecker::withShowInTooltip)),
 	CAN_PLACE_ON(TextInst.translatable("nbteditor.hide_flags.can_place_on"), 16,
-			getComponent(MVDataComponentType.CAN_PLACE_ON, () -> BlockPredicatesChecker::showInTooltip, () -> BlockPredicatesChecker::withShowInTooltip)),
+			getComponent(MVComponentType.CAN_PLACE_ON, () -> BlockPredicatesChecker::showInTooltip, () -> BlockPredicatesChecker::withShowInTooltip)),
 	MISC(TextInst.translatable("nbteditor.hide_flags.misc"), 32,
-			() -> ComponentTagReference.forExistance(MVDataComponentType.HIDE_ADDITIONAL_TOOLTIP)),
+			() -> ComponentTagReference.forExistance(MVComponentType.HIDE_ADDITIONAL_TOOLTIP)),
 	DYED_COLOR(TextInst.translatable("nbteditor.hide_flags.dyed_color"), 64,
-			getComponent(MVDataComponentType.DYED_COLOR, () -> DyedColorComponent::showInTooltip, () -> DyedColorComponent::withShowInTooltip)),
+			getComponent(MVComponentType.DYED_COLOR, () -> DyedColorComponent::showInTooltip, () -> DyedColorComponent::withShowInTooltip)),
 	
 	TOOLTIP(TextInst.translatable("nbteditor.hide_flags.tooltip"), -1,
-			() -> ComponentTagReference.forExistance(MVDataComponentType.HIDE_TOOLTIP)),
+			() -> ComponentTagReference.forExistance(MVComponentType.HIDE_TOOLTIP)),
 	/**
 	 * Was previously covered by MISC
 	 */
 	STORED_ENCHANTMENTS(TextInst.translatable("nbteditor.hide_flags.stored_enchantments"), -1,
-			getComponent(MVDataComponentType.STORED_ENCHANTMENTS, () -> component -> component.showInTooltip, () -> ItemEnchantmentsComponent::withShowInTooltip)),
+			getComponent(MVComponentType.STORED_ENCHANTMENTS, () -> component -> component.showInTooltip, () -> ItemEnchantmentsComponent::withShowInTooltip)),
 	TRIM(TextInst.translatable("nbteditor.hide_flags.trim"), -1,
-			getComponent(MVDataComponentType.TRIM, () -> component -> component.showInTooltip, () -> ArmorTrim::withShowInTooltip));
+			getComponent(MVComponentType.TRIM, () -> component -> component.showInTooltip, () -> ArmorTrim::withShowInTooltip));
 	
-	private static <C> Supplier<ComponentTagReference<Boolean, C>> getComponent(MVDataComponentType<C> component,
+	private static <C> Supplier<ComponentTagReference<Boolean, C>> getComponent(MVComponentType<C> component,
 			Supplier<Predicate<C>> getter, Supplier<BiFunction<C, Boolean, C>> setter) {
 		return () -> new ComponentTagReference<>(component,
 				null,

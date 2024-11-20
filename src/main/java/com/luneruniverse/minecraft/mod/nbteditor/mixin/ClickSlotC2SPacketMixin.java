@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ClickSlotC2SPacketParent;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -24,7 +25,7 @@ public class ClickSlotC2SPacketMixin implements ClickSlotC2SPacketParent {
 	@ModifyVariable(method = "<init>(IIIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/item/ItemStack;Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;)V", at = @At("HEAD"), ordinal = 3)
 	@Group(name = "<init>", min = 1)
 	private static int init_new(int button) {
-		if (ConfigScreen.isNoSlotRestrictions())
+		if (ConfigScreen.isNoSlotRestrictions() && NBTEditorClient.SERVER_CONN.isEditingExpanded())
 			return button | NO_SLOT_RESTRICTIONS_FLAG;
 		return button;
 	}
@@ -39,7 +40,7 @@ public class ClickSlotC2SPacketMixin implements ClickSlotC2SPacketParent {
 			// https://github.com/SpongePowered/Mixin/issues/677
 			return button;
 		}
-		if (ConfigScreen.isNoSlotRestrictions())
+		if (ConfigScreen.isNoSlotRestrictions() && NBTEditorClient.SERVER_CONN.isEditingExpanded())
 			return button | NO_SLOT_RESTRICTIONS_FLAG;
 		return button;
 	}

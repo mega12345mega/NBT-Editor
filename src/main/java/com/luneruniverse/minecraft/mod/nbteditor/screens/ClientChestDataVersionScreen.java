@@ -1,12 +1,13 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
-import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChest;
+import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DataVersionStatus;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
@@ -31,15 +32,20 @@ public class ClientChestDataVersionScreen extends TickableSupportingScreen {
 	private NamedTextFieldWidget dataVersion;
 	private ButtonWidget updatePageBtn;
 	
-	public ClientChestDataVersionScreen(DataVersionStatus dataVersionStatus) {
+	public ClientChestDataVersionScreen(Optional<Integer> dataVersion) {
 		super(TextInst.of("Client Chest DataVersion"));
+		DataVersionStatus dataVersionStatus = DataVersionStatus.of(dataVersion);
+		
 		this.dataVersionStatus = dataVersionStatus;
-		this.msg = TextInst.translatable("nbteditor.client_chest.data_version." + switch (dataVersionStatus) {
-			case UNKNOWN -> "unknown";
-			case OUTDATED -> "old";
-			case TOO_UPDATED -> "new";
-			default -> throw new IllegalArgumentException("Unexpected DataVersionStatus: " + dataVersionStatus);
-		}, ClientChestScreen.PAGE + 1);
+		this.msg = TextInst.translatable(
+				"nbteditor.client_chest.data_version." + switch (dataVersionStatus) {
+					case UNKNOWN -> "unknown";
+					case OUTDATED -> "old";
+					case TOO_UPDATED -> "new";
+					default -> throw new IllegalArgumentException("Unexpected DataVersionStatus: " + dataVersionStatus);
+				},
+				ClientChestScreen.PAGE + 1,
+				dataVersion.flatMap(Version::getMCVersion).or(() -> dataVersion.map(value -> value.toString())).orElse(""));
 	}
 	
 	@Override
@@ -65,24 +71,19 @@ public class ClientChestDataVersionScreen extends TickableSupportingScreen {
 						.append(nextKeybind).append(TextInst.translatable("nbteditor.keybind.page.next")))))
 				.active = ClientChestScreen.PAGE < NBTEditorClient.CLIENT_CHEST.getPageCount() - 1;
 		
-		addDrawableChild(MVMisc.newButton(dontUpdatePageX, height / 2 - 10, 100, 20, TextInst.translatable("nbteditor.client_chest.reload_page"), btn -> {
-			NBTEditorClient.CLIENT_CHEST.reloadPage(ClientChestScreen.PAGE);
-			ClientChestScreen.show();
+		addDrawableChild(MVMisc.newButton(dontUpdatePageX, height / 2 - 10, 100, 20,
+				TextInst.translatable("nbteditor.client_chest.reload_page"), btn -> {
+			LoadingScreen.show(ClientChestHelper.reloadPage(ClientChestScreen.PAGE), pageData -> ClientChestScreen.show());
 		}));
-		addDrawableChild(MVMisc.newButton(dontUpdatePageX, height / 2 + 14, 100, 20, TextInst.translatable("nbteditor.client_chest.clear_page"), btn -> {
+		addDrawableChild(MVMisc.newButton(dontUpdatePageX, height / 2 + 14, 100, 20,
+				TextInst.translatable("nbteditor.client_chest.clear_page"), btn -> {
 			client.setScreen(new FancyConfirmScreen(value -> {
 				if (value) {
-					try {
-						NBTEditorClient.CLIENT_CHEST.discardPage(ClientChestScreen.PAGE);
-					} catch (IOException e) {
-						NBTEditor.LOGGER.error("Error while saving client chest", e);
-						client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.save_error"), false);
-					}
-					ClientChestScreen.show();
+					LoadingScreen.show(ClientChestHelper.discardPage(ClientChestScreen.PAGE), success -> ClientChestScreen.show());
 					return;
 				}
 				
-				client.setScreen(ClientChestDataVersionScreen.this);
+				client.setScreen(this);
 			}, TextInst.translatable("nbteditor.client_chest.clear_page.title"), TextInst.translatable("nbteditor.client_chest.clear_page.desc"),
 					TextInst.translatable("nbteditor.client_chest.clear_page.yes"), TextInst.translatable("nbteditor.client_chest.clear_page.no")));
 		}));
@@ -92,30 +93,16 @@ public class ClientChestDataVersionScreen extends TickableSupportingScreen {
 		
 		addDrawableChild(MVMisc.newButton(width / 2 - 158, height / 2 - 10, 100, 20,
 				TextInst.translatable("nbteditor.client_chest.data_version.import_page"), btn -> {
-					try {
-						NBTEditorClient.CLIENT_CHEST.importPage(ClientChestScreen.PAGE);
-						MainUtil.client.player.sendMessage(NBTEditorClient.CLIENT_CHEST.attachShowFolder(
-								TextInst.translatable("nbteditor.client_chest.data_version.update_page_success",
-										TextInst.literal(ClientChestScreen.PAGE + 1 + "").formatted(Formatting.GREEN))), false);
-						ClientChestScreen.show();
-					} catch (Exception e) {
-						NBTEditor.LOGGER.error("Error while importing client chest page", e);
-						client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.data_version.update_page_error",
-								TextInst.literal(ClientChestScreen.PAGE + 1 + "").formatted(Formatting.RED)), false);
-					}
+					LoadingScreen.show(
+							addSuccessMessage(ClientChestHelper.importPage(ClientChestScreen.PAGE), false),
+							success -> ClientChestScreen.show());
 				}, new MVTooltip("nbteditor.client_chest.data_version.import_page.desc")))
 				.active = (dataVersionStatus == DataVersionStatus.UNKNOWN);
 		addDrawableChild(MVMisc.newButton(width / 2 - 158, height / 2 + 14, 100, 20,
 				TextInst.translatable("nbteditor.client_chest.data_version.import_all_pages"), btn -> {
-					try {
-						NBTEditorClient.CLIENT_CHEST.importAllPages();
-						MainUtil.client.player.sendMessage(NBTEditorClient.CLIENT_CHEST.attachShowFolder(
-								TextInst.translatable("nbteditor.client_chest.data_version.update_all_pages_success")), false);
-						ClientChestScreen.show();
-					} catch (Exception e) {
-						NBTEditor.LOGGER.error("Error while importing client chest pages", e);
-						client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.data_version.update_all_pages_error"), false);
-					}
+					LoadingScreen.show(
+							addSuccessMessage(ClientChestHelper.importAllPages(), true),
+							success -> ClientChestScreen.show());
 				}, new MVTooltip("nbteditor.client_chest.data_version.import_all_pages.desc")));
 		
 		dataVersion = addDrawableChild(
@@ -128,31 +115,23 @@ public class ClientChestDataVersionScreen extends TickableSupportingScreen {
 							.filter(value -> value < Version.getDataVersion());
 					if (dataVersionStatus == DataVersionStatus.UNKNOWN && dataVersionValue.isEmpty())
 						return;
-					try {
-						NBTEditorClient.CLIENT_CHEST.updatePage(ClientChestScreen.PAGE, dataVersionValue);
-						MainUtil.client.player.sendMessage(NBTEditorClient.CLIENT_CHEST.attachShowFolder(
-								TextInst.translatable("nbteditor.client_chest.data_version.update_page_success",
-										TextInst.literal(ClientChestScreen.PAGE + 1 + "").formatted(Formatting.GREEN))), false);
-						ClientChestScreen.show();
-					} catch (Exception e) {
-						NBTEditor.LOGGER.error("Error while updating client chest page", e);
-						client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.data_version.update_page_error",
-								TextInst.literal(ClientChestScreen.PAGE + 1 + "").formatted(Formatting.RED)), false);
-					}
+					
+					updateWithWarning(() -> {
+						LoadingScreen.show(
+								addSuccessMessage(ClientChestHelper.updatePage(ClientChestScreen.PAGE, dataVersionValue), false),
+								success -> ClientChestScreen.show());
+					});
 				}, new MVTooltip("nbteditor.client_chest.data_version.update_page.desc." + (dataVersionStatus == DataVersionStatus.UNKNOWN ? "unknown" : "old"))));
 		addDrawableChild(MVMisc.newButton(width / 2 - 50, height / 2 + 14, 100, 20,
 				TextInst.translatable("nbteditor.client_chest.data_version.update_all_pages"), btn -> {
 					Optional<Integer> dataVersionValue = Version.getDataVersion(dataVersion.getText())
 							.filter(value -> value < Version.getDataVersion());
-					try {
-						NBTEditorClient.CLIENT_CHEST.updateAllPages(dataVersionValue);
-						MainUtil.client.player.sendMessage(NBTEditorClient.CLIENT_CHEST.attachShowFolder(
-								TextInst.translatable("nbteditor.client_chest.data_version.update_all_pages_success")), false);
-						ClientChestScreen.show();
-					} catch (Exception e) {
-						NBTEditor.LOGGER.error("Error while updating client chest pages", e);
-						client.player.sendMessage(TextInst.translatable("nbteditor.client_chest.data_version.update_all_pages_error"), false);
-					}
+					
+					updateWithWarning(() -> {
+						LoadingScreen.show(
+								addSuccessMessage(ClientChestHelper.updateAllPages(dataVersionValue), true),
+								success -> ClientChestScreen.show());
+					});
 				}, new MVTooltip("nbteditor.client_chest.data_version.update_all_pages.desc")));
 	}
 	
@@ -210,6 +189,41 @@ public class ClientChestDataVersionScreen extends TickableSupportingScreen {
 			ClientChestScreen.PAGE++;
 			ClientChestScreen.show();
 		}
+	}
+	
+	private CompletableFuture<Boolean> addSuccessMessage(CompletableFuture<Boolean> future, boolean all) {
+		future.thenAccept(success -> {
+			if (success) {
+				EditableText msg;
+				if (all) {
+					msg = TextInst.translatable("nbteditor.client_chest.data_version.update_all_pages_success");
+				} else {
+					msg = TextInst.translatable("nbteditor.client_chest.data_version.update_page_success",
+							TextInst.literal(ClientChestScreen.PAGE + 1 + "").formatted(Formatting.GREEN));
+				}
+				MainUtil.client.player.sendMessage(ClientChest.attachShowFolder(msg), false);
+			}
+		});
+		return future;
+	}
+	
+	private void updateWithWarning(Runnable callback) {
+		if (Version.<Boolean>newSwitch()
+				.range("1.21", null, true)
+				.range("1.20.5", "1.20.6", false)
+				.range(null, "1.20.4", true)
+				.get()) {
+			callback.run();
+			return;
+		}
+		
+		client.setScreen(new FancyConfirmScreen(value -> {
+			if (value)
+				callback.run();
+			else
+				client.setScreen(this);
+		}, TextInst.translatable("nbteditor.client_chest.data_version.update_page_confirm_1.20.5_1.20.6.title"),
+				TextInst.translatable("nbteditor.client_chest.data_version.update_page_confirm_1.20.5_1.20.6.desc")));
 	}
 	
 }

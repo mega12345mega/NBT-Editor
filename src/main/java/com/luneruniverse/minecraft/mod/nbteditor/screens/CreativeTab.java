@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
@@ -69,13 +70,13 @@ public class CreativeTab {
 				.range("1.20.2", null, true)
 				.range(null, "1.20.1", false)
 				.get()) {
-			TEXTURE_TOP = new Identifier("nbteditor", "textures/gui/sprites/container/creative_inventory/tab_top_unselected.png");
-			TEXTURE_BOTTOM = new Identifier("nbteditor", "textures/gui/sprites/container/creative_inventory/tab_bottom_unselected.png");
+			TEXTURE_TOP = IdentifierInst.of("nbteditor", "textures/gui/sprites/container/creative_inventory/tab_top_unselected.png");
+			TEXTURE_BOTTOM = IdentifierInst.of("nbteditor", "textures/gui/sprites/container/creative_inventory/tab_bottom_unselected.png");
 			V_TOP = 0;
 			V_BOTTOM = 0;
 		} else {
-			TEXTURE_TOP = new Identifier("textures/gui/container/creative_inventory/tabs.png");
-			TEXTURE_BOTTOM = new Identifier("textures/gui/container/creative_inventory/tabs.png");
+			TEXTURE_TOP = IdentifierInst.of("textures/gui/container/creative_inventory/tabs.png");
+			TEXTURE_BOTTOM = IdentifierInst.of("textures/gui/container/creative_inventory/tabs.png");
 			V_TOP = 0;
 			V_BOTTOM = 64;
 		}

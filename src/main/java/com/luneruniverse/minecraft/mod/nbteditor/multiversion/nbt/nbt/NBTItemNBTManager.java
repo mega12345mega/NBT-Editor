@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.nbt;
 import java.lang.invoke.MethodType;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.DeserializableNBTManager;
 
 import net.minecraft.item.ItemStack;
@@ -13,14 +14,14 @@ public class NBTItemNBTManager implements DeserializableNBTManager<ItemStack> {
 	private static final Reflection.MethodInvoker ItemStack_writeNbt =
 			Reflection.getMethod(ItemStack.class, "method_7953", MethodType.methodType(NbtCompound.class, NbtCompound.class));
 	@Override
-	public NbtCompound serialize(ItemStack subject) {
-		return ItemStack_writeNbt.invoke(subject, new NbtCompound());
+	public Attempt<NbtCompound> trySerialize(ItemStack subject) {
+		return new Attempt<>(ItemStack_writeNbt.invoke(subject, new NbtCompound()));
 	}
 	private static final Reflection.MethodInvoker ItemStack_fromNbt =
 			Reflection.getMethod(ItemStack.class, "method_7915", MethodType.methodType(ItemStack.class, NbtCompound.class));
 	@Override
-	public ItemStack deserialize(NbtCompound nbt) {
-		return ItemStack_fromNbt.invoke(null, nbt);
+	public Attempt<ItemStack> tryDeserialize(NbtCompound nbt) {
+		return new Attempt<>(ItemStack_fromNbt.invoke(null, nbt));
 	}
 	
 	private static final Reflection.MethodInvoker ItemStack_hasNbt =

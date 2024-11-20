@@ -25,6 +25,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.world.GameMode;
 
 public class NBTEditorServerConn implements MVClientNetworking.PlayNetworkStateEvents.Start, MVClientNetworking.PlayNetworkStateEvents.Stop {
@@ -106,7 +107,7 @@ public class NBTEditorServerConn implements MVClientNetworking.PlayNetworkStateE
 	}
 	
 	@Override
-	public void onPlayStart() {
+	public void onPlayStart(ClientPlayNetworkHandler networkHandler) {
 		status = Status.CLIENT_ONLY;
 	}
 	

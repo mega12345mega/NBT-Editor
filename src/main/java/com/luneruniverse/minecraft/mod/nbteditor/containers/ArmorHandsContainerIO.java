@@ -20,11 +20,11 @@ public class ArmorHandsContainerIO implements NBTContainerIO {
 		
 		NbtList armorItemsNbt = container.getList("ArmorItems", NbtElement.COMPOUND_TYPE);
 		for (int i = 0; i < armorItemsNbt.size() && i < 4; i++)
-			items[3 - i] = NBTManagers.ITEM.deserialize(armorItemsNbt.getCompound(i));
+			items[3 - i] = NBTManagers.ITEM.deserialize(armorItemsNbt.getCompound(i), true);
 		
 		NbtList handItemsNbt = container.getList("HandItems", NbtElement.COMPOUND_TYPE);
 		for (int i = 0; i < handItemsNbt.size() && i < 2; i++)
-			items[4 + i] = NBTManagers.ITEM.deserialize(handItemsNbt.getCompound(i));
+			items[4 + i] = NBTManagers.ITEM.deserialize(handItemsNbt.getCompound(i), true);
 		
 		return items;
 	}
@@ -43,12 +43,12 @@ public class ArmorHandsContainerIO implements NBTContainerIO {
 		
 		NbtList armorItemsNbt = new NbtList();
 		for (int i = 0; i < 4; i++)
-			armorItemsNbt.add(actualContents[3 - i].manager$serialize());
+			armorItemsNbt.add(actualContents[3 - i].manager$serialize(true));
 		container.put("ArmorItems", armorItemsNbt);
 		
 		NbtList handItemsNbt = new NbtList();
 		for (int i = 0; i < 2; i++)
-			handItemsNbt.add(actualContents[4 + i].manager$serialize());
+			handItemsNbt.add(actualContents[4 + i].manager$serialize(true));
 		container.put("HandItems", handItemsNbt);
 		
 		return 6;

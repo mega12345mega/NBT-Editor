@@ -23,7 +23,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -125,9 +124,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				ClickEvent.Action clickAction = (clickEvent == null ? null : clickEvent.getAction());
 				String clickValue = (clickEvent == null ? "" : clickEvent.getValue());
 				HoverEvent.Action<?> hoverAction = (hoverEvent == null ? null : hoverEvent.getAction());
-				String hoverValue = (hoverEvent == null ? "" : new Gson().toJson(
-						HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, hoverEvent)
-						.result().orElseThrow().getAsJsonObject().get("contents")));
+				String hoverValue = (hoverEvent == null ? "" : MVMisc.getHoverEventContentsJson(hoverEvent).toString());
 				
 				clickActionDropdown = ConfigValueDropdown.forEnum(ClickAction.get(clickAction), ClickAction.NONE, ClickAction.class);
 				clickActionDropdown.setWidth(150);

@@ -6,9 +6,7 @@ import java.util.stream.StreamSupport;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
@@ -60,15 +58,7 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 		
 		checkOverScroll();
 		
-		boolean scissor = shouldScissor();
-		if (scissor) {
-			double scale = MainUtil.client.getWindow().getScaleFactor();
-			RenderSystem.enableScissor(
-					(int) (getPaddedX() * scale),
-					MainUtil.client.getWindow().getHeight() - (int) ((getPaddedY() + getPaddedHeight()) * scale),
-					(int) (getPaddedWidth() * scale),
-					(int) (getPaddedHeight() * scale));
-		}
+		MainUtil.enableScissor(getPaddedX(), getPaddedY(), getPaddedWidth(), getPaddedHeight());
 		
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
 			T element = pos.element();
@@ -79,8 +69,7 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 			matrices.pop();
 		}
 		
-		if (scissor)
-			RenderSystem.disableScissor();
+		MainUtil.disableScissor();
 		
 		scrollBar.render(matrices, mouseX, mouseY, delta);
 	}
@@ -102,9 +91,6 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 		List<PositionedPanelElement<T>> output = new ArrayList<>();
 		getPanelElements().forEach(output::add);
 		return output;
-	}
-	protected boolean shouldScissor() {
-		return !ConfigScreen.isMacScrollPatch();
 	}
 	protected boolean continueEvents() {
 		return true;

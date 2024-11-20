@@ -3,7 +3,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.ComponentTagReference;
@@ -19,30 +20,28 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
 
 public class EnchantsTagReference implements TagReference<Enchants, ItemStack> {
 	
-	private static TagReference<Enchants, ItemStack> getEnchantsTagRef(String tag, MVDataComponentType<ItemEnchantmentsComponent> component) {
+	private static TagReference<Enchants, ItemStack> getEnchantsTagRef(String tag, MVComponentType<ItemEnchantmentsComponent> component) {
 		return Version.<TagReference<Enchants, ItemStack>>newSwitch()
 				.range("1.20.5", null, () -> new ComponentTagReference<>(component,
 						null,
-						componentValue -> componentValue == null ? new Enchants() : new Enchants(componentValue.getEnchantmentsMap().stream()
+						componentValue -> componentValue == null ? new Enchants() : new Enchants(componentValue.getEnchantmentEntries().stream()
 								.map(entry -> new Enchants.EnchantWithLevel(entry.getKey().value(), entry.getIntValue())).collect(Collectors.toList())),
-								(componentValue, enchants) -> new ItemEnchantmentsComponent(new Object2IntOpenHashMap<>(
-										enchants.getEnchants().stream().collect(Collectors.toMap(
-												enchant -> Registries.ENCHANTMENT.getEntry(enchant.enchant()),
-												enchant -> Math.min(255, enchant.level()),
-												Math::max))),
-										componentValue.showInTooltip)))
+						(componentValue, enchants) -> new ItemEnchantmentsComponent(new Object2IntOpenHashMap<>(
+								enchants.getEnchants().stream().collect(Collectors.toMap(
+										enchant -> MVRegistry.getEnchantmentRegistry().getInternalValue().getEntry(enchant.enchant()),
+										enchant -> Math.min(255, enchant.level()),
+										Math::max))),
+								componentValue == null ? true : componentValue.showInTooltip)))
 				.range(null, "1.20.4", () -> TagReference.mapValue(Enchants::new, Enchants::getEnchants,
 						TagReference.forItems(ArrayList::new, TagReference.forLists(element -> {
 							if (!(element instanceof NbtCompound compound))
 								return null;
 							if (!compound.contains("id", NbtElement.STRING_TYPE))
 								return null;
-							Enchantment enchant = MVRegistry.ENCHANTMENT.get(new Identifier(compound.getString("id")));
+							Enchantment enchant = MVRegistry.getEnchantmentRegistry().get(IdentifierInst.of(compound.getString("id")));
 							if (enchant == null)
 								return null;
 							int level = compound.getShort("lvl");
@@ -51,15 +50,15 @@ public class EnchantsTagReference implements TagReference<Enchants, ItemStack> {
 							return new Enchants.EnchantWithLevel(enchant, level);
 						}, enchant -> {
 							NbtCompound output = new NbtCompound();
-							output.putString("id", MVRegistry.ENCHANTMENT.getId(enchant.enchant()).toString());
+							output.putString("id", MVRegistry.getEnchantmentRegistry().getId(enchant.enchant()).toString());
 							output.putShort("lvl", (short) enchant.level());
 							return output;
 						}, new NBTTagReference<>(NbtList.class, tag)))))
 				.get();
 	}
 	
-	private static final TagReference<Enchants, ItemStack> ENCHANTMENTS = getEnchantsTagRef("Enchantments", MVDataComponentType.ENCHANTMENTS);
-	private static final TagReference<Enchants, ItemStack> STORED_ENCHANTMENTS = getEnchantsTagRef("StoredEnchantments", MVDataComponentType.STORED_ENCHANTMENTS);
+	private static final TagReference<Enchants, ItemStack> ENCHANTMENTS = getEnchantsTagRef("Enchantments", MVComponentType.ENCHANTMENTS);
+	private static final TagReference<Enchants, ItemStack> STORED_ENCHANTMENTS = getEnchantsTagRef("StoredEnchantments", MVComponentType.STORED_ENCHANTMENTS);
 	
 	public EnchantsTagReference() {
 		

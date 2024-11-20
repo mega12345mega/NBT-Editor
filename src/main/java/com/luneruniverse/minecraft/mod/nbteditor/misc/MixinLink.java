@@ -14,17 +14,18 @@ import java.util.Random;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.ItemSize;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.ChatScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.HandledScreenAccessor;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDataComponentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -47,6 +48,7 @@ import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -232,7 +234,7 @@ public class MixinLink {
 						armor = true;
 					
 					if (armor)
-						MainUtil.saveItem(EquipmentSlot.fromTypeIndex(EquipmentSlot.Type.ARMOR, 8 - slotId), item);
+						MainUtil.saveItem(MVMisc.getEquipmentSlot(EquipmentSlot.Type.HUMANOID_ARMOR, 8 - slotId), item);
 					else
 						MainUtil.saveItemInvSlot(slotId, item);
 					source.getScreenHandler().setCursorStack(ItemStack.EMPTY);
@@ -249,24 +251,22 @@ public class MixinLink {
 	public static void keyPressed(HandledScreen<?> source, int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> info) {
 		boolean creativeInv = (source instanceof CreativeInventoryScreen);
 		
-		if (keyCode == GLFW.GLFW_KEY_SPACE) {
-			Slot hoveredSlot = ((HandledScreenAccessor) source).getFocusedSlot();
-			if (hoveredSlot != null &&
-					((creativeInv && hoveredSlot.inventory == MainUtil.client.player.getInventory()) ||
-							(!creativeInv && NBTEditorClient.SERVER_CONN.isScreenEditable())) &&
-					(!(source instanceof InventoryScreen) || hoveredSlot.id > 4) &&
-					(ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
-				ItemReference ref;
-				if (creativeInv) {
-					int slot = hoveredSlot.getIndex();
-					if (!MVMisc.isCreativeInventoryTabSelected())
-						slot += 36;
-					ref = ItemReference.getInventoryOrArmorItem(slot, true);
-				} else
-					ref = ItemReference.getContainerItem(hoveredSlot.id, source);
-				ClientHandledScreen.handleKeybind(hoveredSlot.getStack(), ref, source.getScreenHandler().getCursorStack());
+		Slot hoveredSlot = ((HandledScreenAccessor) source).getFocusedSlot();
+		if (hoveredSlot != null &&
+				((creativeInv && hoveredSlot.inventory == MainUtil.client.player.getInventory()) ||
+						(!creativeInv && NBTEditorClient.SERVER_CONN.isScreenEditable())) &&
+				(!(source instanceof InventoryScreen) || hoveredSlot.id > 4) &&
+				(ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
+			ItemReference ref;
+			if (creativeInv) {
+				int slot = hoveredSlot.getIndex();
+				if (!MVMisc.isCreativeInventoryTabSelected())
+					slot += 36;
+				ref = ItemReference.getInventoryOrArmorItem(slot, true);
+			} else
+				ref = ItemReference.getContainerItem(hoveredSlot.id, source);
+			if (ClientHandledScreen.handleKeybind(keyCode, hoveredSlot.getStack(), ref, source.getScreenHandler().getCursorStack()))
 				info.setReturnValue(true);
-			}
 		}
 	}
 	
@@ -277,7 +277,7 @@ public class MixinLink {
 	/**
 	 * Only in 1.20.5 or higher
 	 */
-	public static final WeakHashMap<BookScreen.Contents, Boolean> WRITTEN_BOOK_CONTENTS = new WeakHashMap<>();
+	public static final Cache<BookScreen.Contents, Boolean> WRITTEN_BOOK_CONTENTS = CacheBuilder.newBuilder().weakKeys().build();
 	
 	
 	public static void modifyTooltip(ItemStack source, List<Text> tooltip) {
@@ -286,7 +286,7 @@ public class MixinLink {
 		if (MainUtil.client.world == null)
 			return;
 		
-		if (NBTManagers.COMPONENTS_EXIST && source.contains(MVDataComponentType.HIDE_TOOLTIP))
+		if (NBTManagers.COMPONENTS_EXIST && source.contains(MVComponentType.HIDE_TOOLTIP))
 			return;
 		
 		ConfigScreen.ItemSizeFormat sizeConfig = ConfigScreen.getItemSizeFormat();
@@ -352,11 +352,29 @@ public class MixinLink {
 					tooltip.add(TextInst.translatable("nbteditor.keybind.container"));
 				if (source.getItem() == Items.ENCHANTED_BOOK)
 					tooltip.add(TextInst.translatable("nbteditor.keybind.enchant"));
+				tooltip.add(TextInst.translatable("nbteditor.keybind.delete"));
 			}
 		}
 	}
 	
 	
 	public static HandledScreen<?> LAST_SERVER_HANDLED_SCREEN;
+	
+	
+	public static final WeakHashMap<Runnable, Boolean> CATCH_BYPASSING_TASKS = new WeakHashMap<>();
+	public static void executeCrashableTask(Runnable task) {
+		CATCH_BYPASSING_TASKS.put(task, true);
+		MainUtil.client.execute(task);
+	}
+	
+	
+	public static final WeakHashMap<Tooltip, Boolean> NEW_TOOLTIPS = new WeakHashMap<>();
+	
+	
+	// MinecraftClient#thread is set after the ClientModInitializers are run
+	public static volatile Thread MAIN_THREAD;
+	public static boolean isOnMainThread() {
+		return Thread.currentThread() == MAIN_THREAD;
+	}
 	
 }

@@ -32,13 +32,13 @@ public class ClientChestCommand extends ClientCommand {
 	
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
-		builder.then(argument("page", IntegerArgumentType.integer(1, NBTEditorClient.CLIENT_CHEST.getPageCount())).executes(context -> {
-			ClientChestScreen.PAGE = context.getArgument("page", Integer.class) - 1;
+		builder.then(argument("page", IntegerArgumentType.integer(1)).executes(context -> {
+			ClientChestScreen.PAGE = Math.min(context.getArgument("page", Integer.class), NBTEditorClient.CLIENT_CHEST.getPageCount()) - 1;
 			ClientChestScreen.show();
 			return Command.SINGLE_SUCCESS;
 		})).then(argument("name", ClientChestPageNameArgumentType.pageName()).executes(context -> {
 			Integer page = NBTEditorClient.CLIENT_CHEST.getPageFromName(context.getArgument("name", String.class));
-			if (page == null)
+			if (page == null || page >= NBTEditorClient.CLIENT_CHEST.getPageCount())
 				throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.client_chest.name_not_found")).create();
 			ClientChestScreen.PAGE = page;
 			ClientChestScreen.show();

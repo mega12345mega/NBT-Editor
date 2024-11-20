@@ -28,11 +28,6 @@ import net.minecraft.item.ItemStack;
 
 public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 	
-	private static final Map<String, Enchantment> ENCHANTMENTS;
-	static {
-		ENCHANTMENTS = MVRegistry.ENCHANTMENT.getEntrySet().stream().map(enchant -> Map.entry(enchant.getKey().toString(), enchant.getValue()))
-				.sorted((a, b) -> a.getKey().compareToIgnoreCase(b.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
-	}
 	@SuppressWarnings("unchecked")
 	private static ConfigValueDropdown<String> getConfigEnchantment(ConfigCategory enchant) {
 		return ((ConfigItem<ConfigValueDropdown<String>>) enchant.getConfigurable("enchantment")).getValue();
@@ -49,9 +44,15 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 	public EnchantmentsScreen(ItemReference ref) {
 		super(TextInst.of("Enchantments"), ref);
 		
+		MVRegistry<Enchantment> registry = MVRegistry.getEnchantmentRegistry();
+		Map<String, Enchantment> allEnchantments = registry.getEntrySet().stream()
+				.map(enchant -> Map.entry(enchant.getKey().toString(), enchant.getValue()))
+				.sorted((a, b) -> a.getKey().compareToIgnoreCase(b.getKey()))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
+		
 		ItemStack inputItem = ref.getItem();
 		ConfigCategory entry = new ConfigCategory();
-		List<String> orderedEnchants = ENCHANTMENTS.entrySet().stream()
+		List<String> orderedEnchants = allEnchantments.entrySet().stream()
 				.map(enchant -> Map.entry(enchant.getKey(), enchant.getValue().isAcceptableItem(inputItem)))
 				.sorted((a, b) -> {
 					if (a.getValue()) {
@@ -65,7 +66,7 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 		String firstEnchant = orderedEnchants.get(0);
 		entry.setConfigurable("enchantment", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.enchantment"),
 				ConfigValueDropdown.forList(firstEnchant, firstEnchant, orderedEnchants,
-				ENCHANTMENTS.entrySet().stream().filter(enchant -> enchant.getValue().isAcceptableItem(inputItem)).map(Map.Entry::getKey).toList())));
+				allEnchantments.entrySet().stream().filter(enchant -> enchant.getValue().isAcceptableItem(inputItem)).map(Map.Entry::getKey).toList())));
 		entry.setConfigurable("level", new ConfigItem<>(TextInst.translatable("nbteditor.enchantments.level"),
 				ConfigValueNumber.forInt(1, 1, 1,
 						Version.<Integer>newSwitch()
@@ -76,7 +77,7 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 		
 		ItemTagReferences.ENCHANTMENTS.get(localNBT.getEditableItem()).getEnchants().forEach(enchant -> {
 			ConfigCategory enchantConfig = entry.clone(true);
-			getConfigEnchantment(enchantConfig).setValue(MVRegistry.ENCHANTMENT.getId(enchant.enchant()).toString());
+			getConfigEnchantment(enchantConfig).setValue(registry.getId(enchant.enchant()).toString());
 			getConfigLevel(enchantConfig).setValue(enchant.level());
 			config.addConfigurable(enchantConfig);
 		});
@@ -85,7 +86,9 @@ public class EnchantmentsScreen extends LocalEditorScreen<LocalItem> {
 			List<Enchants.EnchantWithLevel> newEnchants = new ArrayList<>();
 			for (ConfigPath path : config.getConfigurables().values()) {
 				ConfigCategory enchant = (ConfigCategory) path;
-				newEnchants.add(new Enchants.EnchantWithLevel(ENCHANTMENTS.get(getConfigEnchantment(enchant).getValidValue()), getConfigLevel(enchant).getValidValue()));
+				newEnchants.add(new Enchants.EnchantWithLevel(
+						allEnchantments.get(getConfigEnchantment(enchant).getValidValue()),
+						getConfigLevel(enchant).getValidValue()));
 			}
 			ItemTagReferences.ENCHANTMENTS.set(localNBT.getEditableItem(), new Enchants(newEnchants));
 			checkSave();

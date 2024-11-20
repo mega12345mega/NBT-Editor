@@ -36,6 +36,13 @@ public class MVServerNetworking {
 		}
 	}
 	
+	public static void onPlayStart(ServerPlayerEntity player) {
+		PlayNetworkStateEvents.Start.EVENT.invoker().onPlayStart(player);
+	}
+	public static void onPlayStop(ServerPlayerEntity player) {
+		PlayNetworkStateEvents.Stop.EVENT.invoker().onPlayStop(player);
+	}
+	
 	private static final Map<Identifier, List<BiConsumer<MVPacket, ServerPlayerEntity>>> listeners = new HashMap<>();
 	
 	@SuppressWarnings("deprecation")

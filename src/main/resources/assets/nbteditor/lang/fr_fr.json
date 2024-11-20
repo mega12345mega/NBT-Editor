@@ -288,11 +288,6 @@
 	"nbteditor.config.single_quotes.example": "Permis: \"{§e'§rclé avec guillet -> §e\\§r\" <-§e'§r:0}\"\nPas Permis: '{§e\"§clé avec guillemts -> §e\\\\§r\" <-§e\"§r:0}'",
 	"nbteditor.config.single_quotes.allowed": "Permis",
 	"nbteditor.config.single_quotes.not_allowed": "Pas Permis",
-	"nbteditor.config.mac_scroll_patch": "Bordure Mac Patch",
-	"nbteditor.config.mac_scroll_patch.on_mac": "§cBordure Mac Patch",
-	"nbteditor.config.mac_scroll_patch.desc": "Des utilisateurs Mac on signalé\ndes problèmes avec le défilement de menus.\nSi vous avez ce problème, activez ceci.\n\nCe n'est pas une réparation parfaite, le défilement\naura des problèmes d'affichage.",
-	"nbteditor.config.mac_scroll_patch.enabled": "Activé",
-	"nbteditor.config.mac_scroll_patch.disabled": "Désactivé",
 	"nbteditor.config.scroll_speed": "Vitesse de défilement",
 	"nbteditor.config.scroll_speed.desc": "Augmente/Réduit la vitesse de\ndéfilement dans les menus NBT Editor",
 	"nbteditor.config.air_editable": "Modification d'Air",
@@ -470,11 +465,13 @@
 	"nbteditor.credits_5": "[LINK] https://www.spigotmc.org/resources/free-headdb-head-menu.84967/",
 	"nbteditor.credits_6": "§7Porté en côté client Fabric par mega12345mega",
 	"nbteditor.credits_7": "",
-	"nbteditor.credits_8": "§6zh_cn: hyplant",
+	"nbteditor.credits_8": "§6zh_cn: hyplant, Clexus",
 	"nbteditor.credits_9": "§6pl_pl: Xantrisse",
 	"nbteditor.credits_10": "§6ru_ru: TheFaceJD",
 	"nbteditor.credits_11": "§6fr_fr: Darukshock",
-	"nbteditor.credits_12": "§6he_il: inon13",
+	"nbteditor.credits_12": "§6he_il: inon13, RedVortexDev",
+	"nbteditor.credits_13": "§6cs_cz: Kulihrasek1101",
+	"nbteditor.credits_14": "§6zh_tw: dirtTW",
 	
 	
 	

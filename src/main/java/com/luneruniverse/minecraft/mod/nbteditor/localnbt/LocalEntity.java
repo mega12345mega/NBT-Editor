@@ -1,11 +1,13 @@
 package com.luneruniverse.minecraft.mod.nbteditor.localnbt;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
@@ -48,15 +50,30 @@ public class LocalEntity implements LocalNBT {
 		tag = MainUtil.updateDynamic(TypeReferences.ENTITY, tag, nbt.get("DataVersion"), defaultDataVersion);
 		String id = tag.getString("id");
 		tag.remove("id");
-		return new LocalEntity(MVRegistry.ENTITY_TYPE.get(new Identifier(id)), tag);
+		return new LocalEntity(MVRegistry.ENTITY_TYPE.get(IdentifierInst.of(id)), tag);
 	}
 	
 	private EntityType<?> entityType;
 	private NbtCompound nbt;
 	
+	private Entity cachedEntity;
+	private NbtCompound cachedNbt;
+	
 	public LocalEntity(EntityType<?> entityType, NbtCompound nbt) {
 		this.entityType = entityType;
 		this.nbt = nbt;
+	}
+	
+	private Entity getCachedEntity() {
+		if (cachedEntity != null && cachedEntity.getType() == entityType && Objects.equals(cachedNbt, nbt))
+			return cachedEntity;
+		
+		cachedEntity = entityType.create(MainUtil.client.world);
+		NBTManagers.ENTITY.setNbt(cachedEntity, nbt);
+		
+		cachedNbt = nbt.copy();
+		
+		return cachedEntity;
 	}
 	
 	@Override
@@ -118,9 +135,6 @@ public class LocalEntity implements LocalNBT {
 		matrices.push();
 		matrices.translate(0.0, 8.0, 0.0);
 		
-		Entity entity = entityType.create(MainUtil.client.world);
-		NBTManagers.ENTITY.setNbt(entity, nbt);
-		
 		MatrixStack renderMatrices = Version.<MatrixStack>newSwitch()
 				.range("1.19.4", null, matrices)
 				.range(null, "1.19.3", MatrixStack::new)
@@ -128,14 +142,21 @@ public class LocalEntity implements LocalNBT {
 		
 		MVMatrix4f.ofScale(1, 1, -1).applyToPositionMatrix(matrices);
 		MVQuaternionf rotation = LocalNBT.makeRotatingIcon(renderMatrices, x, y, 0.75f, true);
+		rotation.conjugate();
+		if (Version.<Boolean>newSwitch()
+				.range("1.21.0", null, true)
+				.range(null, "1.20.6", false)
+				.get()) {
+			rotation.rotateY((float) Math.PI);
+		}
 		RenderSystem.applyModelViewMatrix();
 		
 		DiffuseLighting.method_34742();
 		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getVertexConsumerProvider();
 		EntityRenderDispatcher dispatcher = MainUtil.client.getEntityRenderDispatcher();
 		dispatcher.setRenderShadows(false);
-		rotation.copy().conjugate().applyToEntityRenderDispatcher(dispatcher);
-		dispatcher.render(entity, 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
+		rotation.applyToEntityRenderDispatcher(dispatcher);
+		dispatcher.render(getCachedEntity(), 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
 		dispatcher.setRenderShadows(true);
 		provider.draw();
 		

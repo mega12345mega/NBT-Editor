@@ -288,11 +288,6 @@
 	"nbteditor.config.single_quotes.example": "Разрешено: \"{§e'§rключ с кавычкой -> §e\\§r\" <-§e'§r:0}\"\nНе разрешено: '{§e\"§rключ с кавычкой -> §e\\\\§r\" <-§e\"§r:0}'",
 	"nbteditor.config.single_quotes.allowed": "Допустимый",
 	"nbteditor.config.single_quotes.not_allowed": "Не допускается",
-	"nbteditor.config.mac_scroll_patch": "Патч границы Mac",
-	"nbteditor.config.mac_scroll_patch.on_mac": "§cНашивка границы cMac",
-	"nbteditor.config.mac_scroll_patch.desc": "Некоторые пользователи Mac сообщили о\nпроблемах с прокруткой меню.\nЕсли у вас возникла эта проблема, включите эту опцию.\n\nЭто не идеальное решение, так как при прокрутке\nвозникнут некоторые проблемы с рендерингом.",
-	"nbteditor.config.mac_scroll_patch.enabled": "Включено",
-	"nbteditor.config.mac_scroll_patch.disabled": "Отключено",
 	"nbteditor.config.scroll_speed": "Скорость прокрутки",
 	"nbteditor.config.scroll_speed.desc": "Увеличить/уменьшить скорость\nпрокрутки в меню редактора NBT",
 	"nbteditor.config.air_editable": "Монтаж воздуха",
@@ -470,11 +465,13 @@
 	"nbteditor.credits_5": "[ССЫЛКА] https://www.spigotmc.org/resources/free-headdb-head-menu.84967/",
 	"nbteditor.credits_6": "§7Перенесено на клиентскую Fabric от mega12345mega",
 	"nbteditor.credits_7": "",
-	"nbteditor.credits_8": "§6zh_cn: hyplant",
+	"nbteditor.credits_8": "§6zh_cn: hyplant, Clexus",
 	"nbteditor.credits_9": "§6pl_pl: Xantrisse",
 	"nbteditor.credits_10": "§6ru_ru: TheFaceJD",
 	"nbteditor.credits_11": "§6fr_fr: Darukshock",
-	"nbteditor.credits_12": "§6he_il: inon13",
+	"nbteditor.credits_12": "§6he_il: inon13, RedVortexDev",
+	"nbteditor.credits_13": "§6cs_cz: Kulihrasek1101",
+	"nbteditor.credits_14": "§6zh_tw: dirtTW",
 	
 	
 	

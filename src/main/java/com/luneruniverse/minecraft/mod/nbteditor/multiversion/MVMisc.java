@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 
 import org.joml.Vector2ic;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
@@ -34,6 +35,7 @@ import com.mojang.serialization.JsonOps;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Keyboard;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.screen.Screen;
@@ -49,6 +51,7 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.client.util.math.MatrixStack;
@@ -59,6 +62,7 @@ import net.minecraft.command.argument.TextArgumentType;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemGroup;
@@ -69,9 +73,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.StringVisitable;
@@ -283,7 +289,7 @@ public class MVMisc {
 			Reflection.getOptionalMethod(SuspiciousStewItem.class, "method_8021", MethodType.methodType(void.class, ItemStack.class, StatusEffect.class, int.class));
 	public static void addEffectToStew(ItemStack item, StatusEffect effect, int duration) {
 		Version.newSwitch()
-				.range("1.20.5", null, () -> item.apply(MVDataComponentType.SUSPICIOUS_STEW_EFFECTS, new SuspiciousStewEffectsComponent(List.of()), effects -> effects.with(new StewEffect(Registries.STATUS_EFFECT.getEntry(effect), duration))))
+				.range("1.20.5", null, () -> item.apply(MVComponentType.SUSPICIOUS_STEW_EFFECTS, new SuspiciousStewEffectsComponent(List.of()), effects -> effects.with(new StewEffect(Registries.STATUS_EFFECT.getEntry(effect), duration))))
 				.range("1.20.2", "1.20.4", () -> SuspiciousStewItem_addEffectsToStew.get().invoke(null, item, List.of(Reflection.newInstance(StewEffect.class, new Class<?>[] {StatusEffect.class, int.class}, effect, duration))))
 				.range(null, "1.20.1", () -> SuspiciousStewItem_addEffectToStew.get().invoke(null, item, effect, duration))
 				.run();
@@ -408,6 +414,14 @@ public class MVMisc {
 		// But this seems to be equivalent (at least currently)
 		return ClickEvent.Action.valueOf(name.toUpperCase());
 	}
+	private static final Supplier<Reflection.MethodInvoker> HoverEvent$Action_contentsToJson =
+			Reflection.getOptionalMethod(HoverEvent.Action.class, "method_27669", MethodType.methodType(JsonElement.class, Object.class));
+	public static JsonElement getHoverEventContentsJson(HoverEvent event) {
+		return Version.<JsonElement>newSwitch()
+				.range("1.20.3", null, () -> HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, event).result().orElseThrow().getAsJsonObject().get("contents"))
+				.range(null, "1.20.2", () -> HoverEvent$Action_contentsToJson.get().invoke(event.getAction(), event.getValue(event.getAction())))
+				.get();
+	}
 	private static final Supplier<Reflection.MethodInvoker> HoverEvent_fromJson =
 			Reflection.getOptionalMethod(HoverEvent.class, "method_27664", MethodType.methodType(HoverEvent.class, JsonObject.class));
 	public static HoverEvent getHoverEvent(JsonObject json) {
@@ -417,13 +431,17 @@ public class MVMisc {
 				.get();
 	}
 	
+	private static final Supplier<Reflection.MethodInvoker> Tessellator_getBuffer =
+			Reflection.getOptionalMethod(Tessellator.class, "method_1349", MethodType.methodType(BufferBuilder.class));
+	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_begin =
+			Reflection.getOptionalMethod(BufferBuilder.class, "method_1328", MethodType.methodType(void.class, VertexFormat.DrawMode.class, VertexFormat.class));
 	public static VertexConsumer beginDrawingShader(MatrixStack matrices, MVShader shader) {
 		return Version.<VertexConsumer>newSwitch()
 				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().getBuffer(shader.layer()))
 				.range(null, "1.19.4", () -> {
 					RenderSystem.setShader(shader.shader());
-					BufferBuilder builder = Tessellator.getInstance().getBuffer();
-					builder.begin(shader.layer().getDrawMode(), shader.layer().getVertexFormat());
+					BufferBuilder builder = Tessellator_getBuffer.get().invoke(Tessellator.getInstance());
+					BufferBuilder_begin.get().invoke(builder, shader.layer().getDrawMode(), shader.layer().getVertexFormat());
 					return builder;
 				})
 				.get();
@@ -515,7 +533,7 @@ public class MVMisc {
 	
 	public static boolean isWrittenBookContents(BookScreen.Contents contents) {
 		return Version.<Boolean>newSwitch()
-				.range("1.20.5", null, () -> MixinLink.WRITTEN_BOOK_CONTENTS.containsKey(contents))
+				.range("1.20.5", null, () -> MixinLink.WRITTEN_BOOK_CONTENTS.getIfPresent(contents) != null)
 				.range(null, "1.20.4", () -> Reflection.getClass("net.minecraft.class_3872$class_3933").isInstance(contents))
 				.get();
 	}
@@ -544,6 +562,78 @@ public class MVMisc {
 					screen.setFocused(element);
 				})
 				.range(null, "1.19.3", () -> ParentElement_setInitialFocus.get().invoke(screen, element))
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> VertexConsumer_next =
+			Reflection.getOptionalMethod(VertexConsumer.class, "method_1344", MethodType.methodType(void.class));
+	public static void nextVertex(VertexConsumer vertexConsumer) {
+		Version.newSwitch()
+				.range("1.21.0", null, () -> {})
+				.range(null, "1.20.6", () -> VertexConsumer_next.get().invoke(vertexConsumer))
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> VertexConsumer_vertex =
+			Reflection.getOptionalMethod(VertexConsumer.class, "method_22912", MethodType.methodType(VertexConsumer.class, double.class, double.class, double.class));
+	public static VertexConsumer startVertex(VertexConsumer vertexConsumer, double x, double y, double z) {
+		return Version.<VertexConsumer>newSwitch()
+				.range("1.21.0", null, () -> vertexConsumer.vertex((float) x, (float) y, (float) z))
+				.range(null, "1.20.6", () -> VertexConsumer_vertex.get().invoke(vertexConsumer, x, y, z))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> MinecraftClient_getTickDelta =
+			Reflection.getOptionalMethod(MinecraftClient.class, "method_1488", MethodType.methodType(float.class));
+	public static float getTickDelta() {
+		return Version.<Float>newSwitch()
+				.range("1.21.0", null, () -> MainUtil.client.getRenderTickCounter().getTickDelta(true))
+				.range(null, "1.20.6", () -> MinecraftClient_getTickDelta.get().invoke(MainUtil.client))
+				.get();
+	}
+	
+	public static EquipmentSlot getEquipmentSlot(EquipmentSlot.Type type, int entityId) {
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			if (slot.getType() == type && slot.getEntitySlotId() == entityId)
+				return slot;
+		}
+		throw new IllegalArgumentException("Unknown equipment slot: type=" + type + ", entityId=" + entityId);
+	}
+	
+	public static void onRegistriesLoad(Runnable callback) {
+		Version.newSwitch()
+				.range("1.20.5", null, () -> DynamicRegistryManagerHolder.onDefaultManagerLoad(callback))
+				.range(null, "1.20.4", callback)
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> VertexConsumer_light =
+			Reflection.getOptionalMethod(VertexConsumer.class, "method_22916", MethodType.methodType(VertexConsumer.class, int.class));
+	public static void setVertexLight(VertexConsumer vertexConsumer, int uv) {
+		Version.newSwitch()
+				.range("1.21.0", null, () -> vertexConsumer.light(uv))
+				.range(null, "1.20.6", () -> VertexConsumer_light.get().invoke(vertexConsumer, uv))
+				.run();
+	}
+	
+	public static <T> T withDefaultRegistryManager(Supplier<T> callback) {
+		if (NBTManagers.COMPONENTS_EXIST)
+			return DynamicRegistryManagerHolder.withDefaultManager(callback);
+		return callback.get();
+	}
+	public static void withDefaultRegistryManager(Runnable callback) {
+		if (NBTManagers.COMPONENTS_EXIST)
+			DynamicRegistryManagerHolder.withDefaultManager(callback);
+		else
+			callback.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> ScreenHandler_setStackInSlot =
+			Reflection.getOptionalMethod(ScreenHandler.class, "method_7619", MethodType.methodType(void.class, int.class, ItemStack.class));
+	public static void setStackInSlot(ScreenHandler screenHandler, ScreenHandlerSlotUpdateS2CPacket packet) {
+		Version.newSwitch()
+				.range("1.17.1", null, () -> screenHandler.setStackInSlot(packet.getSlot(), packet.getRevision(), packet.getStack()))
+				.range(null, "1.17", () -> ScreenHandler_setStackInSlot.get().invoke(screenHandler, packet.getSlot(), packet.getStack()))
 				.run();
 	}
 	

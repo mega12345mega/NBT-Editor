@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
@@ -30,6 +29,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.EntityTagReferenc
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.AttributeModifierId;
 
 import net.minecraft.entity.attribute.ClampedEntityAttribute;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -65,8 +65,8 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	}
 	
 	private static final Map<String, EntityAttribute> ATTRIBUTES;
-	private static final ConfigHiddenDataNamed<ConfigCategory, UUID> BASE_ATTRIBUTE_ENTRY;
-	private static final ConfigHiddenDataNamed<ConfigCategory, UUID> ATTRIBUTE_ENTRY;
+	private static final ConfigHiddenDataNamed<ConfigCategory, AttributeModifierId> BASE_ATTRIBUTE_ENTRY;
+	private static final ConfigHiddenDataNamed<ConfigCategory, AttributeModifierId> ATTRIBUTE_ENTRY;
 	static {
 		ATTRIBUTES = MVRegistry.ATTRIBUTE.getEntrySet().stream().map(attribute -> Map.entry(attribute.getKey().toString(), attribute.getValue()))
 				.sorted((a, b) -> a.getKey().compareToIgnoreCase(b.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a, LinkedHashMap::new));
@@ -82,7 +82,7 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				.setConfigurable("min", createExtremeAmountBtn("nbteditor.attributes.amount.min", false, false))
 				.setConfigurable("infinity", createExtremeAmountBtn("nbteditor.attributes.amount.infinity", true, true))
 				.setConfigurable("negative_infinity", createExtremeAmountBtn("nbteditor.attributes.amount.negative_infinity", false, true)));
-		BASE_ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visibleBase, UUID.randomUUID(), (uuid, defaults) -> UUID.randomUUID());
+		BASE_ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visibleBase, AttributeModifierId.randomUUID(), (id, defaults) -> AttributeModifierId.randomUUID());
 		
 		ConfigCategory visible = new ConfigCategory();
 		visible.setConfigurable("attribute", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.attribute"), ConfigValueDropdown.forList(
@@ -98,7 +98,7 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				.setConfigurable("negative_infinity", createExtremeAmountBtn("nbteditor.attributes.amount.negative_infinity", false, true)));
 		visible.setConfigurable("slot", new ConfigItem<>(TextInst.translatable("nbteditor.attributes.slot"), ConfigValueDropdown.forFilteredEnum(
 				AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.ANY, AttributeModifierData.Slot.class, AttributeModifierData.Slot::isInThisVersion)));
-		ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visible, UUID.randomUUID(), (uuid, defaults) -> UUID.randomUUID());
+		ATTRIBUTE_ENTRY = new ConfigHiddenDataNamed<>(visible, AttributeModifierId.randomUUID(), (id, defaults) -> AttributeModifierId.randomUUID());
 	}
 	@SuppressWarnings("unchecked")
 	private static ConfigValueDropdown<String> getConfigAttribute(ConfigCategory attribute) {
@@ -125,14 +125,15 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		super(TextInst.of("Attributes"), ref);
 		
 		boolean modifiers = (ref instanceof ItemReference);
-		ConfigHiddenDataNamed<ConfigCategory, UUID> entry = (modifiers ? ATTRIBUTE_ENTRY : BASE_ATTRIBUTE_ENTRY);
+		ConfigHiddenDataNamed<ConfigCategory, AttributeModifierId> entry =
+				(modifiers ? ATTRIBUTE_ENTRY : BASE_ATTRIBUTE_ENTRY);
 		List<AttributeData> attributes = (localNBT instanceof LocalItem localItem ?
 				ItemTagReferences.ATTRIBUTES.get(localItem.getEditableItem()) :
 				EntityTagReferences.ATTRIBUTES.get((LocalEntity) localNBT));
 		
 		this.attributes = new ConfigList(TextInst.translatable("nbteditor.attributes"), false, entry);
 		for (AttributeData attribute : attributes) {
-			ConfigHiddenDataNamed<ConfigCategory, UUID> hiddenAttributeConfig = entry.clone(true);
+			ConfigHiddenDataNamed<ConfigCategory, AttributeModifierId> hiddenAttributeConfig = entry.clone(true);
 			ConfigCategory attributeConfig = hiddenAttributeConfig.getVisible();
 			
 			getConfigAttribute(attributeConfig).setValue(MVRegistry.ATTRIBUTE.getId(attribute.attribute()).toString());
@@ -142,7 +143,7 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				AttributeData.AttributeModifierData modifier = attribute.modifierData().get();
 				getConfigOperation(attributeConfig).setValue(modifier.operation());
 				getConfigSlot(attributeConfig).setValue(modifier.slot());
-				hiddenAttributeConfig.setData(modifier.uuid());
+				hiddenAttributeConfig.setData(modifier.id());
 			}
 			
 			this.attributes.addConfigurable(hiddenAttributeConfig);
@@ -152,8 +153,8 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			List<AttributeData> newAttributes = new ArrayList<>();
 			
 			for (ConfigPath path : this.attributes.getConfigurables().values()) {
-				ConfigHiddenDataNamed<ConfigCategory, UUID> hiddenAttributeConfig =
-						(ConfigHiddenDataNamed<ConfigCategory, UUID>) path;
+				ConfigHiddenDataNamed<ConfigCategory, AttributeModifierId> hiddenAttributeConfig =
+						(ConfigHiddenDataNamed<ConfigCategory, AttributeModifierId>) path;
 				ConfigCategory attributeConfig = hiddenAttributeConfig.getVisible();
 				
 				EntityAttribute attribute = ATTRIBUTES.get(getConfigAttribute(attributeConfig).getValidValue());
@@ -162,8 +163,8 @@ public class AttributesScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				if (modifiers) {
 					AttributeModifierData.Operation operation = getConfigOperation(attributeConfig).getValidValue();
 					AttributeModifierData.Slot slot = getConfigSlot(attributeConfig).getValidValue();
-					UUID uuid = hiddenAttributeConfig.getData();
-					newAttributes.add(new AttributeData(attribute, amount, operation, slot, uuid));
+					AttributeModifierId id = hiddenAttributeConfig.getData();
+					newAttributes.add(new AttributeData(attribute, amount, operation, slot, id));
 				} else
 					newAttributes.add(new AttributeData(attribute, amount));
 			}

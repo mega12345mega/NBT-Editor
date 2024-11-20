@@ -7,8 +7,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.PassContainerSlotUpdates;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientScreenHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -22,7 +23,7 @@ public class ClientPlayNetworkHandlerMixin {
 		if (!MainUtil.client.isOnThread())
 			return;
 		
-		if (packet.getSyncId() == ClientHandledScreen.SYNC_ID) {
+		if (packet.getSyncId() == ClientScreenHandler.SYNC_ID) {
 			NBTEditor.LOGGER.warn("Ignoring a slot update packet with a ClientHandledScreen sync id!");
 			info.cancel();
 			return;
@@ -42,7 +43,7 @@ public class ClientPlayNetworkHandlerMixin {
 							packet.getSyncId() + ", slot: " + packet.getSlot() + ", item: " + packet.getStack() + ")");
 					return;
 				}
-				MixinLink.LAST_SERVER_HANDLED_SCREEN.getScreenHandler().setStackInSlot(packet.getSlot(), packet.getRevision(), packet.getStack());
+				MVMisc.setStackInSlot(MixinLink.LAST_SERVER_HANDLED_SCREEN.getScreenHandler(), packet);
 				return;
 			}
 			
