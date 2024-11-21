@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.7-SNAPSHOT'
+	id 'fabric-loom' version '1.8-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -17,11 +17,16 @@ repositories {
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
 	
-	maven {
-		url = "https://maven.terraformersmc.com/releases"
-	}
-	maven {
-		url = "https://cursemaven.com"
+	exclusiveContent {
+		forRepository {
+			maven {
+				name = "Modrinth"
+				url = "https://api.modrinth.com/maven"
+			}
+		}
+		filter {
+			includeGroup "maven.modrinth"
+		}
 	}
 }
 
@@ -45,8 +50,8 @@ dependencies {
 	
 	implementation files("nbteditor_1.17/build/devlibs/nbteditor_1.17-0.0.0-dev.jar")
 	
-	modImplementation "com.terraformersmc:modmenu:11.0.2"
-	modImplementation "curse.maven:nbt-autocomplete-813557:5555359"
+	modImplementation "maven.modrinth:modmenu:12.0.0-beta.1"
+	modImplementation "maven.modrinth:nbt-autocomplete:NzgmvjLk"
 }
 
 processResources {
