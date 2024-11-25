@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
+import java.awt.Color;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -34,7 +35,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ColorHelper;
 
 public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
@@ -44,14 +44,14 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			.range(null, "1.19.4", false)
 			.get();
 	
-	private static int getRenderedColor(DyeColor color) {
-		if (color == DyeColor.BLACK)
+	private static int getRenderedColor(DyeColor dye) {
+		if (dye == DyeColor.BLACK)
 			return 0xFFF0EBCC;
-		int rgb = color.getSignColor();
-		int r = (int) (ColorHelper.Argb.getRed(rgb) * 0.4D);
-		int g = (int) (ColorHelper.Argb.getGreen(rgb) * 0.4D);
-		int b = (int) (ColorHelper.Argb.getBlue(rgb) * 0.4D);
-		return ColorHelper.Argb.getArgb(0, r, g, b);
+		Color color = new Color(dye.getSignColor());
+		int r = (int) (color.getRed() * 0.4D);
+		int g = (int) (color.getGreen() * 0.4D);
+		int b = (int) (color.getBlue() * 0.4D);
+		return new Color(r, g, b, 0).getRGB();
 	}
 	
 	private boolean newFeatures;

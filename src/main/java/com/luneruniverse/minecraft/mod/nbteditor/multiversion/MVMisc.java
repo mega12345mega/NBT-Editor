@@ -24,7 +24,7 @@ import org.joml.Vector2ic;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVShaders.MVShaderAndLayer;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
@@ -42,6 +42,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipPositioner;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -51,33 +52,44 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.command.argument.TextArgumentType;
+import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SpawnEggItem;
-import net.minecraft.item.SuspiciousStewItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.potion.Potion;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryLoader;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.server.command.CommandOutput;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.StringVisitable;
@@ -85,7 +97,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.util.profiler.Profiler;
+import net.minecraft.util.profiler.Profilers;
 import net.minecraft.world.BlockRenderView;
+import net.minecraft.world.World;
 
 public class MVMisc {
 	
@@ -283,10 +298,11 @@ public class MVMisc {
 				.get();
 	}
 	
+	private static final Supplier<Class<?>> SuspiciousStewItem = Reflection.getOptionalClass("net.minecraft.class_1830");
 	private static final Supplier<Reflection.MethodInvoker> SuspiciousStewItem_addEffectsToStew =
-			Reflection.getOptionalMethod(SuspiciousStewItem.class, "method_53209", MethodType.methodType(void.class, ItemStack.class, List.class));
+			Reflection.getOptionalMethod(SuspiciousStewItem, () -> "method_53209", () -> MethodType.methodType(void.class, ItemStack.class, List.class));
 	private static final Supplier<Reflection.MethodInvoker> SuspiciousStewItem_addEffectToStew =
-			Reflection.getOptionalMethod(SuspiciousStewItem.class, "method_8021", MethodType.methodType(void.class, ItemStack.class, StatusEffect.class, int.class));
+			Reflection.getOptionalMethod(SuspiciousStewItem, () -> "method_8021", () -> MethodType.methodType(void.class, ItemStack.class, StatusEffect.class, int.class));
 	public static void addEffectToStew(ItemStack item, StatusEffect effect, int duration) {
 		Version.newSwitch()
 				.range("1.20.5", null, () -> item.apply(MVComponentType.SUSPICIOUS_STEW_EFFECTS, new SuspiciousStewEffectsComponent(List.of()), effects -> effects.with(new StewEffect(Registries.STATUS_EFFECT.getEntry(effect), duration))))
@@ -435,11 +451,11 @@ public class MVMisc {
 			Reflection.getOptionalMethod(Tessellator.class, "method_1349", MethodType.methodType(BufferBuilder.class));
 	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_begin =
 			Reflection.getOptionalMethod(BufferBuilder.class, "method_1328", MethodType.methodType(void.class, VertexFormat.DrawMode.class, VertexFormat.class));
-	public static VertexConsumer beginDrawingShader(MatrixStack matrices, MVShader shader) {
+	public static VertexConsumer beginDrawingShader(MatrixStack matrices, MVShaderAndLayer shader) {
 		return Version.<VertexConsumer>newSwitch()
-				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().getBuffer(shader.layer()))
+				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).vertexConsumers.getBuffer(shader.layer()))
 				.range(null, "1.19.4", () -> {
-					RenderSystem.setShader(shader.shader());
+					RenderSystem.setShader(shader.shader().shader);
 					BufferBuilder builder = Tessellator_getBuffer.get().invoke(Tessellator.getInstance());
 					BufferBuilder_begin.get().invoke(builder, shader.layer().getDrawMode(), shader.layer().getVertexFormat());
 					return builder;
@@ -452,7 +468,7 @@ public class MVMisc {
 			Reflection.getOptionalMethod(BufferRenderer.class, "method_1309", MethodType.methodType(void.class, BufferBuilder.class));
 	public static void endDrawingShader(MatrixStack matrices, VertexConsumer vertexConsumer) {
 		Version.newSwitch()
-				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).getVertexConsumers().draw())
+				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).vertexConsumers.draw())
 				.range("1.19.0", "1.19.4", () -> BufferRenderer.drawWithGlobalProgram(((BufferBuilder) vertexConsumer).end()))
 				.range(null, "1.18.2", () -> {
 					BufferBuilder_end.get().invoke(vertexConsumer);
@@ -634,6 +650,70 @@ public class MVMisc {
 		Version.newSwitch()
 				.range("1.17.1", null, () -> screenHandler.setStackInSlot(packet.getSlot(), packet.getRevision(), packet.getStack()))
 				.range(null, "1.17", () -> ScreenHandler_setStackInSlot.get().invoke(screenHandler, packet.getSlot(), packet.getStack()))
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> TooltipComponent_getHeight =
+			Reflection.getOptionalMethod(TooltipComponent.class, "method_32661", MethodType.methodType(int.class));
+	public static int getTooltipComponentHeight(TooltipComponent line) {
+		return Version.<Integer>newSwitch()
+				.range("1.21.2", null, () -> line.getHeight(MainUtil.client.textRenderer))
+				.range(null, "1.21.1", () -> TooltipComponent_getHeight.get().invoke(line))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> EntityType_create =
+			Reflection.getOptionalMethod(EntityType.class, "method_5883", MethodType.methodType(Entity.class, World.class));
+	public static Entity createEntity(EntityType<?> entityType, World world) {
+		return Version.<Entity>newSwitch()
+				.range("1.21.2", null, () -> entityType.create(world, SpawnReason.COMMAND))
+				.range(null, "1.21.1", () -> EntityType_create.get().invoke(entityType, world))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> Entity_getCommandSource =
+			Reflection.getOptionalMethod(Entity.class, "method_5671", MethodType.methodType(ServerCommandSource.class));
+	public static ServerCommandSource getCommandSource(Entity entity) {
+		return Version.<ServerCommandSource>newSwitch()
+				.range("1.21.2", null, () -> new ServerCommandSource(
+						CommandOutput.DUMMY, entity.getPos(), entity.getRotationClient(), null, 0,
+						entity.getName().getString(), entity.getDisplayName(), null, entity))
+				.range(null, "1.21.1", () -> Entity_getCommandSource.get().invoke(entity))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> MinecraftClient_getProfiler =
+			Reflection.getOptionalMethod(MinecraftClient.class, "method_16011", MethodType.methodType(Profiler.class));
+	public static Profiler getProfiler() {
+		return Version.<Profiler>newSwitch()
+				.range("1.21.2", null, () -> Profilers.get())
+				.range(null, "1.21.1", () -> MinecraftClient_getProfiler.get().invoke(MainUtil.client))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> RegistryLoader_loadFromResource =
+			Reflection.getOptionalMethod(RegistryLoader.class, "method_56515", MethodType.methodType(DynamicRegistryManager.Immutable.class, ResourceManager.class, DynamicRegistryManager.class, List.class));
+	public static DynamicRegistryManager.Immutable loadRegistriesFromResource(
+			ResourceManager resourceManager, DynamicRegistryManager registryManager, List<RegistryLoader.Entry<?>> entries) {
+		return Version.<DynamicRegistryManager.Immutable>newSwitch()
+				.range("1.21.2", null, () -> RegistryLoader.loadFromResource(resourceManager, registryManager.stream().toList(), entries))
+				.range(null, "1.21.1", () -> RegistryLoader_loadFromResource.get().invoke(null, resourceManager, registryManager, entries))
+				.get();
+	}
+	
+	public static PotionContentsComponent newPotionContentsComponent(Optional<RegistryEntry<Potion>> potion, Optional<Integer> customColor, List<StatusEffectInstance> customEffects) {
+		return Version.<PotionContentsComponent>newSwitch()
+				.range("1.21.2", null, () -> new PotionContentsComponent(potion, customColor, customEffects, Optional.empty()))
+				.range(null, "1.21.1", () -> Reflection.newInstance(PotionContentsComponent.class, new Class<?>[] {Optional.class, Optional.class, List.class}, potion, customColor, customEffects))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> EntityRenderDispatcher_render =
+			Reflection.getOptionalMethod(EntityRenderDispatcher.class, "method_3954", MethodType.methodType(void.class, Entity.class, double.class, double.class, double.class, float.class, float.class, MatrixStack.class, VertexConsumerProvider.class, int.class));
+	public static void renderEntity(EntityRenderDispatcher dispatcher, Entity entity, double x, double y, double z, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+		Version.newSwitch()
+				.range("1.21.2", null, () -> dispatcher.render(entity, x, y, z, tickDelta, matrices, vertexConsumers, light))
+				.range(null, "1.21.1", () -> EntityRenderDispatcher_render.get().invoke(dispatcher, entity, x, y, z, yaw, tickDelta, matrices, vertexConsumers, light))
 				.run();
 	}
 	

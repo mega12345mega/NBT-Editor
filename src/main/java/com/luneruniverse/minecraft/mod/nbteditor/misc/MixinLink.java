@@ -108,7 +108,7 @@ public class MixinLink {
 		int height = (tooltip.size() == 1 ? -2 : 0);
 		for (TooltipComponent line : tooltip) {
 			width = Math.max(width, line.getWidth(MainUtil.client.textRenderer));
-			height += line.getHeight();
+			height += MVMisc.getTooltipComponentHeight(line);
 		}
 		return new int[] {width, height};
 	}

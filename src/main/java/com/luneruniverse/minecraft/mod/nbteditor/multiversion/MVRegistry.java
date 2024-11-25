@@ -70,7 +70,7 @@ public class MVRegistry<T> implements Iterable<T> {
 	private static MVRegistry<Enchantment> ENCHANTMENT;
 	public static MVRegistry<Enchantment> getEnchantmentRegistry() {
 		if (MVEnchantments.DATA_PACK_ENCHANTMENTS) {
-			Registry<Enchantment> registry = DynamicRegistryManagerHolder.getManager().get(RegistryKeys.ENCHANTMENT);
+			Registry<Enchantment> registry = DynamicRegistryManagerHolder.getManager().getOrThrow(RegistryKeys.ENCHANTMENT);
 			if (ENCHANTMENT == null || ENCHANTMENT.getInternalValue() != registry)
 				ENCHANTMENT = new MVRegistry<>(registry);
 		} else {

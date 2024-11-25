@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -246,7 +247,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 				passengerOrSelf.stopRiding();
 				passengerOrSelf.remove(RemovalReason.DISCARDED);
 			});
-			entity = entityType.create(world);
+			entity = MVMisc.createEntity(entityType, world);
 			entity.setUuid(newUUID);
 			entity.setPosition(pos);
 			world.spawnEntity(entity);
@@ -278,7 +279,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 				packet.getNbt().putUuid("UUID", uuid);
 		}
 		
-		Entity entity = MVRegistry.ENTITY_TYPE.get(packet.getId()).create(world);
+		Entity entity = MVMisc.createEntity(MVRegistry.ENTITY_TYPE.get(packet.getId()), world);
 		entity.setUuid(uuid);
 		entity.setPosition(packet.getPos());
 		packet.getNbt().put("Pos", Stream.of(packet.getPos().x, packet.getPos().y, packet.getPos().z)
@@ -333,7 +334,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 					passengerUUID = UUID.randomUUID();
 					passengerNbt.putUuid("UUID", passengerUUID);
 				}
-				passenger = passengerType.create(world);
+				passenger = MVMisc.createEntity(passengerType, world);
 				passenger.setUuid(passengerUUID);
 				passenger.startRiding(entity, true);
 				world.spawnEntity(passenger);

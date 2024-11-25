@@ -35,7 +35,7 @@ public class GetBlockCommand extends ClientCommand {
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		Command<FabricClientCommandSource> getBlock = context -> {
 			PosArgument posArg = getDefaultArg(context, "pos", null, PosArgument.class);
-			BlockPos pos = (posArg == null ? null : posArg.toAbsoluteBlockPos(context.getSource().getPlayer().getCommandSource()));
+			BlockPos pos = (posArg == null ? null : posArg.toAbsoluteBlockPos(MVMisc.getCommandSource(context.getSource().getPlayer())));
 			if (pos != null && !MainUtil.client.world.isInBuildLimit(pos))
 				throw BlockPosArgumentType.OUT_OF_WORLD_EXCEPTION.create();
 			BlockStateArgument blockArg = context.getArgument("block", BlockStateArgument.class);

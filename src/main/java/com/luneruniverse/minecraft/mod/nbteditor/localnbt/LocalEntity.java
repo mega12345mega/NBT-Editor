@@ -21,7 +21,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -68,7 +67,7 @@ public class LocalEntity implements LocalNBT {
 		if (cachedEntity != null && cachedEntity.getType() == entityType && Objects.equals(cachedNbt, nbt))
 			return cachedEntity;
 		
-		cachedEntity = entityType.create(MainUtil.client.world);
+		cachedEntity = MVMisc.createEntity(entityType, MainUtil.client.world);
 		NBTManagers.ENTITY.setNbt(cachedEntity, nbt);
 		
 		cachedNbt = nbt.copy();
@@ -149,19 +148,19 @@ public class LocalEntity implements LocalNBT {
 				.get()) {
 			rotation.rotateY((float) Math.PI);
 		}
-		RenderSystem.applyModelViewMatrix();
+		MVDrawableHelper.applyModelViewMatrix();
 		
 		DiffuseLighting.method_34742();
 		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getVertexConsumerProvider();
 		EntityRenderDispatcher dispatcher = MainUtil.client.getEntityRenderDispatcher();
 		dispatcher.setRenderShadows(false);
 		rotation.applyToEntityRenderDispatcher(dispatcher);
-		dispatcher.render(getCachedEntity(), 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
+		MVMisc.renderEntity(dispatcher, getCachedEntity(), 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
 		dispatcher.setRenderShadows(true);
 		provider.draw();
 		
 		matrices.pop();
-		RenderSystem.applyModelViewMatrix();
+		MVDrawableHelper.applyModelViewMatrix();
 	}
 	
 	@Override

@@ -1,6 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
-import java.util.List;
+import java.lang.invoke.MethodType;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +13,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.listener.PacketListener;
-import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryLoader;
@@ -23,10 +22,7 @@ import net.minecraft.resource.LifecycledResourceManagerImpl;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceReload;
 import net.minecraft.resource.ResourceType;
-import net.minecraft.resource.SimpleResourceReload;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Unit;
-import net.minecraft.util.Util;
 
 public class DynamicRegistryManagerHolder {
 	
@@ -34,7 +30,6 @@ public class DynamicRegistryManagerHolder {
 			DynamicRegistryManager.of(MVRegistry.REGISTRIES.getInternalValue());
 	private static final CompletableFutureCache<DynamicRegistryManager> defaultManagerCache =
 			new CompletableFutureCache<>(DynamicRegistryManagerHolder::loadDefaultManagerImpl);
-	private static volatile ResourceReload defaultManagerResourcesMonitor;
 	private static final Set<Thread> defaultManagerForced = ConcurrentHashMap.newKeySet();
 	private static volatile RegistryCache defaultManagerRegistryCache;
 	
@@ -49,11 +44,9 @@ public class DynamicRegistryManagerHolder {
 			
 			ResourceManager resourceManager = new LifecycledResourceManagerImpl(
 					ResourceType.SERVER_DATA, MainUtil.client.getResourcePackManager().createResourcePacks());
-			defaultManagerResourcesMonitor = SimpleResourceReload.start(resourceManager, List.of(new RecipeManager(basicDefaultManager)),
-					Util.getMainWorkerExecutor(), MainUtil.client, CompletableFuture.completedFuture(Unit.INSTANCE), false);
 			
-			defaultManagerResourcesMonitor.whenComplete().thenRun(() -> future.complete(
-					RegistryLoader.loadFromResource(resourceManager, basicDefaultManager, RegistryLoader.DYNAMIC_REGISTRIES)));
+			future.completeAsync(() -> MVMisc.loadRegistriesFromResource(
+					resourceManager, basicDefaultManager, RegistryLoader.DYNAMIC_REGISTRIES));
 		});
 		return future;
 	}
@@ -67,12 +60,7 @@ public class DynamicRegistryManagerHolder {
 			}
 			@Override
 			public float getProgress() {
-				if (defaultManagerResourcesMonitor == null)
-					return 0;
-				if (future.isDone())
-					return 1;
-				// Registries need to be loaded after resources are
-				return defaultManagerResourcesMonitor.getProgress() * 0.5f;
+				return future.isDone() ? 1 : 0;
 			}
 		};
 	}
@@ -127,6 +115,12 @@ public class DynamicRegistryManagerHolder {
 		});
 	}
 	
+	private static final boolean getReadOnlyWrapperExists = Version.<Boolean>newSwitch()
+			.range("1.21.2", null, false)
+			.range(null, "1.21.1", true)
+			.get();
+	private static final Supplier<Reflection.MethodInvoker> Registry_getReadOnlyWrapper =
+			Reflection.getOptionalMethod(Registry.class, "method_46771", MethodType.methodType(RegistryWrapper.Impl.class));
 	public static <T> boolean isOwnedByDefaultManager(RegistryEntry.Reference<T> entry) {
 		if (NBTEditorServer.isOnServerThread() || defaultManagerCache.getStatus() != CompletableFutureCache.Status.LOADED)
 			return false;
@@ -139,7 +133,7 @@ public class DynamicRegistryManagerHolder {
 		if (registry == null)
 			return false;
 		
-		return entry.owner.ownerEquals(registry.getReadOnlyWrapper());
+		return entry.owner.ownerEquals(getReadOnlyWrapperExists ? Registry_getReadOnlyWrapper.get().invoke(registry) : registry);
 	}
 	
 }

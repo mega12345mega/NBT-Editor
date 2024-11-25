@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
@@ -132,13 +133,13 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		matrices.translate(0.0D, 0.0D, 32.0D);
 		matrices.scale(scaleX, scaleY, 1);
 		if (oldMatrix)
-			RenderSystem.applyModelViewMatrix();
+			MVDrawableHelper.applyModelViewMatrix();
 		
 		localNBT.renderIcon(matrices, x, y);
 		
 		matrices.pop();
 		if (oldMatrix)
-			RenderSystem.applyModelViewMatrix();
+			MVDrawableHelper.applyModelViewMatrix();
 	}
 	protected void preRenderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {}
 	protected void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {}

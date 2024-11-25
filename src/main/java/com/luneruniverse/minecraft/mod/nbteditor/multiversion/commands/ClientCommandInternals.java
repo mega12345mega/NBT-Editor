@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Iterables;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection.MethodInvoker;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -97,7 +98,7 @@ public final class ClientCommandInternals {
 		// noinspection ConstantConditions
 		FabricClientCommandSource commandSource = (FabricClientCommandSource) client.getNetworkHandler().getCommandSource();
 
-		client.getProfiler().push(command);
+		MVMisc.getProfiler().push(command);
 
 		try {
 			// TODO: Check for server commands before executing.
@@ -128,7 +129,7 @@ public final class ClientCommandInternals {
 				return true;
 			}
 		} finally {
-			client.getProfiler().pop();
+			MVMisc.getProfiler().pop();
 		}
 	}
 

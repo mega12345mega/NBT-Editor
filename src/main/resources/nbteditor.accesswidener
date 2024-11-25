@@ -52,7 +52,7 @@ accessible method net/minecraft/client/MinecraftClient addBlockEntityNbt (Lnet/m
 
 accessible method net/minecraft/component/type/ItemEnchantmentsComponent <init> (Lit/unimi/dsi/fastutil/objects/Object2IntOpenHashMap;Z)V
 accessible field net/minecraft/component/type/ItemEnchantmentsComponent showInTooltip Z
-accessible field net/minecraft/item/trim/ArmorTrim showInTooltip Z
+accessible field net/minecraft/item/equipment/trim/ArmorTrim showInTooltip Z
 
 accessible field net/minecraft/client/render/GameRenderer buffers Lnet/minecraft/client/render/BufferBuilderStorage;
 
@@ -68,6 +68,8 @@ accessible class com/mojang/blaze3d/platform/GlStateManager$ScissorTestState
 accessible class com/mojang/blaze3d/platform/GlStateManager$CapabilityTracker
 accessible field com/mojang/blaze3d/platform/GlStateManager SCISSOR Lcom/mojang/blaze3d/platform/GlStateManager$ScissorTestState;
 accessible field com/mojang/blaze3d/platform/GlStateManager$CapabilityTracker state Z
+
+accessible field net/minecraft/client/gui/DrawContext vertexConsumers Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;
 
 # Private in older versions
 accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;

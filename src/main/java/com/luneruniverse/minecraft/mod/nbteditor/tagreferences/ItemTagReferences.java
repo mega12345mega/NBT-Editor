@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.ComponentTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.NBTTagReference;
@@ -29,7 +30,6 @@ import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.component.type.BlockStateComponent;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.NbtComponent;
-import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.component.type.UnbreakableComponent;
 import net.minecraft.component.type.WritableBookContentComponent;
@@ -50,9 +50,9 @@ public class ItemTagReferences {
 	
 	public static final TagReference<CustomPotionContents, ItemStack> CUSTOM_POTION_CONTENTS = Version.<TagReference<CustomPotionContents, ItemStack>>newSwitch()
 			.range("1.20.5", null, () -> new ComponentTagReference<>(MVComponentType.POTION_CONTENTS,
-					() -> new PotionContentsComponent(Optional.empty(), Optional.empty(), List.of()),
+					() -> MVMisc.newPotionContentsComponent(Optional.empty(), Optional.empty(), List.of()),
 					contents -> new CustomPotionContents(contents.customColor(), contents.customEffects()),
-					contents -> new PotionContentsComponent(Optional.empty(), contents.color(), contents.effects())))
+					contents -> MVMisc.newPotionContentsComponent(Optional.empty(), contents.color(), contents.effects())))
 			.range(null, "1.20.4", () -> new CustomPotionContentsNBTTagReference())
 			.get();
 	
