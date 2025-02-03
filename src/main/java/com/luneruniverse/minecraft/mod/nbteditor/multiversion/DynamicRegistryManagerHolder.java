@@ -1,6 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
 import java.lang.invoke.MethodType;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,11 +15,14 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.listener.PacketListener;
+import net.minecraft.registry.CombinedDynamicRegistries;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryLoader;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.ServerDynamicRegistryType;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.TagGroupLoader;
 import net.minecraft.resource.LifecycledResourceManagerImpl;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceReload;
@@ -26,8 +31,6 @@ import net.minecraft.server.MinecraftServer;
 
 public class DynamicRegistryManagerHolder {
 	
-	private static final DynamicRegistryManager basicDefaultManager =
-			DynamicRegistryManager.of(MVRegistry.REGISTRIES.getInternalValue());
 	private static final CompletableFutureCache<DynamicRegistryManager> defaultManagerCache =
 			new CompletableFutureCache<>(DynamicRegistryManagerHolder::loadDefaultManagerImpl);
 	private static final Set<Thread> defaultManagerForced = ConcurrentHashMap.newKeySet();
@@ -42,11 +45,23 @@ public class DynamicRegistryManagerHolder {
 			if (MainUtil.client.getResourcePackManager().getEnabledProfiles().isEmpty())
 				MainUtil.client.getResourcePackManager().scanPacks();
 			
+			// Based on https://github.com/MineLittlePony/HDSkins/blob/f9c6b8e570cae03908598eb629bf92e2f4faf5b3/src/main/java/com/minelittlepony/hdskins/client/gui/player/DummyNetworkHandler.java#L49
+			
+			CombinedDynamicRegistries<ServerDynamicRegistryType> combinedRegistries =
+					ServerDynamicRegistryType.createCombinedDynamicRegistries();
 			ResourceManager resourceManager = new LifecycledResourceManagerImpl(
 					ResourceType.SERVER_DATA, MainUtil.client.getResourcePackManager().createResourcePacks());
 			
-			future.completeAsync(() -> MVMisc.loadRegistriesFromResource(
-					resourceManager, basicDefaultManager, RegistryLoader.DYNAMIC_REGISTRIES));
+			List<Registry.PendingTagLoad<?>> tags = TagGroupLoader.startReload(resourceManager, combinedRegistries.get(ServerDynamicRegistryType.STATIC));
+			DynamicRegistryManager.Immutable preceding = combinedRegistries.getPrecedingRegistryManagers(ServerDynamicRegistryType.RELOADABLE);
+			List<RegistryWrapper.Impl<?>> loadedRegistries = TagGroupLoader.collectRegistries(preceding, tags);
+			
+			List<RegistryLoader.Entry<?>> entries = new ArrayList<>();
+			entries.addAll(RegistryLoader.DYNAMIC_REGISTRIES);
+			entries.addAll(RegistryLoader.DIMENSION_REGISTRIES);
+			DynamicRegistryManager.Immutable dynamicRegistries = RegistryLoader.loadFromResource(resourceManager, loadedRegistries, entries);
+			
+			future.complete(combinedRegistries.with(ServerDynamicRegistryType.RELOADABLE, dynamicRegistries).getCombinedRegistryManager());
 		});
 		return future;
 	}

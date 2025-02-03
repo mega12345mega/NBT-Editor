@@ -16,7 +16,7 @@ public class UtilMixin {
 		if (MixinLink.hiddenExceptionHandlers.contains(Thread.currentThread()))
 			throw new MixinLink.HiddenException(message, throwable);
 	}
-	@Inject(method = "error(Ljava/lang/String;)V", at = @At("HEAD"))
+	@Inject(method = "error(Ljava/lang/String;)V", at = @At("HEAD"), require = 0)
 	private static void error(String message, CallbackInfo info) {
 		if (MixinLink.hiddenExceptionHandlers.contains(Thread.currentThread()))
 			throw new MixinLink.HiddenException(message, new RuntimeException(message));

@@ -110,8 +110,12 @@ public class MVRegistry<T> implements Iterable<T> {
 		return call(value, "method_10221", MethodType.methodType(Identifier.class, Object.class), entry);
 	}
 	
+	private static final String get = Version.<String>newSwitch()
+			.range("1.21.2", null, "method_63535")
+			.range(null, "1.21.1", "method_10223")
+			.get();
 	public T get(Identifier id) {
-		return call(value, "method_10223", MethodType.methodType(Object.class, Identifier.class), id);
+		return call(value, get, MethodType.methodType(Object.class, Identifier.class), id);
 	}
 	
 	public Set<Identifier> getIds() {
