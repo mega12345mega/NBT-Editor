@@ -17,6 +17,7 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.registry.CombinedDynamicRegistries;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryLoader;
 import net.minecraft.registry.RegistryWrapper;
@@ -147,6 +148,13 @@ public class DynamicRegistryManagerHolder {
 		Registry<T> registry = (Registry<T>) defaultManagerRegistryCache.getRegistry(entry.registryKey().getRegistry()).orElse(null);
 		if (registry == null)
 			return false;
+		
+		// Check for static registries
+		// Attempting to convert references in static registries to the current registry manager
+		// causes a stack overflow as the reference isn't changed
+		if (Registries.REGISTRIES.get(registry.getKey().getValue()) != null) {
+			return false;
+		}
 		
 		return entry.owner.ownerEquals(getReadOnlyWrapperExists ? Registry_getReadOnlyWrapper.get().invoke(registry) : registry);
 	}

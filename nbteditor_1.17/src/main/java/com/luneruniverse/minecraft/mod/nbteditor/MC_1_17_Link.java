@@ -9,6 +9,7 @@ public class MC_1_17_Link {
 	
 	public static class MixinLink {
 		public static List<ItemStack> ENCHANT_GLINT_FIX;
+		public static boolean USE_DIRECT_ITEM_GLINT_CONSUMER;
 	}
 	
 	public static class ConfigScreen {

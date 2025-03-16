@@ -48,6 +48,9 @@ public class BuiltinModelItemRendererMixin {
 		if (!(item.getItem() instanceof BlockItem) ||
 				(!MixinLink.ENCHANT_GLINT_FIX.contains(item) && !ConfigScreen.isEnchantGlintFix()))
 			return provider;
-		return (layer) -> ItemRenderer.getDirectItemGlintConsumer(provider, layer, true, item.hasGlint());
+		
+		if (MixinLink.USE_DIRECT_ITEM_GLINT_CONSUMER)
+			return (layer) -> ItemRenderer.getDirectItemGlintConsumer(provider, layer, true, item.hasGlint());
+		return (layer) -> ItemRenderer.getItemGlintConsumer(provider, layer, true, item.hasGlint());
 	}
 }

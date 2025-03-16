@@ -35,6 +35,7 @@ public abstract class DrawContextMixin {
 	}
 	@Inject(method = "method_51435(Lnet/minecraft/class_327;Ljava/util/List;IILnet/minecraft/class_8000;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_4587;method_22903()V", shift = At.Shift.AFTER), remap = false)
 	@Group(name = "drawTooltip", min = 1)
+	@SuppressWarnings("target")
 	private void drawTooltip(TextRenderer textRenderer, List<TooltipComponent> tooltip, int x, int y, TooltipPositioner positioner, CallbackInfo info) {
 		drawTooltip_impl(tooltip, x, y, positioner);
 	}
