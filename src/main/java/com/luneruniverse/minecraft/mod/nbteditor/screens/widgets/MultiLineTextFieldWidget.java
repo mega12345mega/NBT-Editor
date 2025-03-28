@@ -417,7 +417,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 		MVDrawableHelper.fill(matrices, x, y, x + width, y + height, bgColor);
 		
-		MainUtil.enableScissor(x, y, width, height);
+		MVDrawableHelper.enableScissor(matrices, x, y, width, height);
 		
 		matrices.push();
 		matrices.translate(0.0, scroll, 0.0);
@@ -452,7 +452,7 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 			suggestor.render(matrices, mouseX, mouseY, delta);
 		}
 		
-		MainUtil.disableScissor();
+		MVDrawableHelper.disableScissor(matrices);
 	}
 	protected void renderHighlightsBelow(MatrixStack matrices, int mouseX, int mouseY, float delta) {}
 	protected void renderHighlightsAbove(MatrixStack matrices, int mouseX, int mouseY, float delta) {}

@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.stream.StreamSupport;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
@@ -58,7 +58,7 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 		
 		checkOverScroll();
 		
-		MainUtil.enableScissor(getPaddedX(), getPaddedY(), getPaddedWidth(), getPaddedHeight());
+		MVDrawableHelper.enableScissor(matrices, getPaddedX(), getPaddedY(), getPaddedWidth(), getPaddedHeight());
 		
 		for (PositionedPanelElement<T> pos : getPanelElementsSafe()) {
 			T element = pos.element();
@@ -69,7 +69,7 @@ public abstract class Panel<T extends Drawable & Element> implements MVDrawable,
 			matrices.pop();
 		}
 		
-		MainUtil.disableScissor();
+		MVDrawableHelper.disableScissor(matrices);
 		
 		scrollBar.render(matrices, mouseX, mouseY, delta);
 	}

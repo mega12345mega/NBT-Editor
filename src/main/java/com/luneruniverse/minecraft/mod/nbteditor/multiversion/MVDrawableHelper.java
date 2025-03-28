@@ -186,7 +186,7 @@ public class MVDrawableHelper {
 			Reflection.getOptionalMethod(ItemRenderer.class, "method_4023", MethodType.methodType(void.class, ItemStack.class, int.class, int.class));
 	private static final Supplier<Reflection.MethodInvoker> ItemRenderer_renderGuiItemOverlay =
 			Reflection.getOptionalMethod(ItemRenderer.class, "method_4025", MethodType.methodType(void.class, TextRenderer.class, ItemStack.class, int.class, int.class));
-	public static final void renderItem(MatrixStack matrices, float zOffset, boolean setScreenZOffset, ItemStack item, int x, int y) {
+	public static void renderItem(MatrixStack matrices, float zOffset, boolean setScreenZOffset, ItemStack item, int x, int y) {
 		ItemRenderer itemRenderer = MainUtil.client.getItemRenderer();
 		TextRenderer textRenderer = MainUtil.client.textRenderer;
 		Version.newSwitch()
@@ -252,6 +252,26 @@ public class MVDrawableHelper {
 		Version.newSwitch()
 				.range("1.21.2", null, () -> {})
 				.range(null, "1.21.1", () -> RenderSystem_applyModelViewMatrix.get().invoke(null))
+				.run();
+	}
+	
+	public static void enableScissor(MatrixStack matrices, int x, int y, int width, int height) {
+		Version.newSwitch()
+				.range("1.20.0", null, () -> getDrawContext(matrices).enableScissor(x, y, x + width, y + height))
+				.range(null, "1.19.4", () -> {
+					double scale = MainUtil.client.getWindow().getScaleFactor();
+					RenderSystem.enableScissor(
+							(int) (x * scale),
+							(int) ((MainUtil.client.getWindow().getScaledHeight() - (y + height)) * scale),
+							(int) (width * scale),
+							(int) (height * scale));
+				})
+				.run();
+	}
+	public static void disableScissor(MatrixStack matrices) {
+		Version.newSwitch()
+				.range("1.20.0", null, () -> getDrawContext(matrices).disableScissor())
+				.range(null, "1.19.4", () -> RenderSystem.disableScissor())
 				.run();
 	}
 	
