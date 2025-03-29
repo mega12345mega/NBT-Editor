@@ -36,6 +36,7 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.screen.Screen;
@@ -71,6 +72,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SpawnEggItem;
@@ -80,13 +82,10 @@ import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.potion.Potion;
-import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryLoader;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
-import net.minecraft.resource.ResourceManager;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
@@ -451,11 +450,13 @@ public class MVMisc {
 			Reflection.getOptionalMethod(Tessellator.class, "method_1349", MethodType.methodType(BufferBuilder.class));
 	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_begin =
 			Reflection.getOptionalMethod(BufferBuilder.class, "method_1328", MethodType.methodType(void.class, VertexFormat.DrawMode.class, VertexFormat.class));
+	private static final Supplier<Reflection.MethodInvoker> RenderSystem_setShader =
+			Reflection.getOptionalMethod(RenderSystem.class, "setShader", MethodType.methodType(void.class, Supplier.class));
 	public static VertexConsumer beginDrawingShader(MatrixStack matrices, MVShaderAndLayer shader) {
 		return Version.<VertexConsumer>newSwitch()
 				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).vertexConsumers.getBuffer(shader.layer()))
 				.range(null, "1.19.4", () -> {
-					RenderSystem.setShader(shader.shader().shader);
+					RenderSystem_setShader.get().invoke(null, (Supplier<ShaderProgram>) () -> shader.shader().shader);
 					BufferBuilder builder = Tessellator_getBuffer.get().invoke(Tessellator.getInstance());
 					BufferBuilder_begin.get().invoke(builder, shader.layer().getDrawMode(), shader.layer().getVertexFormat());
 					return builder;
@@ -691,16 +692,6 @@ public class MVMisc {
 				.get();
 	}
 	
-	private static final Supplier<Reflection.MethodInvoker> RegistryLoader_loadFromResource =
-			Reflection.getOptionalMethod(RegistryLoader.class, "method_56515", MethodType.methodType(DynamicRegistryManager.Immutable.class, ResourceManager.class, DynamicRegistryManager.class, List.class));
-	public static DynamicRegistryManager.Immutable loadRegistriesFromResource(
-			ResourceManager resourceManager, DynamicRegistryManager registryManager, List<RegistryLoader.Entry<?>> entries) {
-		return Version.<DynamicRegistryManager.Immutable>newSwitch()
-				.range("1.21.2", null, () -> RegistryLoader.loadFromResource(resourceManager, registryManager.stream().toList(), entries))
-				.range(null, "1.21.1", () -> RegistryLoader_loadFromResource.get().invoke(null, resourceManager, registryManager, entries))
-				.get();
-	}
-	
 	public static PotionContentsComponent newPotionContentsComponent(Optional<RegistryEntry<Potion>> potion, Optional<Integer> customColor, List<StatusEffectInstance> customEffects) {
 		return Version.<PotionContentsComponent>newSwitch()
 				.range("1.21.2", null, () -> new PotionContentsComponent(potion, customColor, customEffects, Optional.empty()))
@@ -715,6 +706,15 @@ public class MVMisc {
 				.range("1.21.2", null, () -> dispatcher.render(entity, x, y, z, tickDelta, matrices, vertexConsumers, light))
 				.range(null, "1.21.1", () -> EntityRenderDispatcher_render.get().invoke(dispatcher, entity, x, y, z, yaw, tickDelta, matrices, vertexConsumers, light))
 				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> Entity_hasPermissionLevel =
+			Reflection.getOptionalMethod(Entity.class, "method_5687", MethodType.methodType(boolean.class, int.class));
+	public static boolean hasPermissionLevel(PlayerEntity player, int level) {
+		return Version.<Boolean>newSwitch()
+				.range("1.21.2", null, () -> player.hasPermissionLevel(level))
+				.range(null, "1.21.1", () -> Entity_hasPermissionLevel.get().invoke(player, level))
+				.get();
 	}
 	
 }

@@ -36,7 +36,6 @@
     "ScreenshotRecorderMixin",
     "UtilMixin",
     "KeyboardMixin",
-    "GameRendererMixin",
     "ChatInputSuggestorMixin",
     "ClientPlayerEntityMixin",
     "BuiltinModelItemRendererMixin",

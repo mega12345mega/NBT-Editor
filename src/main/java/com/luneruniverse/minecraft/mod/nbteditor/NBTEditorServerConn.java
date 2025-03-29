@@ -64,7 +64,7 @@ public class NBTEditorServerConn implements MVClientNetworking.PlayNetworkStateE
 		if (status != Status.BOTH)
 			return false;
 		GameMode gameMode = MainUtil.client.interactionManager.getCurrentGameMode();
-		return (gameMode.isCreative() || gameMode.isSurvivalLike()) && MainUtil.client.player.hasPermissionLevel(2);
+		return (gameMode.isCreative() || gameMode.isSurvivalLike()) && MVMisc.hasPermissionLevel(MainUtil.client.player, 2);
 	}
 	public boolean isEditingAllowed() {
 		return MainUtil.client.interactionManager.getCurrentGameMode().isCreative() || isEditingExpanded();

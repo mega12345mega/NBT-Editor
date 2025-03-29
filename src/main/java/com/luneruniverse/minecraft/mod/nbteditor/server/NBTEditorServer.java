@@ -96,14 +96,14 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onSetCursorPacket(SetCursorC2SPacket packet, ServerPlayerEntity player) {
-		if (!player.hasPermissionLevel(2))
+		if (!MVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		player.currentScreenHandler.setCursorStack(packet.getItem());
 	}
 	
 	private void onSetSlotPacket(SetSlotC2SPacket packet, ServerPlayerEntity player) {
-		if (!player.hasPermissionLevel(2))
+		if (!MVMisc.hasPermissionLevel(player, 2))
 			return;
 		if (player.currentScreenHandler == player.playerScreenHandler)
 			return;
@@ -116,7 +116,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onOpenEnderChestPacket(OpenEnderChestC2SPacket packet, ServerPlayerEntity player) {
-		if (!player.hasPermissionLevel(2))
+		if (!MVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		player.openHandledScreen(new SimpleNamedScreenHandlerFactory((syncId, inventory, player2) ->
@@ -125,7 +125,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onGetBlockPacket(GetBlockC2SPacket packet, ServerPlayerEntity player) {
-		if (!player.hasPermissionLevel(2))
+		if (!MVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
@@ -140,7 +140,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		MVServerNetworking.send(player, new ViewBlockS2CPacket(packet.getRequestId(), packet.getWorld(), packet.getPos(), null, null, null));
 	}
 	private void onGetLecternBlockPacket(GetLecternBlockC2SPacket packet, ServerPlayerEntity player) {
-		if (!player.hasPermissionLevel(2))
+		if (!MVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		if (player.currentScreenHandler instanceof LecternScreenHandler handler) {
@@ -164,7 +164,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onGetEntityPacket(GetEntityC2SPacket packet, ServerPlayerEntity player) {
-		if (!player.hasPermissionLevel(2))
+		if (!MVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
@@ -183,7 +183,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onSetBlockPacket(SetBlockC2SPacket packet, ServerPlayerEntity player) {
-		if (!player.hasPermissionLevel(2))
+		if (!MVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
@@ -217,7 +217,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onSetEntityPacket(SetEntityC2SPacket packet, ServerPlayerEntity player) {
-		if (!player.hasPermissionLevel(2))
+		if (!MVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
@@ -261,7 +261,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onSummonEntityPacket(SummonEntityC2SPacket packet, ServerPlayerEntity player) {
-		if (!player.hasPermissionLevel(2))
+		if (!MVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());

@@ -91,6 +91,9 @@ def checkRefmap(Map json) {
 }
 
 task mergeRefmapJson {
+	dependsOn classes
+	dependsOn ":nbteditor_1.17:classes"
+	
 	doLast {
 		File mainRefmap = file("build/classes/java/main/nbteditor-refmap.json")
 		File additionalRefmap = file("nbteditor_1.17/build/classes/java/main/nbteditor_1.17-refmap.json")
@@ -115,18 +118,20 @@ task mergeRefmapJson {
 		mainRefmap.text = JsonOutput.prettyPrint(JsonOutput.toJson(mainJson))
 	}
 }
-mergeRefmapJson.dependsOn(classes)
-mergeRefmapJson.dependsOn(":nbteditor_1.17:classes")
 
 jar {
 	from("LICENSE") {
 		rename { "${it}_${project.base.archivesName.get()}"}
 	}
 	
-	from(files("nbteditor_1.17/build/classes/java/main")) {
-		exclude "nbteditor_1.17-refmap.json"
-	}
 	dependsOn mergeRefmapJson
+}
+
+remapJar {
+	dependsOn ":nbteditor_1.17:remapJar"
+	from(zipTree("nbteditor_1.17/build/libs/nbteditor_1.17-0.0.0.jar")) {
+		include "**/*.class"
+	}
 }
 
 // configure the maven publication
