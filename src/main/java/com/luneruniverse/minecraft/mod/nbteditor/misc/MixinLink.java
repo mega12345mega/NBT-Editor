@@ -29,7 +29,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ServerItemReference;
@@ -159,15 +158,6 @@ public class MixinLink {
 		public void run() throws Throwable;
 	}
 	public static void throwHiddenException(DangerousRunnable toRun) throws Throwable {
-		if (Version.<Boolean>newSwitch()
-				.range("1.21.2", null, true)
-				.range(null, "1.21.1", false)
-				.get()) {
-			// Util.error removed in 1.21.2
-			toRun.run();
-			return;
-		}
-		
 		hiddenExceptionHandlers.add(Thread.currentThread());
 		try {
 			toRun.run();

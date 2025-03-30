@@ -14,6 +14,7 @@ import java.io.UncheckedIOException;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -89,6 +90,7 @@ import net.minecraft.resource.ResourceFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.state.property.Property;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.StringVisitable;
@@ -714,6 +716,15 @@ public class MVMisc {
 		return Version.<Boolean>newSwitch()
 				.range("1.21.2", null, () -> player.hasPermissionLevel(level))
 				.range(null, "1.21.1", () -> Entity_hasPermissionLevel.get().invoke(player, level))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> Property_getValues =
+			Reflection.getOptionalMethod(Property.class, "method_11898", MethodType.methodType(Collection.class));
+	public static <T extends Comparable<T>> Collection<T> getValues(Property<T> property) {
+		return Version.<Collection<T>>newSwitch()
+				.range("1.21.2", null, () -> property.getValues())
+				.range(null, "1.21.1", () -> Property_getValues.get().invoke(property))
 				.get();
 	}
 	
