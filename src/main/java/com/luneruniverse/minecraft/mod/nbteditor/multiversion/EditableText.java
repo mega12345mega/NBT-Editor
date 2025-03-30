@@ -4,6 +4,7 @@ import java.lang.invoke.MethodType;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import com.google.common.cache.Cache;
@@ -33,12 +34,11 @@ public class EditableText implements Text {
 		return value;
 	}
 	
-	// Wrapper handler
-	private final Cache<String, Reflection.MethodInvoker> methodCache = CacheBuilder.newBuilder().build();
+	private static final Cache<String, Reflection.MethodInvoker> methodCache = CacheBuilder.newBuilder().build();
 	@SuppressWarnings("unchecked")
-	private <R> R call(boolean mutable, String method, MethodType type, Object... args) {
+	private <R> R call(boolean mutable, String method, Supplier<MethodType> type, Object... args) {
 		try {
-			Object output = methodCache.get(method, () -> Reflection.getMethod(mutable ? MutableText.class : Text.class, method, type)).invoke(value, args);
+			Object output = methodCache.get(method, () -> Reflection.getMethod(mutable ? MutableText.class : Text.class, method, type.get())).invoke(value, args);
 			if (output instanceof MutableText && mutable) {
 				if (output == value)
 					output = this;
@@ -54,68 +54,68 @@ public class EditableText implements Text {
 	// Text
 	@Override
 	public OrderedText asOrderedText() {
-		return call(false, "method_30937", MethodType.methodType(OrderedText.class));
+		return call(false, "method_30937", () -> MethodType.methodType(OrderedText.class));
 	}
 	
 	@Override
 	public TextContent getContent() {
-		return call(false, "method_10851", MethodType.methodType(TextContent.class));
+		return call(false, "method_10851", () -> MethodType.methodType(TextContent.class));
 	}
 	
 	@Override
 	public List<Text> getSiblings() {
-		return call(false, "method_10855", MethodType.methodType(List.class));
+		return call(false, "method_10855", () -> MethodType.methodType(List.class));
 	}
 	
 	@Override
 	public Style getStyle() {
-		return call(false, "method_10866", MethodType.methodType(Style.class));
+		return call(false, "method_10866", () -> MethodType.methodType(Style.class));
 	}
 	
 	// 1.18 Text
 	public String method_10851() { // asString
-		return call(false, "method_10851", MethodType.methodType(String.class));
+		return call(false, "method_10851", () -> MethodType.methodType(String.class));
 	}
 	
 	public MutableText method_27662() { // copy
-		return call(false, "method_27662", MethodType.methodType(MutableText.class));
+		return call(false, "method_27662", () -> MethodType.methodType(MutableText.class));
 	}
 	
 	public MutableText method_27661() { // shallowCopy
-		return call(false, "method_27661", MethodType.methodType(MutableText.class));
+		return call(false, "method_27661", () -> MethodType.methodType(MutableText.class));
 	}
 	
 	public <T> Optional<T> method_27660(StringVisitable.StyledVisitor<T> visitor, Style style) { // visitSelf
-		return call(false, "method_27660", MethodType.methodType(Optional.class, StringVisitable.StyledVisitor.class, Style.class), visitor, style);
+		return call(false, "method_27660", () -> MethodType.methodType(Optional.class, StringVisitable.StyledVisitor.class, Style.class), visitor, style);
 	}
 	
 	public <T> Optional<T> method_27659(StringVisitable.Visitor<T> visitor) { // visitSelf
-		return call(false, "method_27659", MethodType.methodType(Optional.class, StringVisitable.Visitor.class), visitor);
+		return call(false, "method_27659", () -> MethodType.methodType(Optional.class, StringVisitable.Visitor.class), visitor);
 	}
 	
 	// Mutable Text
 	public EditableText setStyle(Style style) {
-		return call(true, "method_10862", MethodType.methodType(MutableText.class, Style.class), style);
+		return call(true, "method_10862", () -> MethodType.methodType(MutableText.class, Style.class), style);
 	}
 	
 	public EditableText append(String text) {
-		return call(true, "method_27693", MethodType.methodType(MutableText.class, String.class), text);
+		return call(true, "method_27693", () -> MethodType.methodType(MutableText.class, String.class), text);
 	}
 	
 	public EditableText append(Text text) {
-		return call(true, "method_10852", MethodType.methodType(MutableText.class, Text.class), text);
+		return call(true, "method_10852", () -> MethodType.methodType(MutableText.class, Text.class), text);
 	}
 	
 	public EditableText styled(UnaryOperator<Style> styleUpdater) {
-		return call(true, "method_27694", MethodType.methodType(MutableText.class, UnaryOperator.class), styleUpdater);
+		return call(true, "method_27694", () -> MethodType.methodType(MutableText.class, UnaryOperator.class), styleUpdater);
 	}
 	
 	public EditableText fillStyle(Style styleOverride) {
-		return call(true, "method_27696", MethodType.methodType(MutableText.class, Style.class), styleOverride);
+		return call(true, "method_27696", () -> MethodType.methodType(MutableText.class, Style.class), styleOverride);
 	}
 	
 	public EditableText formatted(Formatting... formattings) {
-		return call(true, "method_27695", MethodType.methodType(MutableText.class, Formatting[].class), (Object) formattings);
+		return call(true, "method_27695", () -> MethodType.methodType(MutableText.class, Formatting[].class), (Object) formattings);
 	}
 	
 	// Other

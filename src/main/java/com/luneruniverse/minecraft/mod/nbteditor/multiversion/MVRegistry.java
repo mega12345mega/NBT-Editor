@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.google.common.cache.Cache;
@@ -27,12 +28,11 @@ import net.minecraft.util.Identifier;
 
 public class MVRegistry<T> implements Iterable<T> {
 	
-	// Wrapper handler
 	private static final Cache<String, Reflection.MethodInvoker> methodCache = CacheBuilder.newBuilder().build();
 	@SuppressWarnings("unchecked")
-	private static <R> R call(Object registry, String method, MethodType type, Object... args) {
+	private static <R> R call(Object registry, String method, Supplier<MethodType> type, Object... args) {
 		try {
-			return (R) methodCache.get(method, () -> Reflection.getMethod(Registry.class, method, type)).invoke(registry, args);
+			return (R) methodCache.get(method, () -> Reflection.getMethod(Registry.class, method, type.get())).invoke(registry, args);
 		} catch (ExecutionException | UncheckedExecutionException e) {
 			throw new RuntimeException("Error invoking method", e);
 		}
@@ -81,7 +81,7 @@ public class MVRegistry<T> implements Iterable<T> {
 	}
 	
 	public static <V, T extends V> T register(MVRegistry<V> registry, Identifier id, T entry) {
-		return call(null, "method_10230", MethodType.methodType(Object.class, REGISTRY_CLASS, Identifier.class, Object.class), registry.value, id, entry);
+		return call(null, "method_10230", () -> MethodType.methodType(Object.class, REGISTRY_CLASS, Identifier.class, Object.class), registry.value, id, entry);
 	}
 	
 	
@@ -103,11 +103,11 @@ public class MVRegistry<T> implements Iterable<T> {
 	}
 	
 	public Optional<T> getOrEmpty(Identifier id) {
-		return call(value, "method_17966", MethodType.methodType(Optional.class, Identifier.class), id);
+		return call(value, "method_17966", () -> MethodType.methodType(Optional.class, Identifier.class), id);
 	}
 	
 	public Identifier getId(T entry) {
-		return call(value, "method_10221", MethodType.methodType(Identifier.class, Object.class), entry);
+		return call(value, "method_10221", () -> MethodType.methodType(Identifier.class, Object.class), entry);
 	}
 	
 	private static final String get = Version.<String>newSwitch()
@@ -115,15 +115,15 @@ public class MVRegistry<T> implements Iterable<T> {
 			.range(null, "1.21.1", "method_10223")
 			.get();
 	public T get(Identifier id) {
-		return call(value, get, MethodType.methodType(Object.class, Identifier.class), id);
+		return call(value, get, () -> MethodType.methodType(Object.class, Identifier.class), id);
 	}
 	
 	public Set<Identifier> getIds() {
-		return call(value, "method_10235", MethodType.methodType(Set.class));
+		return call(value, "method_10235", () -> MethodType.methodType(Set.class));
 	}
 	
 	public Set<Map.Entry<Identifier, T>> getEntrySet() {
-		Set<Map.Entry<Object, T>> output = call(value, "method_29722", MethodType.methodType(Set.class));
+		Set<Map.Entry<Object, T>> output = call(value, "method_29722", () -> MethodType.methodType(Set.class));
 		return output.stream().map(entry -> Map.entry(getRegistryKeyValue(entry.getKey()), entry.getValue()))
 				.collect(Collectors.toUnmodifiableSet());
 	}
@@ -132,7 +132,7 @@ public class MVRegistry<T> implements Iterable<T> {
 	}
 	
 	public boolean containsId(Identifier id) {
-		return call(value, "method_10250", MethodType.methodType(boolean.class, Identifier.class), id);
+		return call(value, "method_10250", () -> MethodType.methodType(boolean.class, Identifier.class), id);
 	}
 	
 }

@@ -67,23 +67,22 @@ public class MVQuaternionf {
 		return value;
 	}
 	
-	// Wrapper handler
 	private final Cache<String, Reflection.MethodInvoker> methodCache = CacheBuilder.newBuilder().build();
 	@SuppressWarnings("unchecked")
-	private <R> R call(String oldMethod, String newMethod, MethodType type, Object... args) {
+	private <R> R call(String oldMethod, String newMethod, Supplier<MethodType> type, Object... args) {
 		String method = Version.<String>newSwitch()
 				.range("1.19.3", null, () -> newMethod)
 				.range(null, "1.19.2", () -> oldMethod)
 				.get();
 		try {
-			return (R) methodCache.get(method, () -> Reflection.getMethod(Quaternionf_class, method, type)).invoke(value, args);
+			return (R) methodCache.get(method, () -> Reflection.getMethod(Quaternionf_class, method, type.get())).invoke(value, args);
 		} catch (ExecutionException | UncheckedExecutionException e) {
 			throw new RuntimeException("Error invoking method", e);
 		}
 	}
 	
 	public MVQuaternionf multiply(MVQuaternionf right) {
-		call("method_4925", "mul", MethodType.methodType(return_class, Quaternionfc_class), right.getInternalValue());
+		call("method_4925", "mul", () -> MethodType.methodType(return_class, Quaternionfc_class), right.getInternalValue());
 		return this;
 	}
 	
@@ -101,7 +100,7 @@ public class MVQuaternionf {
 	}
 	
 	public MVQuaternionf conjugate() {
-		call("method_4926", "conjugate", MethodType.methodType(return_class));
+		call("method_4926", "conjugate", () -> MethodType.methodType(return_class));
 		return this;
 	}
 	
