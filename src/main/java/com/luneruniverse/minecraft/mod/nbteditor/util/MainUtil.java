@@ -554,4 +554,11 @@ public class MainUtil {
 		return output;
 	}
 	
+	public static Class<?> getRootEnclosingClass(Class<?> clazz) {
+		Class<?> prevClass = clazz;
+		while ((clazz = clazz.getEnclosingClass()) != null)
+			prevClass = clazz;
+		return prevClass;
+	}
+	
 }

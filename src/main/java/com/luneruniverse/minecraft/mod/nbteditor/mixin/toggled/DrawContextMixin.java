@@ -8,9 +8,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -49,6 +51,17 @@ public abstract class DrawContextMixin {
 		int screenHeight = MainUtil.client.getWindow().getScaledHeight();
 		
 		MixinLink.renderTooltipFromComponents(getMatrices(), pos.x(), pos.y(), size[0], size[1], screenWidth, screenHeight);
+	}
+	
+	@ModifyVariable(method = "scissorContains", at = @At("HEAD"), ordinal = 0)
+	private int scissorContainsX(int x) {
+		float[] translation = MVMatrix4f.getTranslation(getMatrices());
+		return x + (int) translation[0];
+	}
+	@ModifyVariable(method = "scissorContains", at = @At("HEAD"), ordinal = 1)
+	private int scissorContainsY(int y) {
+		float[] translation = MVMatrix4f.getTranslation(getMatrices());
+		return y + (int) translation[1];
 	}
 	
 }

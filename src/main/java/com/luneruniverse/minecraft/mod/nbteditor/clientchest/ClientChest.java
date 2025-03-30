@@ -298,7 +298,7 @@ public class ClientChest {
 	}
 	
 	public CompletableFuture<Void> unloadAllPages(PageLoadLevel loadLevel) {
-		if (loadLevel == PageLoadLevel.DYNAMIC_ITEMS)
+		if (!CLIENT_CHEST_FOLDER.exists() || loadLevel == PageLoadLevel.DYNAMIC_ITEMS)
 			return CompletableFuture.completedFuture(null);
 		
 		startUncachedProcessingAll();

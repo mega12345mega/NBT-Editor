@@ -156,8 +156,13 @@ public class MultiLineTextFieldWidget implements MVDrawable, MVElement, Tickable
 				return;
 			}
 			StringBuilder replacement = new StringBuilder();
-			lastRegexMatch.appendReplacement(replacement, replaceValue);
-			replacement.delete(0, lastRegexMatch.start());
+			try {
+				lastRegexMatch.appendReplacement(replacement, replaceValue);
+				replacement.delete(0, lastRegexMatch.start());
+			} catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+				replacement.setLength(0);
+				replacement.append(replaceValue);
+			}
 			write(replacement.toString());
 		}
 		
