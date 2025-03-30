@@ -17,7 +17,6 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.registry.CombinedDynamicRegistries;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryLoader;
 import net.minecraft.registry.RegistryWrapper;
@@ -40,6 +39,8 @@ public class DynamicRegistryManagerHolder {
 	private static volatile DynamicRegistryManager clientManager;
 	private static volatile DynamicRegistryManager serverManager;
 	
+	private static final Supplier<Reflection.MethodInvoker> RegistryLoader_loadFromResource =
+			Reflection.getOptionalMethod(RegistryLoader.class, "method_56515", MethodType.methodType(DynamicRegistryManager.Immutable.class, ResourceManager.class, DynamicRegistryManager.class, List.class));
 	private static CompletableFuture<DynamicRegistryManager> loadDefaultManagerImpl() {
 		CompletableFuture<DynamicRegistryManager> future = new CompletableFuture<>();
 		MixinLink.executeCrashableTask(() -> {
@@ -47,20 +48,27 @@ public class DynamicRegistryManagerHolder {
 				MainUtil.client.getResourcePackManager().scanPacks();
 			
 			// Based on https://github.com/MineLittlePony/HDSkins/blob/f9c6b8e570cae03908598eb629bf92e2f4faf5b3/src/main/java/com/minelittlepony/hdskins/client/gui/player/DummyNetworkHandler.java#L49
+			// and https://github.com/MineLittlePony/HDSkins/blob/a19fe3b0d7d98019bafc814a8782b7a263d090b9/src/main/java/com/minelittlepony/hdskins/client/gui/player/DummyNetworkHandler.java#L41
 			
 			CombinedDynamicRegistries<ServerDynamicRegistryType> combinedRegistries =
 					ServerDynamicRegistryType.createCombinedDynamicRegistries();
 			ResourceManager resourceManager = new LifecycledResourceManagerImpl(
 					ResourceType.SERVER_DATA, MainUtil.client.getResourcePackManager().createResourcePacks());
 			
-			List<Registry.PendingTagLoad<?>> tags = TagGroupLoader.startReload(resourceManager, combinedRegistries.get(ServerDynamicRegistryType.STATIC));
-			DynamicRegistryManager.Immutable preceding = combinedRegistries.getPrecedingRegistryManagers(ServerDynamicRegistryType.RELOADABLE);
-			List<RegistryWrapper.Impl<?>> loadedRegistries = TagGroupLoader.collectRegistries(preceding, tags);
-			
 			List<RegistryLoader.Entry<?>> entries = new ArrayList<>();
 			entries.addAll(RegistryLoader.DYNAMIC_REGISTRIES);
 			entries.addAll(RegistryLoader.DIMENSION_REGISTRIES);
-			DynamicRegistryManager.Immutable dynamicRegistries = RegistryLoader.loadFromResource(resourceManager, loadedRegistries, entries);
+			
+			DynamicRegistryManager.Immutable dynamicRegistries = Version.<DynamicRegistryManager.Immutable>newSwitch()
+					.range("1.21.2", null, () -> {
+						List<Registry.PendingTagLoad<?>> tags = TagGroupLoader.startReload(resourceManager, combinedRegistries.get(ServerDynamicRegistryType.STATIC));
+						DynamicRegistryManager.Immutable preceding = combinedRegistries.getPrecedingRegistryManagers(ServerDynamicRegistryType.RELOADABLE);
+						List<RegistryWrapper.Impl<?>> loadedRegistries = TagGroupLoader.collectRegistries(preceding, tags);
+						
+						return RegistryLoader.loadFromResource(resourceManager, loadedRegistries, entries);
+					})
+					.range("1.20.5", "1.21.1", () -> RegistryLoader_loadFromResource.get().invoke(null, resourceManager, combinedRegistries.getCombinedRegistryManager(), entries))
+					.get();
 			
 			future.complete(combinedRegistries.with(ServerDynamicRegistryType.RELOADABLE, dynamicRegistries).getCombinedRegistryManager());
 		});
@@ -149,12 +157,10 @@ public class DynamicRegistryManagerHolder {
 		if (registry == null)
 			return false;
 		
-		// Check for static registries
 		// Attempting to convert references in static registries to the current registry manager
 		// causes a stack overflow as the reference isn't changed
-		if (Registries.REGISTRIES.get(registry.getKey().getValue()) != null) {
+		if (RegistryCache.isRegistryStatic(registry))
 			return false;
-		}
 		
 		return entry.owner.ownerEquals(getReadOnlyWrapperExists ? Registry_getReadOnlyWrapper.get().invoke(registry) : registry);
 	}
