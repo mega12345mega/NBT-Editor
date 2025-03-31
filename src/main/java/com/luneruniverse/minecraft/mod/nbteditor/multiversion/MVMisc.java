@@ -34,6 +34,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderProgram;
@@ -51,11 +52,14 @@ import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
+import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.client.util.math.MatrixStack;
@@ -71,6 +75,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SpawnEggItem;
@@ -92,6 +97,9 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
+import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.profiler.Profiler;
@@ -493,13 +501,16 @@ public class MVMisc {
 				.run();
 	}
 	
-	private static final Supplier<Reflection.MethodInvoker> SpawnEggItem_getEntityType =
+	private static final Supplier<Reflection.MethodInvoker> SpawnEggItem_getEntityType_NbtCompound =
 			Reflection.getOptionalMethod(SpawnEggItem.class, "method_8015", MethodType.methodType(EntityType.class, NbtCompound.class));
+	private static final Supplier<Reflection.MethodInvoker> SpawnEggItem_getEntityType_ItemStack =
+			Reflection.getOptionalMethod(SpawnEggItem.class, "method_8015", MethodType.methodType(EntityType.class, ItemStack.class));
 	public static EntityType<?> getEntityType(ItemStack item) {
 		SpawnEggItem spawnEggItem = (SpawnEggItem) item.getItem();
 		return Version.<EntityType<?>>newSwitch()
-				.range("1.20.5", null, () -> spawnEggItem.getEntityType(item))
-				.range(null, "1.20.4", () -> SpawnEggItem_getEntityType.get().invoke(spawnEggItem, item.manager$getNbt()))
+				.range("1.21.4", null, () -> spawnEggItem.getEntityType(DynamicRegistryManagerHolder.get(), item))
+				.range("1.20.5", "1.21.3", () -> SpawnEggItem_getEntityType_ItemStack.get().invoke(spawnEggItem, item))
+				.range(null, "1.20.4", () -> SpawnEggItem_getEntityType_NbtCompound.get().invoke(spawnEggItem, item.manager$getNbt()))
 				.get();
 	}
 	
@@ -694,6 +705,36 @@ public class MVMisc {
 				.range("1.21.2", null, () -> dispatcher.render(entity, x, y, z, tickDelta, matrices, vertexConsumers, light))
 				.range(null, "1.21.1", () -> EntityRenderDispatcher_render.get().invoke(dispatcher, entity, x, y, z, yaw, tickDelta, matrices, vertexConsumers, light))
 				.run();
+	}
+	
+	// From MinecraftClient#addBlockEntityNbt (1.21.3)
+	// Edited to remove x, y, & z
+	@SuppressWarnings("deprecation")
+	public static void addBlockEntityNbtWithoutXYZ(ItemStack item, BlockEntity entity) {
+		NbtCompound blockEntityTag = entity.createComponentlessNbtWithIdentifyingData(DynamicRegistryManagerHolder.get());
+		blockEntityTag.remove("x");
+		blockEntityTag.remove("y");
+		blockEntityTag.remove("z");
+		entity.removeFromCopiedStackNbt(blockEntityTag);
+		BlockItem.setBlockEntityData(item, entity.getType(), blockEntityTag);
+		item.applyComponentsFrom(entity.createComponentMap());
+	}
+	
+	// From BlockEntityRenderDispatcher#renderEntity (1.21.3)
+	// Edited to input a tickDelta and use default light and overlay values
+	public static <T extends BlockEntity> boolean renderBlockEntity(BlockEntityRenderDispatcher dispatcher, T entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider provider) {
+		BlockEntityRenderer<T> renderer = dispatcher.get(entity);
+		if (renderer == null)
+			return true;
+		try {
+			renderer.render(entity, tickDelta, matrices, provider, 0xF000F0, OverlayTexture.DEFAULT_UV);
+		} catch (Throwable e) {
+			CrashReport report = CrashReport.create(e, "Rendering Block Entity");
+			CrashReportSection entitySection = report.addElement("Block Entity Details");
+			entity.populateCrashReport(entitySection);
+			throw new CrashException(report);
+		}
+		return false;
 	}
 	
 }

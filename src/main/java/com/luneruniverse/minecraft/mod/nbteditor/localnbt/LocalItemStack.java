@@ -110,7 +110,7 @@ public class LocalItemStack extends LocalItem {
 	}
 	
 	@Override
-	public void renderIcon(MatrixStack matrices, int x, int y) {
+	public void renderIcon(MatrixStack matrices, int x, int y, float tickDelta) {
 		MVDrawableHelper.renderItem(matrices, 200.0F, true, item, x, y);
 	}
 	

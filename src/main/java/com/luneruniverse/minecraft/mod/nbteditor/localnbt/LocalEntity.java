@@ -131,7 +131,7 @@ public class LocalEntity implements LocalNBT {
 	}
 	
 	@Override
-	public void renderIcon(MatrixStack matrices, int x, int y) {
+	public void renderIcon(MatrixStack matrices, int x, int y, float tickDelta) {
 		matrices.push();
 		matrices.translate(0.0, 8.0, 0.0);
 		
@@ -156,7 +156,7 @@ public class LocalEntity implements LocalNBT {
 		EntityRenderDispatcher dispatcher = MainUtil.client.getEntityRenderDispatcher();
 		dispatcher.setRenderShadows(false);
 		rotation.applyToEntityRenderDispatcher(dispatcher);
-		MVMisc.renderEntity(dispatcher, getCachedEntity(), 0, 0, 0, 0, 0, renderMatrices, provider, 0xF000F0);
+		MVMisc.renderEntity(dispatcher, getCachedEntity(), 0, 0, 0, 0, tickDelta, renderMatrices, provider, 0xF000F0);
 		dispatcher.setRenderShadows(true);
 		provider.draw();
 		

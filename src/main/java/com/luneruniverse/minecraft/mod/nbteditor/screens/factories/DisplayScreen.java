@@ -115,7 +115,7 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	}
 	
 	@Override
-	public void filesDragged(List<Path> paths) {
+	public void onFilesDropped(List<Path> paths) {
 		if (!(localNBT instanceof LocalItem))
 			return;
 		List<Text> lines = new ArrayList<>();

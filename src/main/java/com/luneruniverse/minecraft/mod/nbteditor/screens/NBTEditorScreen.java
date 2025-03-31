@@ -524,7 +524,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	}
 	
 	@Override
-	public void filesDragged(List<Path> paths) {
+	public void onFilesDropped(List<Path> paths) {
 		if (!(nbt instanceof NbtCompound))
 			return;
 		for (Path path : paths) {

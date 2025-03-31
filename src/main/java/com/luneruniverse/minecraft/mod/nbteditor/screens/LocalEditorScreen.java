@@ -109,11 +109,11 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		super.renderMain(matrices, mouseX, mouseY, delta);
 		renderEditor(matrices, mouseX, mouseY, delta);
 		MainUtil.renderLogo(matrices);
-		renderPreview(matrices);
+		renderPreview(matrices, delta);
 	}
 	private static final Supplier<Reflection.MethodInvoker> RenderSystem_getModelViewStack =
 			Reflection.getOptionalMethod(RenderSystem.class, "getModelViewStack", MethodType.methodType(MatrixStack.class));
-	private void renderPreview(MatrixStack matrices) {
+	private void renderPreview(MatrixStack matrices, float tickDelta) {
 		int x = 16 + 32 + 8;
 		int y = 16;
 		int scaleX = 2;
@@ -135,7 +135,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		if (oldMatrix)
 			MVDrawableHelper.applyModelViewMatrix();
 		
-		localNBT.renderIcon(matrices, x, y);
+		localNBT.renderIcon(matrices, x, y, tickDelta);
 		
 		matrices.pop();
 		if (oldMatrix)

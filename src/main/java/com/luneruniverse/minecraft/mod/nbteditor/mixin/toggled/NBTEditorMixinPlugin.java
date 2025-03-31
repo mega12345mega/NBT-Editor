@@ -62,6 +62,13 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				.range("1.21.2", null, () -> output.add("toggled.GameRendererMixin_1_21_2"))
 				.range(null, "1.21.1", () -> output.add("toggled.GameRendererMixin_1_21_1"))
 				.run();
+		Version.newSwitch()
+				.range("1.21.4", null, () -> {
+					output.add("toggled.ItemModelManagerMixin");
+					output.add("toggled.ItemRenderStateLayerRenderStateMixin");
+				})
+				.range(null, "1.21.3", () -> output.add("toggled.BuiltinModelItemRendererMixin"))
+				.run();
 	}
 	
 }

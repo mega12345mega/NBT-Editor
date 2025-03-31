@@ -119,7 +119,7 @@ public class ImportScreen extends OverlaySupportingScreen {
 	}
 	
 	@Override
-	public void filesDragged(List<Path> paths) {
+	public void onFilesDropped(List<Path> paths) {
 		importFiles(paths, Version.getDataVersion(dataVersion.getText()).filter(value -> value <= Version.getDataVersion()));
 	}
 	

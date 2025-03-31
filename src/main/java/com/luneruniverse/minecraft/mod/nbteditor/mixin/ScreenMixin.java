@@ -39,8 +39,8 @@ public class ScreenMixin {
 				.run();
 	}
 	
-	@Inject(method = "filesDragged", at = @At("HEAD"))
-	private void filesDragged(List<Path> paths, CallbackInfo info) {
+	@Inject(method = "onFilesDropped", at = @At("HEAD"))
+	private void onFilesDropped(List<Path> paths, CallbackInfo info) {
 		Screen source = (Screen) (Object) this;
 		if (source instanceof HandledScreen || source instanceof GameMenuScreen)
 			ImportScreen.importFiles(paths, Optional.empty());

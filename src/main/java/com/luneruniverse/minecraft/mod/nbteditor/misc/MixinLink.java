@@ -377,4 +377,7 @@ public class MixinLink {
 		return Thread.currentThread() == MAIN_THREAD;
 	}
 	
+	
+	public static final Map<Thread, ItemStack> ITEM_BEING_RENDERED = Collections.synchronizedMap(new WeakHashMap<>());
+	
 }

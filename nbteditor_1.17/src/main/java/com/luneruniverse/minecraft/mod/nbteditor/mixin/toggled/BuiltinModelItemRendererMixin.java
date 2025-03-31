@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.mixin;
+package com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,7 +50,7 @@ public class BuiltinModelItemRendererMixin {
 			return provider;
 		
 		if (MixinLink.USE_DIRECT_ITEM_GLINT_CONSUMER)
-			return (layer) -> ItemRenderer.getDirectItemGlintConsumer(provider, layer, true, item.hasGlint());
-		return (layer) -> ItemRenderer.getItemGlintConsumer(provider, layer, true, item.hasGlint());
+			return layer -> ItemRenderer.getDirectItemGlintConsumer(provider, layer, true, item.hasGlint());
+		return layer -> ItemRenderer.getItemGlintConsumer(provider, layer, true, item.hasGlint());
 	}
 }
