@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.8-SNAPSHOT'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -50,8 +50,8 @@ dependencies {
 	
 	implementation files("nbteditor_1.17/build/devlibs/nbteditor_1.17-0.0.0-dev.jar")
 	
-	modImplementation "maven.modrinth:modmenu:12.0.0"
-	modImplementation "maven.modrinth:nbt-autocomplete:1GiZCUbH"
+	modImplementation "maven.modrinth:modmenu:13.0.3"
+	modImplementation "maven.modrinth:nbt-autocomplete:nJhOBbir"
 }
 
 processResources {
