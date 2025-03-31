@@ -21,11 +21,11 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricCli
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.CreativeTabWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.mojang.brigadier.Command;
@@ -323,7 +323,7 @@ public class NBTEditorAPI {
 	 * @see #registerInventoryTab(ItemStack, Runnable)
 	 */
 	public static void registerInventoryTab(ItemStack item, Runnable onClick, Predicate<Screen> whenToShow) {
-		CreativeTab.TABS.add(new CreativeTab.CreativeTabData(item, onClick, whenToShow));
+		CreativeTabWidget.TABS.add(new CreativeTabWidget.CreativeTabData(item, onClick, whenToShow));
 	}
 	
 	/**

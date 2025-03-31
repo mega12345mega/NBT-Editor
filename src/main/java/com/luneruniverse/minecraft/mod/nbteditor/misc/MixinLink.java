@@ -1,7 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.misc;
 
 import java.awt.Color;
-import java.awt.Point;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +32,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ServerItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
@@ -69,19 +67,6 @@ import net.minecraft.util.Formatting;
 public class MixinLink {
 	
 	public static boolean CLIENT_LOADED = false;
-	
-	public static void addCreativeTabs(Screen source) {
-		List<CreativeTab.CreativeTabData> tabData = CreativeTab.TABS.stream().filter(tab -> tab.whenToShow().test(source)).toList();
-		if (!tabData.isEmpty()) {
-			List<CreativeTab> tabs = new ArrayList<>();
-			for (int i = 0; i < tabData.size(); i++) {
-				CreativeTab.CreativeTabData tab = tabData.get(i);
-				Point pos = ConfigScreen.getCreativeTabsPos().position(i, tabData.size(), source.width, source.height);
-				tabs.add(new CreativeTab(ConfigScreen.getCreativeTabsPos().isTop(), pos.x, pos.y, tab.item(), tab.onClick()));
-			}
-			source.addDrawableChild(new CreativeTab.CreativeTabGroup(tabs));
-		}
-	}
 	
 	
 	private static final Map<String, Runnable> events = new HashMap<>();

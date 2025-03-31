@@ -38,6 +38,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValu
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueSlider;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.CreativeTabWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.Screen;
@@ -168,17 +169,17 @@ public class ConfigScreen extends TickableSupportingScreen {
 		
 		public Point position(int index, int numTabs, int screenWidth, int screenHeight) {
 			int x = switch (this) {
-				case BOTTOM_LEFT, TOP_LEFT -> index * (CreativeTab.WIDTH + 2) + 10;
+				case BOTTOM_LEFT, TOP_LEFT -> index * (CreativeTabWidget.WIDTH + 2) + 10;
 				case BOTTOM_CENTER, TOP_CENTER -> {
-					int tabsWidth = numTabs * (CreativeTab.WIDTH + 2) - 2;
+					int tabsWidth = numTabs * (CreativeTabWidget.WIDTH + 2) - 2;
 					int tabsStart = (screenWidth - tabsWidth) / 2;
-					yield tabsStart + index * (CreativeTab.WIDTH + 2);
+					yield tabsStart + index * (CreativeTabWidget.WIDTH + 2);
 				}
-				case BOTTOM_RIGHT, TOP_RIGHT -> screenWidth - CreativeTab.WIDTH - index * (CreativeTab.WIDTH + 2) - 10;
+				case BOTTOM_RIGHT, TOP_RIGHT -> screenWidth - CreativeTabWidget.WIDTH - index * (CreativeTabWidget.WIDTH + 2) - 10;
 			};
 			
 			int y = switch (this) {
-				case BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT -> screenHeight - CreativeTab.HEIGHT;
+				case BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT -> screenHeight - CreativeTabWidget.HEIGHT;
 				case TOP_LEFT, TOP_CENTER, TOP_RIGHT -> 0;
 			};
 			
