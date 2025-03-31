@@ -50,8 +50,8 @@ dependencies {
 	
 	implementation files("nbteditor_1.17/build/devlibs/nbteditor_1.17-0.0.0-dev.jar")
 	
-	modImplementation "maven.modrinth:modmenu:12.0.0-beta.1"
-	modImplementation "maven.modrinth:nbt-autocomplete:NzgmvjLk"
+	modImplementation "maven.modrinth:modmenu:12.0.0"
+	modImplementation "maven.modrinth:nbt-autocomplete:1GiZCUbH"
 }
 
 processResources {
