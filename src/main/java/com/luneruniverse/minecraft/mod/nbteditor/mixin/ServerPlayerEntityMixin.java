@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVServerNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ContainerScreenS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMainUtil;
 
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
@@ -28,7 +28,7 @@ public class ServerPlayerEntityMixin {
 	@Inject(method = "openHandledScreen", at = @At("HEAD"))
 	private void openHandledScreen(NamedScreenHandlerFactory factory, CallbackInfoReturnable<OptionalInt> info) {
 		if (factory instanceof LockableContainerBlockEntity ||
-				MainUtil.getRootEnclosingClass(factory.getClass()) == ChestBlock.class || // Double chests
+				ServerMainUtil.getRootEnclosingClass(factory.getClass()) == ChestBlock.class || // Double chests
 				ServerMVMisc.isInstanceOfVehicleInventory(factory))
 			MVServerNetworking.send((ServerPlayerEntity) (Object) this, new ContainerScreenS2CPacket());
 	}

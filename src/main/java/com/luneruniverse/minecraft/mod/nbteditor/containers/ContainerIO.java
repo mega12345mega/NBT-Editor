@@ -10,12 +10,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItemStack;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.TagNames;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -134,7 +134,7 @@ public class ContainerIO {
 			for (EntityType<?> entity : MVRegistry.ENTITY_TYPE) {
 				if (ENTITY_IO.containsKey(entity))
 					continue;
-				if (MVMisc.createEntity(entity, MainUtil.client.world) instanceof MobEntity)
+				if (ServerMVMisc.createEntity(entity, MainUtil.client.world) instanceof MobEntity)
 					registerEntityIO(entity, ARMOR_HANDS_IO);
 			}
 		});

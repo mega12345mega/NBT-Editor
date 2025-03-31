@@ -19,6 +19,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.EntityReference;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -67,7 +68,7 @@ public class LocalEntity implements LocalNBT {
 		if (cachedEntity != null && cachedEntity.getType() == entityType && Objects.equals(cachedNbt, nbt))
 			return cachedEntity;
 		
-		cachedEntity = MVMisc.createEntity(entityType, MainUtil.client.world);
+		cachedEntity = ServerMVMisc.createEntity(entityType, MainUtil.client.world);
 		NBTManagers.ENTITY.setNbt(cachedEntity, nbt);
 		
 		cachedNbt = nbt.copy();

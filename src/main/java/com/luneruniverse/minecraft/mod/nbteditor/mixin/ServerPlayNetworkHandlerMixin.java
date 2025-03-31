@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
@@ -22,7 +22,7 @@ public class ServerPlayNetworkHandlerMixin {
 	
 	@Redirect(method = "onCreativeInventoryAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerInteractionManager;isCreative()Z"))
 	private boolean isCreative(ServerPlayerInteractionManager manager) {
-		return manager.isCreative() || MVMisc.hasPermissionLevel(player, 2);
+		return manager.isCreative() || ServerMVMisc.hasPermissionLevel(player, 2);
 	}
 	
 	@Inject(method = "onClickSlot", at = @At("HEAD"))

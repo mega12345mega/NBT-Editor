@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -96,14 +95,14 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onSetCursorPacket(SetCursorC2SPacket packet, ServerPlayerEntity player) {
-		if (!MVMisc.hasPermissionLevel(player, 2))
+		if (!ServerMVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		player.currentScreenHandler.setCursorStack(packet.getItem());
 	}
 	
 	private void onSetSlotPacket(SetSlotC2SPacket packet, ServerPlayerEntity player) {
-		if (!MVMisc.hasPermissionLevel(player, 2))
+		if (!ServerMVMisc.hasPermissionLevel(player, 2))
 			return;
 		if (player.currentScreenHandler == player.playerScreenHandler)
 			return;
@@ -116,7 +115,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onOpenEnderChestPacket(OpenEnderChestC2SPacket packet, ServerPlayerEntity player) {
-		if (!MVMisc.hasPermissionLevel(player, 2))
+		if (!ServerMVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		player.openHandledScreen(new SimpleNamedScreenHandlerFactory((syncId, inventory, player2) ->
@@ -125,7 +124,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onGetBlockPacket(GetBlockC2SPacket packet, ServerPlayerEntity player) {
-		if (!MVMisc.hasPermissionLevel(player, 2))
+		if (!ServerMVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
@@ -140,7 +139,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		MVServerNetworking.send(player, new ViewBlockS2CPacket(packet.getRequestId(), packet.getWorld(), packet.getPos(), null, null, null));
 	}
 	private void onGetLecternBlockPacket(GetLecternBlockC2SPacket packet, ServerPlayerEntity player) {
-		if (!MVMisc.hasPermissionLevel(player, 2))
+		if (!ServerMVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		if (player.currentScreenHandler instanceof LecternScreenHandler handler) {
@@ -164,7 +163,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onGetEntityPacket(GetEntityC2SPacket packet, ServerPlayerEntity player) {
-		if (!MVMisc.hasPermissionLevel(player, 2))
+		if (!ServerMVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
@@ -183,7 +182,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onSetBlockPacket(SetBlockC2SPacket packet, ServerPlayerEntity player) {
-		if (!MVMisc.hasPermissionLevel(player, 2))
+		if (!ServerMVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
@@ -217,7 +216,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onSetEntityPacket(SetEntityC2SPacket packet, ServerPlayerEntity player) {
-		if (!MVMisc.hasPermissionLevel(player, 2))
+		if (!ServerMVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
@@ -247,7 +246,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 				passengerOrSelf.stopRiding();
 				passengerOrSelf.remove(RemovalReason.DISCARDED);
 			});
-			entity = MVMisc.createEntity(entityType, world);
+			entity = ServerMVMisc.createEntity(entityType, world);
 			entity.setUuid(newUUID);
 			entity.setPosition(pos);
 			world.spawnEntity(entity);
@@ -261,7 +260,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 	}
 	
 	private void onSummonEntityPacket(SummonEntityC2SPacket packet, ServerPlayerEntity player) {
-		if (!MVMisc.hasPermissionLevel(player, 2))
+		if (!ServerMVMisc.hasPermissionLevel(player, 2))
 			return;
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
@@ -279,7 +278,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 				packet.getNbt().putUuid("UUID", uuid);
 		}
 		
-		Entity entity = MVMisc.createEntity(MVRegistry.ENTITY_TYPE.get(packet.getId()), world);
+		Entity entity = ServerMVMisc.createEntity(MVRegistry.ENTITY_TYPE.get(packet.getId()), world);
 		entity.setUuid(uuid);
 		entity.setPosition(packet.getPos());
 		packet.getNbt().put("Pos", Stream.of(packet.getPos().x, packet.getPos().y, packet.getPos().z)
@@ -334,7 +333,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 					passengerUUID = UUID.randomUUID();
 					passengerNbt.putUuid("UUID", passengerUUID);
 				}
-				passenger = MVMisc.createEntity(passengerType, world);
+				passenger = ServerMVMisc.createEntity(passengerType, world);
 				passenger.setUuid(passengerUUID);
 				passenger.startRiding(entity, true);
 				world.spawnEntity(passenger);

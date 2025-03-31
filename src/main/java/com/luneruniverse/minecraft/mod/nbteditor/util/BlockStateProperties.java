@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
@@ -30,7 +30,7 @@ public class BlockStateProperties {
 			this.options = options;
 		}
 		public <T extends Comparable<T>> BlockStateProperty(Property<T> property, BlockState state) {
-			this(property.name(state.get(property)), MVMisc.getValues(property).stream().map(option -> property.name(option)).toList());
+			this(property.name(state.get(property)), ServerMVMisc.getValues(property).stream().map(option -> property.name(option)).toList());
 		}
 		private void setValue(String value) {
 			if (!options.contains(value))
@@ -96,7 +96,7 @@ public class BlockStateProperties {
 		return state;
 	}
 	private <T extends Comparable<T>> BlockState applyPropertyTo(BlockState state, Property<T> property, String value) {
-		T valueObj = MVMisc.getValues(property).stream().filter(option -> property.name(option).equals(value)).findFirst()
+		T valueObj = ServerMVMisc.getValues(property).stream().filter(option -> property.name(option).equals(value)).findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("The property value doesn't exist!"));
 		return state.with(property, valueObj);
 	}

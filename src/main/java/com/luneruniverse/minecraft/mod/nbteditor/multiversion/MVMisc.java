@@ -14,7 +14,6 @@ import java.io.UncheckedIOException;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -70,10 +69,8 @@ import net.minecraft.component.type.SuspiciousStewEffectsComponent.StewEffect;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SpawnEggItem;
@@ -90,7 +87,6 @@ import net.minecraft.resource.ResourceFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.state.property.Property;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.StringVisitable;
@@ -101,7 +97,6 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.profiler.Profilers;
 import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.World;
 
 public class MVMisc {
 	
@@ -665,15 +660,6 @@ public class MVMisc {
 				.get();
 	}
 	
-	private static final Supplier<Reflection.MethodInvoker> EntityType_create =
-			Reflection.getOptionalMethod(EntityType.class, "method_5883", MethodType.methodType(Entity.class, World.class));
-	public static Entity createEntity(EntityType<?> entityType, World world) {
-		return Version.<Entity>newSwitch()
-				.range("1.21.2", null, () -> entityType.create(world, SpawnReason.COMMAND))
-				.range(null, "1.21.1", () -> EntityType_create.get().invoke(entityType, world))
-				.get();
-	}
-	
 	private static final Supplier<Reflection.MethodInvoker> Entity_getCommandSource =
 			Reflection.getOptionalMethod(Entity.class, "method_5671", MethodType.methodType(ServerCommandSource.class));
 	public static ServerCommandSource getCommandSource(Entity entity) {
@@ -708,24 +694,6 @@ public class MVMisc {
 				.range("1.21.2", null, () -> dispatcher.render(entity, x, y, z, tickDelta, matrices, vertexConsumers, light))
 				.range(null, "1.21.1", () -> EntityRenderDispatcher_render.get().invoke(dispatcher, entity, x, y, z, yaw, tickDelta, matrices, vertexConsumers, light))
 				.run();
-	}
-	
-	private static final Supplier<Reflection.MethodInvoker> Entity_hasPermissionLevel =
-			Reflection.getOptionalMethod(Entity.class, "method_5687", MethodType.methodType(boolean.class, int.class));
-	public static boolean hasPermissionLevel(PlayerEntity player, int level) {
-		return Version.<Boolean>newSwitch()
-				.range("1.21.2", null, () -> player.hasPermissionLevel(level))
-				.range(null, "1.21.1", () -> Entity_hasPermissionLevel.get().invoke(player, level))
-				.get();
-	}
-	
-	private static final Supplier<Reflection.MethodInvoker> Property_getValues =
-			Reflection.getOptionalMethod(Property.class, "method_11898", MethodType.methodType(Collection.class));
-	public static <T extends Comparable<T>> Collection<T> getValues(Property<T> property) {
-		return Version.<Collection<T>>newSwitch()
-				.range("1.21.2", null, () -> property.getValues())
-				.range(null, "1.21.1", () -> Property_getValues.get().invoke(property))
-				.get();
 	}
 	
 }
