@@ -11,6 +11,8 @@
 	
 	"nbteditor.ok": "確定",
 	"nbteditor.cancel": "取消",
+	"nbteditor.loading": "讀取中 ...",
+	"nbteditor.hide": "在背景執行",
 	
 	"nbteditor.no_ref.unknown": "§c找不到您要編輯的物件！",
 	"nbteditor.no_ref.to_edit": "§c您必須手持物品或看著方塊／實體才能進行編輯！",
@@ -116,8 +118,11 @@
 	"itemGroup.nbteditor.client_chest": "用戶端儲物箱",
 	"itemGroup.nbteditor.inventory": "物品欄",
 	"nbteditor.client_chest": "NBT 編輯器 >> 用戶端儲物箱",
+	"nbteditor.client_chest.load_error": "§c讀取用戶端儲物箱時發生錯誤！",
 	"nbteditor.client_chest.save_error": "§c儲存用戶端儲物箱時發生錯誤！",
-	"nbteditor.client_chest.not_ready": "§c用戶端儲物箱尚未載入完畢！它是否有很多資料？",
+	"nbteditor.client_chest.unload_error": "§c解除讀取用戶端儲物箱時發生錯誤！",
+	"nbteditor.client_chest.import_error": "§c導入用戶端儲物箱時發生錯誤！",
+	"nbteditor.client_chest.update_error": "§c更新用戶端儲物箱時發生錯誤！",
 	"nbteditor.client_chest.corrupt_warning": "§c某些頁面似乎已損壞，並已單獨備份。",
 	"nbteditor.client_chest.slots.lock": "鎖定欄位",
 	"nbteditor.client_chest.slots.unlock": "解鎖欄位",
@@ -145,10 +150,10 @@
 	"nbteditor.client_chest.data_version.update_all_pages": "更新所有頁面",
 	"nbteditor.client_chest.data_version.update_all_pages.desc": "更新所有過時的頁面，\n如果上面沒有提供資料版本，\n則跳過所有沒有\nDataVersion 標籤的頁面",
 	"nbteditor.client_chest.data_version.dont_update_page": "取消",
-	"nbteditor.client_chest.data_version.update_page_success": "§a已成功匯入／更新第 %s 頁§a！舊頁面已備份，以防萬一：",
-	"nbteditor.client_chest.data_version.update_all_pages_success": "§a已成功匯入／更新所有頁面！舊頁面已備份，以防萬一：",
-	"nbteditor.client_chest.data_version.update_page_error": "§c匯入／更新用戶端儲物箱第 %s 頁時發生錯誤§c！",
-	"nbteditor.client_chest.data_version.update_all_pages_error": "§c匯入／更新用戶端儲物箱頁面時發生錯誤！",
+	"nbteditor.client_chest.data_version.update_page_confirm_1.20.5_1.20.6.title": "警告！",
+	"nbteditor.client_chest.data_version.update_page_confirm_1.20.5_1.20.6.desc": "將頁面更新到 1.20.5 或 1.20.6 可能會因為 Minecraft 錯誤導致資料遺失，是否繼續？",
+	"nbteditor.client_chest.data_version.update_page_success": "§a成功導入/更新第 %s 頁！§a以防萬一，舊頁面已備份：",
+	"nbteditor.client_chest.data_version.update_all_pages_success": "§a成功導入/更新全部頁面！§a以防萬一，舊頁面已備份：",
 	
 	"nbteditor.book.convert": "轉換為可寫入",
 	"nbteditor.book.convert.success": "§a已轉換為可寫入！",
@@ -204,6 +209,7 @@
 	"nbteditor.keybind.edit": "§6§l空格鍵§r§6 以編輯！",
 	"nbteditor.keybind.container": "§6§lCtrl + 空格鍵§r§6 以開啟容器！",
 	"nbteditor.keybind.factory": "§6§lShift + 空格鍵§r§6 以開啟工廠！",
+	"nbteditor.keybind.delete": "§6§lDelete§r§6 以刪除！",
 	"nbteditor.keybind.page.up": "§6§lPage Up",
 	"nbteditor.keybind.page.down": "§6§lPage Down",
 	"nbteditor.keybind.page.shift": "§6§lShift+",
@@ -347,7 +353,7 @@
 	"nbteditor.config.chat_limit.extended": "延長",
 	"nbteditor.config.single_quotes": "單引號",
 	"nbteditor.config.single_quotes.desc": "允許使用單引號\n包圍鍵值（在開啟的字串中）\n\n可能會導致文字出現問題\n可以讓 NBT 更短",
-	"nbteditor.config.single_quotes.example": "允許：\"{§e'§r帶有引號的鍵值 -> §e\\§r\" <-§e'§r:0}\"\n不允许：'{§e\"§r帶有引號的鍵值 -> §e\\\\§r\" <-§e\"§r:0}'",
+	"nbteditor.config.single_quotes.example": "允許：\"{§e'§r帶有引號的鍵值 -> §e\\§r\" <-§e'§r:0}\"\n不允許：'{§e\"§r帶有引號的鍵值 -> §e\\\\§r\" <-§e\"§r:0}'",
 	"nbteditor.config.single_quotes.allowed": "允許",
 	"nbteditor.config.single_quotes.not_allowed": "不允許",
 	"nbteditor.config.scroll_speed": "捲動速度",
@@ -574,7 +580,7 @@
 	"nbteditor.credits_11": "§6fr_fr: Darukshock",
 	"nbteditor.credits_12": "§6he_il: inon13, RedVortexDev",
 	"nbteditor.credits_13": "§6cs_cz: Kulihrasek1101",
-	"nbteditor.credits_14": "§6zh_tw: dirtTW",
+	"nbteditor.credits_14": "§6zh_tw: dirtTW, Axolotl1000",
 	
 	
 	
