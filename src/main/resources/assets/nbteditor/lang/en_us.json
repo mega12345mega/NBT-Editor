@@ -202,6 +202,7 @@
 	"nbteditor.hide_flags.tooltip": "Tooltip",
 	"nbteditor.hide_flags.stored_enchantments": "Stored Enchantments",
 	"nbteditor.hide_flags.trim": "Armor Trim",
+	"nbteditor.hide_flags.jukebox_playable": "Jukebox Playable",
 	
 	"nbteditor.item_size.uncompressed": "§6NBT Size: %s",
 	"nbteditor.item_size.compressed": "§6NBT Size (Compressed): %s",

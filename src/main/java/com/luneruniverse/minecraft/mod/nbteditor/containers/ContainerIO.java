@@ -21,9 +21,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.ShulkerBoxBlock;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.vehicle.ChestBoatEntity;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.BundleItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -68,12 +71,14 @@ public class ContainerIO {
 	private static final BlockEntityTagContainerIO DECORATED_POT_IO = (NBTManagers.COMPONENTS_EXIST ?
 			new BlockEntityTagContainerIO(new ConstSizeContainerIO(1), new SpecificItemsContainerIO("item")) :
 				new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item")));
+	private static final BlockEntityTagContainerIO CRAFTER_IO = new BlockEntityTagContainerIO(new ConstSizeContainerIO(9));
 	private static final ItemContainerIO SPAWN_EGG_IO = new SpawnEggContainerIO();
 	private static final EntityTagContainerIO ARMOR_HANDS_IO = new EntityTagContainerIO(new ArmorHandsContainerIO());
 	private static final EntityTagContainerIO HORSE_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("SaddleItem", TagNames.ARMOR_ITEM));
 	private static final EntityTagContainerIO BASIC_HORSE_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("SaddleItem"));
 	private static final EntityTagContainerIO DONKEY_IO = new EntityTagContainerIO(new ConcatNBTContainerIO(new SpecificItemsContainerIO("SaddleItem"), new DonkeyChestContainerIO(false)));
 	private static final EntityTagContainerIO LLAMA_IO = new EntityTagContainerIO(new ConcatNBTContainerIO(new SpecificItemsContainerIO(TagNames.ARMOR_ITEM), new DonkeyChestContainerIO(true)));
+	private static final EntityContainerIO CHEST_BOAT_IO = new EntityTagContainerIO(new ConstSizeContainerIO(27));
 	
 	public static void loadClass() {}
 	
@@ -102,7 +107,10 @@ public class ContainerIO {
 		registerBlockEntityTagIO((BlockItem) Items.LECTERN, LECTERN_IO);
 		registerEntityTagIO(Items.ITEM_FRAME, EntityType.ITEM_FRAME, ITEM_FRAME_IO);
 		registerEntityTagIO(Items.GLOW_ITEM_FRAME, EntityType.GLOW_ITEM_FRAME, ITEM_FRAME_IO);
-		registerItemIO(Items.BUNDLE, BUNDLE_IO);
+		for (Item item : MVRegistry.ITEM) {
+			if (item instanceof BundleItem bundle)
+				registerItemIO(bundle, BUNDLE_IO);
+		}
 		Version.newSwitch()
 				.range("1.20.0", null, () -> {
 					registerBlockEntityTagIO((BlockItem) Items.CHISELED_BOOKSHELF, CHISELED_BOOKSHELF_IO);
@@ -111,6 +119,10 @@ public class ContainerIO {
 					registerBlockEntityTagIO((BlockItem) Items.DECORATED_POT, DECORATED_POT_IO);
 				})
 				.range(null, "1.19.4", () -> {})
+				.run();
+		Version.newSwitch()
+				.range("1.21.0", null, () -> registerBlockEntityTagIO((BlockItem) Items.CRAFTER, CRAFTER_IO))
+				.range(null, "1.20.6", () -> {})
 				.run();
 		
 		registerEntityTagIO(Items.ARMOR_STAND, EntityType.ARMOR_STAND, ARMOR_HANDS_IO);
@@ -131,11 +143,19 @@ public class ContainerIO {
 		registerEntityIO(EntityType.LLAMA, LLAMA_IO);
 		registerEntityIO(EntityType.TRADER_LLAMA, LLAMA_IO);
 		MVClientNetworking.PlayNetworkStateEvents.Join.EVENT.register(() -> {
-			for (EntityType<?> entity : MVRegistry.ENTITY_TYPE) {
-				if (ENTITY_IO.containsKey(entity))
+			for (EntityType<?> entityType : MVRegistry.ENTITY_TYPE) {
+				if (ENTITY_IO.containsKey(entityType))
 					continue;
-				if (ServerMVMisc.createEntity(entity, MainUtil.client.world) instanceof MobEntity)
-					registerEntityIO(entity, ARMOR_HANDS_IO);
+				Entity entity = ServerMVMisc.createEntity(entityType, MainUtil.client.world);
+				if (entity instanceof MobEntity)
+					registerEntityIO(entityType, ARMOR_HANDS_IO);
+				Version.newSwitch()
+						.range("1.19.0", null, () -> {
+							if (entity instanceof ChestBoatEntity)
+								registerEntityIO(entityType, CHEST_BOAT_IO);
+						})
+						.range(null, "1.18.2", () -> {})
+						.run();
 			}
 		});
 	}

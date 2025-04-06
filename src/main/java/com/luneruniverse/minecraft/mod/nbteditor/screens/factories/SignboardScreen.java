@@ -54,15 +54,14 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		return new Color(r, g, b, 0).getRGB();
 	}
 	
-	private boolean newFeatures;
 	private final Identifier texture;
 	private boolean back;
 	private FormattedTextFieldWidget lines;
 	
 	public SignboardScreen(NBTReference<L> ref) {
 		super(TextInst.of("Signboard"), ref);
-		newFeatures = NEW_FEATURES;
-		if (newFeatures) {
+		
+		if (NEW_FEATURES) {
 			Block block = null;
 			if (ref instanceof ItemReference itemRef)
 				block = ((SignItem) itemRef.getItem().getItem()).getBlock();
@@ -74,6 +73,17 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			this.texture = IdentifierInst.of("minecraft", "textures/block/" +
 					ref.getId().getPath().replace("_sign", "_planks") + ".png");
 		}
+		
+		Version.newSwitch()
+				.range("1.21.2", null, () -> {
+					if (localNBT instanceof LocalItem localItem) {
+						NbtCompound nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getEditableItem());
+						nbt.putString("id", "minecraft:sign");
+						ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getEditableItem(), nbt);
+					}
+				})
+				.range(null, "1.21.1", () -> {})
+				.run();
 	}
 	
 	private NbtCompound getSideNbt() {
@@ -86,12 +96,12 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				return new NbtCompound();
 		}
 		
-		if (newFeatures)
+		if (NEW_FEATURES)
 			return nbt.getCompound(back ? "back_text" : "front_text");
 		return nbt;
 	}
 	private void setSideNbt(NbtCompound sideNbt) {
-		if (!newFeatures) {
+		if (!NEW_FEATURES) {
 			if (localNBT instanceof LocalItem localItem)
 				ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getEditableItem(), sideNbt);
 			else
@@ -116,7 +126,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	}
 	
 	private void setWaxed(boolean waxed) {
-		if (!newFeatures)
+		if (!NEW_FEATURES)
 			throw new IllegalStateException("Incorrect version!");
 		
 		if (localNBT instanceof LocalItem localItem) {
@@ -157,7 +167,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	private void setLines(List<Text> lines) {
 		modifySideNbt(nbt -> SignSideTagReferences.TEXT.set(nbt, lines.stream()
-				.map(this::fixClickEvent).map(line -> newFeatures ? fixEditable(line) : line).toList()));
+				.map(this::fixClickEvent).map(line -> NEW_FEATURES ? fixEditable(line) : line).toList()));
 		checkSave();
 	}
 	private List<Text> getLines() {
@@ -195,7 +205,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	@Override
 	protected void initEditor() {
-		if (newFeatures) {
+		if (NEW_FEATURES) {
 			addDrawableChild(MVMisc.newButton(16, 64, 100, 20,
 					TextInst.translatable("nbteditor.signboard.side." + (back ? "back" : "front")), btn -> {
 				back = !back;
@@ -210,7 +220,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			}));
 		}
 		
-		int glowingBtnX = 16 + (newFeatures ? 104 * 2 : 0);
+		int glowingBtnX = 16 + (NEW_FEATURES ? 104 * 2 : 0);
 		int glowingBtnY = 64;
 		AtomicReference<ButtonWidget> glowingBtn = new AtomicReference<>();
 		

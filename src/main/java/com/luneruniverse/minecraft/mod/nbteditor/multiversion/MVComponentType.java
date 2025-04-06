@@ -9,6 +9,7 @@ import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.component.type.BlockStateComponent;
 import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.component.type.JukeboxPlayableComponent;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.component.type.PotionContentsComponent;
@@ -50,6 +51,8 @@ public class MVComponentType<T> {
 			new MVComponentType<>(() -> DataComponentTypes.HIDE_TOOLTIP);
 	public static final MVComponentType<Text> ITEM_NAME =
 			new MVComponentType<>(() -> DataComponentTypes.ITEM_NAME);
+	public static final MVComponentType<JukeboxPlayableComponent> JUKEBOX_PLAYABLE =
+			new MVComponentType<>(() -> DataComponentTypes.JUKEBOX_PLAYABLE);
 	public static final MVComponentType<LoreComponent> LORE =
 			new MVComponentType<>(() -> DataComponentTypes.LORE);
 	public static final MVComponentType<Integer> MAX_DAMAGE =
