@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.addons;
 
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -33,6 +34,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.DSL.TypeReference;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.entity.EntityType;
@@ -207,10 +209,10 @@ public class NBTEditorAPI {
 	 * This is used with the {@code /open} command to edit special containers (like item frames)
 	 * @param item The item that this container applies to
 	 * @param container The container reader and writer
-	 * @see #registerBlockContainer(Block, BlockContainerIO)
-	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
 	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, Function)
 	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, Function)
 	 */
 	public static void registerItemContainer(Item item, ItemContainerIO container) {
 		ContainerIO.registerItemIO(item, container);
@@ -220,10 +222,8 @@ public class NBTEditorAPI {
 	 * This is used with the {@code /open} command to edit special containers (like item frames)
 	 * @param block The block that this container applies to
 	 * @param container The container reader and writer
-	 * @see #registerItemContainer(Item, ItemContainerIO)
-	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
 	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
-	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, Function)
 	 */
 	public static void registerBlockContainer(Block block, BlockContainerIO container) {
 		ContainerIO.registerBlockIO(block, container);
@@ -233,10 +233,8 @@ public class NBTEditorAPI {
 	 * This is used with the {@code /open} command to edit special containers (like item frames)
 	 * @param entity The entity that this container applies to, including spawn eggs of this type
 	 * @param container The container reader and writer
-	 * @see #registerItemContainer(Item, ItemContainerIO)
-	 * @see #registerBlockContainer(Block, BlockContainerIO)
-	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
 	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, Function)
 	 */
 	public static void registerEntityContainer(EntityType<?> entity, EntityContainerIO container) {
 		ContainerIO.registerEntityIO(entity, container);
@@ -248,10 +246,21 @@ public class NBTEditorAPI {
 	 * @param container The container reader and writer
 	 * @see #registerItemContainer(Item, ItemContainerIO)
 	 * @see #registerBlockContainer(Block, BlockContainerIO)
-	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
-	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, Function)
 	 */
 	public static void registerBlockEntityTagContainer(BlockItem blockItem, BlockEntityTagContainerIO container) {
+		ContainerIO.registerBlockEntityTagIO(blockItem, container);
+	}
+	/**
+	 * Register a container<br>
+	 * This is used with the {@code /open} command to edit special containers (like item frames)
+	 * @param blockItem The item and block that this container applies to
+	 * @param container The container reader and writer
+	 * @see #registerItemContainer(Item, ItemContainerIO)
+	 * @see #registerBlockContainer(Block, BlockContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
+	 */
+	public static void registerBlockEntityTagContainer(BlockItem blockItem, Function<BlockEntityType<?>, BlockEntityTagContainerIO> container) {
 		ContainerIO.registerBlockEntityTagIO(blockItem, container);
 	}
 	/**
@@ -262,11 +271,24 @@ public class NBTEditorAPI {
 	 * @param entity The entity that this container applies to, including spawn eggs of this type
 	 * @param container The container reader and writer
 	 * @see #registerItemContainer(Item, ItemContainerIO)
-	 * @see #registerBlockContainer(Block, BlockContainerIO)
 	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
-	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, Function)
 	 */
 	public static void registerEntityTagContainer(Item item, EntityType<?> entity, EntityTagContainerIO container) {
+		ContainerIO.registerEntityTagIO(item, entity, container);
+	}
+	/**
+	 * Register a container<br>
+	 * This is used with the {@code /open} command to edit special containers (like item frames)<br>
+	 * DO NOT pass in the spawn egg to <code>item</code>; use {@link #registerEntityContainer(EntityType, EntityContainerIO)}
+	 * @param item The item that this container applies to
+	 * @param entity The entity that this container applies to, including spawn eggs of this type
+	 * @param container The container reader and writer
+	 * @see #registerItemContainer(Item, ItemContainerIO)
+	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 */
+	public static void registerEntityTagContainer(Item item, EntityType<?> entity, Function<EntityType<?>, EntityTagContainerIO> container) {
 		ContainerIO.registerEntityTagIO(item, entity, container);
 	}
 	

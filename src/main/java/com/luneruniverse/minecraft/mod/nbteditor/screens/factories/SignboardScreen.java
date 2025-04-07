@@ -13,6 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
@@ -74,16 +75,13 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 					ref.getId().getPath().replace("_sign", "_planks") + ".png");
 		}
 		
-		Version.newSwitch()
-				.range("1.21.2", null, () -> {
-					if (localNBT instanceof LocalItem localItem) {
-						NbtCompound nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getEditableItem());
-						nbt.putString("id", "minecraft:sign");
-						ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getEditableItem(), nbt);
-					}
-				})
-				.range(null, "1.21.1", () -> {})
-				.run();
+		if (NBTManagers.COMPONENTS_EXIST) {
+			if (localNBT instanceof LocalItem localItem) {
+				NbtCompound nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getEditableItem());
+				nbt.putString("id", "minecraft:sign");
+				ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getEditableItem(), nbt);
+			}
+		}
 	}
 	
 	private NbtCompound getSideNbt() {

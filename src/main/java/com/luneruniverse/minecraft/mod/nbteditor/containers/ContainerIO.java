@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
@@ -20,7 +21,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.TagNames;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.ShulkerBoxBlock;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
@@ -31,6 +34,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
+import net.minecraft.util.math.BlockPos;
 
 public class ContainerIO {
 	
@@ -51,9 +55,16 @@ public class ContainerIO {
 		registerItemIO(blockItem, io);
 		registerBlockIO(blockItem.getBlock(), io);
 	}
+	public static void registerBlockEntityTagIO(BlockItem blockItem, Function<BlockEntityType<?>, BlockEntityTagContainerIO> io) {
+		registerBlockEntityTagIO(blockItem, io.apply(((BlockWithEntity) blockItem.getBlock())
+				.createBlockEntity(BlockPos.ORIGIN, blockItem.getBlock().getDefaultState()).getType()));
+	}
 	public static void registerEntityTagIO(Item item, EntityType<?> entity, EntityTagContainerIO io) {
 		registerItemIO(item, io);
 		registerEntityIO(entity, io);
+	}
+	public static void registerEntityTagIO(Item item, EntityType<?> entity, Function<EntityType<?>, EntityTagContainerIO> io) {
+		registerEntityTagIO(item, entity, io.apply(entity));
 	}
 	
 	private static final BlockEntityTagContainerIO CHEST_IO = new BlockEntityTagContainerIO(new ConstSizeContainerIO(27));
@@ -62,22 +73,22 @@ public class ContainerIO {
 	private static final BlockEntityTagContainerIO CAMPFIRE_IO = new BlockEntityTagContainerIO(new ConstSizeContainerIO(4));
 	private static final BlockEntityTagContainerIO DISPENSER_IO = new BlockEntityTagContainerIO(new ConstSizeContainerIO(9));
 	private static final BlockEntityTagContainerIO HOPPER_IO = new BlockEntityTagContainerIO(new ConstSizeContainerIO(5));
-	private static final BlockEntityTagContainerIO JUKEBOX_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("RecordItem"));
-	private static final BlockEntityTagContainerIO LECTERN_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("Book"));
-	private static final EntityTagContainerIO ITEM_FRAME_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("Item"));
-	private static final ItemContainerIO BUNDLE_IO = ItemContainerIO.forNBTIO(new DynamicSizeContainerIO(TagNames.BUNDLE_CONTENTS, 27));
+	private static final BlockEntityTagContainerIO JUKEBOX_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("RecordItem").withItemSupport(BlockEntityType.JUKEBOX));
+	private static final BlockEntityTagContainerIO LECTERN_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("Book").withItemSupport(BlockEntityType.LECTERN));
+	private static final Function<EntityType<?>, EntityTagContainerIO> ITEM_FRAME_IO = entity -> new EntityTagContainerIO(new SpecificItemsContainerIO("Item").withItemSupport(entity));
+	private static final ItemContainerIO BUNDLE_IO = ItemContainerIO.forNBTIO(new DynamicSizeContainerIO(TagNames.BUNDLE_CONTENTS, 27).withItemSupport((String) null));
 	private static final BlockEntityTagContainerIO CHISELED_BOOKSHELF_IO = new ChiseledBookshelfContainerIO();
-	private static final BlockEntityTagContainerIO SUSPICIOUS_SAND_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item"));
+	private static final BlockEntityTagContainerIO SUSPICIOUS_SAND_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item").withItemSupport(BlockEntityType.BRUSHABLE_BLOCK));
 	private static final BlockEntityTagContainerIO DECORATED_POT_IO = (NBTManagers.COMPONENTS_EXIST ?
 			new BlockEntityTagContainerIO(new ConstSizeContainerIO(1), new SpecificItemsContainerIO("item")) :
-				new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item")));
+				new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item").withItemSupport(BlockEntityType.DECORATED_POT)));
 	private static final BlockEntityTagContainerIO CRAFTER_IO = new BlockEntityTagContainerIO(new ConstSizeContainerIO(9));
 	private static final ItemContainerIO SPAWN_EGG_IO = new SpawnEggContainerIO();
-	private static final EntityTagContainerIO ARMOR_HANDS_IO = new EntityTagContainerIO(new ArmorHandsContainerIO());
-	private static final EntityTagContainerIO HORSE_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("SaddleItem", TagNames.ARMOR_ITEM));
-	private static final EntityTagContainerIO BASIC_HORSE_IO = new EntityTagContainerIO(new SpecificItemsContainerIO("SaddleItem"));
-	private static final EntityTagContainerIO DONKEY_IO = new EntityTagContainerIO(new ConcatNBTContainerIO(new SpecificItemsContainerIO("SaddleItem"), new DonkeyChestContainerIO(false)));
-	private static final EntityTagContainerIO LLAMA_IO = new EntityTagContainerIO(new ConcatNBTContainerIO(new SpecificItemsContainerIO(TagNames.ARMOR_ITEM), new DonkeyChestContainerIO(true)));
+	private static final Function<EntityType<?>, EntityTagContainerIO> ARMOR_HANDS_IO = entity -> new EntityTagContainerIO(new ArmorHandsContainerIO().withItemSupport(entity));
+	private static final EntityContainerIO HORSE_IO = EntityContainerIO.forNBTIO(new SpecificItemsContainerIO("SaddleItem", TagNames.ARMOR_ITEM));
+	private static final EntityContainerIO BASIC_HORSE_IO = EntityContainerIO.forNBTIO(new SpecificItemsContainerIO("SaddleItem"));
+	private static final EntityContainerIO DONKEY_IO = EntityContainerIO.forNBTIO(new ConcatNonItemNBTContainerIO(new SpecificItemsContainerIO("SaddleItem"), new DonkeyChestContainerIO(false)));
+	private static final EntityContainerIO LLAMA_IO = EntityContainerIO.forNBTIO(new ConcatNonItemNBTContainerIO(new SpecificItemsContainerIO(TagNames.ARMOR_ITEM), new DonkeyChestContainerIO(true)));
 	private static final EntityContainerIO CHEST_BOAT_IO = new EntityTagContainerIO(new ConstSizeContainerIO(27));
 	
 	public static void loadClass() {}
@@ -148,7 +159,7 @@ public class ContainerIO {
 					continue;
 				Entity entity = ServerMVMisc.createEntity(entityType, MainUtil.client.world);
 				if (entity instanceof MobEntity)
-					registerEntityIO(entityType, ARMOR_HANDS_IO);
+					registerEntityIO(entityType, ARMOR_HANDS_IO.apply(entityType));
 				Version.newSwitch()
 						.range("1.19.0", null, () -> {
 							if (entity instanceof ChestBoatEntity)

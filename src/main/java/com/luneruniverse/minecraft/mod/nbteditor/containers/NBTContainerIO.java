@@ -1,19 +1,9 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-
-public interface NBTContainerIO {
-	public default boolean passRootNbt(SourceContainerType source) {
-		return false;
-	}
+public interface NBTContainerIO extends NonItemNBTContainerIO {
 	/**
-	 * @param nbt May be null, which should result in 0 if it is not possible to determine the max size
+	 * In <= 1.20.4, the contents of a non-null return value is irrelevant
+	 * @return The id to add to block_entity_data/entity_data, or null if the root tag should be passed to readNBT and writeNBT
 	 */
-	public int getMaxNBTSize(NbtCompound nbt, SourceContainerType source);
-	public default boolean isNBTReadable(NbtCompound nbt, SourceContainerType source) {
-		return true;
-	}
-	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source);
-	public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source);
+	public String getDefaultEntityId();
 }

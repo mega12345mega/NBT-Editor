@@ -510,11 +510,11 @@ public class MainUtil {
 		return updateDynamic(typeRef, nbt, -1);
 	}
 	
-	public static NbtCompound fillId(NbtCompound nbt) {
+	public static NbtCompound fillId(NbtCompound nbt, String id) {
 		if (!NBTManagers.COMPONENTS_EXIST)
 			return nbt;
 		if (!nbt.contains("id", NbtElement.STRING_TYPE))
-			nbt.putString("id", "");
+			nbt.putString("id", id);
 		return nbt;
 	}
 	

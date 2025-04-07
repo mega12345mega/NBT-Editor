@@ -5,8 +5,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import net.minecraft.item.ItemStack;
 
 public interface BlockContainerIO {
-	public static BlockContainerIO forNBTIO(NBTContainerIO io) {
-		return (BlockContainerIO) new BlockEntityTagContainerIO(io);
+	public static BlockContainerIO forNBTIO(NonItemNBTContainerIO io) {
+		return (BlockContainerIO) new BlockEntityTagContainerIO(io.withItemSupport((String) null));
 	}
 	
 	/**

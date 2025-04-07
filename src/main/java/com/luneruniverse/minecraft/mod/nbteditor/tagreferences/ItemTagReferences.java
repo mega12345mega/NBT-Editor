@@ -22,7 +22,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.GameProf
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.CustomPotionContents;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 
@@ -41,11 +40,11 @@ import net.minecraft.text.Text;
 
 public class ItemTagReferences {
 	
-	private static TagReference<NbtCompound, ItemStack> getComponentTagRefOfNBT(MVComponentType<NbtComponent> component, boolean fillId) {
+	private static TagReference<NbtCompound, ItemStack> getComponentTagRefOfNBT(MVComponentType<NbtComponent> component) {
 		return new ComponentTagReference<>(component,
 				null,
 				componentValue -> componentValue == null ? new NbtCompound() : componentValue.copyNbt(),
-				nbt -> NbtComponent.of(fillId ? MainUtil.fillId(nbt.copy()) : nbt));
+				NbtComponent::of);
 	}
 	
 	public static final TagReference<CustomPotionContents, ItemStack> CUSTOM_POTION_CONTENTS = Version.<TagReference<CustomPotionContents, ItemStack>>newSwitch()
@@ -95,7 +94,7 @@ public class ItemTagReferences {
 			.get();
 	
 	public static final TagReference<NbtCompound, ItemStack> CUSTOM_DATA = Version.<TagReference<NbtCompound, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.CUSTOM_DATA, false))
+			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.CUSTOM_DATA))
 			.range(null, "1.20.4", () -> new CustomDataNBTTagReference())
 			.get();
 	
@@ -111,12 +110,12 @@ public class ItemTagReferences {
 			.get();
 	
 	public static final TagReference<NbtCompound, ItemStack> BLOCK_ENTITY_DATA = Version.<TagReference<NbtCompound, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.BLOCK_ENTITY_DATA, true))
+			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.BLOCK_ENTITY_DATA))
 			.range(null, "1.20.4", () -> TagReference.forItems(NbtCompound::new, new NBTTagReference<>(NbtCompound.class, "BlockEntityTag")))
 			.get();
 	
 	public static final TagReference<NbtCompound, ItemStack> ENTITY_DATA = Version.<TagReference<NbtCompound, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.ENTITY_DATA, true))
+			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.ENTITY_DATA))
 			.range(null, "1.20.4", () -> TagReference.forItems(NbtCompound::new, new NBTTagReference<>(NbtCompound.class, "EntityTag")))
 			.get();
 	

@@ -7,7 +7,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 
-public class ArmorHandsContainerIO implements NBTContainerIO {
+public class ArmorHandsContainerIO implements NonItemNBTContainerIO {
 	
 	@Override
 	public int getMaxNBTSize(NbtCompound nbt, SourceContainerType source) {

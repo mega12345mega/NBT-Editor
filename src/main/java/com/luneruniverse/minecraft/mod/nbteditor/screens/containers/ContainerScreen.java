@@ -46,7 +46,7 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		ItemStack[] contents = ContainerIO.read(localNBT);
 		for (int i = 0; i < contents.length; i++)
 			this.handler.getSlot(i).setStackNoCallbacks(contents[i] == null ? ItemStack.EMPTY : contents[i]);
-		this.numSlots = contents.length;
+		this.numSlots = ContainerIO.getMaxSize(localNBT);
 		
 		return this;
 	}

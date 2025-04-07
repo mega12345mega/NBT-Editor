@@ -9,7 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 
-public class DynamicSizeContainerIO implements NBTContainerIO {
+public class DynamicSizeContainerIO implements NonItemNBTContainerIO {
 	
 	private final String key;
 	private final int maxSize;
