@@ -129,12 +129,43 @@ jar {
 	dependsOn mergeRefmapJson
 }
 
-remapJar {
+task mergeDevLibs(type: Jar) {
+	dependsOn remapJar
+	dependsOn ":nbteditor_1.17:jar"
+	
+	from(zipTree(jar.archiveFile.get()))
+	
+	from(zipTree("nbteditor_1.17/build/devlibs/nbteditor_1.17-0.0.0-dev.jar")) {
+		include "**/*.class"
+	}
+	
+	archiveFile.set(file("${buildDir}/devlibs/temp.jar"))
+	
+	doLast {
+		jar.archiveFile.get().asFile.delete()
+		archiveFile.get().asFile.renameTo(jar.archiveFile.get().asFile)
+	}
+}
+
+task mergeLibs(type: Jar) {
+	dependsOn remapJar
 	dependsOn ":nbteditor_1.17:remapJar"
+	
+	from(zipTree(remapJar.archiveFile.get()))
+	
 	from(zipTree("nbteditor_1.17/build/libs/nbteditor_1.17-0.0.0.jar")) {
 		include "**/*.class"
 	}
+	
+	archiveFile.set(file("${buildDir}/libs/temp.jar"))
+	
+	doLast {
+		remapJar.archiveFile.get().asFile.delete()
+		archiveFile.get().asFile.renameTo(remapJar.archiveFile.get().asFile)
+	}
 }
+
+build.dependsOn mergeDevLibs, mergeLibs
 
 // configure the maven publication
 publishing {
