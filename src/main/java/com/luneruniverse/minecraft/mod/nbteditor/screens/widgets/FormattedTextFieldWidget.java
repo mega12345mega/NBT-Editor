@@ -10,9 +10,8 @@ import java.util.function.Consumer;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.luneruniverse.minecraft.mod.nbteditor.fancytext.ClickAction;
+import com.luneruniverse.minecraft.mod.nbteditor.fancytext.HoverAction;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
@@ -37,74 +36,6 @@ public class FormattedTextFieldWidget extends GroupWidget {
 	
 	private static class InternalTextFieldWidget extends MultiLineTextFieldWidget {
 		private static class EventEditorWidget extends GroupWidget implements InitializableOverlay<Screen> {
-			public enum ClickAction {
-				NONE(null),
-				OPEN_URL(ClickEvent.Action.OPEN_URL),
-				OPEN_FILE(ClickEvent.Action.OPEN_FILE),
-				RUN_COMMAND(ClickEvent.Action.RUN_COMMAND),
-				SUGGEST_COMMAND(ClickEvent.Action.SUGGEST_COMMAND),
-				CHANGE_PAGE(ClickEvent.Action.CHANGE_PAGE),
-				COPY_TO_CLIPBOARD(ClickEvent.Action.COPY_TO_CLIPBOARD);
-				
-				public static ClickAction get(ClickEvent.Action value) {
-					for (ClickAction action : values()) {
-						if (action.value == value)
-							return action;
-					}
-					throw new IllegalArgumentException("Invalid click action: " + value);
-				}
-				
-				private final ClickEvent.Action value;
-				private ClickAction(ClickEvent.Action value) {
-					this.value = value;
-				}
-				public ClickEvent toEvent(String value) {
-					if (this == NONE)
-						return null;
-					return new ClickEvent(this.value, value);
-				}
-				
-				@Override
-				public String toString() {
-					if (this == NONE)
-						return "none";
-					return MVMisc.getClickEventActionName(value);
-				}
-			}
-			public enum HoverAction {
-				NONE(null),
-				SHOW_TEXT(HoverEvent.Action.SHOW_TEXT),
-				SHOW_ITEM(HoverEvent.Action.SHOW_ITEM),
-				SHOW_ENTITY(HoverEvent.Action.SHOW_ENTITY);
-				
-				public static HoverAction get(HoverEvent.Action<?> value) {
-					for (HoverAction action : values()) {
-						if (action.value == value)
-							return action;
-					}
-					throw new IllegalArgumentException("Invalid hover action: " + value);
-				}
-				
-				private final HoverEvent.Action<?> value;
-				private HoverAction(HoverEvent.Action<?> value) {
-					this.value = value;
-				}
-				public HoverEvent toEvent(String value) {
-					if (this == NONE)
-						return null;
-					JsonObject json = new JsonObject();
-					json.addProperty("action", MVMisc.getHoverEventActionName(this.value));
-					json.add("contents", new Gson().fromJson(value, JsonElement.class));
-					return MVMisc.getHoverEvent(json);
-				}
-				
-				@Override
-				public String toString() {
-					if (this == NONE)
-						return "none";
-					return MVMisc.getHoverEventActionName(value);
-				}
-			}
 			public interface EventPairCallback {
 				public void onEventChange(ClickEvent clickEvent, HoverEvent hoverEvent);
 			}

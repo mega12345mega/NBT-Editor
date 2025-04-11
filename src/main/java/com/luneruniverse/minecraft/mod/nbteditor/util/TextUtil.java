@@ -13,14 +13,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
-import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
+import com.luneruniverse.minecraft.mod.nbteditor.fancytext.FancyText;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.ClickEvent.Action;
@@ -47,7 +49,7 @@ public class TextUtil {
 			}
 			if (str.startsWith("[FORMAT] ")) {
 				String toFormat = str.substring("[FORMAT] ".length());
-				line = parseFormattedText(toFormat);
+				line = FancyText.parse(toFormat);
 			}
 			lines.add(line);
 		}
@@ -63,16 +65,8 @@ public class TextUtil {
 		return output;
 	}
 	
-	public static Text parseFormattedText(String text) {
-		try {
-			return FancyTextArgumentType.fancyText(false).parse(new StringReader(text));
-		} catch (CommandSyntaxException e) {
-			return TextInst.literal(text);
-		}
-	}
-	
 	public static Text parseTranslatableFormatted(String key, Object... args) {
-		return parseFormattedText(TextInst.translatable(key, args).getString());
+		return FancyText.parse(TextInst.translatable(key, args).getString());
 	}
 	
 	public static Text substring(Text text, int start, int end) {
@@ -280,6 +274,39 @@ public class TextUtil {
 				return output;
 		} catch (JsonParseException e) {}
 		return TextInst.of(json);
+	}
+	
+	public static final Style RESET_STYLE = Style.EMPTY.withColor(Formatting.WHITE)
+			.withBold(false).withItalic(false).withUnderline(false).withStrikethrough(false).withObfuscated(false);
+	
+	public static Style getBaseNameStyle(LocalNBT localNBT, boolean itemName) {
+		Style baseNameStyle = Style.EMPTY;
+		if (localNBT instanceof LocalItem item) {
+			if (!itemName)
+				baseNameStyle = baseNameStyle.withFormatting(Formatting.ITALIC);
+			baseNameStyle = baseNameStyle.withFormatting(item.getEditableItem().getRarity().formatting);
+		} else if (localNBT instanceof LocalBlock)
+			;
+		else if (localNBT instanceof LocalEntity)
+			baseNameStyle = baseNameStyle.withFormatting(Formatting.WHITE);
+		else
+			throw new IllegalStateException("Cannot get base name style for " + localNBT.getClass().getName());
+		
+		return baseNameStyle;
+	}
+	
+	public static final Style BASE_LORE_STYLE = Style.EMPTY.withFormatting(Formatting.ITALIC, Formatting.DARK_PURPLE);
+	
+	public static Style simplifyStyle(Style style, Style base) {
+		return Style.EMPTY
+				.withColor(Objects.equals(style.getColor(), base.getColor()) ? null : style.getColor())
+				.withBold(Objects.equals(style.bold, base.bold) ? null : style.bold)
+				.withItalic(Objects.equals(style.italic, base.italic) ? null : style.italic)
+				.withUnderline(Objects.equals(style.underlined, base.underlined) ? null : style.underlined)
+				.withStrikethrough(Objects.equals(style.strikethrough, base.strikethrough) ? null : style.strikethrough)
+				.withObfuscated(Objects.equals(style.obfuscated, base.obfuscated) ? null : style.obfuscated)
+				.withClickEvent(Objects.equals(style.getClickEvent(), base.getClickEvent()) ? null : style.getClickEvent())
+				.withHoverEvent(Objects.equals(style.getHoverEvent(), base.getHoverEvent()) ? null : style.getHoverEvent());
 	}
 	
 }

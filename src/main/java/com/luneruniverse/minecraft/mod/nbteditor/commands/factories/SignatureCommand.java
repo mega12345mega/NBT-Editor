@@ -17,6 +17,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -89,7 +90,7 @@ public class SignatureCommand extends ClientCommand {
 					
 					return Command.SINGLE_SUCCESS;
 				}))
-				.then(literal("edit").then(argument("signature", FancyTextArgumentType.fancyText()).executes(context -> {
+				.then(literal("edit").then(argument("signature", FancyTextArgumentType.fancyText(TextUtil.BASE_LORE_STYLE)).executes(context -> {
 					Text oldSignature = signature;
 					
 					try {

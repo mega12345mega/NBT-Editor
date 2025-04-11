@@ -140,7 +140,7 @@ public final class ClientCommandInternals {
 	 * @param type the exception type
 	 * @return true if ignored, false otherwise
 	 */
-	private static boolean isIgnoredException(CommandExceptionType type) {
+	public static boolean isIgnoredException(CommandExceptionType type) {
 		BuiltInExceptionProvider builtins = CommandSyntaxException.BUILT_IN_EXCEPTIONS;
 
 		// Only ignore unknown commands and node parse exceptions.
@@ -150,7 +150,7 @@ public final class ClientCommandInternals {
 	}
 
 	// See ChatInputSuggestor.formatException. That cannot be used directly as it returns an OrderedText instead of a Text.
-	private static Text getErrorMessage(CommandSyntaxException e) {
+	public static Text getErrorMessage(CommandSyntaxException e) {
 		Text msg = Texts.toText(e.getRawMessage());
 		String context = e.getContext();
 		if (context == null)
