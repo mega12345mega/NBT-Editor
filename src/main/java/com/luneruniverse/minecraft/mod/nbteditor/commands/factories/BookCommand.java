@@ -22,6 +22,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.BookScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.WrittenBookTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -54,7 +55,7 @@ public class BookCommand extends ClientCommand {
 		List<Text> pages = WrittenBookTagReferences.PAGES.get(item);
 		List<String> convertedPages = new ArrayList<>();
 		for (Text page : pages) {
-			if (!formatted && TextUtil.isTextFormatted(page, true, "black"))
+			if (!formatted && TextUtil.isTextFormatted(page, StyleUtil.BOOK_STYLE))
 				formatted = true;
 			convertedPages.add(page.getString());
 		}

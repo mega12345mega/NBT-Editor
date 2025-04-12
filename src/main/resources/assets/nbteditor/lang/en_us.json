@@ -457,7 +457,8 @@
 	"nbteditor.effect_list_arg_type.invalid.arg": "Invalid argument",
 	"nbteditor.effect_list_arg_type.invalid.value": "Invalid value",
 	
-	"nbteditor.fancy_text_arg_type.custom_color": "Custom Color (#RRGGBB)",
+	"nbteditor.fancy_text_arg_type.custom_color": "Custom Color (#RRGGBB;)",
+	"nbteditor.fancy_text_arg_type.shadow_color": "Shadow Color (&_<color>)",
 	"nbteditor.fancy_text_arg_type.stringify_unsupported": "§cThis text contains hover events or formatting that can't be fully recreated",
 	
 	"nbteditor.chat_length_warning_1": "WARNING: The text will be truncated to",
@@ -558,7 +559,7 @@
 	"nbteditor.help.text_format_2": "§6Help: Text Format",
 	"nbteditor.help.text_format_3": "§7Used instead of JSON for formatted text",
 	"nbteditor.help.text_format_4": "§7Can be toggled back to JSON in §6/nbteditor config",
-	"nbteditor.help.text_format_5": "[FORMAT] §7Formatting uses \\& for [run_command]{/get preset colorcodes}([show_text]{/get preset colorcodes}(§9§ncolor codes)) and supports custom colors (\\&#RRGGBB)",
+	"nbteditor.help.text_format_5": "[FORMAT] §7Formatting uses \\& for [run_command]{/get preset colorcodes}([show_text]{/get preset colorcodes}(§9§ncolor codes)) and supports custom colors (\\&#RRGGBB;)",
 	"nbteditor.help.text_format_6": "§7When changing colors, the format is not cleared; use &r",
 	"nbteditor.help.text_format_7": "§7Events: §6[<event_name>]{<event_value>}(<affected text>)",
 	"nbteditor.help.text_format_8": "§7Example: §6[run_command]{/say clicked!}(&6Click me!)",

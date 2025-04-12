@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 import com.mojang.brigadier.StringReader;
 
 import net.minecraft.text.TextColor;
@@ -21,9 +23,14 @@ public record FancyTextToken(Type type, Optional<Object> content) {
 		 */
 		COLOR,
 		/**
-		 * content: {@link Formatting}
+		 * content: {@link Formatting} <br>
+		 * (May be formatting for color)
 		 */
 		FORMATTING,
+		/**
+		 * content: {@link Integer}
+		 */
+		SHADOW_COLOR,
 		OPEN_PAREN,
 		CLOSE_PAREN,
 		OPEN_SQUARE,
@@ -70,31 +77,55 @@ public record FancyTextToken(Type type, Optional<Object> content) {
 						content.append(c);
 						continue;
 					}
-					char c2 = str.peek();
+					int startCursor = str.getCursor();
+					
+					char c2 = str.read();
+					boolean shadow = false;
+					if (c2 == '_' && str.canRead() && StyleUtil.SHADOW_COLOR_EXISTS) {
+						shadow = true;
+						c2 = str.read();
+					}
+					
 					if (c2 == '#') {
-						if (!str.canRead(6)) {
+						if (!str.canRead(7)) {
 							content.append(c);
+							str.setCursor(startCursor);
 							continue;
 						}
+						
 						for (int i = 0; i < 6; i++)
-							content.append(str.peek(i + 1));
+							content.append(str.read());
+						if (shadow && str.canRead(3) && str.peek() != ';') {
+							content.append(str.read());
+							content.append(str.read());
+						}
+						
 						try {
-							output.add(new FancyTextToken(Type.COLOR, TextColor.fromRgb(Integer.parseInt(content.toString(), 16))));
+							if (str.read() != ';')
+								throw new NumberFormatException();
+							int color = Integer.parseUnsignedInt(content.toString(), 16);
+							if (shadow) {
+								output.add(new FancyTextToken(Type.SHADOW_COLOR,
+										content.length() == 6 ? color | 0xFF000000 : color));
+							} else
+								output.add(new FancyTextToken(Type.COLOR, TextColor.fromRgb(color)));
 							content.setLength(0);
-							str.setCursor(str.getCursor() + 7);
 						} catch (NumberFormatException e) {
 							content.setLength(0);
 							content.append(c);
-							continue;
+							str.setCursor(startCursor);
 						}
 					} else {
 						Formatting formatting = Formatting.byCode(c2);
-						if (formatting == null) {
+						if (formatting == null || shadow && !formatting.isColor()) {
 							content.append(c);
-							continue;
+							str.setCursor(startCursor);
 						} else {
-							output.add(new FancyTextToken(Type.FORMATTING, formatting));
-							str.skip();
+							if (shadow) {
+									output.add(new FancyTextToken(Type.SHADOW_COLOR,
+											MVMisc.scaleRgb(formatting.getColorValue(), 0.25) | 0xFF000000));
+							} else
+								output.add(new FancyTextToken(Type.FORMATTING, formatting));
 						}
 					}
 				} else {

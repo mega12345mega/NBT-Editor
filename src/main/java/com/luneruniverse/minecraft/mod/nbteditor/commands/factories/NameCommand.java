@@ -12,7 +12,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.DisplayScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -48,7 +48,7 @@ public class NameCommand extends ClientCommand {
 	private static <T extends LocalNBT> void setName(FabricClientCommandSource source, NBTReference<T> ref, FancyTextArgumentType.UnparsedText unparsedName) {
 		try {
 			T localNBT = ref.getLocalNBT();
-			Text name = unparsedName.parse(TextUtil.getBaseNameStyle(localNBT, false));
+			Text name = unparsedName.parse(StyleUtil.getBaseNameStyle(localNBT, false));
 			localNBT.setName(name);
 			ref.saveLocalNBT(localNBT, TextInst.translatable("nbteditor.named").append(name));
 		} catch (CommandSyntaxException e) {

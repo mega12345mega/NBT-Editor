@@ -19,7 +19,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidg
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.EntityTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
@@ -40,7 +40,7 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		nameFormatted = FormattedTextFieldWidget.create(nameFormatted, 16, 64, width - 32, 24 + textRenderer.fontHeight * 3,
 				itemNameType ? MainUtil.getBaseItemNameSafely(((LocalItem) localNBT).getEditableItem()) : localNBT.getName(),
-						false, TextUtil.getBaseNameStyle(localNBT, itemNameType), text -> {
+						false, StyleUtil.getBaseNameStyle(localNBT, itemNameType), text -> {
 			if (itemNameType)
 				((LocalItem) localNBT).getEditableItem().set(MVComponentType.ITEM_NAME, text);
 			else
@@ -53,7 +53,7 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		if (localNBT instanceof LocalItem item) {
 			lore = FormattedTextFieldWidget.create(lore, 16, nextY, width - 32, height - 16 - 20 - 4 - nextY,
-					ItemTagReferences.LORE.get(item.getEditableItem()), TextUtil.BASE_LORE_STYLE, lines -> {
+					ItemTagReferences.LORE.get(item.getEditableItem()), StyleUtil.BASE_LORE_STYLE, lines -> {
 				if (lines.size() == 1 && lines.get(0).getString().isEmpty())
 					ItemTagReferences.LORE.set(item.getEditableItem(), new ArrayList<>());
 				else

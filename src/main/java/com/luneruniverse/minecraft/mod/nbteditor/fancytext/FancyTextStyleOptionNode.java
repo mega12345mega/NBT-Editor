@@ -11,17 +11,19 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
 
-public record FancyTextEventNode(TextAction event, String value, List<FancyTextNode> contents) implements FancyTextNode {
+public record FancyTextStyleOptionNode(StyleOption option, String value, List<FancyTextNode> contents) implements FancyTextNode {
 	
 	@Override
 	public Style modifyStyle(Style style) {
-		if (event instanceof ClickAction clickAction)
-			return style.withClickEvent(clickAction.toEvent(value == null ? "" : value));
-		
-		return switch ((HoverAction) event) {
+		return switch (option) {
+			case OPEN_URL, RUN_COMMAND, SUGGEST_COMMAND, CHANGE_PAGE, COPY_TO_CLIPBOARD -> style.withClickEvent(
+					new ClickEvent(ClickEvent.Action.valueOf(option.name()), value == null ? "" : value));
 			case SHOW_TEXT -> style.withHoverEvent(
 					new HoverEvent(HoverEvent.Action.SHOW_TEXT, value == null ? TextInst.of("") : FancyText.parse(value)));
 			case SHOW_ITEM -> {
@@ -58,7 +60,14 @@ public record FancyTextEventNode(TextAction event, String value, List<FancyTextN
 				yield style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
 						new HoverEvent.EntityContent(entity.getType(), entity.getUuid(), entity.getName())));
 			}
-			default -> style; // Impossible
+			case INSERTION -> style.withInsertion(value);
+			case FONT -> {
+				try {
+					yield style.withFont(Identifier.of(value));
+				} catch (InvalidIdentifierException e) {
+					yield style.withFont(Style.DEFAULT_FONT_ID);
+				}
+			}
 		};
 	}
 	

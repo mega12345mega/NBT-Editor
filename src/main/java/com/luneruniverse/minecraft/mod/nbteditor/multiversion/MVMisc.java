@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
+import java.awt.Color;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -735,6 +736,14 @@ public class MVMisc {
 			throw new CrashException(report);
 		}
 		return false;
+	}
+	
+	public static int scaleRgb(int argb, double scale) {
+		Color color = new Color(argb, true);
+		int r = (int) (color.getRed() * scale);
+		int g = (int) (color.getGreen() * scale);
+		int b = (int) (color.getBlue() * scale);
+		return new Color(r, g, b, color.getAlpha()).getRGB();
 	}
 	
 }

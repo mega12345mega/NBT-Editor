@@ -10,8 +10,9 @@ import java.util.function.Consumer;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.fancytext.ClickAction;
-import com.luneruniverse.minecraft.mod.nbteditor.fancytext.HoverAction;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
@@ -20,6 +21,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.suggestion.Suggestions;
 
@@ -36,6 +38,74 @@ public class FormattedTextFieldWidget extends GroupWidget {
 	
 	private static class InternalTextFieldWidget extends MultiLineTextFieldWidget {
 		private static class EventEditorWidget extends GroupWidget implements InitializableOverlay<Screen> {
+			public enum ClickAction {
+				NONE(null),
+				OPEN_URL(ClickEvent.Action.OPEN_URL),
+				OPEN_FILE(ClickEvent.Action.OPEN_FILE),
+				RUN_COMMAND(ClickEvent.Action.RUN_COMMAND),
+				SUGGEST_COMMAND(ClickEvent.Action.SUGGEST_COMMAND),
+				CHANGE_PAGE(ClickEvent.Action.CHANGE_PAGE),
+				COPY_TO_CLIPBOARD(ClickEvent.Action.COPY_TO_CLIPBOARD);
+				
+				public static ClickAction get(ClickEvent.Action value) {
+					for (ClickAction action : values()) {
+						if (action.value == value)
+							return action;
+					}
+					throw new IllegalArgumentException("Invalid click action: " + value);
+				}
+				
+				private final ClickEvent.Action value;
+				private ClickAction(ClickEvent.Action value) {
+					this.value = value;
+				}
+				public ClickEvent toEvent(String value) {
+					if (this == NONE)
+						return null;
+					return new ClickEvent(this.value, value);
+				}
+				
+				@Override
+				public String toString() {
+					if (this == NONE)
+						return "none";
+					return MVMisc.getClickEventActionName(value);
+				}
+			}
+			public enum HoverAction {
+				NONE(null),
+				SHOW_TEXT(HoverEvent.Action.SHOW_TEXT),
+				SHOW_ITEM(HoverEvent.Action.SHOW_ITEM),
+				SHOW_ENTITY(HoverEvent.Action.SHOW_ENTITY);
+				
+				public static HoverAction get(HoverEvent.Action<?> value) {
+					for (HoverAction action : values()) {
+						if (action.value == value)
+							return action;
+					}
+					throw new IllegalArgumentException("Invalid hover action: " + value);
+				}
+				
+				private final HoverEvent.Action<?> value;
+				private HoverAction(HoverEvent.Action<?> value) {
+					this.value = value;
+				}
+				public HoverEvent toEvent(String value) {
+					if (this == NONE)
+						return null;
+					JsonObject json = new JsonObject();
+					json.addProperty("action", MVMisc.getHoverEventActionName(this.value));
+					json.add("contents", new Gson().fromJson(value, JsonElement.class));
+					return MVMisc.getHoverEvent(json);
+				}
+				
+				@Override
+				public String toString() {
+					if (this == NONE)
+						return "none";
+					return MVMisc.getHoverEventActionName(value);
+				}
+			}
 			public interface EventPairCallback {
 				public void onEventChange(ClickEvent clickEvent, HoverEvent hoverEvent);
 			}
@@ -149,7 +219,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				return new InternalTextFieldWidget(x, y, width, height, text, newLines, base, onChange);
 			if (prev.allowsNewLines() != newLines)
 				throw new IllegalArgumentException("Cannot convert to/from newLines on FormattedTextFieldWidget");
-			if (!TextUtil.styleEqualsExact(prev.base, base))
+			if (!StyleUtil.identical(prev.base, base))
 				throw new IllegalArgumentException("Cannot change base on FormattedTextFieldWidget");
 			prev.setTextChangeListener(onChange);
 			prev.ignoreNextSetText = true;
@@ -174,7 +244,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			super(x, y, width, height, text.getString(), newLines, null);
 			this.onChange = onChange;
 			this.base = base;
-			this.baseReset = TextUtil.forceReset(base);
+			this.baseReset = StyleUtil.minus(StyleUtil.RESET_STYLE, base);
 			this.styles = new ArrayList<>();
 			this.text = text.copy();
 			this.undo = new ArrayList<>();
@@ -228,8 +298,8 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			if (start == end) {
 				if (cursorStyle == null)
 					cursorStyle = getStyle(start == 0 ? 0 : start - 1);
-				if (TextUtil.hasFormatting(cursorStyle, formatting))
-					cursorStyle = TextUtil.removeFormatting(cursorStyle, formatting, true);
+				if (StyleUtil.hasFormatting(cursorStyle, formatting))
+					cursorStyle = withoutFormatting(cursorStyle, formatting);
 				else
 					cursorStyle = withFormatting(cursorStyle, formatting);
 				return;
@@ -238,11 +308,11 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			Style startStyle = getStyle(start);
 			Style endStyle = getStyle(end);
 			
-			boolean filled = TextUtil.hasFormatting(startStyle, formatting);
+			boolean filled = StyleUtil.hasFormatting(startStyle, formatting);
 			setStyle(start, withFormatting(startStyle, formatting));
 			for (int i = start + 1; i < end && i < styles.size(); i++) {
 				Style style = styles.get(i);
-				if (style != null && !TextUtil.hasFormatting(style, formatting)) {
+				if (style != null && !StyleUtil.hasFormatting(style, formatting)) {
 					styles.set(i, withFormatting(style, formatting));
 					filled = false;
 				}
@@ -250,11 +320,11 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			setStyle(end, endStyle);
 			
 			if (filled) {
-				setStyle(start, TextUtil.removeFormatting(startStyle, formatting, true));
+				setStyle(start, withoutFormatting(startStyle, formatting));
 				for (int i = start + 1; i < end && i < styles.size(); i++) {
 					Style style = styles.get(i);
 					if (style != null)
-						styles.set(i, TextUtil.removeFormatting(style, formatting, true));
+						styles.set(i, withoutFormatting(style, formatting));
 				}
 			}
 			
@@ -267,6 +337,9 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			if (formatting == Formatting.RESET)
 				return baseReset;
 			return style.withFormatting(formatting);
+		}
+		private Style withoutFormatting(Style style, Formatting formatting) {
+			return StyleUtil.minusFormatting(style, Style.EMPTY.withColor(base.getColor()), formatting);
 		}
 		
 		private void applyEvents(ClickEvent clickEvent, HoverEvent hoverEvent) {

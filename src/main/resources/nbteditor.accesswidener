@@ -23,6 +23,7 @@ accessible field net/minecraft/text/Style italic Ljava/lang/Boolean;
 accessible field net/minecraft/text/Style underlined Ljava/lang/Boolean;
 accessible field net/minecraft/text/Style strikethrough Ljava/lang/Boolean;
 accessible field net/minecraft/text/Style obfuscated Ljava/lang/Boolean;
+accessible field net/minecraft/text/Style font Lnet/minecraft/util/Identifier;
 
 extendable method net/minecraft/client/gui/widget/ClickableWidget render (Lnet/minecraft/client/gui/DrawContext;IIF)V
 

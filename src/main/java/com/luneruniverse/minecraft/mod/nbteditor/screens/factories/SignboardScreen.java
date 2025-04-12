@@ -1,6 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.factories;
 
-import java.awt.Color;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -22,7 +21,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ButtonDropdownW
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.FormattedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.SignSideTagReferences;
-import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 
 import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.Block;
@@ -48,11 +47,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private static int getRenderedColor(DyeColor dye) {
 		if (dye == DyeColor.BLACK)
 			return 0xFFF0EBCC;
-		Color color = new Color(dye.getSignColor());
-		int r = (int) (color.getRed() * 0.4D);
-		int g = (int) (color.getGreen() * 0.4D);
-		int b = (int) (color.getBlue() * 0.4D);
-		return new Color(r, g, b, 0).getRGB();
+		return MVMisc.scaleRgb(dye.getSignColor(), 0.4);
 	}
 	
 	private final Identifier texture;
@@ -194,7 +189,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	}
 	
 	private Text fixEditable(Text line) { // {"extra":[{...}]} makes the sign uneditable
-		if (TextUtil.styleEqualsExact(line.getStyle(), Style.EMPTY) && line.getSiblings().size() == 1 &&
+		if (StyleUtil.identical(line.getStyle(), Style.EMPTY) && line.getSiblings().size() == 1 &&
 				line.getSiblings().get(0).getSiblings().isEmpty()) {
 			return line.getSiblings().get(0);
 		}

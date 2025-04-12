@@ -25,6 +25,7 @@ public interface FancyTextNode {
 				case TEXT -> output.add(new FancyTextTextNode((String) token.content().get()));
 				case COLOR -> output.add(new FancyTextColorNode((TextColor) token.content().get()));
 				case FORMATTING -> output.add(new FancyTextFormattingNode((Formatting) token.content().get()));
+				case SHADOW_COLOR -> output.add(new FancyTextShadowColorNode((Integer) token.content().get()));
 				case OPEN_PAREN -> {
 					parenLevel++;
 					output.add(new FancyTextTextNode("("));
@@ -45,7 +46,7 @@ public interface FancyTextNode {
 						FancyTextToken event = tokens.get(i + 1);
 						FancyTextToken closeSquare = tokens.get(i + 2);
 						if (event.type() == FancyTextToken.Type.TEXT && closeSquare.type() == FancyTextToken.Type.CLOSE_SQUARE) {
-							TextAction action = TextAction.valueOf(((String) event.content().get()).toUpperCase());
+							StyleOption action = StyleOption.valueOf(((String) event.content().get()).toUpperCase());
 							if (action != null) {
 								int openIndex = i + 3;
 								FancyTextToken open = tokens.get(openIndex);
@@ -67,7 +68,7 @@ public interface FancyTextNode {
 									AtomicInteger internalParseIndex2 = new AtomicInteger(openIndex + 1);
 									List<FancyTextNode> contents = parse(tokens, internalParseIndex2);
 									i = internalParseIndex2.getPlain();
-									output.add(new FancyTextEventNode(action, value, contents));
+									output.add(new FancyTextStyleOptionNode(action, value, contents));
 									success = true;
 								}
 							}
