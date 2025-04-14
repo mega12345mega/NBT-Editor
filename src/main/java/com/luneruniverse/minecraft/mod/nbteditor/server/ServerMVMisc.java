@@ -67,7 +67,7 @@ public class ServerMVMisc {
 	private static final Supplier<Reflection.MethodInvoker> Entity_hasPermissionLevel =
 			Reflection.getOptionalMethod(Entity.class, "method_5687", MethodType.methodType(boolean.class, int.class));
 	public static boolean hasPermissionLevel(PlayerEntity player, int level) {
-		return true
+		return true;
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> Property_getValues =
