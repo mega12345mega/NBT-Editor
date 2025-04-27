@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.Tickable;
 
@@ -20,7 +21,7 @@ import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.util.math.MatrixStack;
 
-public class GroupWidget extends AbstractParentElement implements MVDrawable, MVElement, Tickable, Selectable {
+public class GroupWidget extends AbstractParentElement implements MVDrawable, MVElement, Tickable, Selectable, OldEventBehavior {
 	
 	private final List<Drawable> drawables;
 	private final List<Element> elements;

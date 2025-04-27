@@ -154,6 +154,8 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (getOverlay() != null)
+			return super.keyPressed(keyCode, scanCode, modifiers);
 		if (super.keyPressed(keyCode, scanCode, modifiers))
 			return true;
 		

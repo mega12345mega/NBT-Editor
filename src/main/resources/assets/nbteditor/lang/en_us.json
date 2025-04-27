@@ -61,7 +61,9 @@
 	"nbteditor.nbt.paste": "Paste",
 	"nbteditor.nbt.rename": "Rename",
 	
-	"nbteditor.nbt.overwrite.title": "That name already exists!",
+	"nbteditor.nbt.key": "Tag Name",
+	
+	"nbteditor.nbt.overwrite.title": "That tag already exists!",
 	"nbteditor.nbt.overwrite.desc": "Do you want to overwrite it?",
 	"nbteditor.nbt.overwrite.yes": "Overwrite",
 	"nbteditor.nbt.overwrite.no": "Cancel",
@@ -218,6 +220,11 @@
 	"nbteditor.keybind.page.prev": "§6 to the previous page!",
 	"nbteditor.keybind.page.next_jump": "\n§6to jump to the next page!",
 	"nbteditor.keybind.page.prev_jump": "\n§6to jump to the previous page!",
+	"nbteditor.keybind.formatted_text.custom_color": "§6§lCtrl + Shift + C",
+	"nbteditor.keybind.formatted_text.events": "§6§lCtrl + Shift + E",
+	"nbteditor.keybind.formatted_text.insertion": "§6§lCtrl + Shift + I",
+	"nbteditor.keybind.formatted_text.font": "§6§lCtrl + Shift + F",
+	"nbteditor.keybind.formatted_text.reset": "§6§lCtrl + \\",
 	
 	"nbteditor.skull.invalid_player_name": "§cThat player name is invalid!",
 	
@@ -318,10 +325,11 @@
 	"nbteditor.multi_line_text.regex.on": "☑",
 	"nbteditor.multi_line_text.regex.off": "☐",
 	"nbteditor.formatted_text.custom_color": "Custom Color",
-	"nbteditor.formatted_text.events": "Click & Hover Event",
+	"nbteditor.formatted_text.events": "Click & Hover Events",
 	"nbteditor.formatted_text.click_event_value": "Click Event Value",
 	"nbteditor.formatted_text.hover_event_value": "Hover Event Value",
-	"nbteditor.formatted_text.tip": "Use Ctrl+Shift+C for custom colors & Ctrl+Shift+E for events",
+	"nbteditor.formatted_text.insertion": "Insertion",
+	"nbteditor.formatted_text.font": "Font",
 	"nbteditor.color_selector.hue": "Hue: %d°",
 	
 	"nbteditor.config": "NBT Editor Config",
@@ -448,8 +456,10 @@
 	
 	
 	"nbteditor.configurable.list.move": "Move",
+	"nbteditor.configurable.list.move.index": "Index",
 	"nbteditor.configurable.list.duplicate": "Duplicate",
 	"nbteditor.configurable.list.duplicate.any_amount": "Shift for any amount",
+	"nbteditor.configurable.list.duplicate.amount": "# of new copies",
 	"nbteditor.configurable.list.remove": "Remove",
 	
 	"nbteditor.effect_list_arg_type.expected.space": "Expected a space",

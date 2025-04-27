@@ -41,7 +41,9 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 		return new ArgumentType<>() {
 			@Override
 			public UnparsedText parse(StringReader reader) throws CommandSyntaxException {
-				return style -> new FancyTextArgumentType(style).parse(reader);
+				String remaining = reader.getRemaining();
+				reader.setCursor(reader.getTotalLength());
+				return style -> new FancyTextArgumentType(style).parse(new StringReader(remaining));
 			}
 			@Override
 			public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {

@@ -96,8 +96,6 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		matrices.translate(0.0, 0.0, 1.0);
 		nameFormatted.render(matrices, mouseX, mouseY, delta);
 		matrices.pop();
-		
-		renderTip(matrices, "nbteditor.formatted_text.tip");
 	}
 	
 	@Override

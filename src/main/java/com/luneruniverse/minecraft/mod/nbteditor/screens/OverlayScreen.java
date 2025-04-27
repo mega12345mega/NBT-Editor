@@ -10,13 +10,13 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-public class WidgetScreen extends OverlaySupportingScreen {
+public class OverlayScreen extends OverlaySupportingScreen {
 	
 	public static <T extends Drawable & Element & Selectable> T setOverlayOrScreen(T overlay, double z, boolean restoreParent) {
 		if (MainUtil.client.currentScreen instanceof OverlaySupportingScreen screen)
 			screen.setOverlay(overlay, z);
 		else
-			MainUtil.client.setScreen(new WidgetScreen(TextInst.of(overlay.getClass().getName()), overlay, restoreParent));
+			MainUtil.client.setScreen(new OverlayScreen(TextInst.of(overlay.getClass().getName()), overlay, z, restoreParent));
 		return overlay;
 	}
 	public static <T extends Drawable & Element & Selectable> T setOverlayOrScreen(T overlay, boolean restoreParent) {
@@ -25,9 +25,9 @@ public class WidgetScreen extends OverlaySupportingScreen {
 	
 	private Screen parent;
 	
-	private <T extends Drawable & Element & Selectable> WidgetScreen(Text title, T widget, boolean restoreParent) {
+	private <T extends Drawable & Element & Selectable> OverlayScreen(Text title, T widget, double z, boolean restoreParent) {
 		super(title);
-		setOverlay(widget);
+		setOverlay(widget, z);
 		if (restoreParent)
 			parent = MainUtil.client.currentScreen;
 	}
@@ -50,9 +50,16 @@ public class WidgetScreen extends OverlaySupportingScreen {
 	}
 	
 	@Override
+	protected void init() {
+		if (parent != null)
+			parent.init(client, width, height);
+		super.init();
+	}
+	
+	@Override
 	protected void renderMain(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		super.renderBackground(matrices);
-		super.renderMain(matrices, mouseX, mouseY, delta);
+		if (parent != null)
+			parent.render(matrices, -314, -314, delta);
 	}
 	
 }

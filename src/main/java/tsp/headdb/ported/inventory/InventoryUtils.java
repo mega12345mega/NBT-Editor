@@ -10,7 +10,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientScreenHandler;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.InputOverlay;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.StringInput;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -166,9 +167,10 @@ public class InventoryUtils {
                             return;
                         }
                         if (name.equalsIgnoreCase("search")) {
-                        	new StringInputScreen(this, (text) -> {
-                        		InventoryUtils.openSearchDatabase(text);
-                        	}, (text) -> true).show("Search query");
+                        	InputOverlay.show(
+                        			TextInst.of("Search"),
+                        			StringInput.builder().withPlaceholder(TextInst.of("Query")).build(),
+                        			InventoryUtils::openSearchDatabase);
                             return;
                         }
 

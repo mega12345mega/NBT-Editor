@@ -18,4 +18,21 @@ public class IdentifierInst {
 				.get();
 	}
 	
+	public static boolean isValid(String id) {
+		try {
+			of(id);
+			return true;
+		} catch (InvalidIdentifierException e) {
+			return false;
+		}
+	}
+	public static boolean isValid(String namespace, String path) {
+		try {
+			of(namespace, path);
+			return true;
+		} catch (InvalidIdentifierException e) {
+			return false;
+		}
+	}
+	
 }

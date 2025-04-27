@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -14,6 +15,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -24,6 +27,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -33,6 +37,7 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 
 public class FormattedTextFieldWidget extends GroupWidget {
 	
@@ -194,6 +199,9 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			@Override
 			public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 				MainUtil.client.currentScreen.renderBackground(matrices);
+				MVDrawableHelper.drawCenteredTextWithShadow(matrices, MainUtil.client.textRenderer,
+						TextInst.translatable("nbteditor.formatted_text.events"),
+						x, y - 38 - MainUtil.client.textRenderer.fontHeight, -1);
 				super.render(matrices, mouseX, mouseY, delta);
 			}
 			
@@ -342,30 +350,32 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			return StyleUtil.minusFormatting(style, Style.EMPTY.withColor(base.getColor()), formatting);
 		}
 		
-		private void applyEvents(ClickEvent clickEvent, HoverEvent hoverEvent) {
+		private void applyStyleChange(UnaryOperator<Style> changer, boolean regenerateLines) {
 			int start = getSelStart();
 			int end = getSelEnd();
 			
 			if (start == end) {
 				if (cursorStyle == null)
 					cursorStyle = getStyle(start == 0 ? 0 : start - 1);
-				cursorStyle = cursorStyle.withClickEvent(clickEvent).withHoverEvent(hoverEvent);
+				cursorStyle = changer.apply(cursorStyle);
 				return;
 			}
 			
 			Style startStyle = getStyle(start);
 			Style endStyle = getStyle(end);
 			
-			setStyle(start, startStyle.withClickEvent(clickEvent).withHoverEvent(hoverEvent));
+			setStyle(start, changer.apply(startStyle));
 			for (int i = start + 1; i < end && i < styles.size(); i++) {
 				Style style = styles.get(i);
 				if (style != null)
-					styles.set(i, style.withClickEvent(clickEvent).withHoverEvent(hoverEvent));
+					styles.set(i, changer.apply(style));
 			}
 			setStyle(end, endStyle);
 			
 			markUndo();
 			onEdit("", start, 0);
+			if (regenerateLines)
+				generateLines();
 			onChange.accept(text);
 		}
 		
@@ -395,50 +405,58 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		}
 		private void showCustomColor() {
 			Style initialStyle = getInitialCustomStyle();
-			OverlaySupportingScreen.setOverlayStatic(new InputOverlay<>(new ColorSelectorWidget.ColorSelectorInput(
-					initialStyle.getColor() == null ? -1 : initialStyle.getColor().getRgb()), rgb -> {
-				int start = getSelStart();
-				int end = getSelEnd();
-				
-				if (start == end) {
-					if (cursorStyle == null)
-						cursorStyle = getStyle(start == 0 ? 0 : start - 1);
-					cursorStyle = cursorStyle.withColor(rgb);
-					return;
-				}
-				
-				Style startStyle = getStyle(start);
-				Style endStyle = getStyle(end);
-				
-				setStyle(start, startStyle.withColor(rgb));
-				for (int i = start + 1; i < end && i < styles.size(); i++) {
-					Style style = styles.get(i);
-					if (style != null)
-						styles.set(i, style.withColor(rgb));
-				}
-				setStyle(end, endStyle);
-				
-				markUndo();
-				onEdit("", start, 0);
-				generateLines();
-				onChange.accept(text);
-			}, () -> OverlaySupportingScreen.setOverlayStatic(null)));
+			InputOverlay.show(
+					TextInst.translatable("nbteditor.formatted_text.custom_color"),
+					new ColorSelectorWidget.ColorSelectorInput(
+							initialStyle.getColor() == null ? -1 : initialStyle.getColor().getRgb()),
+					rgb -> applyStyleChange(style -> style.withColor(rgb), true));
 		}
 		private void showEvents() {
 			Style initialStyle = getInitialCustomStyle();
 			OverlaySupportingScreen.setOverlayStatic(new EventEditorWidget(
-					initialStyle.getClickEvent(), initialStyle.getHoverEvent(), this::applyEvents), 200);
+					initialStyle.getClickEvent(), initialStyle.getHoverEvent(),
+					(clickEvent, hoverEvent) -> applyStyleChange(
+							style -> style.withClickEvent(clickEvent).withHoverEvent(hoverEvent), false)),
+					200);
+		}
+		private void showInsertion() {
+			Style initialStyle = getInitialCustomStyle();
+			InputOverlay.show(
+					TextInst.translatable("nbteditor.formatted_text.insertion"),
+					StringInput.builder()
+							.withDefault(initialStyle.getInsertion() == null ? "" : initialStyle.getInsertion())
+							.build(),
+					insertion -> applyStyleChange(style -> style.withInsertion(insertion.isEmpty() ? null : insertion), false));
+		}
+		private void showFont() {
+			Style initialStyle = getInitialCustomStyle();
+			InputOverlay.show(
+					TextInst.translatable("nbteditor.formatted_text.font"),
+					StringInput.builder()
+							.withDefault(initialStyle.font == null ? "" : initialStyle.font.toString())
+							.withValidator(font -> font.isEmpty() || IdentifierInst.isValid(font))
+							.withSuggestions((str, cursor) -> {
+								SuggestionsBuilder builder = new SuggestionsBuilder(str, 0);
+								for (Identifier font : MainUtil.client.fontManager.fontStorages.keySet()) {
+									String fontStr = font.toString();
+									if (fontStr.startsWith(str))
+										builder.suggest(fontStr);
+								}
+								return builder.buildFuture();
+							})
+							.build(),
+					font -> applyStyleChange(style -> style.withFont(font.isEmpty() ? null : IdentifierInst.of(font)), true));
 		}
 		
 		@Override
 		protected void renderHighlightsBelow(MatrixStack matrices, int mouseX, int mouseY, float delta) {
 			Style initialStyle = getStyle(0);
-			int start = (initialStyle.getClickEvent() != null || initialStyle.getHoverEvent() != null ? 0 : -1);
+			int start = (initialStyle.getClickEvent() != null || initialStyle.getHoverEvent() != null || initialStyle.getInsertion() != null ? 0 : -1);
 			for (int i = 0; i < styles.size(); i++) {
 				Style style = styles.get(i);
 				if (style == null)
 					continue;
-				if (style.getClickEvent() != null || style.getHoverEvent() != null) {
+				if (style.getClickEvent() != null || style.getHoverEvent() != null || style.getInsertion() != null) {
 					if (start == -1)
 						start = i;
 				} else if (start != -1) {
@@ -472,10 +490,12 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			}
 			
 			if (Screen.hasControlDown() && Screen.hasShiftDown() && !Screen.hasAltDown()) {
-				if (keyCode == GLFW.GLFW_KEY_C)
-					showCustomColor();
-				else if (keyCode == GLFW.GLFW_KEY_E)
-					showEvents();
+				switch (keyCode) {
+					case GLFW.GLFW_KEY_C -> showCustomColor();
+					case GLFW.GLFW_KEY_E -> showEvents();
+					case GLFW.GLFW_KEY_I -> showInsertion();
+					case GLFW.GLFW_KEY_F -> showFont();
+				}
 			}
 			
 			return false;
@@ -665,6 +685,9 @@ public class FormattedTextFieldWidget extends GroupWidget {
 	private int height;
 	private InternalTextFieldWidget field;
 	private ButtonDropdownWidget colors;
+	private ButtonWidget font;
+	private int lastFont;
+	private long lastFontChange;
 	
 	protected FormattedTextFieldWidget(int x, int y, int width, int height, Text text, boolean newLines, Style base, Consumer<Text> onChange) {
 		this.x = x;
@@ -707,22 +730,50 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			for (Formatting formatting : new Formatting[] {Formatting.BOLD, Formatting.ITALIC, Formatting.UNDERLINE,
 					Formatting.STRIKETHROUGH, Formatting.OBFUSCATED, Formatting.RESET}) {
 				Text btnText;
-				if (formatting == Formatting.RESET)
+				MVTooltip btnTooltip;
+				if (formatting == Formatting.RESET) {
 					btnText = TextInst.of("");
-				else
+					if (ConfigScreen.isKeybindsHidden())
+						btnTooltip = new MVTooltip(TextInst.of(formatting.getName()));
+					else {
+						btnTooltip = new MVTooltip(
+								TextInst.of(formatting.getName()),
+								TextInst.translatable("nbteditor.keybind.formatted_text.reset"));
+					}
+				} else {
 					btnText = TextInst.literal(formatting.name().substring(0, 1)).formatted(formatting);
-				addWidget(MVMisc.newButton(afterColorsX + 24 + i * 20 + (i >= 5 ? 4 + 20 + 4 : 0), y, 20, 20,
-						btnText, btn -> field.applyFormatting(formatting), new MVTooltip(TextInst.of(formatting.getName()))));
+					btnTooltip = new MVTooltip(TextInst.of(formatting.getName()));
+				}
+				addWidget(MVMisc.newButton(
+						afterColorsX + 24 + i * 20 + (formatting == Formatting.RESET ? 4 + 20 * 3 + 4 : 0), y, 20, 20,
+						btnText, btn -> field.applyFormatting(formatting), btnTooltip));
 				i++;
 			}
 			
-			addWidget(MVMisc.newButton(afterColorsX, y, 20, 20, TextInst.literal("⬛")
-					.setStyle(Style.EMPTY.withColor(0x9999C0).withFormatting(Formatting.ITALIC)), btn -> field.showCustomColor(),
-					new MVTooltip(TextInst.translatable("nbteditor.formatted_text.custom_color"))));
+			addWidget(MVMisc.newButton(afterColorsX, y, 20, 20,
+					TextInst.literal("⬛").setStyle(Style.EMPTY.withColor(0x9999C0).withFormatting(Formatting.ITALIC)),
+					btn -> field.showCustomColor(),
+					createFormatButtonTooltip("custom_color")));
 			
-			addWidget(MVMisc.newButton(afterColorsX + 24 + 5 * 20 + 4, y, 20, 20, TextInst.literal("E"), btn -> field.showEvents(),
-					new MVTooltip(TextInst.translatable("nbteditor.formatted_text.events"))));
+			addWidget(MVMisc.newButton(afterColorsX + 24 + 5 * 20 + 4, y, 20, 20,
+					TextInst.literal("E"),
+					btn -> field.showEvents(),
+					createFormatButtonTooltip("events")));
+			addWidget(MVMisc.newButton(afterColorsX + 24 + 5 * 20 + 4 + 20, y, 20, 20,
+					TextInst.literal("I"),
+					btn -> field.showInsertion(),
+					createFormatButtonTooltip("insertion")));
+			font = addWidget(MVMisc.newButton(afterColorsX + 24 + 5 * 20 + 4 + 20 * 2, y, 20, 20,
+					TextInst.literal("F"), // Gets replaced before rendering
+					btn -> field.showFont(),
+					createFormatButtonTooltip("font")));
 		}
+	}
+	private MVTooltip createFormatButtonTooltip(String name) {
+		String key = "nbteditor.formatted_text." + name;
+		if (ConfigScreen.isKeybindsHidden())
+			return new MVTooltip(key);
+		return new MVTooltip(key, "nbteditor.keybind.formatted_text." + name);
 	}
 	
 	public FormattedTextFieldWidget setChangeListener(Consumer<Text> onChange) {
@@ -796,6 +847,16 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			matrices.translate(0.0, 0.0, 1.0);
 			colors.render(matrices, mouseX, mouseY, delta);
 			matrices.pop();
+		}
+		
+		if (font != null) {
+			long time = System.currentTimeMillis();
+			if (lastFontChange < time - 200) {
+				lastFontChange = time;
+				lastFont += Math.floor(Math.random() * 2) + 1;
+				font.setMessage(TextInst.literal(lastFont % 3 + "")
+						.styled(style -> style.withFont(IdentifierInst.of("nbteditor", "fancy_f"))));
+			}
 		}
 		
 		super.render(matrices, mouseX, mouseY, delta);

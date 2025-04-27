@@ -29,10 +29,11 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.It
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.StringMenuGenerator;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.TextAreaScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.InputOverlay;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.StringInput;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.SuggestingTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
@@ -482,6 +483,9 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (getOverlay() != null)
+			return super.keyPressed(keyCode, scanCode, modifiers);
+		
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
 			close();
 			return true;
@@ -615,12 +619,17 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	
 	public void getKey(String defaultValue, Consumer<String> keyConsumer) {
-		new StringInputScreen(this, keyConsumer, str -> !str.isEmpty())
-				.suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
-						.map(ac -> ac.getSuggestions(localNBT, realPath, str, null, cursor,
-								currentGen.getElements(this, nbt).stream().map(NBTValue::getKey).toList()))
-						.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture()))
-				.show(defaultValue);
+		InputOverlay.show(
+				TextInst.translatable("nbteditor.nbt.key"),
+				StringInput.builder()
+						.withDefault(defaultValue)
+						.withValidator(str -> !str.isEmpty())
+						.withSuggestions((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
+								.map(ac -> ac.getSuggestions(localNBT, realPath, str, null, cursor,
+										currentGen.getElements(this, nbt).stream().map(NBTValue::getKey).toList()))
+								.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture()))
+						.build(),
+				keyConsumer);
 	}
 	public void getKey(Consumer<String> keyConsumer) {
 		getKey(null, keyConsumer);

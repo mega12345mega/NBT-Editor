@@ -9,8 +9,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlayScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.WidgetScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.font.TextRenderer;
@@ -21,10 +21,10 @@ import net.minecraft.util.math.BlockPos;
 public class ImportPosWidget extends GroupWidget implements InitializableOverlay<Screen> {
 	
 	public static void openImportPos(BlockPos defaultPos, Consumer<BlockPos> posConsumer) {
-		WidgetScreen.setOverlayOrScreen(new ImportPosWidget(defaultPos, optional -> {
+		OverlayScreen.setOverlayOrScreen(new ImportPosWidget(defaultPos, optional -> {
 			OverlaySupportingScreen.setOverlayStatic(null);
 			optional.ifPresent(posConsumer);
-		}), 200, true);
+		}), 500, true);
 	}
 	
 	public static record ImageToLoreOptions(Integer width, Integer height) {}
@@ -76,8 +76,7 @@ public class ImportPosWidget extends GroupWidget implements InitializableOverlay
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		if (!(MainUtil.client.currentScreen instanceof WidgetScreen))
-			MVDrawableHelper.fill(matrices, width / 2 - 102 - 16, height / 2 - 18 - 16, width / 2 + 102 + 16, height / 2 + 22 + 16, 0xC8101010);
+		MainUtil.client.currentScreen.renderBackground(matrices);
 		super.render(matrices, mouseX, mouseY, delta);
 		MVDrawableHelper.drawCenteredTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.nbt.import.pos"),
 				width / 2, height / 2 - textRenderer.fontHeight - 22, -1);

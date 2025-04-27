@@ -1,0 +1,12 @@
+{
+	"providers": [
+		{
+			"type": "bitmap",
+			"file": "nbteditor:font/fancy_f.png",
+			"ascent": 7,
+			"chars": [
+				"012"
+			]
+		}
+	]
+}
