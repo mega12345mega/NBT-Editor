@@ -347,7 +347,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			return style.withFormatting(formatting);
 		}
 		private Style withoutFormatting(Style style, Formatting formatting) {
-			return StyleUtil.minusFormatting(style, Style.EMPTY.withColor(base.getColor()), formatting);
+			return StyleUtil.minusFormatting(style, StyleUtil.RESET_STYLE.withColor(base.getColor()), formatting);
 		}
 		
 		private void applyStyleChange(UnaryOperator<Style> changer, boolean regenerateLines) {
@@ -379,6 +379,14 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			onChange.accept(text);
 		}
 		
+		private void applyColor(Formatting color, boolean shadow) {
+			if (shadow) {
+				int shadowColor = (MVMisc.scaleRgb(color.getColorValue(), 0.25) | 0xFF000000);
+				applyStyleChange(style -> style.withShadowColor(shadowColor), true);
+			} else
+				applyFormatting(color);
+		}
+		
 		public void setFormattedText(Text text) {
 			styles.clear();
 			genStyles(text, base, 0);
@@ -403,13 +411,23 @@ public class FormattedTextFieldWidget extends GroupWidget {
 					(cursorStyle == null ? getStyle(getSelStart() == 0 ? 0 : getSelStart() - 1) : cursorStyle) :
 						getStyle(getSelStart()));
 		}
-		private void showCustomColor() {
+		private void showCustomColor(boolean shadow) {
 			Style initialStyle = getInitialCustomStyle();
-			InputOverlay.show(
-					TextInst.translatable("nbteditor.formatted_text.custom_color"),
-					new ColorSelectorWidget.ColorSelectorInput(
-							initialStyle.getColor() == null ? -1 : initialStyle.getColor().getRgb()),
-					rgb -> applyStyleChange(style -> style.withColor(rgb), true));
+			int initialColor = (initialStyle.getColor() == null ?
+					(base.getColor() == null ? -1 : base.getColor().getRgb()) : initialStyle.getColor().getRgb());
+			if (shadow) {
+				int initialShadow = (initialStyle.getShadowColor() == null ?
+						(base.getShadowColor() == null ? MVMisc.scaleRgb(initialColor, 0.25) : base.getShadowColor()) : initialStyle.getShadowColor());
+				InputOverlay.show(
+						TextInst.translatable("nbteditor.formatted_text.custom_color.shadow"),
+						new ColorSelectorWidget.ColorSelectorInput(initialShadow),
+						rgb -> applyStyleChange(style -> style.withShadowColor(rgb | 0xFF000000), true));
+			} else {
+				InputOverlay.show(
+						TextInst.translatable("nbteditor.formatted_text.custom_color"),
+						new ColorSelectorWidget.ColorSelectorInput(initialColor),
+						rgb -> applyStyleChange(style -> style.withColor(rgb), true));
+			}
 		}
 		private void showEvents() {
 			Style initialStyle = getInitialCustomStyle();
@@ -473,7 +491,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			if (super.keyPressed(keyCode, scanCode, modifiers))
 				return true;
 			
-			if (Screen.hasControlDown() && !Screen.hasShiftDown() && !Screen.hasAltDown()) {
+			if (Screen.hasControlDown() && !Screen.hasShiftDown()) {
 				Formatting formatting = switch (keyCode) {
 					case GLFW.GLFW_KEY_B -> Formatting.BOLD;
 					case GLFW.GLFW_KEY_I -> Formatting.ITALIC;
@@ -489,9 +507,9 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				}
 			}
 			
-			if (Screen.hasControlDown() && Screen.hasShiftDown() && !Screen.hasAltDown()) {
+			if (Screen.hasControlDown() && Screen.hasShiftDown()) {
 				switch (keyCode) {
-					case GLFW.GLFW_KEY_C -> showCustomColor();
+					case GLFW.GLFW_KEY_C -> showCustomColor(hasShadowKeyDown());
 					case GLFW.GLFW_KEY_E -> showEvents();
 					case GLFW.GLFW_KEY_I -> showInsertion();
 					case GLFW.GLFW_KEY_F -> showFont();
@@ -665,7 +683,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		prev.height = height;
 		prev.field = InternalTextFieldWidget.create(prev.field, x, y + 24, width, height - 24, text, newLines, base, onChange);
 		prev.clearWidgets();
-		prev.genColors();
+		prev.init();
 		prev.addElement(prev.field);
 		prev.addTickable(prev.field);
 		prev.setText(text);
@@ -677,6 +695,10 @@ public class FormattedTextFieldWidget extends GroupWidget {
 	public static FormattedTextFieldWidget create(FormattedTextFieldWidget prev, int x, int y, int width, int height,
 			List<Text> lines, Style base, Consumer<List<Text>> onChange) {
 		return create(prev, x, y, width, height, TextUtil.joinLines(lines), true, base, text -> onChange.accept(TextUtil.splitText(text)));
+	}
+	
+	private static boolean hasShadowKeyDown() {
+		return StyleUtil.SHADOW_COLOR_EXISTS && Screen.hasAltDown();
 	}
 	
 	private int x;
@@ -695,20 +717,20 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		this.width = width;
 		this.height = height;
 		this.field = InternalTextFieldWidget.create(null, x, y + 24, width, height - 24, text, newLines, base, onChange);
-		genColors();
+		init();
 		addElement(field);
 		addTickable(field);
 	}
-	private void genColors() {
+	private void init() {
 		if (width < 16 * 20 + (ConfigScreen.isHideFormatButtons() ? 0 : 20 + 4 + 5 * 20 + (4 + 20) * 2)) {
 			colors = addElement(new ButtonDropdownWidget(x, y, 20, 20, TextInst.literal("⬛").formatted(Formatting.AQUA), 20, 20));
 			for (Formatting formatting : Formatting.values()) {
 				if (!formatting.isColor())
 					break;
 				colors.addButton(TextInst.literal("⬛").formatted(formatting), btn -> {
-					field.applyFormatting(formatting);
+					field.applyColor(formatting, hasShadowKeyDown());
 					colors.setOpen(false);
-				}, new MVTooltip(TextInst.of(formatting.getName())));
+				}, createColorButtonTooltip(formatting));
 			}
 			colors.build();
 		} else {
@@ -718,7 +740,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				if (!formatting.isColor())
 					break;
 				addWidget(MVMisc.newButton(x + i * 20, y, 20, 20, TextInst.literal("⬛").formatted(formatting),
-						btn -> field.applyFormatting(formatting), new MVTooltip(TextInst.of(formatting.getName()))));
+						btn -> field.applyColor(formatting, hasShadowKeyDown()), createColorButtonTooltip(formatting)));
 				i++;
 			}
 		}
@@ -752,28 +774,37 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			
 			addWidget(MVMisc.newButton(afterColorsX, y, 20, 20,
 					TextInst.literal("⬛").setStyle(Style.EMPTY.withColor(0x9999C0).withFormatting(Formatting.ITALIC)),
-					btn -> field.showCustomColor(),
-					createFormatButtonTooltip("custom_color")));
+					btn -> field.showCustomColor(hasShadowKeyDown()),
+					createFormatButtonTooltip("custom_color", true)));
 			
 			addWidget(MVMisc.newButton(afterColorsX + 24 + 5 * 20 + 4, y, 20, 20,
 					TextInst.literal("E"),
 					btn -> field.showEvents(),
-					createFormatButtonTooltip("events")));
+					createFormatButtonTooltip("events", false)));
 			addWidget(MVMisc.newButton(afterColorsX + 24 + 5 * 20 + 4 + 20, y, 20, 20,
 					TextInst.literal("I"),
 					btn -> field.showInsertion(),
-					createFormatButtonTooltip("insertion")));
+					createFormatButtonTooltip("insertion", false)));
 			font = addWidget(MVMisc.newButton(afterColorsX + 24 + 5 * 20 + 4 + 20 * 2, y, 20, 20,
 					TextInst.literal("F"), // Gets replaced before rendering
 					btn -> field.showFont(),
-					createFormatButtonTooltip("font")));
+					createFormatButtonTooltip("font", false)));
 		}
 	}
-	private MVTooltip createFormatButtonTooltip(String name) {
-		String key = "nbteditor.formatted_text." + name;
+	private MVTooltip createColorButtonTooltip(Formatting color) {
+		Text name = TextInst.of(color.getName());
+		if (ConfigScreen.isKeybindsHidden() || !StyleUtil.SHADOW_COLOR_EXISTS)
+			return new MVTooltip(name);
+		return new MVTooltip(name, TextInst.translatable("nbteditor.keybind.formatted_text.shadow"));
+	}
+	private MVTooltip createFormatButtonTooltip(String name, boolean color) {
+		String nameKey = "nbteditor.formatted_text." + name;
 		if (ConfigScreen.isKeybindsHidden())
-			return new MVTooltip(key);
-		return new MVTooltip(key, "nbteditor.keybind.formatted_text." + name);
+			return new MVTooltip(nameKey);
+		String keybindKey = "nbteditor.keybind.formatted_text." + name;
+		if (color && StyleUtil.SHADOW_COLOR_EXISTS)
+			return new MVTooltip(nameKey, keybindKey, "nbteditor.keybind.formatted_text.shadow");
+		return new MVTooltip(nameKey, keybindKey);
 	}
 	
 	public FormattedTextFieldWidget setChangeListener(Consumer<Text> onChange) {
