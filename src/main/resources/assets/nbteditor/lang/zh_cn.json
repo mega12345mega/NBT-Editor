@@ -60,7 +60,9 @@
 	"nbteditor.nbt.cut": "剪切",
 	"nbteditor.nbt.paste": "粘贴",
 	"nbteditor.nbt.rename": "重命名",
-	
+
+	"nbteditor.nbt.key": "组件名称",
+
 	"nbteditor.nbt.overwrite.title": "该名称已存在！",
 	"nbteditor.nbt.overwrite.desc": "是否要覆盖它吗？",
 	"nbteditor.nbt.overwrite.yes": "覆盖",
@@ -202,14 +204,15 @@
 	"nbteditor.hide_flags.tooltip": "工具提示",
 	"nbteditor.hide_flags.stored_enchantments": "储存的附魔",
 	"nbteditor.hide_flags.trim": "盔甲纹饰",
-	
+	"nbteditor.hide_flags.jukebox_playable": "可播放的点唱机",
+
 	"nbteditor.item_size.uncompressed": "§6NBT 体积：%s",
 	"nbteditor.item_size.compressed": "§6NBT 体积（压缩后）：%s",
-	"nbteditor.keybind.enchant": "按住 §6§lCTRL§r§6 点击来附魔",
-	"nbteditor.keybind.edit": "按 §6§l空格§r§6 来编辑",
-	"nbteditor.keybind.container": "按 §6§lCTRL + 空格§r§6 来打开容器",
-	"nbteditor.keybind.factory": "按 §6§lSHIFT + 空格§r§6 打开高级编辑器",
-	"nbteditor.keybind.delete": "按 §6§lDelete§r§6 来删除!",
+	"nbteditor.keybind.enchant": "按住 §6§lCTRL§r§6 §r点击来附魔",
+	"nbteditor.keybind.edit": "按 §6§l空格§r§6 §r来编辑",
+	"nbteditor.keybind.container": "按 §6§lCTRL + 空格§r§6 §r来打开容器",
+	"nbteditor.keybind.factory": "按 §6§lSHIFT + 空格§r§6 §r打开高级编辑器",
+	"nbteditor.keybind.delete": "按 §6§lDelete§r§6 §r来删除!",
 	"nbteditor.keybind.page.up": "§6§lPAGE-UP",
 	"nbteditor.keybind.page.down": "§6§lPAGE-DOWN",
 	"nbteditor.keybind.page.shift": "§6§lSHIFT + ",
@@ -217,7 +220,13 @@
 	"nbteditor.keybind.page.prev": "§6上一页",
 	"nbteditor.keybind.page.next_jump": "\n§6下一非空页",
 	"nbteditor.keybind.page.prev_jump": "\n§6上一非空页",
-	
+	"nbteditor.keybind.formatted_text.shadow": "按 §6§lAlt§r§6 §r设置阴影颜色！",
+	"nbteditor.keybind.formatted_text.custom_color": "按 §6§lCtrl + Shift + C",
+	"nbteditor.keybind.formatted_text.events": "按 §6§lCtrl + Shift + E",
+	"nbteditor.keybind.formatted_text.insertion": "按 §6§lCtrl + Shift + I",
+	"nbteditor.keybind.formatted_text.font": "按 §6§lCtrl + Shift + F",
+	"nbteditor.keybind.formatted_text.reset": "按 §6§lCtrl + \\",
+
 	"nbteditor.skull.invalid_player_name": "§c该玩家名称无效!",
 	
 	"nbteditor.unbind_skull.no_textures": "该玩家模型未加载任何贴图",
@@ -240,8 +249,8 @@
 	"nbteditor.attributes.amount.max.desc": "最大",
 	"nbteditor.attributes.amount.min": "最小",
 	"nbteditor.attributes.amount.min.desc": "最小",
-	"nbteditor.attributes.amount.infinity": "∞",
-	"nbteditor.attributes.amount.infinity.desc": "无穷",
+	"nbteditor.attributes.amount.infinity": "+∞",
+	"nbteditor.attributes.amount.infinity.desc": "正无穷",
 	"nbteditor.attributes.amount.negative_infinity": "-∞",
 	"nbteditor.attributes.amount.negative_infinity.desc": "负无穷",
 	"nbteditor.attributes.slot": "生效槽位",
@@ -290,8 +299,8 @@
 	"nbteditor.book.page": "页码：%d/%d",
 	"nbteditor.book.back": "上",
 	"nbteditor.book.forward": "下",
-	"nbteditor.book.add": "§a添",
-	"nbteditor.book.remove": "§c删",
+	"nbteditor.book.add": "§a添加",
+	"nbteditor.book.remove": "§c删除",
 	"nbteditor.book.preview": "成书预览",
 	"nbteditor.book.preview.icon": "览",
 	"nbteditor.book.preview.click.title": "§l点击行为",
@@ -317,10 +326,12 @@
 	"nbteditor.multi_line_text.regex.on": "开",
 	"nbteditor.multi_line_text.regex.off": "关",
 	"nbteditor.formatted_text.custom_color": "自定义颜色",
+	"nbteditor.formatted_text.custom_color.shadow": "自定义阴影颜色",
 	"nbteditor.formatted_text.events": "悬浮和点击行为",
 	"nbteditor.formatted_text.click_event_value": "点击行为",
 	"nbteditor.formatted_text.hover_event_value": "悬浮行为",
-	"nbteditor.formatted_text.tip": "按 CTRL+SHIFT+C 自定义颜色，按 CTRL+SHIFT+E 自定义事件",
+	"nbteditor.formatted_text.insertion": "嵌入文本",
+	"nbteditor.formatted_text.font": "特殊字体",
 	"nbteditor.color_selector.hue": "Hue 色环值：%d°",
 	
 	"nbteditor.config": "NBT Editor 设置",
@@ -447,17 +458,19 @@
 	
 	
 	"nbteditor.configurable.list.move": "移动",
+	"nbteditor.configurable.list.move.index": "索引",
 	"nbteditor.configurable.list.duplicate": "复制",
 	"nbteditor.configurable.list.duplicate.any_amount": "按住 SHIFT 使用任意值",
+	"nbteditor.configurable.list.duplicate.amount": "复制数量",
 	"nbteditor.configurable.list.remove": "移除",
 	
 	"nbteditor.effect_list_arg_type.expected.space": "展开空格",
 	"nbteditor.effect_list_arg_type.expected.colon": "展开冒号（:）",
 	"nbteditor.effect_list_arg_type.invalid.arg": "参数错误",
 	"nbteditor.effect_list_arg_type.invalid.value": "值错误",
-	
-	"nbteditor.fancy_text_arg_type.invalid.event_type": "错误的鼠标悬浮或点击事件",
-	"nbteditor.fancy_text_arg_type.invalid.entity": "该项目不存在",
+
+	"nbteditor.fancy_text_arg_type.custom_color": "自定义颜色 (#RRGGBB;)",
+	"nbteditor.fancy_text_arg_type.shadow_color": "阴影颜色 (&_<颜色>)",
 	"nbteditor.fancy_text_arg_type.stringify_unsupported": "§c该文本包含无法被编辑器复现的格式或事件",
 	
 	"nbteditor.chat_length_warning_1": "警告：对于服务端命令，",
