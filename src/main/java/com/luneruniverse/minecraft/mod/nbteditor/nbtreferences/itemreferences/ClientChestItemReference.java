@@ -23,6 +23,9 @@ public class ClientChestItemReference implements ItemReference {
 		
 		this.save = new SaveQueue<>("ClientChest/" + (page + 1) + "/" + slot, toSave -> {
 			ClientChestHelper.getPage(page, PageLoadLevel.DYNAMIC_ITEMS).join().ifPresent(pageData -> {
+				if (MainUtil.client.currentScreen instanceof ClientChestScreen screen && ClientChestScreen.PAGE == page)
+					screen.getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
+				
 				pageData.getItemsOrThrow()[slot] = toSave;
 				pageData.dynamicItems().remove(slot);
 				ClientChestHelper.setPage(page, pageData.items(), pageData.dynamicItems()).join();

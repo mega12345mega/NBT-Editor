@@ -12,6 +12,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.client.render.item.ItemRenderState.Glint;
 import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 
 @Mixin(ItemRenderState.LayerRenderState.class)
@@ -26,7 +27,8 @@ public class ItemRenderStateLayerRenderStateMixin {
 		if (item == null)
 			return provider;
 		
-		if (!MixinLink.ENCHANT_GLINT_FIX.contains(item) && !ConfigScreen.isEnchantGlintFix())
+		if (!(item.getItem() instanceof BlockItem) ||
+				(!MixinLink.ENCHANT_GLINT_FIX.contains(item) && !ConfigScreen.isEnchantGlintFix()))
 			return provider;
 		return layer -> ItemRenderer.getItemGlintConsumer(provider, layer, true, glint != Glint.NONE);
 	}

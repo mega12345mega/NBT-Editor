@@ -28,7 +28,6 @@ public class ContainerItemReference<L extends LocalNBT> implements ItemReference
 			contents[slot] = toSave;
 			ContainerIO.write(containerValue, contents);
 			
-			// The recursive nature causes parent containers to also write items to the screen, hence the check
 			if (MainUtil.client.currentScreen instanceof ContainerScreen screen && screen.getReference() == container)
 				screen.getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
 			

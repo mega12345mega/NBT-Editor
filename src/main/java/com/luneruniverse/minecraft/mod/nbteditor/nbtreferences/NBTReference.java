@@ -107,6 +107,7 @@ public interface NBTReference<T extends LocalNBT> {
 	}
 	public default void escapeParent(Optional<ItemStack> cursor) {
 		cursor.ifPresent(MainUtil::setInventoryCursorStack);
+		MainUtil.client.player.currentScreenHandler = MainUtil.client.player.playerScreenHandler;
 		MainUtil.client.setScreen(null);
 	}
 	public default void clearParentCursor() {}
