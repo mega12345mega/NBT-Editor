@@ -204,7 +204,7 @@
 	"nbteditor.hide_flags.tooltip": "工具提示",
 	"nbteditor.hide_flags.stored_enchantments": "储存的附魔",
 	"nbteditor.hide_flags.trim": "盔甲纹饰",
-	"nbteditor.hide_flags.jukebox_playable": "可播放的点唱机",
+	"nbteditor.hide_flags.jukebox_playable": "播放的唱片机",
 
 	"nbteditor.item_size.uncompressed": "§6NBT 体积：%s",
 	"nbteditor.item_size.compressed": "§6NBT 体积（压缩后）：%s",
