@@ -61,6 +61,8 @@
 	"nbteditor.nbt.paste": "貼上",
 	"nbteditor.nbt.rename": "重新命名",
 	
+	"nbteditor.nbt.key": "組件名稱",
+	
 	"nbteditor.nbt.overwrite.title": "該名稱已存在！",
 	"nbteditor.nbt.overwrite.desc": "是否要覆寫它？",
 	"nbteditor.nbt.overwrite.yes": "覆寫",
@@ -202,6 +204,7 @@
 	"nbteditor.hide_flags.tooltip": "工具提示",
 	"nbteditor.hide_flags.stored_enchantments": "儲存的附魔",
 	"nbteditor.hide_flags.trim": "盔甲微調",
+	"nbteditor.hide_flags.jukebox_playable": "播放的麯目",
 	
 	"nbteditor.item_size.uncompressed": "§6NBT 大小：%s",
 	"nbteditor.item_size.compressed": "§6NBT 大小（已壓縮）：%s",
@@ -217,6 +220,12 @@
 	"nbteditor.keybind.page.prev": "§6 到上一頁！",
 	"nbteditor.keybind.page.next_jump": "\n§6以跳轉到下一頁！",
 	"nbteditor.keybind.page.prev_jump": "\n§6以跳轉到上一頁！",
+	"nbteditor.keybind.formatted_text.shadow": "按 §6§lAlt§r§6 §r設寘隂影顔色！",
+	"nbteditor.keybind.formatted_text.custom_color": "按 §6§lCtrl + Shift + C",
+	"nbteditor.keybind.formatted_text.events": "按 §6§lCtrl + Shift + E",
+	"nbteditor.keybind.formatted_text.insertion": "按 §6§lCtrl + Shift + I",
+	"nbteditor.keybind.formatted_text.font": "按 §6§lCtrl + Shift + F",
+	"nbteditor.keybind.formatted_text.reset": "按 §6§lCtrl + \\",
 	
 	"nbteditor.skull.invalid_player_name": "§c該玩家名稱無效！",
 	
@@ -317,11 +326,13 @@
 	"nbteditor.multi_line_text.regex.on": "☑",
 	"nbteditor.multi_line_text.regex.off": "☐",
 	"nbteditor.formatted_text.custom_color": "自訂顏色",
+	"nbteditor.formatted_text.custom_color.shadow": "自定义阴影颜色",
 	"nbteditor.formatted_text.events": "點擊和懸浮事件",
 	"nbteditor.formatted_text.click_event_value": "點擊事件值",
 	"nbteditor.formatted_text.hover_event_value": "懸浮事件值",
-	"nbteditor.formatted_text.tip": "使用 Ctrl+Shift+C 設定自訂顏色，使用 Ctrl+Shift+E 設定事件",
-	"nbteditor.color_selector.hue": "色調：%d°",
+	"nbteditor.formatted_text.insertion": "嵌入文本",
+	"nbteditor.formatted_text.font": "特殊字體",
+	"nbteditor.color_selector.hue": "Hue 色环值：%d°",
 	
 	"nbteditor.config": "NBT 編輯器設定",
 	"nbteditor.config.category.mc": "Minecraft 調整",
@@ -447,8 +458,10 @@
 	
 	
 	"nbteditor.configurable.list.move": "移動",
+	"nbteditor.configurable.list.move.index": "索引",
 	"nbteditor.configurable.list.duplicate": "複製",
 	"nbteditor.configurable.list.duplicate.any_amount": "按住 Shift 鍵以複製任意數量",
+	"nbteditor.configurable.list.duplicate.amount": "復製數量",
 	"nbteditor.configurable.list.remove": "移除",
 	
 	"nbteditor.effect_list_arg_type.expected.space": "應為空格",
@@ -456,8 +469,8 @@
 	"nbteditor.effect_list_arg_type.invalid.arg": "無效的引數",
 	"nbteditor.effect_list_arg_type.invalid.value": "無效的值",
 	
-	"nbteditor.fancy_text_arg_type.invalid.event_type": "無效的點擊或懸浮事件",
-	"nbteditor.fancy_text_arg_type.invalid.entity": "該實體不存在",
+	"nbteditor.fancy_text_arg_type.custom_color": "自定義顔色 (#RRGGBB;)",
+	"nbteditor.fancy_text_arg_type.shadow_color": "隂影顔色 (&_<颜色>)",
 	"nbteditor.fancy_text_arg_type.stringify_unsupported": "§c此文字包含無法完全重新建立的懸浮事件或格式",
 	
 	"nbteditor.chat_length_warning_1": "警告：文字將會被截斷為",
@@ -574,13 +587,13 @@
 	"nbteditor.credits_5": "[LINK] https://www.spigotmc.org/resources/free-headdb-head-menu.84967/",
 	"nbteditor.credits_6": "§7移植到用戶端 Fabric 版本由 mega12345mega 製作",
 	"nbteditor.credits_7": "",
-	"nbteditor.credits_8": "§6zh_cn: hyplant, Clexus",
+	"nbteditor.credits_8": "§6zh_cn: hyplant, Clexus, GTedd",
 	"nbteditor.credits_9": "§6pl_pl: Xantrisse",
 	"nbteditor.credits_10": "§6ru_ru: TheFaceJD",
 	"nbteditor.credits_11": "§6fr_fr: Darukshock",
 	"nbteditor.credits_12": "§6he_il: inon13, RedVortexDev",
 	"nbteditor.credits_13": "§6cs_cz: Kulihrasek1101",
-	"nbteditor.credits_14": "§6zh_tw: dirtTW, Axolotl1000",
+	"nbteditor.credits_14": "§6zh_tw: dirtTW, Axolotl1000, GTedd",
 	
 	
 	
