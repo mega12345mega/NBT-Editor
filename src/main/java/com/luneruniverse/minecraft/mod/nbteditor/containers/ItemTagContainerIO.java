@@ -61,4 +61,9 @@ public class ItemTagContainerIO implements ItemContainerIO {
 		return output;
 	}
 	
+	@Override
+	public int getWrittenItemSlotIndex(ItemStack container, ItemStack[] contents, int slot) {
+		return nbtIO.getWrittenNBTSlotIndex(getNBT(container), contents, slot, SourceContainerType.ITEM);
+	}
+	
 }

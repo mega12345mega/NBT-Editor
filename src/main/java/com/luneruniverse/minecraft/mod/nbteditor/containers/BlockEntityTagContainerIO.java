@@ -41,4 +41,9 @@ public class BlockEntityTagContainerIO extends ItemTagContainerIO implements Blo
 		return output;
 	}
 	
+	@Override
+	public int getWrittenBlockSlotIndex(LocalBlock container, ItemStack[] contents, int slot) {
+		return blockNbtIO.getWrittenNBTSlotIndex(getNBT(container), contents, slot, SourceContainerType.BLOCK);
+	}
+	
 }

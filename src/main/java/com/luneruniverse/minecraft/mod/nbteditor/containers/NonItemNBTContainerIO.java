@@ -15,6 +15,9 @@ public interface NonItemNBTContainerIO {
 	}
 	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source);
 	public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source);
+	public default int getWrittenNBTSlotIndex(NbtCompound container, ItemStack[] contents, int slot, SourceContainerType source) {
+		return slot;
+	}
 	
 	public default NBTContainerIO withItemSupport(String defaultEntityId) {
 		return new NBTContainerIO() {
@@ -33,6 +36,10 @@ public interface NonItemNBTContainerIO {
 			@Override
 			public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
 				return NonItemNBTContainerIO.this.writeNBT(container, contents, source);
+			}
+			@Override
+			public int getWrittenNBTSlotIndex(NbtCompound container, ItemStack[] contents, int slot, SourceContainerType source) {
+				return NonItemNBTContainerIO.this.getWrittenNBTSlotIndex(container, contents, slot, source);
 			}
 			
 			@Override

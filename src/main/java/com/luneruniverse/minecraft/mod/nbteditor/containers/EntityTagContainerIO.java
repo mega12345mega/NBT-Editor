@@ -41,4 +41,9 @@ public class EntityTagContainerIO extends ItemTagContainerIO implements EntityCo
 		return output;
 	}
 	
+	@Override
+	public int getWrittenEntitySlotIndex(LocalEntity container, ItemStack[] contents, int slot) {
+		return entityNbtIO.getWrittenNBTSlotIndex(getNBT(container), contents, slot, SourceContainerType.ENTITY);
+	}
+	
 }

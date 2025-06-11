@@ -62,4 +62,25 @@ public class ConcatNonItemNBTContainerIO implements NonItemNBTContainerIO {
 		return total;
 	}
 	
+	@Override
+	public int getWrittenNBTSlotIndex(NbtCompound container, ItemStack[] contents, int slot, SourceContainerType source) {
+		NbtCompound tempContainer = container.copy();
+		
+		int total = 0;
+		for (NonItemNBTContainerIO nbtIO : nbtIOs) {
+			int numWritten = nbtIO.writeNBT(tempContainer, contents, source);
+			if (slot < total + numWritten)
+				return nbtIO.getWrittenNBTSlotIndex(container, contents, slot - total, source) + total;
+			if (numWritten >= contents.length)
+				contents = new ItemStack[0];
+			else {
+				ItemStack[] temp = new ItemStack[contents.length - numWritten];
+				System.arraycopy(contents, numWritten, temp, 0, temp.length);
+				contents = temp;
+			}
+			total += numWritten;
+		}
+		throw new IllegalArgumentException("Slot is never written: " + slot);
+	}
+	
 }

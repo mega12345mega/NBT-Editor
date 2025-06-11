@@ -18,4 +18,7 @@ public interface EntityContainerIO {
 	}
 	public ItemStack[] readEntity(LocalEntity container);
 	public int writeEntity(LocalEntity container, ItemStack[] contents);
+	public default int getWrittenEntitySlotIndex(LocalEntity container, ItemStack[] contents, int slot) {
+		return slot;
+	}
 }

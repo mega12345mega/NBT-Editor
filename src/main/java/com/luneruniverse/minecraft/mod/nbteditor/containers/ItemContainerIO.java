@@ -16,4 +16,7 @@ public interface ItemContainerIO {
 	}
 	public ItemStack[] readItem(ItemStack container);
 	public int writeItem(ItemStack container, ItemStack[] contents);
+	public default int getWrittenItemSlotIndex(ItemStack container, ItemStack[] contents, int slot) {
+		return slot;
+	}
 }

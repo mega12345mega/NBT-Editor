@@ -9,6 +9,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawable;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVElement;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 
@@ -25,7 +26,14 @@ public class CreativeTabWidget implements MVDrawable, MVElement {
 	public static void addCreativeTabs(Screen screen) {
 		List<CreativeTabWidget.CreativeTabData> tabs = TABS.stream().filter(tab -> tab.whenToShow().test(screen)).toList();
 		if (!tabs.isEmpty()) {
-			GroupWidget group = new GroupWidget();
+			GroupWidget group = new GroupWidget() {
+				@Override
+				public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+					MVTooltip.setOneTooltip(true, false);
+					super.render(matrices, mouseX, mouseY, delta);
+					MVTooltip.renderOneTooltip(matrices, mouseX, mouseY);
+				}
+			};
 			for (int i = 0; i < tabs.size(); i++) {
 				CreativeTabWidget.CreativeTabData tab = tabs.get(i);
 				Point pos = ConfigScreen.getCreativeTabsPos().position(i, tabs.size(), screen.width, screen.height);
@@ -67,6 +75,7 @@ public class CreativeTabWidget implements MVDrawable, MVElement {
 	private final int y;
 	private final ItemStack item;
 	private final Runnable onClick;
+	private final MVTooltip tooltip;
 	
 	public CreativeTabWidget(boolean bottom, int x, int y, ItemStack item, Runnable onClick) {
 		this.bottom = bottom;
@@ -74,6 +83,7 @@ public class CreativeTabWidget implements MVDrawable, MVElement {
 		this.y = y;
 		this.item = item;
 		this.onClick = onClick;
+		this.tooltip = new MVTooltip(item.getName());
 	}
 	
 	@Override
@@ -87,7 +97,7 @@ public class CreativeTabWidget implements MVDrawable, MVElement {
 		MVDrawableHelper.renderItem(matrices, 100.0F, false, item, x + xOffset, y + (bottom ? 5 : 11));
 		
 		if (isMouseOver(mouseX, mouseY))
-			MVDrawableHelper.renderTooltip(matrices, item.getName(), mouseX, mouseY);
+			tooltip.render(matrices, mouseX, mouseY);
 	}
 	
 	@Override

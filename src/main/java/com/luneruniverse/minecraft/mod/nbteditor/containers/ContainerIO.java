@@ -14,7 +14,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.TagNames;
@@ -78,10 +77,15 @@ public class ContainerIO {
 	private static final Function<EntityType<?>, EntityTagContainerIO> ITEM_FRAME_IO = entity -> new EntityTagContainerIO(new SpecificItemsContainerIO("Item").withItemSupport(entity));
 	private static final ItemContainerIO BUNDLE_IO = ItemContainerIO.forNBTIO(new DynamicSizeContainerIO(TagNames.BUNDLE_CONTENTS, 27).withItemSupport((String) null));
 	private static final BlockEntityTagContainerIO CHISELED_BOOKSHELF_IO = new ChiseledBookshelfContainerIO();
-	private static final BlockEntityTagContainerIO SUSPICIOUS_SAND_IO = new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item").withItemSupport(BlockEntityType.BRUSHABLE_BLOCK));
-	private static final BlockEntityTagContainerIO DECORATED_POT_IO = (NBTManagers.COMPONENTS_EXIST ?
-			new BlockEntityTagContainerIO(new ConstSizeContainerIO(1), new SpecificItemsContainerIO("item")) :
-				new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item").withItemSupport(BlockEntityType.DECORATED_POT)));
+	private static final BlockEntityTagContainerIO SUSPICIOUS_SAND_IO = Version.<BlockEntityTagContainerIO>newSwitch()
+			.range("1.20.0", null, () -> new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item").withItemSupport(BlockEntityType.BRUSHABLE_BLOCK)))
+			.range(null, "1.19.4", () -> null)
+			.get();
+	private static final BlockEntityTagContainerIO DECORATED_POT_IO = Version.<BlockEntityTagContainerIO>newSwitch()
+			.range("1.20.5", null, () -> new BlockEntityTagContainerIO(new ConstSizeContainerIO(1), new SpecificItemsContainerIO("item")))
+			.range("1.20.0", "1.20.4", () -> new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item").withItemSupport(BlockEntityType.DECORATED_POT)))
+			.range(null, "1.19.4", () -> null)
+			.get();
 	private static final BlockEntityTagContainerIO CRAFTER_IO = new BlockEntityTagContainerIO(new ConstSizeContainerIO(9));
 	private static final ItemContainerIO SPAWN_EGG_IO = new SpawnEggContainerIO();
 	private static final Function<EntityType<?>, EntityTagContainerIO> ARMOR_HANDS_IO = entity -> new EntityTagContainerIO(new ArmorHandsContainerIO().withItemSupport(entity));
@@ -203,6 +207,9 @@ public class ContainerIO {
 	public static int write(ItemStack container, ItemStack[] contents) {
 		return ITEM_IO.get(container.getItem()).writeItem(container, contents);
 	}
+	public static int getWrittenSlotIndex(ItemStack container, ItemStack[] contents, int slot) {
+		return ITEM_IO.get(container.getItem()).getWrittenItemSlotIndex(container, contents, slot);
+	}
 	
 	public static int getMaxSize(LocalNBT nbt) {
 		if (nbt instanceof LocalItem item) {
@@ -257,6 +264,15 @@ public class ContainerIO {
 			return BLOCK_IO.get(block.getBlock()).writeBlock(block, contents);
 		if (container instanceof LocalEntity entity)
 			return ENTITY_IO.get(entity.getEntityType()).writeEntity(entity, contents);
+		throw new IllegalArgumentException("Not a container!");
+	}
+	public static int getWrittenSlotIndex(LocalNBT container, ItemStack[] contents, int slot) {
+		if (container instanceof LocalItem item)
+			return ITEM_IO.get(item.getItemType()).getWrittenItemSlotIndex(item.getEditableItem(), contents, slot);
+		if (container instanceof LocalBlock block)
+			return BLOCK_IO.get(block.getBlock()).getWrittenBlockSlotIndex(block, contents, slot);
+		if (container instanceof LocalEntity entity)
+			return ENTITY_IO.get(entity.getEntityType()).getWrittenEntitySlotIndex(entity, contents, slot);
 		throw new IllegalArgumentException("Not a container!");
 	}
 	

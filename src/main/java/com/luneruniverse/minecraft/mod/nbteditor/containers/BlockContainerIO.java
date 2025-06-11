@@ -18,4 +18,7 @@ public interface BlockContainerIO {
 	}
 	public ItemStack[] readBlock(LocalBlock container);
 	public int writeBlock(LocalBlock container, ItemStack[] contents);
+	public default int getWrittenBlockSlotIndex(LocalBlock container, ItemStack[] contents, int slot) {
+		return slot;
+	}
 }

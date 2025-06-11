@@ -154,13 +154,19 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 				if (handleKeybind(keyCode, focusedSlot,
 						HandledScreenItemReferenceParent.create(
 								cursor -> show(ref, cursor), () -> handler.setCursorStack(ItemStack.EMPTY)),
-						slot -> new ContainerItemReference<>(ref, slot.getIndex()), handler.getCursorStack())) {
+						slot -> getContainerRef(slot.getIndex()), handler.getCursorStack())) {
 					return true;
 				}
 			}
 		}
 		
 		return super.keyPressed(keyCode, scanCode, modifiers);
+	}
+	private ContainerItemReference<L> getContainerRef(int slot) {
+		ItemStack[] contents = new ItemStack[this.handler.getInventory().size()];
+		for (int i = 0; i < contents.length; i++)
+			contents[i] = this.handler.getInventory().getStack(i);
+		return new ContainerItemReference<>(ref, ContainerIO.getWrittenSlotIndex(localNBT, contents, slot));
 	}
 	
 	@Override
