@@ -67,11 +67,6 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
-	withSourcesJar()
-	
 	sourceCompatibility = JavaVersion.VERSION_16
 	targetCompatibility = JavaVersion.VERSION_16
 }
@@ -129,6 +124,10 @@ jar {
 	dependsOn mergeRefmapJson
 }
 
+def getGitHash() {
+	return "git rev-parse --verify --short HEAD".execute().text.trim()
+}
+
 task mergeDevLibs(type: Jar) {
 	dependsOn remapJar
 	dependsOn ":nbteditor_1.17:jar"
@@ -139,12 +138,7 @@ task mergeDevLibs(type: Jar) {
 		include "**/*.class"
 	}
 	
-	archiveFile.set(file("${buildDir}/devlibs/temp.jar"))
-	
-	doLast {
-		jar.archiveFile.get().asFile.delete()
-		archiveFile.get().asFile.renameTo(jar.archiveFile.get().asFile)
-	}
+	archiveFile.set(file("${buildDir}/devlibs/nbteditor-${project.mod_version}-${getGitHash()}-dev.jar"))
 }
 
 task mergeLibs(type: Jar) {
@@ -157,12 +151,7 @@ task mergeLibs(type: Jar) {
 		include "**/*.class"
 	}
 	
-	archiveFile.set(file("${buildDir}/libs/temp.jar"))
-	
-	doLast {
-		remapJar.archiveFile.get().asFile.delete()
-		archiveFile.get().asFile.renameTo(remapJar.archiveFile.get().asFile)
-	}
+	archiveFile.set(file("${buildDir}/libs/nbteditor-${project.mod_version}-${getGitHash()}.jar"))
 }
 
 build.dependsOn mergeDevLibs, mergeLibs

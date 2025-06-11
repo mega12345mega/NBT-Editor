@@ -28,5 +28,5 @@ jobs:
         with:
           name: Artifacts
           path: |
-            build/libs/
-            build/devlibs/
+            build/libs/nbteditor-*-*.jar
+            build/devlibs/nbteditor-*-*-dev.jar
