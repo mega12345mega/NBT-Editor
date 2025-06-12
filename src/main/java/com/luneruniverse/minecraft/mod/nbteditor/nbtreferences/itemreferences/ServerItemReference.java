@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetSlotC2SPacket;
@@ -35,6 +36,11 @@ public class ServerItemReference extends HandledScreenItemReference {
 	
 	public int getSlot() {
 		return slot;
+	}
+	
+	@Override
+	public boolean exists() {
+		return !MixinLink.CLOSED_SERVER_HANDLED_SCREENS.containsKey(screen);
 	}
 	
 	@Override

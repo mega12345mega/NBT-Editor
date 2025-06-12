@@ -29,6 +29,7 @@ public class GetLostItemCommand extends ClientCommand {
 		if (ItemLostCallback.EVENT.invoker().onItemLost(item) == ActionResult.FAIL)
 			return;
 		LOST_ITEM = new SingleDynamicItem(item);
+		addToHistory(item);
 		MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.get.lost_item").append(TextInst.literal("§6/get lostitem")
 				.styled(style -> style.withClickEvent(new ClickEvent(Action.RUN_COMMAND, "/get lostitem"))
 						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.translatable("nbteditor.get.lost_item.hover"))))), false);

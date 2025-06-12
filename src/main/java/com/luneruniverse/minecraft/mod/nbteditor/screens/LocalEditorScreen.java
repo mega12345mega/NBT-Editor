@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
@@ -18,6 +19,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.AlertWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -176,12 +178,21 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		return saved;
 	}
 	protected boolean save() {
-		savedLocalNBT = LocalNBT.copy(localNBT);
-		saveBtn.setMessage(TextInst.translatable("nbteditor.editor.saving"));
-		setSaved(true);
-		ref.saveLocalNBT(savedLocalNBT, () -> {
-			saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
-		});
+		if (ref.exists()) {
+			savedLocalNBT = LocalNBT.copy(localNBT);
+			saveBtn.setMessage(TextInst.translatable("nbteditor.editor.saving"));
+			setSaved(true);
+			ref.saveLocalNBT(savedLocalNBT, () -> {
+				saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
+			});
+		} else {
+			localNBT.toItem().ifPresentOrElse(item -> {
+				savedLocalNBT = LocalNBT.copy(localNBT);
+				GetLostItemCommand.loseItem(item);
+				setSaved(true);
+				saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
+			}, () -> setOverlay(new AlertWidget(() -> setOverlay(null), TextInst.translatable("nbteditor.editor.ref_broken")), 500));
+		}
 		return true;
 	}
 	protected void checkSave() {

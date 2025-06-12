@@ -344,6 +344,7 @@ public class MixinLink {
 	
 	
 	public static HandledScreen<?> LAST_SERVER_HANDLED_SCREEN;
+	public static final Map<HandledScreen<?>, Boolean> CLOSED_SERVER_HANDLED_SCREENS = Collections.synchronizedMap(new WeakHashMap<>());
 	
 	
 	public static final WeakHashMap<Runnable, Boolean> CATCH_BYPASSING_TASKS = new WeakHashMap<>();

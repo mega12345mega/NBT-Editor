@@ -35,6 +35,11 @@ public class ArmorItemReference extends HandledScreenItemReference {
 	}
 	
 	@Override
+	public boolean exists() {
+		return true;
+	}
+	
+	@Override
 	public ItemStack getItem() {
 		return MainUtil.client.player.getEquippedStack(slot);
 	}

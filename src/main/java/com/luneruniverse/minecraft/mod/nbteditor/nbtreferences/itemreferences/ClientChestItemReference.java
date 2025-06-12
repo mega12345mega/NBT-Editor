@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import java.util.Optional;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.PageLoadLevel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -38,6 +39,11 @@ public class ClientChestItemReference implements ItemReference {
 	}
 	public int getSlot() {
 		return slot;
+	}
+	
+	@Override
+	public boolean exists() {
+		return page < NBTEditorClient.CLIENT_CHEST.getPageCount();
 	}
 	
 	@Override

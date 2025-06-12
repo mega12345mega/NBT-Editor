@@ -37,6 +37,7 @@
 	
 	"nbteditor.editor.save": "Save",
 	"nbteditor.editor.saving": "Saving ...",
+	"nbteditor.editor.ref_broken": "Saving is blocked; the NBT reference has been broken,\nso there is nowhere to save data. Copy important NBT\ndata before closing! (The expand button will allow\nyou to copy everything at once if no tags are selected)",
 	"nbteditor.editor.name": "Name",
 	
 	"nbteditor.editor.unsaved.title": "Subject Not Saved!",

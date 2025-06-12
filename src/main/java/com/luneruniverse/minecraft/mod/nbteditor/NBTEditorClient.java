@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.luneruniverse.minecraft.mod.nbteditor.addons.NBTEditorAPI;
 import com.luneruniverse.minecraft.mod.nbteditor.addons.NBTEditorAddon;
@@ -92,7 +93,8 @@ public class NBTEditorClient implements ClientModInitializer {
 				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));
 		MVEnchantments.addEnchantment(clientChestIcon, MVEnchantments.LOYALTY, 1);
 		MixinLink.ENCHANT_GLINT_FIX.add(clientChestIcon);
-		NBTEditorAPI.registerInventoryTab(clientChestIcon, ClientChestScreen::show,
+		NBTEditorAPI.registerInventoryTab(clientChestIcon,
+				() -> ClientChestScreen.show(Optional.of(MainUtil.client.player.playerScreenHandler.getCursorStack())),
 				screen -> screen instanceof CreativeInventoryScreen || (screen instanceof InventoryScreen && SERVER_CONN.isEditingExpanded()));
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.CHEST)
 				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.inventory")),

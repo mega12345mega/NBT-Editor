@@ -18,6 +18,11 @@ public class InventoryItemReference extends HandledScreenItemReference {
 	}
 	
 	@Override
+	public boolean exists() {
+		return true;
+	}
+	
+	@Override
 	public ItemStack getItem() {
 		if (slot == 45)
 			return MainUtil.client.player.getOffHandStack();

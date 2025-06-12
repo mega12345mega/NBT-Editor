@@ -99,6 +99,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 			return;
 		
 		player.currentScreenHandler.setCursorStack(packet.getItem());
+		player.currentScreenHandler.setPreviousCursorStack(packet.getItem());
 	}
 	
 	private void onSetSlotPacket(SetSlotC2SPacket packet, ServerPlayerEntity player) {

@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -27,12 +28,23 @@ public abstract class HandledScreenItemReference implements ItemReference {
 			return new HandledScreenItemReferenceParent() {
 				@Override
 				public void show(Optional<ItemStack> cursor) {
+					if (MixinLink.CLOSED_SERVER_HANDLED_SCREENS.containsKey(screen)) {
+						cursor.ifPresent(MainUtil::setInventoryCursorStack);
+						MainUtil.client.player.closeHandledScreen();
+						return;
+					}
+					
 					cursor.ifPresent(value -> MainUtil.setRootCursorStack(screen.getScreenHandler(), value));
 					MainUtil.client.player.currentScreenHandler = screen.getScreenHandler();
 					MainUtil.client.setScreen(screen);
 				}
 				@Override
 				public void clearCursor() {
+					if (MixinLink.CLOSED_SERVER_HANDLED_SCREENS.containsKey(screen)) {
+						MainUtil.setInventoryCursorStack(ItemStack.EMPTY);
+						return;
+					}
+					
 					MainUtil.setRootCursorStack(screen.getScreenHandler(), ItemStack.EMPTY);
 				}
 			};

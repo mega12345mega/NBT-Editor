@@ -371,11 +371,8 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				removing = true;
 			}
 		}
-		if (removing) {
-			path.text = realPath.toString();
-			path.setSelectionStart(path.getText().length());
-			path.setSelectionEnd(path.getText().length());
-		}
+		if (removing)
+			MainUtil.setTextFieldValueSilently(path, realPath.toString(), true);
 		
 		if (realPath.isEmpty())
 			upValue = null;
@@ -400,11 +397,8 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	}
 	private void updateName() {
 		String newName = localNBT.getName().getString();
-		if (!name.text.equals(newName)) {
-			name.text = newName;
-			name.setSelectionStart(0);
-			name.setSelectionEnd(0);
-		}
+		if (!name.text.equals(newName))
+			MainUtil.setTextFieldValueSilently(name, newName, false);
 	}
 	@Override
 	protected boolean isNameEditable() {
@@ -420,9 +414,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			selectedValue = null;
 			value.setText("");
 			value.setEditable(false);
-			path.text = realPath.toString();
-			path.setSelectionStart(path.getText().length());
-			path.setSelectionEnd(path.getText().length());
+			MainUtil.setTextFieldValueSilently(path, realPath.toString(), true);
 			genEditor();
 		} else {
 			selectedValue = key;

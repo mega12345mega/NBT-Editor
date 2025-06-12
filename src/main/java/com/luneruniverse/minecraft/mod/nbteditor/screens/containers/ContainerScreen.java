@@ -51,7 +51,7 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		return this;
 	}
 	public static <L extends LocalNBT> void show(NBTReference<L> ref, Optional<ItemStack> cursor) {
-		if (ref.getLocalNBT().isEmpty()) {
+		if (!ref.exists() || !ContainerIO.isContainer(ref.getLocalNBT())) {
 			ref.showParent(cursor);
 			return;
 		}
@@ -167,6 +167,12 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		for (int i = 0; i < contents.length; i++)
 			contents[i] = this.handler.getInventory().getStack(i);
 		return new ContainerItemReference<>(ref, ContainerIO.getWrittenSlotIndex(localNBT, contents, slot));
+	}
+	
+	@Override
+	protected void handledScreenTick() {
+		if (!ref.exists())
+			ref.showParent(Optional.of(handler.getCursorStack()));
 	}
 	
 	@Override

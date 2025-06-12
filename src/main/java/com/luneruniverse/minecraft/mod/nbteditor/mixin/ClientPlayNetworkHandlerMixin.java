@@ -13,12 +13,13 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientScreen
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
 	
-	@Inject(method = "onScreenHandlerSlotUpdate", at = @At(value = "HEAD"), cancellable = true)
+	@Inject(method = "onScreenHandlerSlotUpdate", at = @At("HEAD"), cancellable = true)
 	private void onScreenHandlerSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo info) {
 		if (!MainUtil.client.isOnThread())
 			return;
@@ -54,6 +55,24 @@ public class ClientPlayNetworkHandlerMixin {
 					MainUtil.client.player.getInventory().armor.set(8 - packet.getSlot(), packet.getStack());
 			} else
 				MainUtil.client.player.getInventory().setStack(packet.getSlot() >= 36 ? packet.getSlot() - 36 : packet.getSlot(), packet.getStack());
+		}
+	}
+	
+	@Inject(method = "onCloseScreen", at = @At("HEAD"), cancellable = true)
+	private void onCloseScreen(CloseScreenS2CPacket packet, CallbackInfo info) {
+		if (!MainUtil.client.isOnThread())
+			return;
+		
+		if (packet.getSyncId() == ClientScreenHandler.SYNC_ID) {
+			NBTEditor.LOGGER.warn("Ignoring a close screen packet with a ClientHandledScreen sync id!");
+			info.cancel();
+			return;
+		}
+		
+		if (MainUtil.client.currentScreen instanceof PassContainerSlotUpdates) {
+			info.cancel();
+			
+			MixinLink.CLOSED_SERVER_HANDLED_SCREENS.put(MixinLink.LAST_SERVER_HANDLED_SCREEN, true);
 		}
 	}
 	

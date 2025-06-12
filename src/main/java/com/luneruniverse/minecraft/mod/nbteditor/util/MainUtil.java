@@ -41,6 +41,7 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EquipmentSlot;
@@ -552,6 +553,13 @@ public class MainUtil {
 			return null;
 		});
 		return output;
+	}
+	
+	public static void setTextFieldValueSilently(TextFieldWidget widget, String text, boolean scrollToEnd) {
+		widget.text = text;
+		int cursor = (scrollToEnd ? text.length() : 0);
+		widget.setSelectionStart(cursor);
+		widget.setSelectionEnd(cursor);
 	}
 	
 }

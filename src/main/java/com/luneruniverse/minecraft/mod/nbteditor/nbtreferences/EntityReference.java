@@ -49,6 +49,11 @@ public class EntityReference implements NBTReference<LocalEntity> {
 	}
 	
 	@Override
+	public boolean exists() {
+		return true;
+	}
+	
+	@Override
 	public LocalEntity getLocalNBT() {
 		return new LocalEntity(entityType, nbt);
 	}

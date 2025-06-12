@@ -37,10 +37,10 @@ public class ClientChestScreen extends ClientHandledScreen {
 	
 	public static void show(Optional<ItemStack> cursor) {
 		Runnable close = () -> {
-			if (MainUtil.client.currentScreen instanceof ClientChestScreen screen)
-				screen.close();
-			else
-				cursor.ifPresent(MainUtil::setInventoryCursorStack);
+			cursor.ifPresent(item -> {
+				MainUtil.setInventoryCursorStack(item);
+				MainUtil.client.player.closeHandledScreen();
+			});
 		};
 		
 		LoadingScreen.show(
@@ -58,7 +58,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 					
 					if (!pageData.isInThisVersion()) {
 						if (!loaded)
-							cursor.ifPresent(MainUtil::setInventoryCursorStack);
+							close.run();
 						MainUtil.client.setScreen(new ClientChestDataVersionScreen(pageData.dataVersion()));
 						return;
 					}
@@ -66,11 +66,12 @@ public class ClientChestScreen extends ClientHandledScreen {
 					if (MainUtil.client.currentScreen instanceof ClientChestScreen screen) {
 						((ClientChestHandler) screen.handler).fillPage(pageData);
 						screen.dynamicItems = pageData.dynamicItems();
+						MainUtil.setTextFieldValueSilently(screen.pageField, (PAGE + 1) + "", true);
 						screen.updatePageNavigation();
 					} else {
 						ClientChestHandler handler = new ClientChestHandler(pageData);
-						handler.setCursorStack(cursor.filter(item -> !loaded).orElse(
-								MainUtil.client.player.playerScreenHandler.getCursorStack()));
+						if (!loaded)
+							cursor.ifPresent(handler::setCursorStack);
 						ClientChestScreen screen = new ClientChestScreen(handler);
 						screen.dynamicItems = pageData.dynamicItems();
 						MainUtil.client.setScreen(screen);
@@ -149,7 +150,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 			int intVal = Integer.parseInt(str);
 			if (intVal > 0) {
 				PAGE = intVal - 1;
-				show();
+				show(Optional.ofNullable(handler.getCursorStack()));
 			}
 		});
 		pageField.setTextPredicate(MainUtil.intPredicate(() -> 0, NBTEditorClient.CLIENT_CHEST::getPageCount, true));
@@ -199,7 +200,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 92, 83, 20, TextInst.translatable("nbteditor.client_chest.reload_page"), btn -> {
 			navigationClicked = true;
-			LoadingScreen.show(ClientChestHelper.reloadPage(PAGE), this::close, (loaded, pageData) -> show());
+			LoadingScreen.show(ClientChestHelper.reloadPage(PAGE), this::close, (loaded, pageData) -> show(Optional.ofNullable(handler.getCursorStack())));
 		}));
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 116, 83, 20, TextInst.translatable("nbteditor.client_chest.clear_page"), btn -> {
@@ -346,30 +347,26 @@ public class ClientChestScreen extends ClientHandledScreen {
 		if (!prevPage.active)
 			return;
 		PAGE--;
-		pageField.setText((PAGE + 1) + "");
-		show();
+		show(Optional.ofNullable(handler.getCursorStack()));
 	}
 	private void nextPage() {
 		if (!nextPage.active)
 			return;
 		PAGE++;
-		pageField.setText((PAGE + 1) + "");
-		show();
+		show(Optional.ofNullable(handler.getCursorStack()));
 	}
 	
 	private void prevPageJump() {
 		if (!prevPageJump.active)
 			return;
 		PAGE = prevPageJumpTarget;
-		pageField.setText((PAGE + 1) + "");
-		show();
+		show(Optional.ofNullable(handler.getCursorStack()));
 	}
 	private void nextPageJump() {
 		if (!nextPageJump.active)
 			return;
 		PAGE = nextPageJumpTarget;
-		pageField.setText((PAGE + 1) + "");
-		show();
+		show(Optional.ofNullable(handler.getCursorStack()));
 	}
 	
 }

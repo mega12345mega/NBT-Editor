@@ -59,8 +59,21 @@ public class ContainerItemReference<L extends LocalNBT> implements ItemReference
 	}
 	
 	@Override
+	public boolean exists() {
+		if (!container.exists())
+			return false;
+		
+		L containerValue = container.getLocalNBT();
+		return ContainerIO.isContainer(containerValue) && slot < ContainerIO.getMaxSize(containerValue);
+	}
+	
+	@Override
 	public ItemStack getItem() {
-		return ContainerIO.read(container.getLocalNBT())[slot];
+		L containerValue = container.getLocalNBT();
+		ItemStack[] contents = ContainerIO.read(containerValue);
+		if (slot >= contents.length && slot < ContainerIO.getMaxSize(containerValue))
+			return ItemStack.EMPTY;
+		return contents[slot];
 	}
 	
 	@Override

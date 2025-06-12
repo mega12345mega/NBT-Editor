@@ -69,6 +69,11 @@ public class BlockReference implements NBTReference<LocalBlock> {
 	}
 	
 	@Override
+	public boolean exists() {
+		return true;
+	}
+	
+	@Override
 	public LocalBlock getLocalNBT() {
 		return new LocalBlock(block, state, nbt);
 	}

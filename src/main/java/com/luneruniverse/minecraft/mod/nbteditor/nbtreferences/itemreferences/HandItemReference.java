@@ -22,6 +22,11 @@ public class HandItemReference implements ItemReference {
 	}
 	
 	@Override
+	public boolean exists() {
+		return true;
+	}
+	
+	@Override
 	public ItemStack getItem() {
 		return MainUtil.client.player.getStackInHand(hand);
 	}

@@ -70,6 +70,8 @@ public interface NBTReference<T extends LocalNBT> {
 		}));
 	}
 	
+	public boolean exists();
+	
 	T getLocalNBT();
 	public default void saveLocalNBT(T nbt, Runnable onFinished) {
 		saveNBT(nbt.getId(), nbt.getNBT(), onFinished);
