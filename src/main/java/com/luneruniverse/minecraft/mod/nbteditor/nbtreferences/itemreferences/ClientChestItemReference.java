@@ -1,7 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
-import java.util.Optional;
-
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.PageLoadLevel;
@@ -79,11 +77,8 @@ public class ClientChestItemReference implements ItemReference {
 	}
 	
 	@Override
-	public void showParent(Optional<ItemStack> cursor) {
-		ClientChestScreen.show(cursor);
+	public void showParent() {
+		ClientChestScreen.show();
 	}
-	
-	@Override
-	public void clearParentCursor() {}
 	
 }

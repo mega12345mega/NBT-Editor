@@ -1,7 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
-import java.util.Optional;
-
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
@@ -14,7 +12,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ClientChestItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandledScreenItemReference.HandledScreenItemReferenceParent;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestDataVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LoadingScreen;
@@ -35,30 +32,20 @@ public class ClientChestScreen extends ClientHandledScreen {
 	public static int prevPageJumpTarget;
 	public static int nextPageJumpTarget;
 	
-	public static void show(Optional<ItemStack> cursor) {
-		Runnable close = () -> {
-			cursor.ifPresent(item -> {
-				MainUtil.setInventoryCursorStack(item);
-				MainUtil.client.player.closeHandledScreen();
-			});
-		};
-		
+	public static void show() {
 		LoadingScreen.show(
 				ClientChestHelper.getPage(PAGE, PageLoadLevel.DYNAMIC_ITEMS),
-				close,
+				NBTEditorClient.CURSOR_MANAGER::closeRoot,
 				(loaded, optional) -> {
 					if (optional.isEmpty()) {
-						if (!loaded)
-							close.run();
-						MainUtil.client.setScreen(null);
+						NBTEditorClient.CURSOR_MANAGER.closeRoot();
 						return;
 					}
 					
 					ClientChestPage pageData = optional.get();
 					
 					if (!pageData.isInThisVersion()) {
-						if (!loaded)
-							close.run();
+						NBTEditorClient.CURSOR_MANAGER.closeRoot();
 						MainUtil.client.setScreen(new ClientChestDataVersionScreen(pageData.dataVersion()));
 						return;
 					}
@@ -69,18 +56,12 @@ public class ClientChestScreen extends ClientHandledScreen {
 						MainUtil.setTextFieldValueSilently(screen.pageField, (PAGE + 1) + "", true);
 						screen.updatePageNavigation();
 					} else {
-						ClientChestHandler handler = new ClientChestHandler(pageData);
-						if (!loaded)
-							cursor.ifPresent(handler::setCursorStack);
-						ClientChestScreen screen = new ClientChestScreen(handler);
+						ClientChestScreen screen = new ClientChestScreen(new ClientChestHandler(pageData));
 						screen.dynamicItems = pageData.dynamicItems();
-						MainUtil.client.setScreen(screen);
+						NBTEditorClient.CURSOR_MANAGER.showBranch(screen);
 						NBTEditorClient.CLIENT_CHEST.warnIfCorrupt();
 					}
 				});
-	}
-	public static void show() {
-		show(Optional.empty());
 	}
 	
 	
@@ -150,7 +131,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 			int intVal = Integer.parseInt(str);
 			if (intVal > 0) {
 				PAGE = intVal - 1;
-				show(Optional.ofNullable(handler.getCursorStack()));
+				show();
 			}
 		});
 		pageField.setTextPredicate(MainUtil.intPredicate(() -> 0, NBTEditorClient.CLIENT_CHEST::getPageCount, true));
@@ -200,7 +181,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 92, 83, 20, TextInst.translatable("nbteditor.client_chest.reload_page"), btn -> {
 			navigationClicked = true;
-			LoadingScreen.show(ClientChestHelper.reloadPage(PAGE), this::close, (loaded, pageData) -> show(Optional.ofNullable(handler.getCursorStack())));
+			LoadingScreen.show(ClientChestHelper.reloadPage(PAGE), this::close, (loaded, pageData) -> show());
 		}));
 		
 		this.addDrawableChild(MVMisc.newButton(this.x - 87, this.y + 116, 83, 20, TextInst.translatable("nbteditor.client_chest.clear_page"), btn -> {
@@ -269,10 +250,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 			boolean lockedSlot = (focusedSlot.inventory == handler.getInventory() &&
 					dynamicItems.isSlotLocked(focusedSlot.getIndex()));
 			if (!lockedSlot || keyCode == GLFW.GLFW_KEY_DELETE) {
-				if (handleKeybind(keyCode, focusedSlot,
-						HandledScreenItemReferenceParent.create(
-								ClientChestScreen::show, () -> handler.setCursorStack(ItemStack.EMPTY)),
-						slot -> new ClientChestItemReference(PAGE, slot.getIndex()), handler.getCursorStack())) {
+				if (handleKeybind(keyCode, focusedSlot, ClientChestScreen::show, slot -> new ClientChestItemReference(PAGE, slot.getIndex()))) {
 					if (keyCode == GLFW.GLFW_KEY_DELETE && lockedSlot)
 						dynamicItems.remove(focusedSlot.getIndex());
 					return true;
@@ -347,26 +325,26 @@ public class ClientChestScreen extends ClientHandledScreen {
 		if (!prevPage.active)
 			return;
 		PAGE--;
-		show(Optional.ofNullable(handler.getCursorStack()));
+		show();
 	}
 	private void nextPage() {
 		if (!nextPage.active)
 			return;
 		PAGE++;
-		show(Optional.ofNullable(handler.getCursorStack()));
+		show();
 	}
 	
 	private void prevPageJump() {
 		if (!prevPageJump.active)
 			return;
 		PAGE = prevPageJumpTarget;
-		show(Optional.ofNullable(handler.getCursorStack()));
+		show();
 	}
 	private void nextPageJump() {
 		if (!nextPageJump.active)
 			return;
 		PAGE = nextPageJumpTarget;
-		show(Optional.ofNullable(handler.getCursorStack()));
+		show();
 	}
 	
 }

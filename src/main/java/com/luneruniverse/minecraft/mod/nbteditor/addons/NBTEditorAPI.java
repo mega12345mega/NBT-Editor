@@ -118,7 +118,10 @@ public class NBTEditorAPI {
 	}
 	
 	/**
-	 * Register a normal factory, adding it to the factory gui
+	 * Register a normal factory, adding it to the factory gui<br>
+	 * <strong>Warning:</strong> If this factory opens its own GUI, make sure call {@link NBTReference#showParent()}
+	 * (recommended) or {@link NBTReference#escapeParent()} when the GUI is closed. This ensures that, if the user
+	 * has an item on their cursor, it doesn't get lost.
 	 * @param name The name of the factory (used in the factory command)
 	 * @param extremeAlias The extreme alias
 	 * @param buttonMsg The text to display in the factory gui

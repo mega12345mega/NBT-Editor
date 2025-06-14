@@ -1,19 +1,18 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IgnoreCloseScreenPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.PassContainerSlotUpdates;
-import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandledScreenItemReference.HandledScreenItemReferenceParent;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.InventoryItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -38,7 +37,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class ClientHandledScreen extends GenericContainerScreen implements OldEventBehavior, PassContainerSlotUpdates {
+public class ClientHandledScreen extends GenericContainerScreen implements OldEventBehavior, IgnoreCloseScreenPacket {
 	
 	private static final Identifier TEXTURE = IdentifierInst.of("textures/gui/container/generic_54.png");
 	
@@ -82,8 +81,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		return updatingServerInventory;
 	}
 	
-	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, HandledScreenItemReferenceParent parent,
-			Function<Slot, ItemReference> containerRef, ItemStack cursor) {
+	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, Runnable parent, Function<Slot, ItemReference> containerRef) {
 		if (hoveredSlot != null &&
 				(ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
 			int slot = hoveredSlot.getIndex();
@@ -94,11 +92,11 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 					((InventoryItemReference) ref).setParent(parent);
 			} else
 				ref = containerRef.apply(hoveredSlot);
-			return handleKeybind(keyCode, hoveredSlot.getStack(), ref, cursor);
+			return handleKeybind(keyCode, hoveredSlot.getStack(), ref);
 		}
 		return false;
 	}
-	public static boolean handleKeybind(int keyCode, ItemStack item, ItemReference ref, ItemStack cursor) {
+	public static boolean handleKeybind(int keyCode, ItemStack item, ItemReference ref) {
 		if (keyCode == GLFW.GLFW_KEY_DELETE) {
 			if (item == null || item.isEmpty())
 				return false;
@@ -112,22 +110,12 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		boolean notAir = item != null && !item.isEmpty();
 		if (hasControlDown()) {
 			if (notAir && ContainerIO.isContainer(item))
-				ContainerScreen.show(ref, Optional.of(cursor));
+				ContainerScreen.show(ref);
 		} else if (hasShiftDown()) {
-			if (notAir) {
-				if (cursor != null && !cursor.isEmpty()) {
-					MainUtil.get(cursor, true);
-					ref.clearParentCursor();
-				}
+			if (notAir)
 				MainUtil.client.setScreen(new LocalFactoryScreen<>(ref));
-			}
-		} else {
-			if (cursor != null && !cursor.isEmpty()) {
-				MainUtil.get(cursor, true);
-				ref.clearParentCursor();
-			}
+		} else
 			MainUtil.client.setScreen(new NBTEditorScreen<>(ref));
-		}
 		
 		return true;
 	}
@@ -135,7 +123,6 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	public ClientHandledScreen(GenericContainerScreenHandler handler, Text title) {
 		super(handler, MainUtil.client.player.getInventory(), title);
 		handler.disableSyncing();
-		MainUtil.client.player.currentScreenHandler = handler;
 	}
 	
 	@Override
@@ -194,10 +181,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	}
 	
 	public void close() {
-		MainUtil.setInventoryCursorStack(handler.getCursorStack());
-		handler.setCursorStack(ItemStack.EMPTY);
-		
-		MainUtil.client.player.closeHandledScreen();
+		NBTEditorClient.CURSOR_MANAGER.closeRoot();
 	}
 	@Override
 	public void removed() {

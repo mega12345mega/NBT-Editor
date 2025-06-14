@@ -250,7 +250,7 @@ public class MixinLink {
 				ref = ItemReference.getInventoryOrArmorItem(slot, true);
 			} else
 				ref = ItemReference.getContainerItem(hoveredSlot.id, source);
-			if (ClientHandledScreen.handleKeybind(keyCode, hoveredSlot.getStack(), ref, source.getScreenHandler().getCursorStack()))
+			if (ClientHandledScreen.handleKeybind(keyCode, hoveredSlot.getStack(), ref))
 				info.setReturnValue(true);
 		}
 	}
@@ -341,10 +341,6 @@ public class MixinLink {
 			}
 		}
 	}
-	
-	
-	public static HandledScreen<?> LAST_SERVER_HANDLED_SCREEN;
-	public static final Map<HandledScreen<?>, Boolean> CLOSED_SERVER_HANDLED_SCREENS = Collections.synchronizedMap(new WeakHashMap<>());
 	
 	
 	public static final WeakHashMap<Runnable, Boolean> CATCH_BYPASSING_TASKS = new WeakHashMap<>();

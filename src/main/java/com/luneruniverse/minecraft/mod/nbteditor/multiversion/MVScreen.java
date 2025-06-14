@@ -6,7 +6,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-public class MVScreen extends Screen implements OldEventBehavior, PassContainerSlotUpdates {
+public class MVScreen extends Screen implements OldEventBehavior, IgnoreCloseScreenPacket {
 	
 	protected MVScreen(Text title) {
 		super(title);

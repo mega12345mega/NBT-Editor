@@ -51,6 +51,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.OverlayTexture;
@@ -76,6 +77,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -84,13 +86,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.potion.Potion;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.ClickEvent;
@@ -654,15 +654,6 @@ public class MVMisc {
 			callback.run();
 	}
 	
-	private static final Supplier<Reflection.MethodInvoker> ScreenHandler_setStackInSlot =
-			Reflection.getOptionalMethod(ScreenHandler.class, "method_7619", MethodType.methodType(void.class, int.class, ItemStack.class));
-	public static void setStackInSlot(ScreenHandler screenHandler, ScreenHandlerSlotUpdateS2CPacket packet) {
-		Version.newSwitch()
-				.range("1.17.1", null, () -> screenHandler.setStackInSlot(packet.getSlot(), packet.getRevision(), packet.getStack()))
-				.range(null, "1.17", () -> ScreenHandler_setStackInSlot.get().invoke(screenHandler, packet.getSlot(), packet.getStack()))
-				.run();
-	}
-	
 	private static final Supplier<Reflection.MethodInvoker> TooltipComponent_getHeight =
 			Reflection.getOptionalMethod(TooltipComponent.class, "method_32661", MethodType.methodType(int.class));
 	public static int getTooltipComponentHeight(TooltipComponent line) {
@@ -744,6 +735,13 @@ public class MVMisc {
 		int g = (int) (color.getGreen() * scale);
 		int b = (int) (color.getBlue() * scale);
 		return new Color(r, g, b, color.getAlpha()).getRGB();
+	}
+	
+	public static CreativeInventoryScreen newCreativeInventoryScreen(ClientPlayerEntity player) {
+		return Version.<CreativeInventoryScreen>newSwitch()
+				.range("1.19.3", null, () -> new CreativeInventoryScreen(player, player.networkHandler.getEnabledFeatures(), MainUtil.client.options.getOperatorItemsTab().getValue()))
+				.range(null, "1.19.2", () -> Reflection.newInstance(CreativeInventoryScreen.class, new Class<?>[] {PlayerEntity.class}, player))
+				.get();
 	}
 	
 }

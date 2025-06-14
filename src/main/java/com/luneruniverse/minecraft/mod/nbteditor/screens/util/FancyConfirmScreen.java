@@ -1,7 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.util;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IgnoreCloseScreenPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.PassContainerSlotUpdates;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-public class FancyConfirmScreen extends ConfirmScreen implements PassContainerSlotUpdates {
+public class FancyConfirmScreen extends ConfirmScreen implements IgnoreCloseScreenPacket {
 	
 	private Screen parent;
 	
@@ -31,13 +31,15 @@ public class FancyConfirmScreen extends ConfirmScreen implements PassContainerSl
 	
 	@Override
 	protected void init() {
-		parent.init(client, width, height);
+		if (parent != null)
+			parent.init(client, width, height);
 		super.init();
 	}
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-		parent.render(matrices, -314, -314, delta);
+		if (parent != null)
+			parent.render(matrices, -314, -314, delta);
 		
 		matrices.push();
 		matrices.translate(0.0, 0.0, 500.0);
@@ -55,7 +57,7 @@ public class FancyConfirmScreen extends ConfirmScreen implements PassContainerSl
 	
 	@Override
 	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		MVDrawableHelper.renderBackground(parent, MVDrawableHelper.getMatrices(context));
+		MVDrawableHelper.renderBackground(this, MVDrawableHelper.getMatrices(context));
 	}
 	
 }

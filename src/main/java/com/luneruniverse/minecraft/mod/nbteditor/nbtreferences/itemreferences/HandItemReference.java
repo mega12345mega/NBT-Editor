@@ -1,11 +1,8 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
-import java.util.Optional;
-
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 
@@ -62,16 +59,8 @@ public class HandItemReference implements ItemReference {
 	}
 	
 	@Override
-	public void showParent(Optional<ItemStack> cursor) {
-		HandledScreen<?> newScreen = new InventoryScreen(MainUtil.client.player);
-		cursor.ifPresent(value -> MainUtil.setRootCursorStack(newScreen.getScreenHandler(), value));
-		MainUtil.client.player.currentScreenHandler = newScreen.getScreenHandler();
-		MainUtil.client.setScreen(newScreen);
-	}
-	
-	@Override
-	public void clearParentCursor() {
-		MainUtil.setRootCursorStack(MainUtil.client.player.playerScreenHandler, ItemStack.EMPTY);
+	public void showParent() {
+		NBTEditorClient.CURSOR_MANAGER.showRoot();
 	}
 	
 }

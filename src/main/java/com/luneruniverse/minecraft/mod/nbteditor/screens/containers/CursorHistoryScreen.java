@@ -1,10 +1,9 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
 import java.util.List;
-import java.util.Optional;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.item.ItemStack;
 
@@ -27,13 +26,8 @@ public class CursorHistoryScreen extends ClientHandledScreen {
 		
 		return this;
 	}
-	public static void show(List<ItemStack> items, List<Integer> lockedItems, Optional<ItemStack> cursor) {
-		CursorHistoryHandler handler = new CursorHistoryHandler();
-		handler.setCursorStack(cursor.orElse(MainUtil.client.player.playerScreenHandler.getCursorStack()));
-		MainUtil.client.setScreen(new CursorHistoryScreen(handler).build(items, lockedItems));
-	}
 	public static void show(List<ItemStack> items, List<Integer> lockedItems) {
-		show(items, lockedItems, Optional.empty());
+		NBTEditorClient.CURSOR_MANAGER.showBranch(new CursorHistoryScreen(new CursorHistoryHandler()).build(items, lockedItems));
 	}
 	
 	@Override

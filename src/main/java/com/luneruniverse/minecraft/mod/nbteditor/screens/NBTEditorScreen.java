@@ -42,7 +42,6 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
-import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -146,7 +145,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	@Override
 	protected void initEditor() {
 		if (realPath.isEmpty() && ((NbtCompound) this.nbt).contains("")) {
-			client.setScreen(new ConfirmScreen(value -> {
+			client.setScreen(new FancyConfirmScreen(value -> {
 				if (value) {
 					((NbtCompound) this.nbt).remove("");
 					localNBT.setNBT((NbtCompound) this.nbt);
@@ -155,7 +154,8 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				} else
 					close();
 			}, TextInst.translatable("nbteditor.nbt.empty_key.title"), TextInst.translatable("nbteditor.nbt.empty_key.desc"),
-					TextInst.translatable("nbteditor.nbt.empty_key.yes"), TextInst.translatable("nbteditor.nbt.empty_key.no")));
+					TextInst.translatable("nbteditor.nbt.empty_key.yes"), TextInst.translatable("nbteditor.nbt.empty_key.no"))
+					.setParent(null));
 			
 			return;
 		}

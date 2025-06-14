@@ -31,8 +31,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVShaders.MVShader
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.DSL.TypeReference;
 import com.mojang.serialization.Dynamic;
@@ -53,7 +51,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
@@ -525,24 +522,6 @@ public class MainUtil {
 		if (component.startsWith("!"))
 			return "!minecraft:" + component.substring(1);
 		return "minecraft:" + component;
-	}
-	
-	public static void setRootCursorStack(ScreenHandler handler, ItemStack cursor) {
-		handler.setCursorStack(cursor);
-		handler.setPreviousCursorStack(cursor);
-		if (client.player.playerScreenHandler != handler || client.interactionManager.getCurrentGameMode().isSurvivalLike())
-			MVClientNetworking.send(new SetCursorC2SPacket(cursor));
-	}
-	public static void setInventoryCursorStack(ItemStack cursor) {
-		if (MainUtil.client.interactionManager.getCurrentGameMode().isCreative())
-			MainUtil.client.player.playerScreenHandler.setCursorStack(cursor);
-		else {
-			if (!cursor.isEmpty())
-				MainUtil.get(cursor, true);
-			MainUtil.client.player.playerScreenHandler.setCursorStack(ItemStack.EMPTY);
-			MainUtil.client.player.playerScreenHandler.setPreviousCursorStack(ItemStack.EMPTY);
-			MVClientNetworking.send(new SetCursorC2SPacket(ItemStack.EMPTY));
-		}
 	}
 	
 	public static <T> CompletableFuture<T> mergeFutures(List<CompletableFuture<T>> futures) {

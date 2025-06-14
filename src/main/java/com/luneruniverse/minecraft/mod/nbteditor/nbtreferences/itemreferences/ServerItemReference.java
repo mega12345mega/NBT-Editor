@@ -1,7 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetSlotC2SPacket;
@@ -19,7 +18,7 @@ public class ServerItemReference extends HandledScreenItemReference {
 	private ItemStack item;
 	
 	public ServerItemReference(int slot, HandledScreen<?> screen) {
-		super(HandledScreenItemReferenceParent.forRoot(screen));
+		super(screen);
 		this.slot = slot;
 		this.screen = screen;
 		
@@ -40,7 +39,8 @@ public class ServerItemReference extends HandledScreenItemReference {
 	
 	@Override
 	public boolean exists() {
-		return !MixinLink.CLOSED_SERVER_HANDLED_SCREENS.containsKey(screen);
+		return NBTEditorClient.CURSOR_MANAGER.getCurrentRoot() == screen &&
+				!NBTEditorClient.CURSOR_MANAGER.isCurrentRootClosed();
 	}
 	
 	@Override
@@ -85,11 +85,15 @@ public class ServerItemReference extends HandledScreenItemReference {
 	}
 	
 	@Override
-	public HandledScreenItemReference setParent(HandledScreenItemReferenceParent parent) {
+	public HandledScreenItemReference setParent(Runnable parent) {
 		throw new UnsupportedOperationException("ServerItemReferences cannot have custom parents");
 	}
 	@Override
-	public HandledScreenItemReferenceParent getDefaultParent() {
+	public HandledScreenItemReference setParent(HandledScreen<?> parent) {
+		throw new UnsupportedOperationException("ServerItemReferences cannot have custom parents");
+	}
+	@Override
+	public Runnable getDefaultParent() {
 		throw new UnsupportedOperationException("ServerItemReferences cannot have default parents");
 	}
 	

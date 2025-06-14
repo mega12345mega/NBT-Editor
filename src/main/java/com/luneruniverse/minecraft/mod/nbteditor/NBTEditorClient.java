@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import com.luneruniverse.minecraft.mod.nbteditor.addons.NBTEditorAPI;
 import com.luneruniverse.minecraft.mod.nbteditor.addons.NBTEditorAddon;
@@ -27,8 +26,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClien
 import com.luneruniverse.minecraft.mod.nbteditor.packets.OpenEnderChestC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.CursorManager;
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -51,6 +50,7 @@ public class NBTEditorClient implements ClientModInitializer {
 	}
 	
 	public static final File SETTINGS_FOLDER = new File("nbteditor");
+	public static CursorManager CURSOR_MANAGER;
 	public static ClientChest CLIENT_CHEST;
 	public static NBTEditorServerConn SERVER_CONN;
 	
@@ -83,6 +83,7 @@ public class NBTEditorClient implements ClientModInitializer {
 		ContainerIO.loadClass();
 		new HeadRefreshThread().start();
 		ConfigScreen.loadSettings();
+		CURSOR_MANAGER = new CursorManager();
 		
 		CLIENT_CHEST = new ClientChest(ConfigScreen.isLargeClientChest() ? new LargeClientChestPageCache(5) : new SmallClientChestPageCache(100));
 		ClientChestHelper.loadDefaultPages(PageLoadLevel.NORMAL_ITEMS);
@@ -94,21 +95,18 @@ public class NBTEditorClient implements ClientModInitializer {
 		MVEnchantments.addEnchantment(clientChestIcon, MVEnchantments.LOYALTY, 1);
 		MixinLink.ENCHANT_GLINT_FIX.add(clientChestIcon);
 		NBTEditorAPI.registerInventoryTab(clientChestIcon,
-				() -> ClientChestScreen.show(Optional.of(MainUtil.client.player.playerScreenHandler.getCursorStack())),
+				ClientChestScreen::show,
 				screen -> screen instanceof CreativeInventoryScreen || (screen instanceof InventoryScreen && SERVER_CONN.isEditingExpanded()));
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.CHEST)
 				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.inventory")),
-				() -> {
-					MainUtil.setRootCursorStack(MainUtil.client.player.playerScreenHandler, MainUtil.client.player.currentScreenHandler.getCursorStack());
-					MainUtil.client.player.currentScreenHandler = MainUtil.client.player.playerScreenHandler;
-					MainUtil.client.setScreen(new InventoryScreen(MainUtil.client.player));
-				},
+				CURSOR_MANAGER::showRoot,
 				screen -> screen instanceof ClientChestScreen);
-		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST), () -> {
-					MainUtil.setInventoryCursorStack(MainUtil.client.player.currentScreenHandler.getCursorStack());
-					MainUtil.client.player.closeHandledScreen();
+		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST),
+				() -> {
+					CURSOR_MANAGER.closeRoot();
 					MVClientNetworking.send(new OpenEnderChestC2SPacket());
-				}, screen -> (screen instanceof CreativeInventoryScreen || screen instanceof InventoryScreen || screen instanceof ClientChestScreen)
+				},
+				screen -> (screen instanceof CreativeInventoryScreen || screen instanceof InventoryScreen || screen instanceof ClientChestScreen)
 						&& SERVER_CONN.isEditingExpanded());
 		
 		SERVER_CONN = new NBTEditorServerConn();
