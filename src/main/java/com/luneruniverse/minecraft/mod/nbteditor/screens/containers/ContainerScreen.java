@@ -22,40 +22,37 @@ import net.minecraft.text.Text;
 
 public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	
-	private boolean saved;
-	private final Text unsavedTitle;
-	
-	private NBTReference<L> ref;
-	private L localNBT;
-	private int numSlots;
-	
-	private boolean navigationClicked;
-	
-	private ContainerScreen(ContainerHandler handler, Text title) {
-		super(handler, title);
-		
-		this.saved = true;
-		this.unsavedTitle = TextInst.copy(title).append("*");
-	}
-	private ContainerScreen<L> build(NBTReference<L> ref) {
-		this.ref = ref;
-		this.localNBT = LocalNBT.copy(ref.getLocalNBT());
-		
-		ItemStack[] contents = ContainerIO.read(localNBT);
-		for (int i = 0; i < contents.length; i++)
-			this.handler.getSlot(i).setStackNoCallbacks(contents[i] == null ? ItemStack.EMPTY : contents[i]);
-		this.numSlots = ContainerIO.getMaxSize(localNBT);
-		
-		return this;
-	}
 	public static <L extends LocalNBT> void show(NBTReference<L> ref) {
 		if (!ref.exists() || !ContainerIO.isContainer(ref.getLocalNBT())) {
 			ref.showParent();
 			return;
 		}
 		
-		NBTEditorClient.CURSOR_MANAGER.showBranch(new ContainerScreen<L>(new ContainerHandler(),
-				TextInst.translatable("nbteditor.container.title").append(ref.getLocalNBT().getName())).build(ref));
+		NBTEditorClient.CURSOR_MANAGER.showBranch(new ContainerScreen<>(ref));
+	}
+	
+	private final Text unsavedTitle;
+	
+	private final NBTReference<L> ref;
+	private final L localNBT;
+	private final int numSlots;
+	private boolean saved;
+	
+	private boolean navigationClicked;
+	
+	private ContainerScreen(NBTReference<L> ref) {
+		super(new ClientScreenHandler(3), TextInst.translatable("nbteditor.container.title").append(ref.getLocalNBT().getName()));
+		
+		this.unsavedTitle = TextInst.copy(title).append("*");
+		
+		this.ref = ref;
+		this.localNBT = LocalNBT.copy(ref.getLocalNBT());
+		this.numSlots = ContainerIO.getMaxSize(localNBT);
+		this.saved = true;
+		
+		ItemStack[] contents = ContainerIO.read(localNBT);
+		for (int i = 0; i < contents.length; i++)
+			handler.getSlot(i).setStackNoCallbacks(contents[i] == null ? ItemStack.EMPTY : contents[i]);
 	}
 	
 	@Override

@@ -9,25 +9,21 @@ import net.minecraft.item.ItemStack;
 
 public class CursorHistoryScreen extends ClientHandledScreen {
 	
+	public static void show(List<ItemStack> items, List<Integer> lockedItems) {
+		NBTEditorClient.CURSOR_MANAGER.showBranch(new CursorHistoryScreen(items, lockedItems));
+	}
+	
 	private final LockedSlotsInfo lockedSlots;
 	
-	private CursorHistoryScreen(CursorHistoryHandler handler) {
-		super(handler, TextInst.translatable("nbteditor.container.title").append(TextInst.translatable("nbteditor.get.lost_item.history")));
+	private CursorHistoryScreen(List<ItemStack> items, List<Integer> lockedItems) {
+		super(new ClientScreenHandler(6), TextInst.translatable("nbteditor.container.title")
+				.append(TextInst.translatable("nbteditor.get.lost_item.history")));
+		
+		for (int i = 0; i < handler.getInventory().size() && i < items.size(); i++)
+			handler.getSlot(i).setStackNoCallbacks(items.get(i).copy());
+		
 		lockedSlots = LockedSlotsInfo.ALL_LOCKED.copy();
-	}
-	private CursorHistoryScreen build(List<ItemStack> items, List<Integer> lockedItems) {
-		for (int i = 0; i < this.handler.getInventory().size(); i++) {
-			if (i == items.size())
-				break;
-			this.handler.getSlot(i).setStackNoCallbacks(items.get(i));
-		}
-		
 		lockedItems.forEach(lockedSlots::addContainerSlot);
-		
-		return this;
-	}
-	public static void show(List<ItemStack> items, List<Integer> lockedItems) {
-		NBTEditorClient.CURSOR_MANAGER.showBranch(new CursorHistoryScreen(new CursorHistoryHandler()).build(items, lockedItems));
 	}
 	
 	@Override

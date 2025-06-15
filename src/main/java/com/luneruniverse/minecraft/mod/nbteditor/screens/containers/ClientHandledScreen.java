@@ -42,7 +42,6 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	private static final Identifier TEXTURE = IdentifierInst.of("textures/gui/container/generic_54.png");
 	
 	private static Inventory SERVER_INV;
-	private static ItemStack SERVER_CURSOR;
 	
 	private static boolean updatingServerInventory;
 	private static void updateServerInventory() {
@@ -54,10 +53,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		try {
 			updatingServerInventory = true;
 			
-			ClientHandledScreen screen = (ClientHandledScreen) MainUtil.client.currentScreen;
 			Inventory clientInv = MainUtil.client.player.getInventory();
-			ItemStack clientCursor = screen.handler.getCursorStack();
-			
 			for (int i = 0; i < clientInv.size(); i++) {
 				ItemStack clientStack = clientInv.getStack(i);
 				if (!ItemStack.areEqual(clientStack, SERVER_INV.getStack(i))) {
@@ -69,10 +65,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 					SERVER_INV.setStack(i, clientStack.copy());
 				}
 			}
-			if (!ItemStack.areEqual(clientCursor, SERVER_CURSOR)) {
-				// Don't update server; cursor acts like the creative inventory
-				SERVER_CURSOR = clientCursor.copy();
-			}
+			// Don't update server's cursor; acts like the creative inventory
 		} finally {
 			updatingServerInventory = false;
 		}
@@ -132,7 +125,6 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		SERVER_INV = new SimpleInventory(client.player.getInventory().size());
 		for (int i = 0; i < client.player.getInventory().size(); i++)
 			SERVER_INV.setStack(i, client.player.getInventory().getStack(i).copy());
-		SERVER_CURSOR = this.handler.getCursorStack().copy();
 	}
 	
 	protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {

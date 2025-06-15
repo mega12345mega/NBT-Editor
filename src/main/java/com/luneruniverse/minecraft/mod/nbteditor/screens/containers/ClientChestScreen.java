@@ -51,19 +51,17 @@ public class ClientChestScreen extends ClientHandledScreen {
 					}
 					
 					if (MainUtil.client.currentScreen instanceof ClientChestScreen screen) {
-						((ClientChestHandler) screen.handler).fillPage(pageData);
-						screen.dynamicItems = pageData.dynamicItems();
+						screen.setPageData(pageData);
 						MainUtil.setTextFieldValueSilently(screen.pageField, (PAGE + 1) + "", true);
 						screen.updatePageNavigation();
 					} else {
-						ClientChestScreen screen = new ClientChestScreen(new ClientChestHandler(pageData));
-						screen.dynamicItems = pageData.dynamicItems();
+						ClientChestScreen screen = new ClientChestScreen();
+						screen.setPageData(pageData);
 						NBTEditorClient.CURSOR_MANAGER.showBranch(screen);
 						NBTEditorClient.CLIENT_CHEST.warnIfCorrupt();
 					}
 				});
 	}
-	
 	
 	private DynamicItems dynamicItems;
 	private boolean navigationClicked;
@@ -74,8 +72,14 @@ public class ClientChestScreen extends ClientHandledScreen {
 	private ButtonWidget prevPageJump;
 	private ButtonWidget nextPageJump;
 	
-	private ClientChestScreen(ClientChestHandler handler) {
-		super(handler, TextInst.translatable("nbteditor.client_chest"));
+	private ClientChestScreen() {
+		super(new ClientScreenHandler(6), TextInst.translatable("nbteditor.client_chest"));
+	}
+	private void setPageData(ClientChestPage pageData) {
+		ItemStack[] items = pageData.getItemsOrThrow();
+		for (int i = 0; i < items.length; i++)
+			handler.getSlot(i).setStackNoCallbacks(items[i] == null ? ItemStack.EMPTY : items[i].copy());
+		dynamicItems = pageData.dynamicItems();
 	}
 	
 	@Override
