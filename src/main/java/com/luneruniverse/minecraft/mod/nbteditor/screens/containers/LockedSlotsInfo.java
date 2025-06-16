@@ -6,6 +6,7 @@ import java.util.List;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.SlotUtil;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
@@ -48,25 +49,18 @@ public class LockedSlotsInfo {
 	}
 	
 	/**
-	 * @param slot 0-26 inv, 27-35 hotbar, 40 offhand
+	 * @param slot Format: inv
 	 */
 	public LockedSlotsInfo addPlayerSlot(int slot) {
-		if (slot == 40) {
-			playerLockedHotbarSlots.add(40);
-			return this;
-		}
 		playerLockedSlots.add(slot);
-		if (slot >= 27)
-			playerLockedHotbarSlots.add(slot - 27);
+		if (SlotUtil.isHotbarFromInv(slot) || SlotUtil.isOffHandFromInv(slot))
+			playerLockedHotbarSlots.add(slot);
 		return this;
 	}
 	public LockedSlotsInfo addPlayerSlot(ItemReference itemRef) {
-		int slot = itemRef.getBlockedInvSlot();
+		int slot = itemRef.getBlockedSlot();
 		if (slot != -1)
-			playerLockedSlots.add(slot);
-		int hotbarSlot = itemRef.getBlockedHotbarSlot();
-		if (hotbarSlot != -1)
-			playerLockedHotbarSlots.add(hotbarSlot);
+			addPlayerSlot(slot);
 		return this;
 	}
 	
@@ -80,7 +74,7 @@ public class LockedSlotsInfo {
 			return true;
 		
 		if (slot.inventory == MainUtil.client.player.getInventory()) {
-			if (playerLockedSlots.contains(slot.getIndex() < 9 ? slot.getIndex() + 27 : slot.getIndex() - 9))
+			if (playerLockedSlots.contains(slot.getIndex()))
 				return true;
 		} else {
 			if (containerLockedSlots.contains(slot.getIndex()))

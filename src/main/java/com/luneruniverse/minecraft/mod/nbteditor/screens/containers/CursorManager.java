@@ -133,4 +133,15 @@ public class CursorManager {
 		MainUtil.client.player.closeHandledScreen(); // will trigger #onNoScreenSet()
 	}
 	
+	public void setCursor(ItemStack item) {
+		if (currentRoot == null)
+			throw new IllegalStateException("There is no root to set the cursor of");
+		
+		currentBranch.getScreenHandler().setCursorStack(item);
+		currentBranch.getScreenHandler().setPreviousCursorStack(item);
+		
+		if (currentRootHasServerCursor && currentBranch == currentRoot)
+			MVClientNetworking.send(new SetCursorC2SPacket(item));
+	}
+	
 }

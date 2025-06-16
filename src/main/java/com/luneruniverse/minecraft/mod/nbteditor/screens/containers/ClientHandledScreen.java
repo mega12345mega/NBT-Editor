@@ -21,6 +21,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryS
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.SlotUtil;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
@@ -57,11 +58,11 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 			for (int i = 0; i < clientInv.size(); i++) {
 				ItemStack clientStack = clientInv.getStack(i);
 				if (!ItemStack.areEqual(clientStack, SERVER_INV.getStack(i))) {
-					if (36 <= i && i <= 39) { // Armor
+					if (SlotUtil.isArmorFromInv(i)) {
 						SERVER_INV.setStack(i, clientStack.copy());
 						continue;
 					}
-					MainUtil.clickCreativeStack(clientStack, i == 40 ? 45 : (i < 9 ? i + 36 : i));
+					MainUtil.clickCreativeStack(clientStack, SlotUtil.invToContainer(i));
 					SERVER_INV.setStack(i, clientStack.copy());
 				}
 			}
@@ -77,10 +78,9 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, Runnable parent, Function<Slot, ItemReference> containerRef) {
 		if (hoveredSlot != null &&
 				(ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
-			int slot = hoveredSlot.getIndex();
 			ItemReference ref;
 			if (hoveredSlot.inventory == MainUtil.client.player.getInventory()) {
-				ref = new InventoryItemReference(slot >= 36 ? slot - 36 : slot);
+				ref = new InventoryItemReference(hoveredSlot.getIndex());
 				if (parent != null)
 					((InventoryItemReference) ref).setParent(parent);
 			} else

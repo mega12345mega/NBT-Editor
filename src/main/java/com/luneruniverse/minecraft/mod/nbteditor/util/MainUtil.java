@@ -64,6 +64,10 @@ public class MainUtil {
 	
 	// Same as ClientPlayerInteractionManager#clickCreativeSlot, but without a feature flag check
 	// Also includes survival bypass
+	/**
+	 * @param item
+	 * @param slot Format: container
+	 */
 	public static void clickCreativeStack(ItemStack item, int slot) {
 		if (NBTEditorClient.SERVER_CONN.isEditingAllowed())
 			MVMisc.sendC2SPacket(new CreativeInventoryActionC2SPacket(slot, item));
@@ -75,7 +79,8 @@ public class MainUtil {
 	
 	public static void saveItem(Hand hand, ItemStack item) {
 		client.player.setStackInHand(hand, item.copy());
-		clickCreativeStack(item, hand == Hand.OFF_HAND ? 45 : client.player.getInventory().selectedSlot + 36);
+		clickCreativeStack(item, hand == Hand.OFF_HAND ? SlotUtil.createOffHandInContainer() :
+			SlotUtil.createHotbarInContainer(client.player.getInventory().selectedSlot));
 	}
 	public static void saveItem(EquipmentSlot equipment, ItemStack item) {
 		if (equipment == EquipmentSlot.MAINHAND)
@@ -84,16 +89,17 @@ public class MainUtil {
 			saveItem(Hand.OFF_HAND, item);
 		else {
 			client.player.getInventory().armor.set(equipment.getEntitySlotId(), item.copy());
-			clickCreativeStack(item, 8 - equipment.getEntitySlotId());
+			clickCreativeStack(item, SlotUtil.createArmorInContainer(equipment));
 		}
 	}
 	
+	/**
+	 * @param slot Format: inv
+	 * @param item
+	 */
 	public static void saveItem(int slot, ItemStack item) {
-		client.player.getInventory().setStack(slot == 45 ? 40 : slot, item.copy());
-		clickCreativeStack(item, slot < 9 ? slot + 36 : slot);
-	}
-	public static void saveItemInvSlot(int slot, ItemStack item) {
-		saveItem(slot == 45 ? 45 : (slot >= 36 ? slot - 36 : slot), item);
+		client.player.getInventory().setStack(slot, item.copy());
+		clickCreativeStack(item, SlotUtil.invToContainer(slot));
 	}
 	
 	public static void get(ItemStack item, boolean dropIfNoSpace) {
@@ -116,7 +122,7 @@ public class MainUtil {
 				overflow = item.getCount() - item.getMaxCount();
 				item.setCount(item.getMaxCount());
 			}
-			saveItem(slot == 40 ? 45 : slot, item);
+			saveItem(slot, item);
 			if (overflow != 0) {
 				item = item.copy();
 				item.setCount(overflow);

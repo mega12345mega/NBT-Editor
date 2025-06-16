@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 import java.lang.reflect.Proxy;
 import java.util.function.Predicate;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItemStack;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
@@ -52,27 +53,12 @@ public interface ItemReference extends NBTReference<LocalItem> {
 		throw new SimpleCommandExceptionType(TextInst.translatable("nbteditor.no_hand.all_item")).create();
 	}
 	
-	public static HandledScreenItemReference getInventoryOrArmorItem(int slot, boolean creative) {
-		if (creative) {
-			if (slot < 9)
-				return new ArmorItemReference(slot);
-			return new InventoryItemReference(slot == 45 ? 45 : (slot >= 36 ? slot - 36 : slot));
+	public static ItemReference getContainerItem(HandledScreen<?> screen, Slot slot) {
+		if (slot.inventory == MainUtil.client.player.getInventory()) {
+			return new InventoryItemReference(slot.getIndex()).setParent(
+					() -> NBTEditorClient.CURSOR_MANAGER.showBranch(screen));
 		}
-		if (slot == 40)
-			return new InventoryItemReference(45);
-		if (slot >= 36)
-			return new ArmorItemReference(slot - 36);
-		return new InventoryItemReference(slot);
-	}
-	public static ItemReference getContainerItem(int slot, HandledScreen<?> screen) {
-		if (slot == -1)
-			return new ServerItemReference(-1, screen); // "CursorItemReference"
-		
-		Slot slotObj = screen.getScreenHandler().getSlot(slot);
-		if (slotObj.inventory == MainUtil.client.player.getInventory()) {
-			return getInventoryOrArmorItem(slotObj.getIndex(), false).setParent(screen);
-		}
-		return new ServerItemReference(slot, screen);
+		return new ServerItemReference(screen, slot.id);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -140,15 +126,10 @@ public interface ItemReference extends NBTReference<LocalItem> {
 	public boolean isLockable();
 	
 	/**
-	 * Prevents a slot from being clicked while open in a container screen
-	 * @return The slot to block (0-26 inv, 27-35 hotbar) or -1 if no slot should be blocked
+	 * Prevents a slot from being clicked or swapped while open in a container screen
+	 * @return The slot to block (format: inv) or -1 if no slot should be blocked
 	 */
-	public int getBlockedInvSlot();
-	/**
-	 * Prevents a slot from being swapped (slot keybind) while open in a container screen
-	 * @return The slot to block (0-8 hotbar, 40 offhand) or -1 if no slot should be blocked
-	 */
-	public int getBlockedHotbarSlot();
+	public int getBlockedSlot();
 	
 	@Override
 	public default Identifier getId() {

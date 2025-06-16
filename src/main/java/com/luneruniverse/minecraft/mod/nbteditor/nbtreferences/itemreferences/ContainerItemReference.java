@@ -91,13 +91,8 @@ public class ContainerItemReference<L extends LocalNBT> implements ItemReference
 	}
 	
 	@Override
-	public int getBlockedInvSlot() {
-		return container instanceof ItemReference item ? item.getBlockedInvSlot() : -1;
-	}
-	
-	@Override
-	public int getBlockedHotbarSlot() {
-		return container instanceof ItemReference item ? item.getBlockedHotbarSlot() : -1;
+	public int getBlockedSlot() {
+		return container instanceof ItemReference item ? item.getBlockedSlot() : -1;
 	}
 	
 	@Override

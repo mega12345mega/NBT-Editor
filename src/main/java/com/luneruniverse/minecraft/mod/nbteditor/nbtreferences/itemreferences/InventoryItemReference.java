@@ -5,12 +5,21 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.item.ItemStack;
 
-public class InventoryItemReference extends HandledScreenItemReference {
+public class InventoryItemReference implements ItemReference {
 	
 	private final int slot;
+	private Runnable parent;
 	
+	/**
+	 * @param slot Format: inv
+	 */
 	public InventoryItemReference(int slot) {
 		this.slot = slot;
+		this.parent = NBTEditorClient.CURSOR_MANAGER::showRoot;
+	}
+	public InventoryItemReference setParent(Runnable parent) {
+		this.parent = parent;
+		return this;
 	}
 	
 	public int getSlot() {
@@ -24,14 +33,12 @@ public class InventoryItemReference extends HandledScreenItemReference {
 	
 	@Override
 	public ItemStack getItem() {
-		if (slot == 45)
-			return MainUtil.client.player.getOffHandStack();
 		return MainUtil.client.player.getInventory().getStack(slot);
 	}
 	
 	@Override
 	public void saveItem(ItemStack toSave, Runnable onFinished) {
-		MainUtil.saveItemInvSlot(slot, toSave);
+		MainUtil.saveItem(slot, toSave);
 		onFinished.run();
 	}
 	
@@ -46,24 +53,13 @@ public class InventoryItemReference extends HandledScreenItemReference {
 	}
 	
 	@Override
-	public int getBlockedInvSlot() {
-		if (slot == 45)
-			return -1;
-		return slot < 9 ? slot + 27 : slot - 9;
+	public int getBlockedSlot() {
+		return slot;
 	}
 	
 	@Override
-	public int getBlockedHotbarSlot() {
-		if (slot == 45)
-			return 40;
-		if (slot < 9)
-			return slot;
-		return -1;
-	}
-	
-	@Override
-	public Runnable getDefaultParent() {
-		return NBTEditorClient.CURSOR_MANAGER::showRoot;
+	public void showParent() {
+		parent.run();
 	}
 	
 }

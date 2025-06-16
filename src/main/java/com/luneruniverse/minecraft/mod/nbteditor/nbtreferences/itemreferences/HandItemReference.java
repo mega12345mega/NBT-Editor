@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.SlotUtil;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
@@ -45,22 +46,15 @@ public class HandItemReference implements ItemReference {
 	}
 	
 	@Override
-	public int getBlockedInvSlot() {
+	public int getBlockedSlot() {
 		if (hand == Hand.MAIN_HAND)
-			return MainUtil.client.player.getInventory().selectedSlot + 27;
-		return -1;
-	}
-	
-	@Override
-	public int getBlockedHotbarSlot() {
-		if (hand == Hand.MAIN_HAND)
-			return MainUtil.client.player.getInventory().selectedSlot;
-		return 40;
+			return SlotUtil.createHotbarInInv(MainUtil.client.player.getInventory().selectedSlot);
+		return SlotUtil.createOffHandInInv();
 	}
 	
 	@Override
 	public void showParent() {
-		NBTEditorClient.CURSOR_MANAGER.showRoot();
+		NBTEditorClient.CURSOR_MANAGER.closeRoot();
 	}
 	
 }

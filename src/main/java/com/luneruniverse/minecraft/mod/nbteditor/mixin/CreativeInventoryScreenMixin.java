@@ -18,11 +18,6 @@ import net.minecraft.screen.slot.SlotActionType;
 public class CreativeInventoryScreenMixin {
 	@Inject(method = "onMouseClick", at = @At(value = "HEAD"), cancellable = true)
 	private void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo info) {
-		if (slot != null) {
-			if (slot instanceof CreativeInventoryScreen.CreativeSlot)
-				slot = ((CreativeInventoryScreen.CreativeSlot) slot).slot;
-		}
-		
 		MixinLink.onMouseClick((CreativeInventoryScreen) (Object) this, slot, slotId, button, actionType, info);
 	}
 	@Inject(method = "onMouseClick", at = @At(value = "RETURN"))

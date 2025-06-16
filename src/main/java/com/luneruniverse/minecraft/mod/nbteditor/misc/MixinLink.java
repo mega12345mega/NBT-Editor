@@ -30,7 +30,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ServerItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
@@ -50,7 +49,6 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
@@ -191,6 +189,9 @@ public class MixinLink {
 		if (!Screen.hasControlDown())
 			return;
 		
+		if (slot instanceof CreativeInventoryScreen.CreativeSlot creativeSlot)
+			slot = creativeSlot.slot;
+		
 		if (actionType == SlotActionType.PICKUP && slot != null &&
 				(slot.inventory == MainUtil.client.player.getInventory() || !creativeInv) &&
 				(!(source instanceof InventoryScreen) || slot.id > 4)) {
@@ -209,24 +210,8 @@ public class MixinLink {
 				enchants.addEnchants(ItemTagReferences.ENCHANTMENTS.get(cursor).getEnchants());
 				ItemTagReferences.ENCHANTMENTS.set(item, enchants);
 				
-				slotId = slot.id;
-				
-				if (creativeInv) {
-					boolean armor = false;
-					if (!MVMisc.isCreativeInventoryTabSelected())
-						slotId -= 9;
-					else if (slotId < 9)
-						armor = true;
-					
-					if (armor)
-						MainUtil.saveItem(MVMisc.getEquipmentSlot(EquipmentSlot.Type.HUMANOID_ARMOR, 8 - slotId), item);
-					else
-						MainUtil.saveItemInvSlot(slotId, item);
-					source.getScreenHandler().setCursorStack(ItemStack.EMPTY);
-				} else {
-					ItemReference.getContainerItem(slotId, source).saveItem(item);
-					new ServerItemReference(-1, source).saveItem(ItemStack.EMPTY);
-				}
+				ItemReference.getContainerItem(source, slot).saveItem(item);
+				NBTEditorClient.CURSOR_MANAGER.setCursor(ItemStack.EMPTY);
 				
 				info.cancel();
 			}
@@ -237,21 +222,19 @@ public class MixinLink {
 		boolean creativeInv = (source instanceof CreativeInventoryScreen);
 		
 		Slot hoveredSlot = ((HandledScreenAccessor) source).getFocusedSlot();
+		
+		if (hoveredSlot instanceof CreativeInventoryScreen.CreativeSlot creativeSlot)
+			hoveredSlot = creativeSlot.slot;
+		
 		if (hoveredSlot != null &&
 				((creativeInv && hoveredSlot.inventory == MainUtil.client.player.getInventory()) ||
 						(!creativeInv && NBTEditorClient.SERVER_CONN.isScreenEditable())) &&
 				(!(source instanceof InventoryScreen) || hoveredSlot.id > 4) &&
 				(ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
-			ItemReference ref;
-			if (creativeInv) {
-				int slot = hoveredSlot.getIndex();
-				if (!MVMisc.isCreativeInventoryTabSelected())
-					slot += 36;
-				ref = ItemReference.getInventoryOrArmorItem(slot, true);
-			} else
-				ref = ItemReference.getContainerItem(hoveredSlot.id, source);
-			if (ClientHandledScreen.handleKeybind(keyCode, hoveredSlot.getStack(), ref))
+			if (ClientHandledScreen.handleKeybind(keyCode, hoveredSlot.getStack(),
+					ItemReference.getContainerItem(source, hoveredSlot))) {
 				info.setReturnValue(true);
+			}
 		}
 	}
 	

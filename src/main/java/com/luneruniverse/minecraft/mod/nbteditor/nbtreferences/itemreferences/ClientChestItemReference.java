@@ -67,12 +67,7 @@ public class ClientChestItemReference implements ItemReference {
 	}
 	
 	@Override
-	public int getBlockedInvSlot() {
-		return -1;
-	}
-	
-	@Override
-	public int getBlockedHotbarSlot() {
+	public int getBlockedSlot() {
 		return -1;
 	}
 	
