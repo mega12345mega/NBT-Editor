@@ -27,8 +27,8 @@ public abstract class ClientConnectionMixin {
 		if (getSide() != NetworkSide.CLIENTBOUND)
 			return;
 		
-		if (MainUtil.client.currentScreen instanceof ClientHandledScreen) {
-			if (ClientHandledScreen.isUpdatingServerInventory())
+		if (MainUtil.client.currentScreen instanceof ClientHandledScreen clientHandledScreen) {
+			if (clientHandledScreen.getServerInventoryManager().isUpdatingServer())
 				return;
 			
 			if (packet instanceof ClickSlotC2SPacket slotPacket) {

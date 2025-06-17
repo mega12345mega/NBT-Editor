@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IgnoreCloseScreenPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientScreenHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -17,6 +18,7 @@ import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.SetCursorItemS2CPacket;
+import net.minecraft.network.packet.s2c.play.SetPlayerInventoryS2CPacket;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
@@ -90,6 +92,24 @@ public class ClientPlayNetworkHandlerMixin {
 			if (!(NBTEditorClient.CURSOR_MANAGER.getCurrentRoot() instanceof CreativeInventoryScreen))
 				MainUtil.client.player.currentScreenHandler.setCursorStack(packet.contents());
 		}
+	}
+	
+	@Inject(method = "onSetPlayerInventory", at = @At("RETURN"), cancellable = true)
+	private void onSetPlayerInventory_return(SetPlayerInventoryS2CPacket packet, CallbackInfo info) {
+		if (MainUtil.client.currentScreen instanceof ClientHandledScreen clientHandledScreen)
+			clientHandledScreen.getServerInventoryManager().onSetPlayerInventoryPacket(packet);
+	}
+	
+	@Inject(method = "onInventory", at = @At("RETURN"), cancellable = true)
+	private void onInventory_return(InventoryS2CPacket packet, CallbackInfo info) {
+		if (MainUtil.client.currentScreen instanceof ClientHandledScreen clientHandledScreen)
+			clientHandledScreen.getServerInventoryManager().onInventoryPacket(packet);
+	}
+	
+	@Inject(method = "onScreenHandlerSlotUpdate", at = @At("RETURN"), cancellable = true)
+	private void onScreenHandlerSlotUpdate_return(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo info) {
+		if (MainUtil.client.currentScreen instanceof ClientHandledScreen clientHandledScreen)
+			clientHandledScreen.getServerInventoryManager().onScreenHandlerSlotUpdatePacket(packet);
 	}
 	
 	@Inject(method = "onCloseScreen", at = @At("HEAD"), cancellable = true)

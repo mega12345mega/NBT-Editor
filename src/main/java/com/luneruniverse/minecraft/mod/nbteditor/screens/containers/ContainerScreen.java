@@ -52,7 +52,7 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		
 		ItemStack[] contents = ContainerIO.read(localNBT);
 		for (int i = 0; i < contents.length; i++)
-			handler.getSlot(i).setStackNoCallbacks(contents[i] == null ? ItemStack.EMPTY : contents[i]);
+			handler.getSlot(i).setStackNoCallbacks(contents[i] == null ? ItemStack.EMPTY : contents[i].copy());
 	}
 	
 	@Override
