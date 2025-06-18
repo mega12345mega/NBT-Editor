@@ -192,7 +192,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 			navigationClicked = true;
 			client.setScreen(new FancyConfirmScreen(value -> {
 				if (value) {
-					this.handler.getInventory().clear();
+					handler.getInventory().clear();
+					dynamicItems = new DynamicItems();
 					save();
 				}
 				
@@ -303,8 +304,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 	
 	private void save() {
 		ItemStack[] items = new ItemStack[54];
-		for (int i = 0; i < this.handler.getInventory().size(); i++)
-			items[i] = this.handler.getInventory().getStack(i).copy();
+		for (int i = 0; i < handler.getInventory().size(); i++)
+			items[i] = handler.getInventory().getStack(i).copy();
 		
 		ClientChestHelper.setPage(PAGE, items, dynamicItems);
 	}
