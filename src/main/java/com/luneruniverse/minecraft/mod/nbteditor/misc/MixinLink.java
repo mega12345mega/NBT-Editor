@@ -49,6 +49,7 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.ComponentChanges;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
@@ -344,5 +345,16 @@ public class MixinLink {
 	
 	
 	public static final Map<Thread, ItemStack> ITEM_BEING_RENDERED = Collections.synchronizedMap(new WeakHashMap<>());
+	
+	
+	public static final Set<Thread> SET_CHANGES = Collections.synchronizedSet(new HashSet<>());
+	public static void setChanges(ItemStack item, ComponentChanges changes) {
+		try {
+			SET_CHANGES.add(Thread.currentThread());
+			item.applyChanges(changes);
+		} finally {
+			SET_CHANGES.remove(Thread.currentThread());
+		}
+	}
 	
 }

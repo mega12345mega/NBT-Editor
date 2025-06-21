@@ -69,6 +69,10 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				})
 				.range(null, "1.21.3", () -> output.add("toggled.BuiltinModelItemRendererMixin"))
 				.run();
+		Version.newSwitch()
+				.range("1.21.2", null, () -> output.add("toggled.ClientPlayNetworkHandlerMixin"))
+				.range(null, "1.21.1", () -> {})
+				.run();
 	}
 	
 }

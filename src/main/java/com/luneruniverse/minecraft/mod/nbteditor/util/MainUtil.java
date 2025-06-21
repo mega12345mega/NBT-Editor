@@ -70,11 +70,11 @@ public class MainUtil {
 	 */
 	public static void clickCreativeStack(ItemStack item, int slot) {
 		if (NBTEditorClient.SERVER_CONN.isEditingAllowed())
-			MVMisc.sendC2SPacket(new CreativeInventoryActionC2SPacket(slot, item));
+			MVMisc.sendC2SPacket(new CreativeInventoryActionC2SPacket(slot, item.copy()));
 	}
 	public static void dropCreativeStack(ItemStack item) {
 		if (NBTEditorClient.SERVER_CONN.isEditingAllowed() && !item.isEmpty())
-			MVMisc.sendC2SPacket(new CreativeInventoryActionC2SPacket(-1, item));
+			MVMisc.sendC2SPacket(new CreativeInventoryActionC2SPacket(-1, item.copy()));
 	}
 	
 	public static void saveItem(Hand hand, ItemStack item) {
