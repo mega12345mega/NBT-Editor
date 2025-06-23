@@ -12,6 +12,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IgnoreCloseScreenP
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.InventoryItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -138,6 +139,20 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		return false;
 	}
 	
+	@Override
+	public final void tick() {
+		super.tick();
+		Version.newSwitch()
+				.range("1.17.1", null, () -> {})
+				.range(null, "1.17", () -> {
+					if (client.player.isAlive() && !client.player.isRemoved())
+						handledScreenTick();
+				})
+				.run();
+	}
+	@Override
+	protected void handledScreenTick() {}
+	
 	public void close() {
 		NBTEditorClient.CURSOR_MANAGER.closeRoot();
 	}
@@ -186,7 +201,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 						case QUICK_MOVE -> {
 							ItemStack prevItem = slot.getStack().copy();
 							LockableSlot.unlockDuring(() -> handler.onSlotClick(slot.id, button, actionType, MainUtil.client.player));
-							slot.setStack(prevItem);
+							slot.setStackNoCallbacks(prevItem);
 							serverInv.updateServer();
 						}
 						case THROW -> {

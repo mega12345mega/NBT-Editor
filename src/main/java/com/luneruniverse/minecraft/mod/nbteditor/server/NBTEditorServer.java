@@ -37,6 +37,7 @@ import net.minecraft.block.entity.LecternBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.Entity.RemovalReason;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.nbt.NbtCompound;
@@ -243,6 +244,10 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		if (packet.isRecreate() || !entity.getUuid().equals(newUUID) || entity.getType() != entityType) {
 			Entity vehicle = entity.getVehicle();
 			Vec3d pos = entity.getPos();
+			float yaw = entity.getYaw();
+			float bodyYaw = (entity instanceof LivingEntity livingEntity ? livingEntity.bodyYaw : 0);
+			float headYaw = entity.getHeadYaw();
+			float pitch = entity.getPitch();
 			entity.streamPassengersAndSelf().forEach(passengerOrSelf -> {
 				passengerOrSelf.stopRiding();
 				passengerOrSelf.remove(RemovalReason.DISCARDED);
@@ -250,6 +255,10 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 			entity = ServerMVMisc.createEntity(entityType, world);
 			entity.setUuid(newUUID);
 			entity.setPosition(pos);
+			entity.setYaw(yaw);
+			entity.setBodyYaw(bodyYaw);
+			entity.setHeadYaw(headYaw);
+			entity.setPitch(pitch);
 			world.spawnEntity(entity);
 			readEntityNbtWithPassengers(world, entity, packet.getNbt());
 			if (vehicle != null)

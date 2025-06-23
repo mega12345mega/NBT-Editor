@@ -27,13 +27,10 @@ public abstract class ClientConnectionMixin {
 		if (getSide() != NetworkSide.CLIENTBOUND)
 			return;
 		
-		if (MainUtil.client.currentScreen instanceof ClientHandledScreen clientHandledScreen) {
-			if (clientHandledScreen.getServerInventoryManager().isUpdatingServer())
-				return;
-			
+		if (MainUtil.client.currentScreen instanceof ClientHandledScreen) {
 			if (packet instanceof ClickSlotC2SPacket slotPacket) {
 				info.cancel();
-				NBTEditor.LOGGER.warn("Tried to send ClickSlotC2SPacket while not updating server inventory: slot=" +
+				NBTEditor.LOGGER.warn("Tried to send a slot click packet while on a ClientHandledScreen: slot=" +
 						slotPacket.getSlot() + ", button=" + slotPacket.getButton() + ", action=" + slotPacket.getActionType());
 			}
 		}

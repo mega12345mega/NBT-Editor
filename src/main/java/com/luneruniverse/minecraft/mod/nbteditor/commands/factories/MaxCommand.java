@@ -7,6 +7,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVEnchantments;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
@@ -33,17 +34,21 @@ public class MaxCommand extends ClientCommand {
 	
 	@Override
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
+		int maxLevel = Version.<Integer>newSwitch()
+				.range("1.17.1", null, 255)
+				.range(null, "1.17", 32767)
+				.get();
 		builder
 				.then(literal("cursed")
 						.then(literal("all")
-							.then(argument("level", IntegerArgumentType.integer(1, 32767)).executes(context -> max(context, context.getArgument("level", Integer.class), true, true)))
+							.then(argument("level", IntegerArgumentType.integer(1, maxLevel)).executes(context -> max(context, context.getArgument("level", Integer.class), true, true)))
 							.executes(context -> max(context, -1, true, true)))
-						.then(argument("level", IntegerArgumentType.integer(1, 32767)).executes(context -> max(context, context.getArgument("level", Integer.class), false, true)))
+						.then(argument("level", IntegerArgumentType.integer(1, maxLevel)).executes(context -> max(context, context.getArgument("level", Integer.class), false, true)))
 						.executes(context -> max(context, -1, false, true)))
 				.then(literal("all")
-						.then(argument("level", IntegerArgumentType.integer(1, 32767)).executes(context -> max(context, context.getArgument("level", Integer.class), true, false)))
+						.then(argument("level", IntegerArgumentType.integer(1, maxLevel)).executes(context -> max(context, context.getArgument("level", Integer.class), true, false)))
 						.executes(context -> max(context, -1, true, false)))
-				.then(argument("level", IntegerArgumentType.integer(1, 32767)).executes(context -> max(context, context.getArgument("level", Integer.class), false, false)))
+				.then(argument("level", IntegerArgumentType.integer(1, maxLevel)).executes(context -> max(context, context.getArgument("level", Integer.class), false, false)))
 				.executes(context -> max(context, -1, false, false));
 	}
 	private int max(CommandContext<FabricClientCommandSource> context, int enchantLevel, boolean allEnchants, boolean cursed) throws CommandSyntaxException {

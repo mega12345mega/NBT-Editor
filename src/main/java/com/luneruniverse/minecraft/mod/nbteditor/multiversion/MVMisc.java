@@ -79,6 +79,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SpawnEggItem;
@@ -741,6 +742,15 @@ public class MVMisc {
 		return Version.<CreativeInventoryScreen>newSwitch()
 				.range("1.19.3", null, () -> new CreativeInventoryScreen(player, player.networkHandler.getEnabledFeatures(), MainUtil.client.options.getOperatorItemsTab().getValue()))
 				.range(null, "1.19.2", () -> Reflection.newInstance(CreativeInventoryScreen.class, new Class<?>[] {PlayerEntity.class}, player))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> Item_getName =
+			Reflection.getOptionalMethod(Item.class, "method_7848", MethodType.methodType(Text.class));
+	public static Text getName(Item item) {
+		return Version.<Text>newSwitch()
+				.range("1.21.2", null, () -> item.getName())
+				.range(null, "1.21.1", () -> Item_getName.get().invoke(item))
 				.get();
 	}
 	

@@ -7,6 +7,7 @@ import java.util.stream.IntStream;
 
 import com.luneruniverse.minecraft.mod.nbteditor.addons.events.ItemLostCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ActionResult;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.CursorHistoryScreen;
@@ -20,7 +21,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.ClickEvent.Action;
 import net.minecraft.text.HoverEvent;
-import net.minecraft.util.ActionResult;
 
 public class GetLostItemCommand extends ClientCommand {
 	

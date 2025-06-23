@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -14,7 +15,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 
 public record FancyTextStyleOptionNode(StyleOption option, String value, List<FancyTextNode> contents) implements FancyTextNode {
@@ -63,7 +63,7 @@ public record FancyTextStyleOptionNode(StyleOption option, String value, List<Fa
 			case INSERTION -> style.withInsertion(value);
 			case FONT -> {
 				try {
-					yield style.withFont(Identifier.of(value));
+					yield style.withFont(IdentifierInst.of(value));
 				} catch (InvalidIdentifierException e) {
 					yield style.withFont(Style.DEFAULT_FONT_ID);
 				}

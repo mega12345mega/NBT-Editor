@@ -25,11 +25,11 @@ public class ThreadExecutorMixin {
 	private void send_new(Runnable runnable, CallbackInfo info) {
 		stackTraces.put(runnable, new Exception("Stack trace"));
 	}
-	@Inject(method = "method_16901(Ljava/lang/Object;)V", at = @At("HEAD"), remap = false)
+	@Inject(method = "method_18858(Ljava/lang/Runnable;)V", at = @At("HEAD"), remap = false)
 	@Group(name = "send", min = 1)
 	@SuppressWarnings("target")
-	private void send_old(Object runnable, CallbackInfo info) {
-		stackTraces.put((Runnable) runnable, new Exception("Stack trace"));
+	private void send_old(Runnable runnable, CallbackInfo info) {
+		stackTraces.put(runnable, new Exception("Stack trace"));
 	}
 	
 	private final WeakHashMap<Thread, Runnable> executeTask_task = new WeakHashMap<>();

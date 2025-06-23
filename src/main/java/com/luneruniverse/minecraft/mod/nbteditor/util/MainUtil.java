@@ -21,6 +21,7 @@ import java.util.zip.ZipException;
 import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ActionResult;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
@@ -52,7 +53,6 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -259,7 +259,7 @@ public class MainUtil {
 			if (name != null)
 				return name;
 		}
-		return item.getItem().getName();
+		return MVMisc.getName(item.getItem());
 	}
 	public static Text getCustomItemNameSafely(ItemStack item) {
 		if (NBTManagers.COMPONENTS_EXIST)

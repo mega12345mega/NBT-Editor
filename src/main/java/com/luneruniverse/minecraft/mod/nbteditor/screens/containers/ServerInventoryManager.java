@@ -15,7 +15,6 @@ import net.minecraft.screen.slot.Slot;
 public class ServerInventoryManager {
 	
 	private final Inventory serverInv;
-	private boolean updatingServer;
 	
 	public ServerInventoryManager() {
 		Inventory playerInv = MainUtil.client.player.getInventory();
@@ -66,24 +65,14 @@ public class ServerInventoryManager {
 	}
 	
 	public void updateServer() {
-		try {
-			updatingServer = true;
-			
-			Inventory playerInv = MainUtil.client.player.getInventory();
-			for (int i = 0; i < serverInv.size(); i++) {
-				ItemStack item = playerInv.getStack(i);
-				if (!ItemStack.areEqual(item, serverInv.getStack(i))) {
-					MainUtil.clickCreativeStack(item, SlotUtil.invToContainer(i));
-					serverInv.setStack(i, item.copy());
-				}
+		Inventory playerInv = MainUtil.client.player.getInventory();
+		for (int i = 0; i < serverInv.size(); i++) {
+			ItemStack item = playerInv.getStack(i);
+			if (!ItemStack.areEqual(item, serverInv.getStack(i))) {
+				MainUtil.clickCreativeStack(item, SlotUtil.invToContainer(i));
+				serverInv.setStack(i, item.copy());
 			}
-		} finally {
-			updatingServer = false;
 		}
-	}
-	
-	public boolean isUpdatingServer() {
-		return updatingServer;
 	}
 	
 }

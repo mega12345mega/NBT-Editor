@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -118,13 +119,22 @@ public class CursorManager {
 		}
 		
 		if (currentRootClosed) {
-			ItemStack cursor = currentBranch.getScreenHandler().getCursorStack();
-			if (currentRootHasServerCursor) {
-				MainUtil.get(cursor, true);
-				cursor = ItemStack.EMPTY;
+			if (currentBranch != currentRoot) {
+				ItemStack cursor = currentBranch.getScreenHandler().getCursorStack();
+				if (currentRootHasServerCursor) {
+					if (Version.<Boolean>newSwitch()
+							.range("1.17.1", null, true)
+							.range(null, "1.17", false)
+							.get()) {
+						MainUtil.get(cursor, true);
+					} else {
+						MainUtil.dropCreativeStack(cursor);
+					}
+					cursor = ItemStack.EMPTY;
+				}
+				currentRoot.getScreenHandler().setCursorStack(cursor);
+				currentRoot.getScreenHandler().setPreviousCursorStack(cursor);
 			}
-			currentRoot.getScreenHandler().setCursorStack(cursor);
-			currentRoot.getScreenHandler().setPreviousCursorStack(cursor);
 			MainUtil.client.player.closeScreen(); // will trigger #onNoScreenSet()
 			return;
 		}

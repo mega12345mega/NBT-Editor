@@ -78,8 +78,12 @@ public class BookScreenMixin extends Screen {
 		}
 		
 		openBtn = addDrawableChild(MVMisc.newButton(16, 64, 100, 20, TextInst.translatable("nbteditor.book.open"), btn -> {
-			getReference(ref -> MainUtil.client.setScreen(
-					new com.luneruniverse.minecraft.mod.nbteditor.screens.factories.BookScreen(ref, pageIndex)));
+			getReference(ref -> {
+				if ((Object) this instanceof LecternScreen)
+					MainUtil.client.player.closeHandledScreen();
+				MainUtil.client.setScreen(
+						new com.luneruniverse.minecraft.mod.nbteditor.screens.factories.BookScreen(ref, Math.max(0, pageIndex)));
+			});
 		}));
 		convertBtn = addDrawableChild(MVMisc.newButton(16, 64 + 24, 100, 20, TextInst.translatable("nbteditor.book.convert"),
 				btn -> getReference(itemRef -> {

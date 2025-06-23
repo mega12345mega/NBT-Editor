@@ -92,7 +92,7 @@ public class ContainerIO {
 	private static final EntityContainerIO HORSE_IO = EntityContainerIO.forNBTIO(new SpecificItemsContainerIO("SaddleItem", TagNames.ARMOR_ITEM));
 	private static final EntityContainerIO BASIC_HORSE_IO = EntityContainerIO.forNBTIO(new SpecificItemsContainerIO("SaddleItem"));
 	private static final EntityContainerIO DONKEY_IO = EntityContainerIO.forNBTIO(new ConcatNonItemNBTContainerIO(new SpecificItemsContainerIO("SaddleItem"), new DonkeyChestContainerIO(false)));
-	private static final EntityContainerIO LLAMA_IO = EntityContainerIO.forNBTIO(new ConcatNonItemNBTContainerIO(new SpecificItemsContainerIO(TagNames.ARMOR_ITEM), new DonkeyChestContainerIO(true)));
+	private static final EntityContainerIO LLAMA_IO = EntityContainerIO.forNBTIO(new ConcatNonItemNBTContainerIO(new SpecificItemsContainerIO(TagNames.DECOR_ITEM), new DonkeyChestContainerIO(true)));
 	private static final EntityContainerIO CHEST_BOAT_IO = new EntityTagContainerIO(new ConstSizeContainerIO(27));
 	
 	public static void loadClass() {}
