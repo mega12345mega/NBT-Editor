@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.BookCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
@@ -34,12 +35,13 @@ import net.minecraft.util.Formatting;
 
 @Mixin(BookScreen.class)
 public class BookScreenMixin extends Screen {
+	
 	@Shadow
 	private Contents contents;
 	@Shadow
 	private int pageIndex;
 	
-	private boolean writtenBook;
+	private boolean renderLogo;
 	private ButtonWidget openBtn;
 	private ButtonWidget convertBtn;
 	
@@ -69,11 +71,19 @@ public class BookScreenMixin extends Screen {
 		getReference().thenAccept(ref -> MainUtil.client.execute(() -> ref.ifPresent(consumer)));
 	}
 	
+	private void updateButtons(Contents contents) {
+		boolean editable = (!((Object) this instanceof LecternScreen) || NBTEditorClient.SERVER_CONN.isEditingExpanded()) &&
+				NBTEditorClient.SERVER_CONN.isEditingAllowed() && MVMisc.isWrittenBookContents(contents);
+		renderLogo = editable;
+		openBtn.visible = editable;
+		convertBtn.visible = editable;
+	}
+	
 	@Inject(method = "init", at = @At("TAIL"))
 	private void init(CallbackInfo info) {
 		if (MainUtil.client.currentScreen instanceof
 				com.luneruniverse.minecraft.mod.nbteditor.screens.factories.BookScreen) { // Preview mode
-			writtenBook = true;
+			renderLogo = true;
 			return;
 		}
 		
@@ -88,7 +98,6 @@ public class BookScreenMixin extends Screen {
 		convertBtn = addDrawableChild(MVMisc.newButton(16, 64 + 24, 100, 20, TextInst.translatable("nbteditor.book.convert"),
 				btn -> getReference(itemRef -> {
 					if (BookCommand.convertBookToWritable(itemRef)) {
-						writtenBook = false;
 						openBtn.visible = false;
 						convertBtn.visible = false;
 						if (!((Object) this instanceof LecternScreen))
@@ -96,16 +105,12 @@ public class BookScreenMixin extends Screen {
 					}
 				})));
 		
-		writtenBook = MVMisc.isWrittenBookContents(contents);
-		openBtn.visible = writtenBook;
-		convertBtn.visible = writtenBook;
+		updateButtons(contents);
 	}
 	
 	@Inject(method = "setPageProvider", at = @At("HEAD"))
 	private void setPageProvider(Contents contents, CallbackInfo info) {
-		writtenBook = MVMisc.isWrittenBookContents(contents);
-		openBtn.visible = writtenBook;
-		convertBtn.visible = writtenBook;
+		updateButtons(contents);
 	}
 	
 	@Inject(method = "addCloseButton", at = @At("HEAD"), cancellable = true)
@@ -121,14 +126,15 @@ public class BookScreenMixin extends Screen {
 	@Inject(method = "render", at = @At("TAIL"))
 	@Group(name = "render", min = 1)
 	private void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo info) {
-		if (writtenBook)
+		if (renderLogo)
 			MainUtil.renderLogo(MVDrawableHelper.getMatrices(context));
 	}
 	@Inject(method = "method_25394(Lnet/minecraft/class_4587;IIF)V", at = @At("TAIL"))
 	@Group(name = "render", min = 1)
 	@SuppressWarnings("target")
 	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
-		if (writtenBook)
+		if (renderLogo)
 			MainUtil.renderLogo(matrices);
 	}
+	
 }

@@ -25,8 +25,11 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 
 import net.minecraft.block.AbstractSignBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.HangingSignBlock;
+import net.minecraft.block.WallHangingSignBlock;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.HangingSignItem;
 import net.minecraft.item.SignItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.ClickEvent;
@@ -57,23 +60,34 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	public SignboardScreen(NBTReference<L> ref) {
 		super(TextInst.of("Signboard"), ref);
 		
+		String woodType;
+		boolean hanging;
 		if (NEW_FEATURES) {
 			Block block = null;
 			if (ref instanceof ItemReference itemRef)
 				block = ((SignItem) itemRef.getItem().getItem()).getBlock();
 			else if (ref instanceof BlockReference blockRef)
 				block = blockRef.getBlock();
-			this.texture = IdentifierInst.of("minecraft", "textures/block/" +
-					AbstractSignBlock.getWoodType(block).name() + "_planks.png");
+			woodType = AbstractSignBlock.getWoodType(block).name();
+			hanging = block instanceof HangingSignBlock || block instanceof WallHangingSignBlock;
 		} else {
-			this.texture = IdentifierInst.of("minecraft", "textures/block/" +
-					ref.getId().getPath().replace("_sign", "_planks") + ".png");
+			String id = ref.getId().getPath();
+			woodType = id.replaceAll("(_hanging)?_sign$", "");
+			hanging = id.matches("_hanging_sign$");
 		}
+		String textureName = switch (woodType) {
+			case "crimson" -> "stripped_crimson_stem";
+			case "warped" -> "stripped_warped_stem";
+			case "bamboo" -> "bamboo_planks";
+			default -> hanging ? "stripped_" + woodType + "_log" : woodType + "_planks";
+		};
+		texture = IdentifierInst.of("minecraft", "textures/block/" + textureName + ".png");
 		
 		if (NBTManagers.COMPONENTS_EXIST) {
 			if (localNBT instanceof LocalItem localItem) {
 				NbtCompound nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getEditableItem());
-				nbt.putString("id", "minecraft:sign");
+				nbt.putString("id",
+						localItem.getItemType() instanceof HangingSignItem ? "minecraft:hanging_sign" : "minecraft:sign");
 				ItemTagReferences.BLOCK_ENTITY_DATA.set(localItem.getEditableItem(), nbt);
 			}
 		}
