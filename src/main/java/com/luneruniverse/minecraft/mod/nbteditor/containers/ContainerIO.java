@@ -83,8 +83,8 @@ public class ContainerIO {
 			.get();
 	private static final BlockEntityTagContainerIO DECORATED_POT_IO = Version.<BlockEntityTagContainerIO>newSwitch()
 			.range("1.20.5", null, () -> new BlockEntityTagContainerIO(new ConstSizeContainerIO(1), new SpecificItemsContainerIO("item")))
-			.range("1.20.0", "1.20.4", () -> new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item").withItemSupport(BlockEntityType.DECORATED_POT)))
-			.range(null, "1.19.4", () -> null)
+			.range("1.20.3", "1.20.4", () -> new BlockEntityTagContainerIO(new SpecificItemsContainerIO("item").withItemSupport(BlockEntityType.DECORATED_POT)))
+			.range(null, "1.20.2", () -> null)
 			.get();
 	private static final BlockEntityTagContainerIO CRAFTER_IO = new BlockEntityTagContainerIO(new ConstSizeContainerIO(9));
 	private static final ItemContainerIO SPAWN_EGG_IO = new SpawnEggContainerIO();
@@ -131,9 +131,12 @@ public class ContainerIO {
 					registerBlockEntityTagIO((BlockItem) Items.CHISELED_BOOKSHELF, CHISELED_BOOKSHELF_IO);
 					registerBlockEntityTagIO((BlockItem) Items.SUSPICIOUS_SAND, SUSPICIOUS_SAND_IO);
 					registerBlockEntityTagIO((BlockItem) Items.SUSPICIOUS_GRAVEL, SUSPICIOUS_SAND_IO);
-					registerBlockEntityTagIO((BlockItem) Items.DECORATED_POT, DECORATED_POT_IO);
 				})
 				.range(null, "1.19.4", () -> {})
+				.run();
+		Version.newSwitch()
+				.range("1.20.3", null, () -> registerBlockEntityTagIO((BlockItem) Items.DECORATED_POT, DECORATED_POT_IO))
+				.range(null, "1.20.2", () -> {})
 				.run();
 		Version.newSwitch()
 				.range("1.21.0", null, () -> registerBlockEntityTagIO((BlockItem) Items.CRAFTER, CRAFTER_IO))

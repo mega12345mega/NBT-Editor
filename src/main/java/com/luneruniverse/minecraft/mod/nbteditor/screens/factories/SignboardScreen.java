@@ -72,15 +72,19 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			hanging = block instanceof HangingSignBlock || block instanceof WallHangingSignBlock;
 		} else {
 			String id = ref.getId().getPath();
-			woodType = id.replaceAll("(_hanging)?_sign$", "");
-			hanging = id.matches("_hanging_sign$");
+			woodType = id.replaceAll("(_wall)?(_hanging)?_sign$", "");
+			hanging = id.matches("^[a-z_]+_hanging_sign$");
 		}
-		String textureName = switch (woodType) {
-			case "crimson" -> "stripped_crimson_stem";
-			case "warped" -> "stripped_warped_stem";
-			case "bamboo" -> "bamboo_planks";
-			default -> hanging ? "stripped_" + woodType + "_log" : woodType + "_planks";
-		};
+		String textureName;
+		if (hanging) {
+			textureName = switch (woodType) {
+				case "crimson" -> "stripped_crimson_stem";
+				case "warped" -> "stripped_warped_stem";
+				case "bamboo" -> "bamboo_planks";
+				default -> "stripped_" + woodType + "_log";
+			};
+		} else
+			textureName = woodType + "_planks";
 		texture = IdentifierInst.of("minecraft", "textures/block/" + textureName + ".png");
 		
 		if (NBTManagers.COMPONENTS_EXIST) {

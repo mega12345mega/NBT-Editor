@@ -79,9 +79,11 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.HangingSignItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.SignItem;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
@@ -92,6 +94,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
+import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.ClickEvent;
@@ -740,8 +743,14 @@ public class MVMisc {
 	
 	public static CreativeInventoryScreen newCreativeInventoryScreen(ClientPlayerEntity player) {
 		return Version.<CreativeInventoryScreen>newSwitch()
-				.range("1.19.3", null, () -> new CreativeInventoryScreen(player, player.networkHandler.getEnabledFeatures(), MainUtil.client.options.getOperatorItemsTab().getValue()))
-				.range(null, "1.19.2", () -> Reflection.newInstance(CreativeInventoryScreen.class, new Class<?>[] {PlayerEntity.class}, player))
+				.range("1.21.0", null, () -> new CreativeInventoryScreen(
+						player, player.networkHandler.getEnabledFeatures(), MainUtil.client.options.getOperatorItemsTab().getValue()))
+				.range("1.19.3", "1.20.6", () -> Reflection.newInstance(CreativeInventoryScreen.class,
+						new Class<?>[] {PlayerEntity.class, FeatureSet.class, boolean.class},
+						player, player.networkHandler.getEnabledFeatures(), MainUtil.client.options.getOperatorItemsTab().getValue()))
+				.range(null, "1.19.2", () -> Reflection.newInstance(CreativeInventoryScreen.class,
+						new Class<?>[] {PlayerEntity.class},
+						player))
 				.get();
 	}
 	
@@ -751,6 +760,16 @@ public class MVMisc {
 		return Version.<Text>newSwitch()
 				.range("1.21.2", null, () -> item.getName())
 				.range(null, "1.21.1", () -> Item_getName.get().invoke(item))
+				.get();
+	}
+	
+	public static boolean isSignItem(Item item) {
+		if (item instanceof SignItem)
+			return true;
+		return Version.<Boolean>newSwitch()
+				.range("1.20.0", null, () -> false)
+				.range("1.19.3", "1.19.4", () -> item instanceof HangingSignItem)
+				.range(null, "1.19.2", () -> false)
 				.get();
 	}
 	
