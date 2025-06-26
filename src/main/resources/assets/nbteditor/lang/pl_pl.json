@@ -37,6 +37,7 @@
 	
 	"nbteditor.editor.save": "Zapisz",
 	"nbteditor.editor.saving": "Trwa Zapisywanie...",
+	"nbteditor.editor.ref_broken": "Saving is blocked; the NBT reference has been broken,\nso there is nowhere to save data. Copy important NBT\ndata before closing! (The expand button will allow\nyou to copy everything at once if no tags are selected)",
 	"nbteditor.editor.name": "Nazwa",
 	
 	"nbteditor.editor.unsaved.title": "NBT nie zostało zapisane!",
@@ -60,6 +61,8 @@
 	"nbteditor.nbt.cut": "Wytnij",
 	"nbteditor.nbt.paste": "Wklej",
 	"nbteditor.nbt.rename": "Zmień nazwę",
+	
+	"nbteditor.nbt.key": "Nazwa",
 	
 	"nbteditor.nbt.overwrite.title": "Ta nazwa już istnieje!",
 	"nbteditor.nbt.overwrite.desc": "Czy chcesz ją nadpisać?",
@@ -202,6 +205,7 @@
 	"nbteditor.hide_flags.tooltip": "Etykietka",
 	"nbteditor.hide_flags.stored_enchantments": "Zaklęcia",
 	"nbteditor.hide_flags.trim": "Ozdobienie Zbroi",
+	"nbteditor.hide_flags.jukebox_playable": "Odtwarzalny w szafie grającej", 
 	
 	"nbteditor.item_size.uncompressed": "§6Rozmiar NBT: %s",
 	"nbteditor.item_size.compressed": "§6Rozmiar NBT (Skompresowany): %s",
@@ -217,6 +221,12 @@
 	"nbteditor.keybind.page.prev": "§6 do poprzedniej strony!",
 	"nbteditor.keybind.page.next_jump": "\n§6aby przejść do następnej strony!",
 	"nbteditor.keybind.page.prev_jump": "\n§6aby przejść do poprzedniej strony!",
+	"nbteditor.keybind.formatted_text.shadow": "§6§lAlt§r§6 aby ustawić kolor cieni!",
+	"nbteditor.keybind.formatted_text.custom_color": "§6§lCtrl + Shift + C",
+	"nbteditor.keybind.formatted_text.events": "§6§lCtrl + Shift + E",
+	"nbteditor.keybind.formatted_text.insertion": "§6§lCtrl + Shift + I",
+	"nbteditor.keybind.formatted_text.font": "§6§lCtrl + Shift + F",
+	"nbteditor.keybind.formatted_text.reset": "§6§lCtrl + \\",
 	
 	"nbteditor.skull.invalid_player_name": "§cTa nazwa gracza jest nieprawidłowa!",
 	
@@ -317,10 +327,12 @@
 	"nbteditor.multi_line_text.regex.on": "☑",
 	"nbteditor.multi_line_text.regex.off": "☐",
 	"nbteditor.formatted_text.custom_color": "Niestandardowy Kolor",
+	"nbteditor.formatted_text.custom_color.shadow": "Niestandardowy kolor cieni",
 	"nbteditor.formatted_text.events": "Zdarzenia Kliknięcia i Najechania",
 	"nbteditor.formatted_text.click_event_value": "Wartość Po Kliknięciu",
 	"nbteditor.formatted_text.hover_event_value": "Wartość Po Najechaniu",
-	"nbteditor.formatted_text.tip": "Użyj Ctrl+Shift+C dla niestandardowych kolorów & Ctrl+Shift+E dla zdarzeń",
+	"nbteditor.formatted_text.insertion": "Insertion",
+	"nbteditor.formatted_text.font": "Czcionka",
 	"nbteditor.color_selector.hue": "Odcień: %d°",
 	
 	"nbteditor.config": "Konfiguracja NBT Editor",
@@ -447,8 +459,10 @@
 	
 	
 	"nbteditor.configurable.list.move": "Przenieś",
+	"nbteditor.configurable.list.move.index": "Index",
 	"nbteditor.configurable.list.duplicate": "Duplikuj",
 	"nbteditor.configurable.list.duplicate.any_amount": "Shift dla dowolnej ilości",
+	"nbteditor.configurable.list.duplicate.amount": "# nowych egzemplarzy",
 	"nbteditor.configurable.list.remove": "Usuń",
 	
 	"nbteditor.effect_list_arg_type.expected.space": "Oczekiwano spacji",
@@ -456,8 +470,8 @@
 	"nbteditor.effect_list_arg_type.invalid.arg": "Nieprawidłowy argument",
 	"nbteditor.effect_list_arg_type.invalid.value": "Nieprawidłowa wartość",
 	
-	"nbteditor.fancy_text_arg_type.invalid.event_type": "Nieprawidłowe zdarzenie kliknięcia lub najechania",
-	"nbteditor.fancy_text_arg_type.invalid.entity": "To stworzenie nie istnieje",
+	"nbteditor.fancy_text_arg_type.custom_color": "Niestandardowy kolor (#RRGGBB;)", 
+	"nbteditor.fancy_text_arg_type.shadow_color": "Kolor cieni (&_<color>)",
 	"nbteditor.fancy_text_arg_type.stringify_unsupported": "§cTen tekst zawiera zdarzenia najechania lub formatowanie, które nie może być w pełni odtworzone",
 	
 	"nbteditor.chat_length_warning_1": "OSTRZEŻENIE: Tekst zostanie przycięty do",
@@ -546,10 +560,10 @@
 	"nbteditor.help.factories_7": "§6display [name | lore | hideflags] [<argumenty>]: §7Edytuj nazwy, historię i ukryte flagi.",
 	"nbteditor.help.factories_8": "§6enchantments: §7Edytuj zaklęcia.",
 	"nbteditor.help.factories_9": "§6max [cursed] [all] [<poziom>]: §7Ustal maksymalne poziomy zaklęć przedmiotu.",
-	"nbteditor.help.factories_10": "§6maxstacksize (default | <rozmiar>): §7Ustaw maksymalny rozmiar ilości przedmiotu.",
+	"nbteditor.help.factories_10": "§6maxstacksize (default | <rozmiar>): §7Ustaw maksymalny rozmiar ilości przedmiotu (Tylko 1.20.5+)",
 	"nbteditor.help.factories_11": "§6randomuuid [add | remove]: §7Dodaj losowy UUID do przedmiotu.",
 	"nbteditor.help.factories_12": "§6signature (add | remove | edit <nowy podpis>): §7Dodaj podpis.",
-	"nbteditor.help.factories_13": "§6signboard [new <typ> | import]: §7Edytuj tabliczki.",
+	"nbteditor.help.factories_13": "§6signboard [new <typ>]: §7Edytuj tabliczki.",
 	"nbteditor.help.factories_14": "§6unbindskull: §7Usuń powiązanie głowy z pierwotnym właścicielem.",
 	"nbteditor.help.factories_15": "§6unbreakable: §7Przełącz niezniszczalny tag przedmiotu.",
 	"nbteditor.help.factories_16": "§7--------------------",
@@ -558,8 +572,8 @@
 	"nbteditor.help.text_format_2": "§6Pomoc: Formatowanie Tekstu",
 	"nbteditor.help.text_format_3": "§7Używane zamiast JSON do formatowania tekstu.",
 	"nbteditor.help.text_format_4": "§7Można przełączyć z powrotem na JSON w §6/nbteditor config",
-	"nbteditor.help.text_format_5": "[FORMAT] §7Formatowanie używa \\& dla [run_command]{/get preset colorcodes}([show_text]{/get preset colorcodes}(§9§nkodów kolorów))",
-	"nbteditor.help.text_format_6": "§7Zmieniając kolory, formatowanie zostaje wyczyszczone dla spójności.",
+	"nbteditor.help.text_format_5": "[FORMAT] §7Formatowanie używa \\& dla [run_command]{/get preset colorcodes}([show_text]{/get preset colorcodes}(§9§nkodów kolorów)) oraz wspiera niestandardowe kolory (\\&#RRGGBB;)",
+	"nbteditor.help.text_format_6": "§7Podczas zmiany kolorów format nie jest czyszczony; użyj &r",
 	"nbteditor.help.text_format_7": "§7Zdarzenia: §6[<nazwa_zdarzenia>]{<wartość_zdarzenia>}(<tekst>)",
 	"nbteditor.help.text_format_8": "§7Przykład: §6[run_command]{/say kliknąłeś!}(&6Kliknij mnie!)",
 	"nbteditor.help.text_format_9": "§7Wartość zdarzenia §6[show_text]§7 używa sformatowanego tekstu.",
@@ -575,7 +589,7 @@
 	"nbteditor.credits_6": "§7Przeniesione do Fabric na stronę klienta przez mega12345mega",
 	"nbteditor.credits_7": "",
 	"nbteditor.credits_8": "§6zh_cn: hyplant, Clexus, GTedd",
-	"nbteditor.credits_9": "§6pl_pl: Xantrisse",
+	"nbteditor.credits_9": "§6pl_pl: Xantrisse, papa_louie09",
 	"nbteditor.credits_10": "§6ru_ru: TheFaceJD",
 	"nbteditor.credits_11": "§6fr_fr: Darukshock",
 	"nbteditor.credits_12": "§6he_il: inon13, RedVortexDev",
