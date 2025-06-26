@@ -51,8 +51,6 @@ public class MVComponentType<T> {
 			new MVComponentType<>(() -> DataComponentTypes.HIDE_TOOLTIP);
 	public static final MVComponentType<Text> ITEM_NAME =
 			new MVComponentType<>(() -> DataComponentTypes.ITEM_NAME);
-	public static final MVComponentType<JukeboxPlayableComponent> JUKEBOX_PLAYABLE =
-			new MVComponentType<>(() -> DataComponentTypes.JUKEBOX_PLAYABLE);
 	public static final MVComponentType<LoreComponent> LORE =
 			new MVComponentType<>(() -> DataComponentTypes.LORE);
 	public static final MVComponentType<Integer> MAX_DAMAGE =
@@ -75,11 +73,19 @@ public class MVComponentType<T> {
 			new MVComponentType<>(() -> DataComponentTypes.WRITABLE_BOOK_CONTENT);
 	public static final MVComponentType<WrittenBookContentComponent> WRITTEN_BOOK_CONTENT =
 			new MVComponentType<>(() -> DataComponentTypes.WRITTEN_BOOK_CONTENT);
+	public static final MVComponentType<JukeboxPlayableComponent> JUKEBOX_PLAYABLE =
+			new MVComponentType<>(() -> DataComponentTypes.JUKEBOX_PLAYABLE, "1.20.6", "1.21.0");
 	
 	private final Object component;
 	
 	public MVComponentType(Supplier<Object> component) {
 		this.component = (NBTManagers.COMPONENTS_EXIST ? component.get() : null);
+	}
+	public MVComponentType(Supplier<Object> component, String maxMissingVersion, String minVersion) {
+		this.component = Version.<Object>newSwitch()
+				.range(minVersion, null, component)
+				.range(null, maxMissingVersion, () -> null)
+				.get();
 	}
 	
 	public Object getInternalValue() {

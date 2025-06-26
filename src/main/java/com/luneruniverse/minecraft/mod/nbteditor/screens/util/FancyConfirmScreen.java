@@ -57,7 +57,10 @@ public class FancyConfirmScreen extends ConfirmScreen implements IgnoreCloseScre
 	
 	@Override
 	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		MVDrawableHelper.renderBackground(this, MVDrawableHelper.getMatrices(context));
+		if (MainUtil.client.world == null)
+			super.renderBackground(context, mouseX, mouseY, delta);
+		else
+			renderInGameBackground(context);
 	}
 	
 }
