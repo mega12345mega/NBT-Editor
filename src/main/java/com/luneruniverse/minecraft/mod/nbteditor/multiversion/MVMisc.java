@@ -473,16 +473,25 @@ public class MVMisc {
 				})
 				.get();
 	}
-	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_end =
+	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_end_void =
 			Reflection.getOptionalMethod(BufferBuilder.class, "method_1326", MethodType.methodType(void.class));
 	private static final Supplier<Reflection.MethodInvoker> BufferRenderer_draw =
 			Reflection.getOptionalMethod(BufferRenderer.class, "method_1309", MethodType.methodType(void.class, BufferBuilder.class));
+	private static final Supplier<Class<?>> BufferBuilder$BuiltBuffer =
+			Reflection.getOptionalClass("net.minecraft.class_287$class_7433");
+	private static final Supplier<Reflection.MethodInvoker> BufferBuilder_end_BuiltBuffer =
+			Reflection.getOptionalMethod(() -> BufferBuilder.class, () -> "method_1326", () -> MethodType.methodType(BufferBuilder$BuiltBuffer.get()));
+	private static final Supplier<Reflection.MethodInvoker> BufferRenderer_drawWithGlobalProgram =
+			Reflection.getOptionalMethod(() -> BufferRenderer.class, () -> "method_43433", () -> MethodType.methodType(void.class, BufferBuilder$BuiltBuffer.get()));
 	public static void endDrawingShader(MatrixStack matrices, VertexConsumer vertexConsumer) {
 		Version.newSwitch()
 				.range("1.20.0", null, () -> MVDrawableHelper.getDrawContext(matrices).vertexConsumers.draw())
-				.range("1.19.0", "1.19.4", () -> BufferRenderer.drawWithGlobalProgram(((BufferBuilder) vertexConsumer).end()))
+				.range("1.19.0", "1.19.4", () -> {
+					Object builtBuffer = BufferBuilder_end_BuiltBuffer.get().invoke(vertexConsumer);
+					BufferRenderer_drawWithGlobalProgram.get().invoke(null, builtBuffer);
+				})
 				.range(null, "1.18.2", () -> {
-					BufferBuilder_end.get().invoke(vertexConsumer);
+					BufferBuilder_end_void.get().invoke(vertexConsumer);
 					BufferRenderer_draw.get().invoke(null, vertexConsumer);
 				})
 				.run();
