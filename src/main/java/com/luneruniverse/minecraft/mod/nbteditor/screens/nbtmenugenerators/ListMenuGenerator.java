@@ -1,144 +1,163 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTValue;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.nbt.AbstractNbtList;
 import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtByte;
+import net.minecraft.nbt.NbtByteArray;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtFloat;
 import net.minecraft.nbt.NbtInt;
+import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtLong;
+import net.minecraft.nbt.NbtLongArray;
 import net.minecraft.nbt.NbtShort;
 import net.minecraft.nbt.NbtString;
 
-public class ListMenuGenerator<T extends NbtElement, L extends AbstractNbtList<? extends NbtElement>> implements MenuGenerator {
+public class ListMenuGenerator implements MenuGenerator<AbstractNbtList<?>> {
 	
-	private final T defaultValue;
-	public ListMenuGenerator(T defaultValue) {
-		this.defaultValue = defaultValue;
+	public static final ListMenuGenerator INSTANCE = new ListMenuGenerator();
+	
+	private ListMenuGenerator() {}
+	
+	@Override
+	public List<NBTValue> getEntries(AbstractNbtList<?> nbt, NBTEditorScreen<?> screen) {
+		return IntStream.range(0, nbt.size())
+				.mapToObj(i -> new NBTValue(screen, i + "", nbt.get(i), nbt)).collect(Collectors.toList());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<NBTValue> getElements(NBTEditorScreen<?> screen, NbtElement source) {
-		AbstractNbtList<? extends NbtElement> nbt = (AbstractNbtList<T>) source;
-		List<NBTValue> output = new ArrayList<>();
-		for (int i = 0; i < nbt.size(); i++)
-			output.add(new NBTValue(screen, i + "", nbt.get(i), nbt));
-		return output;
+	public boolean hasEmptyKey(AbstractNbtList<?> nbt) {
+		return false;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public NbtElement getElement(NbtElement source, String key) {
+	public NbtElement getValue(AbstractNbtList<?> nbt, String key) {
 		try {
-			return ((AbstractNbtList<T>) source).get(Integer.parseInt(key));
+			int i = Integer.parseInt(key);
+			if (i < 0 || i >= nbt.size())
+				return null;
+			return nbt.get(i);
 		} catch (NumberFormatException e) {
 			return null;
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public void setElement(NbtElement source, String key, NbtElement value) {
+	public void setValue(AbstractNbtList<?> nbt, String key, NbtElement value) {
+		int i = Integer.parseInt(key);
+		if (nbt.size() == 1 && i == 0 && nbt instanceof NbtList list) {
+			list.remove(0);
+			list.add(value);
+		} else
+			setValue(nbt, i, value);
+	}
+	private <C extends NbtElement> void setValue(AbstractNbtList<C> nbt, int i, NbtElement value) {
+		C convertedValue = convertToType(nbt, value);
+		if (convertedValue != null)
+			nbt.set(i, convertedValue);
+	}
+	
+	@Override
+	public void addKey(AbstractNbtList<?> nbt, String key) {
+		int i = Integer.parseInt(key);
+		addKey(nbt, i);
+	}
+	private <C extends NbtElement> void addKey(AbstractNbtList<C> nbt, int i) {
+		nbt.add(i, getDefaultValue(nbt));
+	}
+	
+	@Override
+	public void removeKey(AbstractNbtList<?> nbt, String key) {
 		try {
-			AbstractNbtList<T> list = (AbstractNbtList<T>) source;
-			int index = Integer.parseInt(key);
-			if (list.size() == 1 && index == 0 && list instanceof NbtList) {
-				NbtList nonGenericList = (NbtList) list;
-				nonGenericList.remove(0);
-				nonGenericList.add(value);
-			} else if (list.getHeldType() == value.getType())
-				list.set(index, (T) value);
-		} catch (NumberFormatException e) {
-			NBTEditor.LOGGER.error("Error while modifying a list", e);
-		}
+			int i = Integer.parseInt(key);
+			if (i >= 0 && i < nbt.size())
+				nbt.remove(i);
+		} catch (NumberFormatException e) {}
+	}
+	
+	@Override
+	public Optional<String> getNextKey(AbstractNbtList<?> nbt, Optional<String> pastingKey) {
+		return Optional.of(nbt.size() + "");
 	}
 	
 	@SuppressWarnings("unchecked")
-	@Override
-	public void addElement(NBTEditorScreen<?> screen, NbtElement source, Consumer<String> requestOverwrite, String force) {
-		((AbstractNbtList<T>) source).add((T) defaultValue.copy());
-		requestOverwrite.accept(null);
+	private <C extends NbtElement> C convertToType(AbstractNbtList<C> nbt, NbtElement value) {
+		int heldType = nbt.getHeldType();
+		
+		if (heldType == 0 || heldType == value.getType())
+			return (C) value;
+		
+		if (heldType == NbtElement.COMPOUND_TYPE) {
+			NbtCompound output = new NbtCompound();
+			output.put("value", value);
+			return (C) output;
+		}
+		if (heldType == NbtElement.LIST_TYPE) {
+			NbtList output = new NbtList();
+			output.add(value);
+			return (C) output;
+		}
+		if (heldType == NbtElement.STRING_TYPE)
+			return (C) NbtString.of(value.toString());
+		
+		if (value instanceof AbstractNbtNumber num) {
+			return switch (heldType) {
+				case NbtElement.BYTE_TYPE -> (C) NbtByte.of(num.byteValue());
+				case NbtElement.SHORT_TYPE -> (C) NbtShort.of(num.shortValue());
+				case NbtElement.INT_TYPE -> (C) NbtInt.of(num.intValue());
+				case NbtElement.LONG_TYPE -> (C) NbtLong.of(num.longValue());
+				case NbtElement.FLOAT_TYPE -> (C) NbtFloat.of(num.floatValue());
+				case NbtElement.DOUBLE_TYPE -> (C) NbtDouble.of(num.doubleValue());
+				case NbtElement.BYTE_ARRAY_TYPE -> (C) new NbtByteArray(new byte[] {num.byteValue()});
+				case NbtElement.INT_ARRAY_TYPE -> (C) new NbtIntArray(new int[] {num.intValue()});
+				case NbtElement.LONG_ARRAY_TYPE -> (C) new NbtLongArray(new long[] {num.longValue()});
+				default -> null;
+			};
+		}
+		
+		return null;
 	}
 	
 	@SuppressWarnings("unchecked")
-	@Override
-	public void removeElement(NbtElement source, String key) {
-		try {
-			((AbstractNbtList<T>) source).remove(Integer.parseInt(key));
-		} catch (NumberFormatException e) {
-			NBTEditor.LOGGER.error("Error while modifying a list", e);
-		}
+	private <C extends NbtElement> C getDefaultValue(AbstractNbtList<C> nbt) {
+		return switch (nbt.getHeldType()) {
+			case NbtElement.BYTE_TYPE -> (C) NbtByte.ZERO;
+			case NbtElement.SHORT_TYPE -> (C) NbtShort.of((short) 0);
+			case 0, NbtElement.INT_TYPE -> (C) NbtInt.of(0);
+			case NbtElement.LONG_TYPE -> (C) NbtLong.of(0);
+			case NbtElement.FLOAT_TYPE -> (C) NbtFloat.ZERO;
+			case NbtElement.DOUBLE_TYPE -> (C) NbtDouble.ZERO;
+			case NbtElement.BYTE_ARRAY_TYPE -> (C) new NbtByteArray(new byte[0]);
+			case NbtElement.INT_ARRAY_TYPE -> (C) new NbtIntArray(new int[0]);
+			case NbtElement.LONG_ARRAY_TYPE -> (C) new NbtLongArray(new long[0]);
+			case NbtElement.LIST_TYPE -> (C) new NbtList();
+			case NbtElement.COMPOUND_TYPE -> (C) new NbtCompound();
+			case NbtElement.STRING_TYPE -> (C) NbtString.of("");
+			default -> throw new IllegalArgumentException("Unknown NBT type: " + nbt.getHeldType());
+		};
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public void pasteElement(NbtElement source, String key, NbtElement value) {
-		AbstractNbtList<T> list = (AbstractNbtList<T>) source;
-		if (list.getHeldType() == 0 || list.getHeldType() == value.getType())
-			list.add((T) value);
-		else if (list.getHeldType() == NbtElement.STRING_TYPE)
-			list.add((T) NbtString.of(value.toString()));
-		else if (value instanceof AbstractNbtNumber) {
-			AbstractNbtNumber num = (AbstractNbtNumber) value;
-			
-			switch (list.getHeldType()) {
-				case NbtElement.BYTE_TYPE:
-					list.add((T) NbtByte.of(num.byteValue()));
-					break;
-				case NbtElement.SHORT_TYPE:
-					list.add((T) NbtShort.of(num.shortValue()));
-					break;
-				case NbtElement.INT_TYPE:
-					list.add((T) NbtInt.of(num.intValue()));
-					break;
-				case NbtElement.LONG_TYPE:
-					list.add((T) NbtLong.of(num.longValue()));
-					break;
-				case NbtElement.FLOAT_TYPE:
-					list.add((T) NbtFloat.of(num.floatValue()));
-					break;
-				case NbtElement.DOUBLE_TYPE:
-					list.add((T) NbtDouble.of(num.doubleValue()));
-					break;
-			}
-		}
+	public Predicate<String> getKeyValidator(AbstractNbtList<?> nbt, boolean renaming) {
+		return MainUtil.intPredicate(0, nbt.size() + (renaming ? -1 : 0), false);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public boolean renameElement(NbtElement source, String key, String newKey, boolean force) {
-		AbstractNbtList<T> list = (AbstractNbtList<T>) source;
-		try {
-			NbtElement value = getElement(source, key);
-			int keyInt = Integer.parseInt(key);
-			int newKeyInt = Integer.parseInt(newKey);
-			if (newKeyInt < 0)
-				throw new NumberFormatException(newKeyInt + " is less than 0!");
-			
-			if (newKeyInt >= list.size()) {
-				list.remove(keyInt);
-				list.add((T) value);
-			} else {
-				list.remove(keyInt);
-				list.add(newKeyInt, (T) value);
-			}
-			
-			return true;
-		} catch (NumberFormatException e) {
-			NBTEditor.LOGGER.error("Error while modifying a list", e);
-			return true;
-		}
+	public boolean handlesDuplicateKeys(AbstractNbtList<?> nbt) {
+		return true;
 	}
 	
 }

@@ -305,7 +305,7 @@ public class NBTEditorAPI {
 	 * @param generator The generator for the editor's menu
 	 * @see #makeMutable(byte)
 	 */
-	public static void registerNBTMenuGenerator(byte type, MenuGenerator generator) {
+	public static void registerNBTMenuGenerator(byte type, MenuGenerator<?> generator) {
 		MenuGenerator.TYPES.put(type, generator);
 	}
 	

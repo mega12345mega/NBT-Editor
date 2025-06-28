@@ -134,8 +134,8 @@ public class NBTValue extends List2D.List2DValue {
 				return true;
 			}
 			
-			MenuGenerator menuGen = MenuGenerator.TYPES.get(value.getType());
-			screen.selectNbt(this, selected && menuGen != null && !menuGen.hasEmptyKey(screen, value));
+			MenuGenerator<NbtElement> menuGen = MenuGenerator.get(value);
+			screen.selectNbt(this, selected && menuGen != null && !menuGen.hasEmptyKey(value));
 			selected = !selected;
 			return selected;
 		}
