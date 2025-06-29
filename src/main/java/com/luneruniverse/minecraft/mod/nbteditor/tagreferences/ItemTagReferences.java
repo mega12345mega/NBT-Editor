@@ -104,7 +104,7 @@ public class ItemTagReferences {
 					component -> component == null ? new HashMap<>() : new HashMap<>(component.properties()),
 					BlockStateComponent::new))
 			.range(null, "1.20.4", () -> TagReference.forItems(HashMap::new, TagReference.forMaps(
-					element -> element instanceof NbtString str ? str.value : null,
+					element -> element instanceof NbtString str ? str.asString() : null,
 					NbtString::of,
 					new NBTTagReference<>(NbtCompound.class, "BlockStateTag"))))
 			.get();

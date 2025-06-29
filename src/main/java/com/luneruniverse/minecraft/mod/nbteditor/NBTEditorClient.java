@@ -17,7 +17,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChestPag
 import com.luneruniverse.minecraft.mod.nbteditor.commands.CommandHandler;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVEnchantments;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -73,7 +72,6 @@ public class NBTEditorClient implements ClientModInitializer {
 	}
 	
 	private void onRegistriesLoad() {
-		NbtTypeModifier.loadClass();
 		CommandHandler.registerCommands();
 		try {
 			HeadAPI.loadFavorites();

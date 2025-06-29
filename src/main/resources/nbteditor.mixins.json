@@ -21,7 +21,6 @@
     "ChatScreenAccessor",
     "ClientConnectionMixin",
     "ClientPlayNetworkHandlerMixin",
-    "NbtStringMixin",
     "StringNbtWriterAccessor",
     "CreativeInventoryScreenMixin",
     "ItemStackMixin",

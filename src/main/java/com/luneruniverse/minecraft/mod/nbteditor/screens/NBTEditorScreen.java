@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -28,8 +27,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.StringMenuGenerator;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtfolder.NBTFolder;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtfolder.StringNBTFolder;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.TextAreaScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.InputOverlay;
@@ -52,68 +51,10 @@ import net.minecraft.util.InvalidIdentifierException;
 
 public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
-	private class RecursiveMenuGenerator implements MenuGenerator<NbtElement> {
-		@Override
-		public List<NBTValue> getEntries(NbtElement nbt, NBTEditorScreen<?> screen) {
-			return currentGen.getEntries(nbt, screen);
-		}
-		@Override
-		public boolean hasEmptyKey(NbtElement nbt) {
-			return currentGen.hasEmptyKey(nbt);
-		}
-		@Override
-		public NbtElement getValue(NbtElement nbt, String key) {
-			return currentGen.getValue(nbt, key);
-		}
-		@Override
-		public void setValue(NbtElement nbt, String key, NbtElement value) {
-			currentGen.setValue(nbt, key, value);
-			recursiveUpdate(nbt);
-		}
-		@Override
-		public void addKey(NbtElement nbt, String key) {
-			currentGen.addKey(nbt, key);
-			recursiveUpdate(nbt);
-		}
-		@Override
-		public void removeKey(NbtElement nbt, String key) {
-			currentGen.removeKey(nbt, key);
-			recursiveUpdate(nbt);
-		}
-		@Override
-		public Optional<String> getNextKey(NbtElement nbt, Optional<String> pastingKey) {
-			return currentGen.getNextKey(nbt, pastingKey);
-		}
-		@Override
-		public Predicate<String> getKeyValidator(NbtElement nbt, boolean renaming) {
-			return currentGen.getKeyValidator(nbt, renaming);
-		}
-		@Override
-		public boolean handlesDuplicateKeys(NbtElement nbt) {
-			return currentGen.handlesDuplicateKeys(nbt);
-		}
-		private void recursiveUpdate(NbtElement nbt) {
-			List<NbtElement> path = new ArrayList<>();
-			NbtElement lastPart = localNBT.getOrCreateNBT();
-			for (String part : realPath) {
-				MenuGenerator<NbtElement> gen = MenuGenerator.get(lastPart);
-				if (gen == null)
-					return;
-				path.add(lastPart = gen.getValue(lastPart, part));
-			}
-			lastPart = nbt;
-			for (int i = path.size() - 2; i >= 0; i--) {
-				NbtElement part = path.get(i);
-				MenuGenerator.get(part).setValue(part, realPath.get(i + 1), lastPart);
-				lastPart = part;
-			}
-		}
-	}
-	
-	
 	private static String copiedKey;
 	private static NbtElement copiedValue;
 	
+	private final NBTFolder<NbtCompound> baseFolder;
 	
 	private NamedTextFieldWidget type;
 	private NamedTextFieldWidget count;
@@ -124,12 +65,10 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private Map<String, Integer> scrollPerFolder;
 	
 	private List<String> realPath;
+	private NBTFolder<?> currentFolder;
 	private NBTValue upValue;
 	private NBTValue selectedValue;
 	private boolean json;
-	private MenuGenerator<NbtElement> currentGen;
-	private final MenuGenerator<NbtElement> gen;
-	private NbtElement nbt;
 	
 	@SuppressWarnings({ "serial", "deprecation" })
 	public NBTEditorScreen(NBTReference<L> ref) {
@@ -142,17 +81,15 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				return String.join("/", this);
 			}
 		};
-		gen = new RecursiveMenuGenerator();
-		nbt = localNBT.getOrCreateNBT();
+		baseFolder = NBTFolder.get(NbtCompound.class, localNBT::getOrCreateNBT, localNBT::setNBT);
 	}
 	
 	@Override
 	protected void initEditor() {
-		if (realPath.isEmpty() && ((NbtCompound) nbt).contains("")) {
+		if (realPath.isEmpty() && baseFolder.hasEmptyKey()) {
 			client.setScreen(new FancyConfirmScreen(value -> {
 				if (value) {
-					((NbtCompound) nbt).remove("");
-					localNBT.setNBT((NbtCompound) nbt);
+					baseFolder.removeKey("");
 					save();
 					client.setScreen(this);
 				} else
@@ -248,13 +185,10 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		path.setText(realPath.toString());
 		path.setChangedListener(str -> {
 			String[] parts = str.split("/");
-			NbtElement nbt = localNBT.getOrCreateNBT();
+			NBTFolder<?> folder = this.baseFolder;
 			for (String part : parts) {
-				MenuGenerator<NbtElement> gen = MenuGenerator.get(nbt);
-				if (gen == null)
-					return;
-				nbt = gen.getValue(nbt, part);
-				if (nbt == null)
+				folder = folder.getSubFolder(part);
+				if (folder == null)
 					return;
 			}
 			realPath.clear();
@@ -276,7 +210,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				if (selectedValue.isUnsafe())
 					return;
 				selectedValue.valueChanged(str, nbt -> {
-					gen.setValue(this.nbt, selectedValue.getKey(), nbt);
+					currentFolder.setValue(selectedValue.getKey(), nbt);
 					updateName();
 				});
 				if (realPath.isEmpty()) {
@@ -297,21 +231,20 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		addDrawableChild(MVMisc.newButton(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, TextInst.translatable("nbteditor.nbt.value_expand"), btn -> {
 			if (selectedValue == null) {
-				client.setScreen(new TextAreaScreen(this, nbt.toString(), NbtFormatter.FORMATTER, false, str -> {
+				client.setScreen(new TextAreaScreen(this, currentFolder.getNBT().toString(), NbtFormatter.FORMATTER, false, str -> {
 					try {
-						NbtElement newNbt = MixinLink.parseSpecialElement(new StringReader(str));
+						NbtElement nbt = MixinLink.parseSpecialElement(new StringReader(str));
 						if (realPath.isEmpty()) {
-							if (newNbt instanceof NbtCompound)
-								nbt = newNbt;
-							else {
-								nbt = new NbtCompound();
-								((NbtCompound) nbt).put("value", newNbt);
+							if (!(nbt instanceof NbtCompound)) {
+								NbtCompound temp = new NbtCompound();
+								temp.put("value", nbt);
+								nbt = temp;
 							}
-							localNBT.setNBT((NbtCompound) nbt);
+							baseFolder.setNBT((NbtCompound) nbt);
 						} else {
 							String lastPathPart = realPath.remove(realPath.size() - 1);
 							genEditor();
-							gen.setValue(nbt, lastPathPart, newNbt);
+							currentFolder.setValue(lastPathPart, nbt);
 							realPath.add(lastPathPart);
 						}
 					} catch (CommandSyntaxException e) {
@@ -352,23 +285,20 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		editor.clearElements();
 		
-		nbt = localNBT.getOrCreateNBT();
 		json = false;
-		currentGen = MenuGenerator.get(nbt);
+		currentFolder = baseFolder;
 		Iterator<String> keys = realPath.iterator();
 		boolean removing = false;
-		NbtElement value = null;
-		MenuGenerator<NbtElement> generator = null;
 		while (keys.hasNext()) {
 			String key = keys.next();
 			if (removing) {
 				keys.remove();
 				continue;
 			}
-			if ((value = currentGen.getValue(nbt, key)) != null && (generator = MenuGenerator.get(value)) != null) {
-				nbt = value;
-				currentGen = generator;
-				if ((MenuGenerator<?>) currentGen instanceof StringMenuGenerator)
+			NBTFolder<?> folder = currentFolder.getSubFolder(key);
+			if (folder != null) {
+				currentFolder = folder;
+				if (currentFolder instanceof StringNBTFolder)
 					json = true;
 			} else {
 				keys.remove();
@@ -386,7 +316,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			editor.addElement(upValue);
 		}
 		
-		List<NBTValue> elements = gen.getEntries(nbt, this);
+		List<NBTValue> elements = currentFolder.getEntries(this);
 		if (elements == null) {
 			selectNbt(null, true);
 			return;
@@ -459,7 +389,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		}
 		
 		if (localNBT instanceof LocalItem && localNBT.getNBT() != null) {
-			List<NBTValue> elements = MenuGenerator.get(localNBT.getNBT()).getEntries(localNBT.getNBT(), this);
+			List<NBTValue> elements = baseFolder.getEntries(this);
 			elements.forEach(element -> element.updateInvalidComponent(localNBT, null));
 			if (elements.stream().anyMatch(NBTValue::isInvalidComponent)) {
 				MainUtil.client.setScreen(new FancyConfirmScreen(value -> {
@@ -525,7 +455,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	@Override
 	public void onFilesDropped(List<Path> paths) {
-		if (!(nbt instanceof NbtCompound))
+		if (!(currentFolder.getNBT() instanceof NbtCompound))
 			return;
 		for (Path path : paths) {
 			File file = path.toFile();
@@ -533,7 +463,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				try (FileInputStream in = new FileInputStream(file)) {
 					NbtCompound nbt = MainUtil.readNBT(in);
 					for (String key : nbt.getKeys())
-						gen.setValue(this.nbt, key, nbt.get(key));
+						currentFolder.setValue(key, nbt.get(key));
 					genEditor();
 				} catch (Exception e) {
 					NBTEditor.LOGGER.error("Error while importing a .nbt file", e);
@@ -551,36 +481,36 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
 	private void add() {
 		getNextKey(Optional.empty(), key -> {
-			gen.addKey(nbt, key);
+			currentFolder.addKey(key);
 			genEditor();
 		}, false);
 	}
 	private void remove() {
 		if (selectedValue != null) {
-			gen.removeKey(nbt, selectedValue.getKey());
+			currentFolder.removeKey(selectedValue.getKey());
 			genEditor();
 		}
 	}
 	private void copy() {
 		if (selectedValue != null) {
 			copiedKey = selectedValue.getKey();
-			copiedValue = gen.getValue(nbt, selectedValue.getKey()).copy();
+			copiedValue = currentFolder.getValue(selectedValue.getKey()).copy();
 		}
 	}
 	private void cut() {
 		if (selectedValue != null) {
 			copiedKey = selectedValue.getKey();
-			copiedValue = gen.getValue(nbt, selectedValue.getKey()).copy();
+			copiedValue = currentFolder.getValue(selectedValue.getKey()).copy();
 			
-			gen.removeKey(nbt, selectedValue.getKey());
+			currentFolder.removeKey(selectedValue.getKey());
 			genEditor();
 		}
 	}
 	private void paste() {
 		if (copiedKey != null) {
 			getNextKey(Optional.of(copiedKey), key -> {
-				gen.addKey(nbt, key);
-				gen.setValue(nbt, key, copiedValue.copy());
+				currentFolder.addKey(key);
+				currentFolder.setValue(key, copiedValue.copy());
 				genEditor();
 			}, false);
 		}
@@ -588,12 +518,12 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private void rename() {
 		if (selectedValue != null) {
 			String selectedKey = selectedValue.getKey();
-			NbtElement selectedValue = gen.getValue(nbt, selectedKey);
+			NbtElement selectedValue = currentFolder.getValue(selectedKey);
 			
 			getKey(selectedKey, key -> promptForDuplicateKey(key, key2 -> {
-				gen.removeKey(nbt, selectedKey);
-				gen.addKey(nbt, key2);
-				gen.setValue(nbt, key2, selectedValue);
+				currentFolder.removeKey(selectedKey);
+				currentFolder.addKey(key2);
+				currentFolder.setValue(key2, selectedValue);
 				genEditor();
 			}), true);
 		}
@@ -605,10 +535,10 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				TextInst.translatable("nbteditor.nbt.key"),
 				StringInput.builder()
 						.withDefault(defaultValue)
-						.withValidator(str -> !str.isEmpty() && gen.getKeyValidator(nbt, renaming).test(str))
+						.withValidator(str -> !str.isEmpty() && currentFolder.getKeyValidator(renaming).test(str))
 						.withSuggestions((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
 								.map(ac -> ac.getSuggestions(localNBT, realPath, str, null, cursor,
-										currentGen.getEntries(nbt, this).stream().map(NBTValue::getKey).toList()))
+										currentFolder.getEntries(this).stream().map(NBTValue::getKey).toList()))
 								.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture()))
 						.build(),
 				keyConsumer);
@@ -618,7 +548,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	}
 	
 	private void promptForDuplicateKey(String key, Consumer<String> keyConsumer) {
-		if (gen.handlesDuplicateKeys(nbt) || gen.getValue(nbt, key) == null) {
+		if (currentFolder.handlesDuplicateKeys() || currentFolder.getValue(key) == null) {
 			keyConsumer.accept(key);
 			return;
 		}
@@ -632,7 +562,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 				TextInst.translatable("nbteditor.nbt.overwrite.yes"), TextInst.translatable("nbteditor.nbt.overwrite.no")));
 	}
 	private void getNextKey(Optional<String> pastingKey, Consumer<String> keyConsumer, boolean renaming) {
-		gen.getNextKey(nbt, pastingKey).ifPresentOrElse(
+		currentFolder.getNextKey(pastingKey).ifPresentOrElse(
 				key -> promptForDuplicateKey(key, keyConsumer),
 				() -> getKey(key -> promptForDuplicateKey(key, keyConsumer), renaming));
 	}

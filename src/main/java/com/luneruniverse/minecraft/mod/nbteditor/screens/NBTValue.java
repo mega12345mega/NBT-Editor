@@ -9,7 +9,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtfolder.NBTFolder;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.StringReader;
@@ -38,9 +38,6 @@ public class NBTValue extends List2D.List2DValue {
 	private static final Identifier INT_ARRAY = IdentifierInst.of("nbteditor", "textures/nbt/int_array.png");
 	private static final Identifier LONG_ARRAY = IdentifierInst.of("nbteditor", "textures/nbt/long_array.png");
 	private static final Identifier COMPOUND = IdentifierInst.of("nbteditor", "textures/nbt/compound.png");
-	
-	
-	
 	
 	private final NBTEditorScreen<?> screen;
 	private final String key;
@@ -134,8 +131,8 @@ public class NBTValue extends List2D.List2DValue {
 				return true;
 			}
 			
-			MenuGenerator<NbtElement> menuGen = MenuGenerator.get(value);
-			screen.selectNbt(this, selected && menuGen != null && !menuGen.hasEmptyKey(value));
+			NBTFolder<?> folder = NBTFolder.get(value);
+			screen.selectNbt(this, selected && folder != null && !folder.hasEmptyKey());
 			selected = !selected;
 			return selected;
 		}

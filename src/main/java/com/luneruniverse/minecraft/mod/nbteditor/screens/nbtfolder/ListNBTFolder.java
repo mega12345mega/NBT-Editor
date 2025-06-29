@@ -1,8 +1,10 @@
-package com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators;
+package com.luneruniverse.minecraft.mod.nbteditor.screens.nbtfolder;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -26,25 +28,41 @@ import net.minecraft.nbt.NbtLongArray;
 import net.minecraft.nbt.NbtShort;
 import net.minecraft.nbt.NbtString;
 
-public class ListMenuGenerator implements MenuGenerator<AbstractNbtList<?>> {
+public class ListNBTFolder implements NBTFolder<AbstractNbtList<?>> {
 	
-	public static final ListMenuGenerator INSTANCE = new ListMenuGenerator();
+	private final Supplier<AbstractNbtList<?>> get;
+	private final Consumer<AbstractNbtList<?>> set;
 	
-	private ListMenuGenerator() {}
+	public ListNBTFolder(Supplier<AbstractNbtList<?>> get, Consumer<AbstractNbtList<?>> set) {
+		this.get = get;
+		this.set = set;
+	}
 	
 	@Override
-	public List<NBTValue> getEntries(AbstractNbtList<?> nbt, NBTEditorScreen<?> screen) {
+	public AbstractNbtList<?> getNBT() {
+		return get.get();
+	}
+	
+	@Override
+	public void setNBT(AbstractNbtList<?> value) {
+		set.accept(value);
+	}
+	
+	@Override
+	public List<NBTValue> getEntries(NBTEditorScreen<?> screen) {
+		AbstractNbtList<?> nbt = getNBT();
 		return IntStream.range(0, nbt.size())
 				.mapToObj(i -> new NBTValue(screen, i + "", nbt.get(i), nbt)).collect(Collectors.toList());
 	}
 	
 	@Override
-	public boolean hasEmptyKey(AbstractNbtList<?> nbt) {
+	public boolean hasEmptyKey() {
 		return false;
 	}
 	
 	@Override
-	public NbtElement getValue(AbstractNbtList<?> nbt, String key) {
+	public NbtElement getValue(String key) {
+		AbstractNbtList<?> nbt = getNBT();
 		try {
 			int i = Integer.parseInt(key);
 			if (i < 0 || i >= nbt.size())
@@ -56,41 +74,49 @@ public class ListMenuGenerator implements MenuGenerator<AbstractNbtList<?>> {
 	}
 	
 	@Override
-	public void setValue(AbstractNbtList<?> nbt, String key, NbtElement value) {
+	public void setValue(String key, NbtElement value) {
+		AbstractNbtList<?> nbt = getNBT();
 		int i = Integer.parseInt(key);
 		if (nbt.size() == 1 && i == 0 && nbt instanceof NbtList list) {
 			list.remove(0);
 			list.add(value);
+			setNBT(nbt);
 		} else
 			setValue(nbt, i, value);
 	}
 	private <C extends NbtElement> void setValue(AbstractNbtList<C> nbt, int i, NbtElement value) {
 		C convertedValue = convertToType(nbt, value);
-		if (convertedValue != null)
+		if (convertedValue != null) {
 			nbt.set(i, convertedValue);
+			setNBT(nbt);
+		}
 	}
 	
 	@Override
-	public void addKey(AbstractNbtList<?> nbt, String key) {
-		int i = Integer.parseInt(key);
-		addKey(nbt, i);
+	public void addKey(String key) {
+		AbstractNbtList<?> nbt = getNBT();
+		addKey(nbt, Integer.parseInt(key));
+		setNBT(nbt);
 	}
 	private <C extends NbtElement> void addKey(AbstractNbtList<C> nbt, int i) {
 		nbt.add(i, getDefaultValue(nbt));
 	}
 	
 	@Override
-	public void removeKey(AbstractNbtList<?> nbt, String key) {
+	public void removeKey(String key) {
+		AbstractNbtList<?> nbt = getNBT();
 		try {
 			int i = Integer.parseInt(key);
-			if (i >= 0 && i < nbt.size())
+			if (i >= 0 && i < nbt.size()) {
 				nbt.remove(i);
+				setNBT(nbt);
+			}
 		} catch (NumberFormatException e) {}
 	}
 	
 	@Override
-	public Optional<String> getNextKey(AbstractNbtList<?> nbt, Optional<String> pastingKey) {
-		return Optional.of(nbt.size() + "");
+	public Optional<String> getNextKey(Optional<String> pastingKey) {
+		return Optional.of(getNBT().size() + "");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -151,12 +177,12 @@ public class ListMenuGenerator implements MenuGenerator<AbstractNbtList<?>> {
 	}
 	
 	@Override
-	public Predicate<String> getKeyValidator(AbstractNbtList<?> nbt, boolean renaming) {
-		return MainUtil.intPredicate(0, nbt.size() + (renaming ? -1 : 0), false);
+	public Predicate<String> getKeyValidator(boolean renaming) {
+		return MainUtil.intPredicate(() -> 0, () -> getNBT().size() + (renaming ? -1 : 0), false);
 	}
 	
 	@Override
-	public boolean handlesDuplicateKeys(AbstractNbtList<?> nbt) {
+	public boolean handlesDuplicateKeys() {
 		return true;
 	}
 	

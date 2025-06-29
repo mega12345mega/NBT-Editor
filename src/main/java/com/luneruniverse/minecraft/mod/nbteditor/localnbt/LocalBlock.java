@@ -43,7 +43,7 @@ public class LocalBlock implements LocalNBT {
 	public static LocalBlock deserialize(NbtCompound nbt, int defaultDataVersion) {
 		NbtElement dataVersion = nbt.get("DataVersion");
 		
-		String id = MainUtil.updateDynamic(TypeReferences.BLOCK_NAME, NbtString.of(nbt.getString("id")), dataVersion, defaultDataVersion).value;
+		String id = MainUtil.updateDynamic(TypeReferences.BLOCK_NAME, NbtString.of(nbt.getString("id")), dataVersion, defaultDataVersion).asString();
 		Block block = MVRegistry.BLOCK.get(IdentifierInst.of(id));
 		
 		BlockStateProperties state = new BlockStateProperties(block.getDefaultState());

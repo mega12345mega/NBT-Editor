@@ -17,7 +17,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.EntityContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.EntityTagContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ItemContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
@@ -25,7 +24,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtfolder.NBTFolder;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.CreativeTabWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
@@ -43,8 +42,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtType;
-import net.minecraft.nbt.NbtTypes;
 import net.minecraft.text.Text;
 
 /**
@@ -299,25 +296,12 @@ public class NBTEditorAPI {
 	 * Register a way to open usually unopenable NBT types in the editor<br>
 	 * This technique is used to allow opening parsable strings<br>
 	 * This could be used to open a number as a list of bits for example<br>
-	 * You must properly handle immutable types to prevent issues<br>
 	 * This is an advanced, somewhat obscure feature of the API
-	 * @param type The NBT type to open
-	 * @param generator The generator for the editor's menu
-	 * @see #makeMutable(byte)
+	 * @param clazz The NBT class to make openable (can be a superclass)
+	 * @param folder The constructor for the folder manager
 	 */
-	public static void registerNBTMenuGenerator(byte type, MenuGenerator<?> generator) {
-		MenuGenerator.TYPES.put(type, generator);
-	}
-	
-	/**
-	 * The NBT type is set to mutable<br>
-	 * You must create a mixin for the nbt element, overriding copy and getNbtType
-	 * @param type The NBT type to modify
-	 * @return The new NBT type that should be returned from getNbtType
-	 * @see #registerNBTMenuGenerator(byte, MenuGenerator)
-	 */
-	public static NbtType<?> makeMutable(byte type) {
-		return NbtTypeModifier.makeMutable(NbtTypes.byId(type));
+	public static void registerNBTFolderType(Class<? extends NbtElement> clazz, NBTFolder.Constructor<?> folder) {
+		NBTFolder.TYPES.put(clazz, folder);
 	}
 	
 	/**
