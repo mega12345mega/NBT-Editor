@@ -46,7 +46,6 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			public enum ClickAction {
 				NONE(null),
 				OPEN_URL(ClickEvent.Action.OPEN_URL),
-				OPEN_FILE(ClickEvent.Action.OPEN_FILE),
 				RUN_COMMAND(ClickEvent.Action.RUN_COMMAND),
 				SUGGEST_COMMAND(ClickEvent.Action.SUGGEST_COMMAND),
 				CHANGE_PAGE(ClickEvent.Action.CHANGE_PAGE),
@@ -57,6 +56,8 @@ public class FormattedTextFieldWidget extends GroupWidget {
 						if (action.value == value)
 							return action;
 					}
+					if (value == ClickEvent.Action.OPEN_FILE)
+						return NONE;
 					throw new IllegalArgumentException("Invalid click action: " + value);
 				}
 				
