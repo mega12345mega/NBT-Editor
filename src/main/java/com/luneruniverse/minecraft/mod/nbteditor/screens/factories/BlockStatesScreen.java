@@ -62,10 +62,11 @@ public class BlockStatesScreen<L extends LocalNBT> extends LocalEditorScreen<L> 
 					
 					if (newValue.equals("unset"))
 						unset.add(property);
-					else
+					else {
 						unset.remove(property);
+						state.setValue(property, newValue);
+					}
 					
-					state.setValue(property, newValue);
 					if (localNBT instanceof LocalItem item) {
 						Map<String, String> blockStatesMap = state.getValuesMap();
 						blockStatesMap.keySet().removeAll(unset);
