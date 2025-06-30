@@ -32,6 +32,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.block.BlockState;
@@ -443,7 +444,7 @@ public class MVMisc {
 			Reflection.getOptionalMethod(HoverEvent.Action.class, "method_27669", MethodType.methodType(JsonElement.class, Object.class));
 	public static JsonElement getHoverEventContentsJson(HoverEvent event) {
 		return Version.<JsonElement>newSwitch()
-				.range("1.20.3", null, () -> HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, event).result().orElseThrow().getAsJsonObject().get("contents"))
+				.range("1.20.3", null, () -> result(HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, event)).orElseThrow().getAsJsonObject().get("contents"))
 				.range(null, "1.20.2", () -> HoverEvent$Action_contentsToJson.get().invoke(event.getAction(), event.getValue(event.getAction())))
 				.get();
 	}
@@ -451,7 +452,7 @@ public class MVMisc {
 			Reflection.getOptionalMethod(HoverEvent.class, "method_27664", MethodType.methodType(HoverEvent.class, JsonObject.class));
 	public static HoverEvent getHoverEvent(JsonObject json) {
 		return Version.<HoverEvent>newSwitch()
-				.range("1.20.3", null, () -> HoverEvent.CODEC.parse(JsonOps.INSTANCE, json).result().orElseThrow())
+				.range("1.20.3", null, () -> result(HoverEvent.CODEC.parse(JsonOps.INSTANCE, json)).orElseThrow())
 				.range(null, "1.20.2", () -> HoverEvent_fromJson.get().invoke(null, json))
 				.get();
 	}
@@ -779,6 +780,15 @@ public class MVMisc {
 				.range("1.20.0", null, () -> false)
 				.range("1.19.3", "1.19.4", () -> item instanceof HangingSignItem)
 				.range(null, "1.19.2", () -> false)
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> DataResult_result =
+			Reflection.getOptionalMethod(DataResult.class, "result", MethodType.methodType(Optional.class));
+	public static <T> Optional<T> result(DataResult<T> result) {
+		return Version.<Optional<T>>newSwitch()
+				.range("1.20.5", null, () -> result.result())
+				.range(null, "1.20.4", () -> DataResult_result.get().invoke(result))
 				.get();
 	}
 	
