@@ -9,7 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 
-public class DynamicSizeContainerIO implements NBTContainerIO {
+public class DynamicSizeContainerIO implements NonItemNBTContainerIO {
 	
 	private final String key;
 	private final int maxSize;
@@ -41,7 +41,17 @@ public class DynamicSizeContainerIO implements NBTContainerIO {
 				.filter(item -> item != null && !item.isEmpty()).map(item -> item.manager$serialize(true))
 				.collect(NbtList::new, NbtList::add, NbtList::addAll);
 		container.put(key, nbt);
-		return nbt.size();
+		return Math.min(contents.length, maxSize);
+	}
+	
+	@Override
+	public int getWrittenNBTSlotIndex(NbtCompound container, ItemStack[] contents, int slot, SourceContainerType source) {
+		int output = slot;
+		for (int i = 0; i < slot; i++) {
+			if (contents[i] == null || contents[i].isEmpty())
+				output--;
+		}
+		return output;
 	}
 	
 }

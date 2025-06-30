@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "nbteditor",
-  "version": "2.0.2",
+  "version": "2.0.3",
 
   "name": "NBT Editor",
   "description": "Lets you edit items, blocks, and entities ingame, store items in a client side chest, open containers in your inventory, and more!",
@@ -51,7 +51,9 @@
   "custom": {
     "modmenu": {
       "links": {
-      	"modmenu.discord": "https://discord.gg/PzeYTbEZjn"
+      	"modmenu.discord": "https://discord.gg/PzeYTbEZjn",
+      	"modmenu.wiki": "https://github.com/mega12345mega/NBT-Editor/wiki",
+      	"modmenu.buymeacoffee": "https://buymeacoffee.com/mega12345mega"
       }
     },
     "loom:injected_interfaces": {

@@ -66,11 +66,11 @@ public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 		}
 		
 		if (target.isAssignableFrom(String.class))
-			return (element instanceof NbtString str ? str.value : "");
+			return (element instanceof NbtString str ? str.asString() : "");
 		
 		if (target.isAssignableFrom(Text.class)) {
 			try {
-				return (element instanceof NbtString str ? TextUtil.fromJsonSafely(str.value) : TextInst.of(""));
+				return (element instanceof NbtString str ? TextUtil.fromJsonSafely(str.asString()) : TextInst.of(""));
 			} catch (JsonParseException e) {
 				return TextInst.of("");
 			}

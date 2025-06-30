@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,7 +23,7 @@ public class ArmorSlotMixin {
 	private void canInsert(ItemStack stack, CallbackInfoReturnable<Boolean> info) {
 		PlayerEntity owner = ((PlayerInventory) ((Slot) (Object) this).inventory).player;
 		if (owner instanceof ServerPlayerEntity) {
-			if (owner.hasPermissionLevel(2) && ServerMixinLink.NO_SLOT_RESTRICTIONS_PLAYERS.getOrDefault(owner, false))
+			if (ServerMVMisc.hasPermissionLevel(owner, 2) && ServerMixinLink.NO_SLOT_RESTRICTIONS_PLAYERS.getOrDefault(owner, false))
 				info.setReturnValue(true);
 		} else {
 			if (NBTEditorClient.SERVER_CONN.isEditingAllowed() && ConfigScreen.isNoSlotRestrictions())
@@ -32,7 +33,7 @@ public class ArmorSlotMixin {
 	@Inject(method = "canTakeItems", at = @At("HEAD"), cancellable = true)
 	private void canTakeItems(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
 		if (player instanceof ServerPlayerEntity) {
-			if (player.hasPermissionLevel(2) && ServerMixinLink.NO_SLOT_RESTRICTIONS_PLAYERS.getOrDefault(player, false))
+			if (ServerMVMisc.hasPermissionLevel(player, 2) && ServerMixinLink.NO_SLOT_RESTRICTIONS_PLAYERS.getOrDefault(player, false))
 				info.setReturnValue(true);
 		} else {
 			if (NBTEditorClient.SERVER_CONN.isEditingAllowed() && ConfigScreen.isNoSlotRestrictions())

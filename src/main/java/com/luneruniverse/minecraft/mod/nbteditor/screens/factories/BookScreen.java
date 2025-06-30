@@ -161,13 +161,13 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 		return MixinLink.withRunClickEvent(style, () -> {
 			net.minecraft.client.gui.screen.ingame.BookScreen preview = getOverlay();
 			setOverlay(new AlertWidget(
-					() -> setOverlayScreen(preview, 200),
+					() -> setOverlayScreen(preview, 500),
 					TextInst.translatable("nbteditor.book.preview.click.title"),
 					TextInst.of(""),
 					TextInst.translatable("nbteditor.book.preview.click.action",
 							MVMisc.getClickEventActionName(style.getClickEvent().getAction())),
 					TextInst.of(""),
-					TextInst.translatable("nbteditor.book.preview.click.value", style.getClickEvent().getValue())), 200);
+					TextInst.translatable("nbteditor.book.preview.click.value", style.getClickEvent().getValue())), 500);
 		});
 	}
 	
@@ -249,11 +249,12 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 	protected void renderEditor(MatrixStack matrices, int fdf8eb, int mouseY, float delta) {
 		MVDrawableHelper.drawTextWithShadow(matrices, textRenderer, TextInst.translatable("nbteditor.book.page", page + 1, getPageCount()),
 				16 + 108 * 3 - 4 + 24 * 3, 64 + 10 - textRenderer.fontHeight / 2, -1);
-		renderTip(matrices, "nbteditor.formatted_text.tip");
 	}
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (getOverlay() != null)
+			return super.keyPressed(keyCode, scanCode, modifiers);
 		if (super.keyPressed(keyCode, scanCode, modifiers))
 			return true;
 		
@@ -272,7 +273,7 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 	}
 	
 	@Override
-	public void filesDragged(List<Path> paths) {
+	public void onFilesDropped(List<Path> paths) {
 		List<Text> lines = new ArrayList<>();
 		lines.add(getPage());
 		ImageToLoreWidget.openImportFiles(paths, (file, imgLines) -> lines.addAll(imgLines), () -> {

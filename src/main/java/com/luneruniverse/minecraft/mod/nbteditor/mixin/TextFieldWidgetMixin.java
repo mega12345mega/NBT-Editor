@@ -23,9 +23,17 @@ import net.minecraft.util.Identifier;
 @Mixin(TextFieldWidget.class)
 public abstract class TextFieldWidgetMixin implements Tickable {
 	private static final Identifier TEXT_FIELD_INVALID = IdentifierInst.of("nbteditor", "widget/text_field_invalid");
-	@ModifyArg(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIII)V", ordinal = 0), index = 0)
+	@ModifyArg(method = "renderWidget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIII)V", ordinal = 0))
 	@Group(name = "renderButton", min = 1)
-	private Identifier drawGuiTexture(Identifier texture) {
+	private Identifier drawGuiTexture2(Identifier texture) {
+		TextFieldWidget source = (TextFieldWidget) (Object) this;
+		if (source instanceof NamedTextFieldWidget named && !named.isValid())
+			return TEXT_FIELD_INVALID;
+		return texture;
+	}
+	@ModifyArg(method = "method_48579", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_332;method_52706(Lnet/minecraft/class_2960;IIII)V", ordinal = 0), remap = false)
+	@Group(name = "renderButton", min = 1)
+	private Identifier drawGuiTexture1(Identifier texture) {
 		TextFieldWidget source = (TextFieldWidget) (Object) this;
 		if (source instanceof NamedTextFieldWidget named && !named.isValid())
 			return TEXT_FIELD_INVALID;

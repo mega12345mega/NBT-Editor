@@ -16,8 +16,8 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 	}
 	
 	@Override
-	public boolean passRootNbt(SourceContainerType source) {
-		return NBTManagers.COMPONENTS_EXIST && source == SourceContainerType.ITEM;
+	public String getDefaultEntityId() {
+		return NBTManagers.COMPONENTS_EXIST ? null : "";
 	}
 	
 	@Override

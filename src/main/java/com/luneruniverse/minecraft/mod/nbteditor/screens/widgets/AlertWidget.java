@@ -1,11 +1,14 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.widgets;
 
+import java.util.Arrays;
+
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -20,7 +23,7 @@ public class AlertWidget extends GroupWidget implements InitializableOverlay<Scr
 	
 	public AlertWidget(Runnable onClose, Text... lines) {
 		this.onClose = onClose;
-		this.lines = lines;
+		this.lines = Arrays.stream(lines).flatMap(line -> TextUtil.splitText(line).stream()).toArray(Text[]::new);
 	}
 	
 	@Override

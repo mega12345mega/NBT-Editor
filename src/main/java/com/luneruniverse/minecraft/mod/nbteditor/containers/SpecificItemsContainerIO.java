@@ -8,7 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 
-public class SpecificItemsContainerIO implements NBTContainerIO {
+public class SpecificItemsContainerIO implements NonItemNBTContainerIO {
 	
 	private final String[] keys;
 	

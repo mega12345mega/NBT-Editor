@@ -5,6 +5,7 @@ import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.Cl
 
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.SignboardArgumentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
@@ -16,13 +17,13 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.block.AbstractSignBlock;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SignItem;
 
 public class SignboardCommand extends ClientCommand {
 	
 	public static final NBTReferenceFilter SIGNBOARD_FILTER = NBTReferenceFilter.create(
-			ref -> ref.getItem().getItem() instanceof SignItem,
+			ref -> MVMisc.isSignItem(ref.getItem().getItem()),
 			ref -> ref.getBlock() instanceof AbstractSignBlock,
 			null,
 			TextInst.translatable("nbteditor.no_ref.signboard"),
@@ -42,7 +43,7 @@ public class SignboardCommand extends ClientCommand {
 	public void register(LiteralArgumentBuilder<FabricClientCommandSource> builder, String path) {
 		builder.then(literal("new").then(argument("sign", SignboardArgumentType.signboard()).executes(context -> {
 			ItemReference ref = ItemReference.getHeldAir();
-			ref.saveItem(new ItemStack(context.getArgument("sign", SignItem.class)));
+			ref.saveItem(new ItemStack(context.getArgument("sign", Item.class)));
 			MainUtil.client.setScreen(new SignboardScreen<>(ref));
 			return Command.SINGLE_SUCCESS;
 		}))).executes(context -> {

@@ -42,7 +42,7 @@ class MVTexturedButtonWidget_1_20_2 extends ButtonWidget {
 			i += hoveredVOffset;
 		}
 		RenderSystem.enableDepthTest();
-		context.drawTexture(texture, x, y, u, i, width, height, textureWidth, textureHeight);
+		MVDrawableHelper.drawTexture(MVDrawableHelper.getMatrices(context), texture, x, y, u, i, width, height, textureWidth, textureHeight);
 	}
 	
 }

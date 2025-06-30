@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientScreenHandler;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
@@ -30,11 +29,10 @@ public class MinecraftClientMixin {
 	
 	@Inject(method = "setScreen", at = @At("HEAD"))
 	private void setScreen(Screen screen, CallbackInfo info) {
-		if (screen instanceof HandledScreen<?> handledScreen) {
-			int syncId = handledScreen.getScreenHandler().syncId;
-			if (syncId != 0 && syncId != ClientScreenHandler.SYNC_ID)
-				MixinLink.LAST_SERVER_HANDLED_SCREEN = handledScreen;
-		}
+		if (screen == null)
+			NBTEditorClient.CURSOR_MANAGER.onNoScreenSet();
+		else if (screen instanceof HandledScreen<?> handledScreen)
+			NBTEditorClient.CURSOR_MANAGER.onHandledScreenSet(handledScreen);
 	}
 	
 	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/thread/ReentrantThreadExecutor;<init>(Ljava/lang/String;)V", shift = At.Shift.AFTER))

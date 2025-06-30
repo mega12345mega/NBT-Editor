@@ -1,7 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
-import java.util.Optional;
-
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.ClientChestHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.PageLoadLevel;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -23,6 +22,9 @@ public class ClientChestItemReference implements ItemReference {
 		
 		this.save = new SaveQueue<>("ClientChest/" + (page + 1) + "/" + slot, toSave -> {
 			ClientChestHelper.getPage(page, PageLoadLevel.DYNAMIC_ITEMS).join().ifPresent(pageData -> {
+				if (MainUtil.client.currentScreen instanceof ClientChestScreen screen && ClientChestScreen.PAGE == page)
+					screen.getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
+				
 				pageData.getItemsOrThrow()[slot] = toSave;
 				pageData.dynamicItems().remove(slot);
 				ClientChestHelper.setPage(page, pageData.items(), pageData.dynamicItems()).join();
@@ -35,6 +37,11 @@ public class ClientChestItemReference implements ItemReference {
 	}
 	public int getSlot() {
 		return slot;
+	}
+	
+	@Override
+	public boolean exists() {
+		return page < NBTEditorClient.CLIENT_CHEST.getPageCount();
 	}
 	
 	@Override
@@ -60,21 +67,13 @@ public class ClientChestItemReference implements ItemReference {
 	}
 	
 	@Override
-	public int getBlockedInvSlot() {
+	public int getBlockedSlot() {
 		return -1;
 	}
 	
 	@Override
-	public int getBlockedHotbarSlot() {
-		return -1;
+	public void showParent() {
+		ClientChestScreen.show();
 	}
-	
-	@Override
-	public void showParent(Optional<ItemStack> cursor) {
-		ClientChestScreen.show(cursor);
-	}
-	
-	@Override
-	public void clearParentCursor() {}
 	
 }

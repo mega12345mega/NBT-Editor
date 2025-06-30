@@ -12,7 +12,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.It
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -70,6 +69,8 @@ public interface NBTReference<T extends LocalNBT> {
 		}));
 	}
 	
+	public boolean exists();
+	
 	T getLocalNBT();
 	public default void saveLocalNBT(T nbt, Runnable onFinished) {
 		saveNBT(nbt.getId(), nbt.getNBT(), onFinished);
@@ -102,12 +103,10 @@ public interface NBTReference<T extends LocalNBT> {
 		saveNBT(id, toSave, () -> {});
 	}
 	
-	public default void showParent(Optional<ItemStack> cursor) {
-		escapeParent(cursor);
+	public default void showParent() {
+		escapeParent();
 	}
-	public default void escapeParent(Optional<ItemStack> cursor) {
-		cursor.ifPresent(MainUtil::setInventoryCursorStack);
-		MainUtil.client.setScreen(null);
+	public default void escapeParent() {
+		NBTEditorClient.CURSOR_MANAGER.closeRoot();
 	}
-	public default void clearParentCursor() {}
 }

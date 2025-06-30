@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
@@ -24,7 +23,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
@@ -45,7 +43,7 @@ public class LocalBlock implements LocalNBT {
 	public static LocalBlock deserialize(NbtCompound nbt, int defaultDataVersion) {
 		NbtElement dataVersion = nbt.get("DataVersion");
 		
-		String id = MainUtil.updateDynamic(TypeReferences.BLOCK_NAME, NbtString.of(nbt.getString("id")), dataVersion, defaultDataVersion).value;
+		String id = MainUtil.updateDynamic(TypeReferences.BLOCK_NAME, NbtString.of(nbt.getString("id")), dataVersion, defaultDataVersion).asString();
 		Block block = MVRegistry.BLOCK.get(IdentifierInst.of(id));
 		
 		BlockStateProperties state = new BlockStateProperties(block.getDefaultState());
@@ -159,7 +157,7 @@ public class LocalBlock implements LocalNBT {
 	}
 	
 	@Override
-	public void renderIcon(MatrixStack matrices, int x, int y) {
+	public void renderIcon(MatrixStack matrices, int x, int y, float tickDelta) {
 		RenderSystem.disableCull();
 		
 		matrices.push();
@@ -176,8 +174,8 @@ public class LocalBlock implements LocalNBT {
 				new BlockPos(0, 1000, 0), MainUtil.client.world, renderMatrices,
 				provider.getBuffer(RenderLayer.getCutout()), false);
 		if (isBlockEntity()) {
-			MainUtil.client.getBlockEntityRenderDispatcher().renderEntity(getCachedBlockEntity(),
-					renderMatrices, provider, 0xF000F0, OverlayTexture.DEFAULT_UV);
+			MVMisc.renderBlockEntity(MainUtil.client.getBlockEntityRenderDispatcher(),
+					getCachedBlockEntity(), tickDelta, renderMatrices, provider);
 		}
 		provider.draw();
 		
@@ -197,13 +195,7 @@ public class LocalBlock implements LocalNBT {
 							BlockEntity entity = provider.createBlockEntity(new BlockPos(0, 1000, 0), state.applyTo(block.getDefaultState()));
 							entity.setWorld(MainUtil.client.world);
 							NBTManagers.BLOCK_ENTITY.setNbt(entity, nbt);
-							MainUtil.client.addBlockEntityNbt(output, entity, DynamicRegistryManagerHolder.getManager());
-							
-							NbtCompound blockEntityDataTag = ItemTagReferences.BLOCK_ENTITY_DATA.get(output);
-							blockEntityDataTag.remove("x");
-							blockEntityDataTag.remove("y");
-							blockEntityDataTag.remove("z");
-							ItemTagReferences.BLOCK_ENTITY_DATA.set(output, blockEntityDataTag);
+							MVMisc.addBlockEntityNbtWithoutXYZ(output, entity);
 						}
 					} else {
 						NbtCompound nbt = new NbtCompound();

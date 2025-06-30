@@ -37,6 +37,7 @@
 	
 	"nbteditor.editor.save": "Save",
 	"nbteditor.editor.saving": "Saving ...",
+	"nbteditor.editor.ref_broken": "Saving is blocked; the NBT reference has been broken,\nso there is nowhere to save data. Copy important NBT\ndata before closing! (The expand button will allow\nyou to copy everything at once if no tags are selected)",
 	"nbteditor.editor.name": "Name",
 	
 	"nbteditor.editor.unsaved.title": "Subject Not Saved!",
@@ -61,7 +62,9 @@
 	"nbteditor.nbt.paste": "Paste",
 	"nbteditor.nbt.rename": "Rename",
 	
-	"nbteditor.nbt.overwrite.title": "That name already exists!",
+	"nbteditor.nbt.key": "Tag Name",
+	
+	"nbteditor.nbt.overwrite.title": "That tag already exists!",
 	"nbteditor.nbt.overwrite.desc": "Do you want to overwrite it?",
 	"nbteditor.nbt.overwrite.yes": "Overwrite",
 	"nbteditor.nbt.overwrite.no": "Cancel",
@@ -202,6 +205,7 @@
 	"nbteditor.hide_flags.tooltip": "Tooltip",
 	"nbteditor.hide_flags.stored_enchantments": "Stored Enchantments",
 	"nbteditor.hide_flags.trim": "Armor Trim",
+	"nbteditor.hide_flags.jukebox_playable": "Jukebox Playable",
 	
 	"nbteditor.item_size.uncompressed": "§6NBT Size: %s",
 	"nbteditor.item_size.compressed": "§6NBT Size (Compressed): %s",
@@ -217,6 +221,12 @@
 	"nbteditor.keybind.page.prev": "§6 to the previous page!",
 	"nbteditor.keybind.page.next_jump": "\n§6to jump to the next page!",
 	"nbteditor.keybind.page.prev_jump": "\n§6to jump to the previous page!",
+	"nbteditor.keybind.formatted_text.shadow": "§6§lAlt§r§6 to set the shadow color!",
+	"nbteditor.keybind.formatted_text.custom_color": "§6§lCtrl + Shift + C",
+	"nbteditor.keybind.formatted_text.events": "§6§lCtrl + Shift + E",
+	"nbteditor.keybind.formatted_text.insertion": "§6§lCtrl + Shift + I",
+	"nbteditor.keybind.formatted_text.font": "§6§lCtrl + Shift + F",
+	"nbteditor.keybind.formatted_text.reset": "§6§lCtrl + \\",
 	
 	"nbteditor.skull.invalid_player_name": "§cThat player name is invalid!",
 	
@@ -317,10 +327,12 @@
 	"nbteditor.multi_line_text.regex.on": "☑",
 	"nbteditor.multi_line_text.regex.off": "☐",
 	"nbteditor.formatted_text.custom_color": "Custom Color",
-	"nbteditor.formatted_text.events": "Click & Hover Event",
+	"nbteditor.formatted_text.custom_color.shadow": "Custom Shadow Color",
+	"nbteditor.formatted_text.events": "Click & Hover Events",
 	"nbteditor.formatted_text.click_event_value": "Click Event Value",
 	"nbteditor.formatted_text.hover_event_value": "Hover Event Value",
-	"nbteditor.formatted_text.tip": "Use Ctrl+Shift+C for custom colors & Ctrl+Shift+E for events",
+	"nbteditor.formatted_text.insertion": "Insertion",
+	"nbteditor.formatted_text.font": "Font",
 	"nbteditor.color_selector.hue": "Hue: %d°",
 	
 	"nbteditor.config": "NBT Editor Config",
@@ -447,8 +459,10 @@
 	
 	
 	"nbteditor.configurable.list.move": "Move",
+	"nbteditor.configurable.list.move.index": "Index",
 	"nbteditor.configurable.list.duplicate": "Duplicate",
 	"nbteditor.configurable.list.duplicate.any_amount": "Shift for any amount",
+	"nbteditor.configurable.list.duplicate.amount": "# of new copies",
 	"nbteditor.configurable.list.remove": "Remove",
 	
 	"nbteditor.effect_list_arg_type.expected.space": "Expected a space",
@@ -456,8 +470,8 @@
 	"nbteditor.effect_list_arg_type.invalid.arg": "Invalid argument",
 	"nbteditor.effect_list_arg_type.invalid.value": "Invalid value",
 	
-	"nbteditor.fancy_text_arg_type.invalid.event_type": "Invalid click or hover event",
-	"nbteditor.fancy_text_arg_type.invalid.entity": "That entity doesn't exist",
+	"nbteditor.fancy_text_arg_type.custom_color": "Custom Color (#RRGGBB;)",
+	"nbteditor.fancy_text_arg_type.shadow_color": "Shadow Color (&_<color>)",
 	"nbteditor.fancy_text_arg_type.stringify_unsupported": "§cThis text contains hover events or formatting that can't be fully recreated",
 	
 	"nbteditor.chat_length_warning_1": "WARNING: The text will be truncated to",
@@ -546,10 +560,10 @@
 	"nbteditor.help.factories_7": "§6display [name | lore | hideflags] [<args>]: §7Edit names, lore, and hideflags",
 	"nbteditor.help.factories_8": "§6enchantments: §7Edit enchantments",
 	"nbteditor.help.factories_9": "§6max [cursed] [all] [<level>]: §7Max an item's enchantments",
-	"nbteditor.help.factories_10": "§6maxstacksize (default | <size>): §7Set an item's max stack size",
+	"nbteditor.help.factories_10": "§6maxstacksize (default | <size>): §7Set an item's max stack size (1.20.5+ only)",
 	"nbteditor.help.factories_11": "§6randomuuid [add | remove]: §7Add a random UUID to an item",
 	"nbteditor.help.factories_12": "§6signature (add | remove | edit <new signature>): §7Add a signature to items",
-	"nbteditor.help.factories_13": "§6signboard [new <type> | import]: §7Edit signs",
+	"nbteditor.help.factories_13": "§6signboard [new <type>]: §7Edit signs",
 	"nbteditor.help.factories_14": "§6unbindskull: §7Remove a skull's link to the original owner",
 	"nbteditor.help.factories_15": "§6unbreakable: §7Toggle an item's unbreakable tag",
 	"nbteditor.help.factories_16": "§7--------------------",
@@ -558,8 +572,8 @@
 	"nbteditor.help.text_format_2": "§6Help: Text Format",
 	"nbteditor.help.text_format_3": "§7Used instead of JSON for formatted text",
 	"nbteditor.help.text_format_4": "§7Can be toggled back to JSON in §6/nbteditor config",
-	"nbteditor.help.text_format_5": "[FORMAT] §7Formatting uses \\& for [run_command]{/get preset colorcodes}([show_text]{/get preset colorcodes}(§9§ncolor codes))",
-	"nbteditor.help.text_format_6": "§7When changing colors, the format is cleared for consistency",
+	"nbteditor.help.text_format_5": "[FORMAT] §7Formatting uses \\& for [run_command]{/get preset colorcodes}([show_text]{/get preset colorcodes}(§9§ncolor codes)) and supports custom colors (\\&#RRGGBB;)",
+	"nbteditor.help.text_format_6": "§7When changing colors, the format is not cleared; use &r",
 	"nbteditor.help.text_format_7": "§7Events: §6[<event_name>]{<event_value>}(<affected text>)",
 	"nbteditor.help.text_format_8": "§7Example: §6[run_command]{/say clicked!}(&6Click me!)",
 	"nbteditor.help.text_format_9": "§7The §6[show_text]§7 event's value uses formatted text",
@@ -574,13 +588,13 @@
 	"nbteditor.credits_5": "[LINK] https://www.spigotmc.org/resources/free-headdb-head-menu.84967/",
 	"nbteditor.credits_6": "§7Ported to client sided Fabric by mega12345mega",
 	"nbteditor.credits_7": "",
-	"nbteditor.credits_8": "§6zh_cn: hyplant, Clexus",
-	"nbteditor.credits_9": "§6pl_pl: Xantrisse",
+	"nbteditor.credits_8": "§6zh_cn: hyplant, Clexus, GTedd",
+	"nbteditor.credits_9": "§6pl_pl: Xantrisse, papa_louie09",
 	"nbteditor.credits_10": "§6ru_ru: TheFaceJD",
 	"nbteditor.credits_11": "§6fr_fr: Darukshock",
 	"nbteditor.credits_12": "§6he_il: inon13, RedVortexDev",
 	"nbteditor.credits_13": "§6cs_cz: Kulihrasek1101",
-	"nbteditor.credits_14": "§6zh_tw: dirtTW",
+	"nbteditor.credits_14": "§6zh_tw: dirtTW, Axolotl1000, GTedd",
 	
 	
 	

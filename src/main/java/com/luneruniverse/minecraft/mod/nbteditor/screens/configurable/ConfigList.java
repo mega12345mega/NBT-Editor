@@ -12,7 +12,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.InputOverlay;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.StringInput;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.Screen;
@@ -179,26 +180,41 @@ public class ConfigList extends ConfigGroupingVertical<Integer, ConfigList> {
 							if (mouseY >= y && mouseY <= y + MainUtil.client.textRenderer.fontHeight) {
 								switch (action) {
 									case MOVE -> {
-										new StringInputScreen(MainUtil.client.currentScreen, str -> {
-											int target = Integer.parseInt(str) - 1;
-											if (target == index)
-												return;
-											int dir = (index < target ? 1 : -1);
-											for (int i = index; dir == 1 ? i < target : i > target; i += dir) {
-												ConfigListEntry entry = parent.getListEntry(i + dir);
-												entry.setIndex(i);
-												parent.setListEntry(i, entry);
-											}
-											setIndex(target);
-											parent.setListEntry(target, this);
-											parent.onChanged.forEach(listener -> listener.onValueChanged(null));
-										}, MainUtil.intPredicate(() -> 1, () -> parent.paths.size() - 1, false)).show(index + 1 + "");
+										InputOverlay.show(
+												TextInst.translatable("nbteditor.configurable.list.move"),
+												StringInput.builder()
+														.withDefault(index + 1 + "")
+														.withPlaceholder(
+																TextInst.translatable("nbteditor.configurable.list.move.index"))
+														.withValidator(
+																MainUtil.intPredicate(() -> 1, () -> parent.paths.size() - 1, false))
+														.build(),
+												str -> {
+													int target = Integer.parseInt(str) - 1;
+													if (target == index)
+														return;
+													int dir = (index < target ? 1 : -1);
+													for (int i = index; dir == 1 ? i < target : i > target; i += dir) {
+														ConfigListEntry entry = parent.getListEntry(i + dir);
+														entry.setIndex(i);
+														parent.setListEntry(i, entry);
+													}
+													setIndex(target);
+													parent.setListEntry(target, this);
+													parent.onChanged.forEach(listener -> listener.onValueChanged(null));
+												});
 									}
 									case DUPLICATE -> {
 										if (Screen.hasShiftDown()) {
-											MainUtil.client.setScreen(new StringInputScreen(MainUtil.client.currentScreen,
-													numCopies -> duplicate(Integer.parseInt(numCopies)),
-													MainUtil.intPredicate(1, Integer.MAX_VALUE, false)));
+											InputOverlay.show(
+													TextInst.translatable("nbteditor.configurable.list.duplicate"),
+													StringInput.builder()
+															.withPlaceholder(
+																	TextInst.translatable("nbteditor.configurable.list.duplicate.amount"))
+															.withValidator(
+																	MainUtil.intPredicate(1, Integer.MAX_VALUE, false))
+															.build(),
+													numCopies -> duplicate(Integer.parseInt(numCopies)));
 										} else
 											duplicate(1);
 									}

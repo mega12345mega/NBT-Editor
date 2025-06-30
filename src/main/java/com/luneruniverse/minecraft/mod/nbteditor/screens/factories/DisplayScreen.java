@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
@@ -20,11 +19,10 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.ImageToLoreWidg
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.EntityTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	
@@ -40,21 +38,9 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	protected void initEditor() {
 		MVMisc.setKeyboardRepeatEvents(true);
 		
-		Style baseNameStyle = Style.EMPTY;
-		if (localNBT instanceof LocalItem item) {
-			if (!itemNameType)
-				baseNameStyle = baseNameStyle.withFormatting(Formatting.ITALIC);
-			baseNameStyle = baseNameStyle.withFormatting(item.getEditableItem().getRarity().formatting);
-		} else if (localNBT instanceof LocalBlock)
-			;
-		else if (localNBT instanceof LocalEntity)
-			baseNameStyle = baseNameStyle.withFormatting(Formatting.WHITE);
-		else
-			throw new IllegalStateException("DisplayScreen doesn't support " + localNBT.getClass().getName());
-		
 		nameFormatted = FormattedTextFieldWidget.create(nameFormatted, 16, 64, width - 32, 24 + textRenderer.fontHeight * 3,
 				itemNameType ? MainUtil.getBaseItemNameSafely(((LocalItem) localNBT).getEditableItem()) : localNBT.getName(),
-						false, baseNameStyle, text -> {
+						false, StyleUtil.getBaseNameStyle(localNBT, itemNameType), text -> {
 			if (itemNameType)
 				((LocalItem) localNBT).getEditableItem().set(MVComponentType.ITEM_NAME, text);
 			else
@@ -67,7 +53,7 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		if (localNBT instanceof LocalItem item) {
 			lore = FormattedTextFieldWidget.create(lore, 16, nextY, width - 32, height - 16 - 20 - 4 - nextY,
-					ItemTagReferences.LORE.get(item.getEditableItem()), Style.EMPTY.withFormatting(Formatting.ITALIC, Formatting.DARK_PURPLE), lines -> {
+					ItemTagReferences.LORE.get(item.getEditableItem()), StyleUtil.BASE_LORE_STYLE, lines -> {
 				if (lines.size() == 1 && lines.get(0).getString().isEmpty())
 					ItemTagReferences.LORE.set(item.getEditableItem(), new ArrayList<>());
 				else
@@ -110,12 +96,10 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		matrices.translate(0.0, 0.0, 1.0);
 		nameFormatted.render(matrices, mouseX, mouseY, delta);
 		matrices.pop();
-		
-		renderTip(matrices, "nbteditor.formatted_text.tip");
 	}
 	
 	@Override
-	public void filesDragged(List<Path> paths) {
+	public void onFilesDropped(List<Path> paths) {
 		if (!(localNBT instanceof LocalItem))
 			return;
 		List<Text> lines = new ArrayList<>();

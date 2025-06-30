@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.components;
 import java.util.Map;
 import java.util.Optional;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.Attempt;
@@ -28,7 +29,7 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 		DataResult<NbtElement> result = ItemStack.CODEC.encodeStart(
 				DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), subject);
 		return new Attempt<>(
-				result.resultOrPartial().map(nbt -> (NbtCompound) nbt),
+				result.resultOrPartial().map(nbt -> (NbtCompound) nbt.copy()),
 				result.error().map(DataResult.Error::message).orElse(null));
 	}
 	@Override
@@ -40,7 +41,7 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 			return new Attempt<>(ItemStack.EMPTY);
 		
 		DataResult<Pair<ItemStack, NbtElement>> result = ItemStack.OPTIONAL_CODEC.decode(
-				DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), nbt);
+				DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), nbt.copy());
 		return new Attempt<>(
 				result.resultOrPartial().map(Pair::getFirst).map(item -> {
 					if (item.contains(DataComponentTypes.MAX_DAMAGE) && item.getOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1) > 1)
@@ -57,7 +58,7 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 	@Override
 	public NbtCompound getNbt(ItemStack subject) {
 		return (NbtCompound) ComponentChanges.CODEC.encodeStart(
-				DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), subject.getComponentChanges()).getOrThrow();
+				DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), subject.getComponentChanges()).getOrThrow().copy();
 	}
 	@Override
 	public NbtCompound getOrCreateNbt(ItemStack subject) {
@@ -66,7 +67,7 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 	@Override
 	public void setNbt(ItemStack subject, NbtCompound nbt) {
 		ComponentChanges components = ComponentChanges.CODEC.decode(
-				DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), nbt).getPartialOrThrow().getFirst();
+				DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), nbt.copy()).getPartialOrThrow().getFirst();
 		Optional<? extends Integer> maxDamage = components.get(DataComponentTypes.MAX_DAMAGE);
 		Optional<? extends Integer> maxStackSize = components.get(DataComponentTypes.MAX_STACK_SIZE);
 		if (maxDamage != null && maxDamage.isPresent() &&
@@ -75,8 +76,7 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 						maxStackSize.isPresent() && maxStackSize.get() > 1)) {
 			components = components.withRemovedIf(component -> component == DataComponentTypes.MAX_DAMAGE);
 		}
-		subject.getComponentChanges().entrySet().clear();
-		subject.applyChanges(components);
+		MixinLink.setChanges(subject, components);
 	}
 	
 	@Override

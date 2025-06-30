@@ -7,6 +7,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.SummonableEntityArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.integrations.NBTAutocompleteIntegration;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -41,7 +42,7 @@ public class GetEntityCommand extends ClientCommand {
 			EntityType<?> entityType = context.getArgument("entity", EntityType.class);
 			
 			PosArgument posArg = getDefaultArg(context, "pos", null, PosArgument.class);
-			Vec3d pos = (posArg == null ? null : posArg.toAbsolutePos(context.getSource().getPlayer().getCommandSource()));
+			Vec3d pos = (posArg == null ? null : posArg.getPos(MVMisc.getCommandSource(context.getSource().getPlayer())));
 			
 			NbtCompound nbtArg = getDefaultArg(context, "nbt", new NbtCompound(), NbtCompound.class);
 			

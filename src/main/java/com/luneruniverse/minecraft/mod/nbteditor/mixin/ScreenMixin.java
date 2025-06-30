@@ -14,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ImportScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.CreativeTabWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.MinecraftClient;
@@ -29,18 +30,18 @@ import net.minecraft.text.Style;
 public class ScreenMixin {
 	@Inject(method = "clearChildren", at = @At("RETURN"))
 	private void clearChildren(CallbackInfo info) {
-		MixinLink.addCreativeTabs((Screen) (Object) this);
+		CreativeTabWidget.addCreativeTabs((Screen) (Object) this);
 	}
 	@Inject(method = "init(Lnet/minecraft/client/MinecraftClient;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;init()V"), require = 0)
 	private void init(MinecraftClient client, int width, int height, CallbackInfo info) {
 		Version.newSwitch()
-				.range("1.19.4", null, () -> MixinLink.addCreativeTabs((Screen) (Object) this))
+				.range("1.19.4", null, () -> CreativeTabWidget.addCreativeTabs((Screen) (Object) this))
 				.range(null, "1.19.3", () -> {})
 				.run();
 	}
 	
-	@Inject(method = "filesDragged", at = @At("HEAD"))
-	private void filesDragged(List<Path> paths, CallbackInfo info) {
+	@Inject(method = "onFilesDropped", at = @At("HEAD"))
+	private void onFilesDropped(List<Path> paths, CallbackInfo info) {
 		Screen source = (Screen) (Object) this;
 		if (source instanceof HandledScreen || source instanceof GameMenuScreen)
 			ImportScreen.importFiles(paths, Optional.empty());

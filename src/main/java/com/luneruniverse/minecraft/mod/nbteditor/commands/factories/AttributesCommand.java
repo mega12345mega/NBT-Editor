@@ -11,6 +11,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.AttributesScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.AttributeModifierId;
@@ -26,7 +27,7 @@ public class AttributesCommand extends ClientCommand {
 	public static final NBTReferenceFilter ATTRIBUTES_FILTER = NBTReferenceFilter.create(
 			ref -> true,
 			null,
-			ref -> ref.getEntityType().create(MainUtil.client.world) instanceof MobEntity,
+			ref -> ServerMVMisc.createEntity(ref.getEntityType(), MainUtil.client.world) instanceof MobEntity,
 			TextInst.translatable("nbteditor.no_ref.attributes"),
 			TextInst.translatable("nbteditor.no_hand.no_item.to_edit"));
 	

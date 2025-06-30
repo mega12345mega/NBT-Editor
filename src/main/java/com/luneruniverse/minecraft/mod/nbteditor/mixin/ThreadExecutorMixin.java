@@ -4,6 +4,7 @@ import java.util.WeakHashMap;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -20,7 +21,14 @@ public class ThreadExecutorMixin {
 	private static final Cache<Runnable, Exception> stackTraces = CacheBuilder.newBuilder().weakKeys().build();
 	
 	@Inject(method = "send", at = @At("HEAD"))
-	private void send(Runnable runnable, CallbackInfo info) {
+	@Group(name = "send", min = 1)
+	private void send_new(Runnable runnable, CallbackInfo info) {
+		stackTraces.put(runnable, new Exception("Stack trace"));
+	}
+	@Inject(method = "method_18858(Ljava/lang/Runnable;)V", at = @At("HEAD"), remap = false)
+	@Group(name = "send", min = 1)
+	@SuppressWarnings("target")
+	private void send_old(Runnable runnable, CallbackInfo info) {
 		stackTraces.put(runnable, new Exception("Stack trace"));
 	}
 	

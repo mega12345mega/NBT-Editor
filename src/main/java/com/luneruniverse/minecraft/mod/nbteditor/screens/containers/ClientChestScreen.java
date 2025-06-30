@@ -1,7 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
-import java.util.Optional;
-
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
@@ -14,7 +12,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ClientChestItemReference;
-import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandledScreenItemReference.HandledScreenItemReferenceParent;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ClientChestDataVersionScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LoadingScreen;
@@ -35,53 +32,36 @@ public class ClientChestScreen extends ClientHandledScreen {
 	public static int prevPageJumpTarget;
 	public static int nextPageJumpTarget;
 	
-	public static void show(Optional<ItemStack> cursor) {
-		Runnable close = () -> {
-			if (MainUtil.client.currentScreen instanceof ClientChestScreen screen)
-				screen.close();
-			else
-				cursor.ifPresent(MainUtil::setInventoryCursorStack);
-		};
-		
+	public static void show() {
 		LoadingScreen.show(
 				ClientChestHelper.getPage(PAGE, PageLoadLevel.DYNAMIC_ITEMS),
-				close,
+				NBTEditorClient.CURSOR_MANAGER::closeRoot,
 				(loaded, optional) -> {
 					if (optional.isEmpty()) {
-						if (!loaded)
-							close.run();
-						MainUtil.client.setScreen(null);
+						NBTEditorClient.CURSOR_MANAGER.closeRoot();
 						return;
 					}
 					
 					ClientChestPage pageData = optional.get();
 					
 					if (!pageData.isInThisVersion()) {
-						if (!loaded)
-							cursor.ifPresent(MainUtil::setInventoryCursorStack);
+						NBTEditorClient.CURSOR_MANAGER.closeRoot();
 						MainUtil.client.setScreen(new ClientChestDataVersionScreen(pageData.dataVersion()));
 						return;
 					}
 					
 					if (MainUtil.client.currentScreen instanceof ClientChestScreen screen) {
-						((ClientChestHandler) screen.handler).fillPage(pageData);
-						screen.dynamicItems = pageData.dynamicItems();
+						screen.setPageData(pageData);
+						MainUtil.setTextFieldValueSilently(screen.pageField, (PAGE + 1) + "", true);
 						screen.updatePageNavigation();
 					} else {
-						ClientChestHandler handler = new ClientChestHandler(pageData);
-						handler.setCursorStack(cursor.filter(item -> !loaded).orElse(
-								MainUtil.client.player.playerScreenHandler.getCursorStack()));
-						ClientChestScreen screen = new ClientChestScreen(handler);
-						screen.dynamicItems = pageData.dynamicItems();
-						MainUtil.client.setScreen(screen);
+						ClientChestScreen screen = new ClientChestScreen();
+						screen.setPageData(pageData);
+						NBTEditorClient.CURSOR_MANAGER.showBranch(screen);
 						NBTEditorClient.CLIENT_CHEST.warnIfCorrupt();
 					}
 				});
 	}
-	public static void show() {
-		show(Optional.empty());
-	}
-	
 	
 	private DynamicItems dynamicItems;
 	private boolean navigationClicked;
@@ -92,8 +72,14 @@ public class ClientChestScreen extends ClientHandledScreen {
 	private ButtonWidget prevPageJump;
 	private ButtonWidget nextPageJump;
 	
-	private ClientChestScreen(ClientChestHandler handler) {
-		super(handler, TextInst.translatable("nbteditor.client_chest"));
+	private ClientChestScreen() {
+		super(new ClientScreenHandler(6), TextInst.translatable("nbteditor.client_chest"));
+	}
+	private void setPageData(ClientChestPage pageData) {
+		ItemStack[] items = pageData.getItemsOrThrow();
+		for (int i = 0; i < items.length; i++)
+			handler.getSlot(i).setStackNoCallbacks(items[i] == null ? ItemStack.EMPTY : items[i].copy());
+		dynamicItems = pageData.dynamicItems();
 	}
 	
 	@Override
@@ -206,7 +192,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 			navigationClicked = true;
 			client.setScreen(new FancyConfirmScreen(value -> {
 				if (value) {
-					this.handler.getInventory().clear();
+					handler.getInventory().clear();
+					dynamicItems = new DynamicItems();
 					save();
 				}
 				
@@ -268,10 +255,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 			boolean lockedSlot = (focusedSlot.inventory == handler.getInventory() &&
 					dynamicItems.isSlotLocked(focusedSlot.getIndex()));
 			if (!lockedSlot || keyCode == GLFW.GLFW_KEY_DELETE) {
-				if (handleKeybind(keyCode, focusedSlot,
-						HandledScreenItemReferenceParent.create(
-								ClientChestScreen::show, () -> handler.setCursorStack(ItemStack.EMPTY)),
-						slot -> new ClientChestItemReference(PAGE, slot.getIndex()), handler.getCursorStack())) {
+				if (handleKeybind(keyCode, focusedSlot, ClientChestScreen::show, slot -> new ClientChestItemReference(PAGE, slot.getIndex()))) {
 					if (keyCode == GLFW.GLFW_KEY_DELETE && lockedSlot)
 						dynamicItems.remove(focusedSlot.getIndex());
 					return true;
@@ -320,8 +304,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 	
 	private void save() {
 		ItemStack[] items = new ItemStack[54];
-		for (int i = 0; i < this.handler.getInventory().size(); i++)
-			items[i] = this.handler.getInventory().getStack(i).copy();
+		for (int i = 0; i < handler.getInventory().size(); i++)
+			items[i] = handler.getInventory().getStack(i).copy();
 		
 		ClientChestHelper.setPage(PAGE, items, dynamicItems);
 	}
@@ -346,14 +330,12 @@ public class ClientChestScreen extends ClientHandledScreen {
 		if (!prevPage.active)
 			return;
 		PAGE--;
-		pageField.setText((PAGE + 1) + "");
 		show();
 	}
 	private void nextPage() {
 		if (!nextPage.active)
 			return;
 		PAGE++;
-		pageField.setText((PAGE + 1) + "");
 		show();
 	}
 	
@@ -361,14 +343,12 @@ public class ClientChestScreen extends ClientHandledScreen {
 		if (!prevPageJump.active)
 			return;
 		PAGE = prevPageJumpTarget;
-		pageField.setText((PAGE + 1) + "");
 		show();
 	}
 	private void nextPageJump() {
 		if (!nextPageJump.active)
 			return;
 		PAGE = nextPageJumpTarget;
-		pageField.setText((PAGE + 1) + "");
 		show();
 	}
 	

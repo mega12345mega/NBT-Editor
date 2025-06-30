@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.ComponentTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.NBTTagReference;
@@ -21,7 +22,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.GameProf
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.CustomPotionContents;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 
@@ -29,7 +29,6 @@ import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.component.type.BlockStateComponent;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.NbtComponent;
-import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.component.type.UnbreakableComponent;
 import net.minecraft.component.type.WritableBookContentComponent;
@@ -41,18 +40,18 @@ import net.minecraft.text.Text;
 
 public class ItemTagReferences {
 	
-	private static TagReference<NbtCompound, ItemStack> getComponentTagRefOfNBT(MVComponentType<NbtComponent> component, boolean fillId) {
+	private static TagReference<NbtCompound, ItemStack> getComponentTagRefOfNBT(MVComponentType<NbtComponent> component) {
 		return new ComponentTagReference<>(component,
 				null,
 				componentValue -> componentValue == null ? new NbtCompound() : componentValue.copyNbt(),
-				nbt -> NbtComponent.of(fillId ? MainUtil.fillId(nbt.copy()) : nbt));
+				NbtComponent::of);
 	}
 	
 	public static final TagReference<CustomPotionContents, ItemStack> CUSTOM_POTION_CONTENTS = Version.<TagReference<CustomPotionContents, ItemStack>>newSwitch()
 			.range("1.20.5", null, () -> new ComponentTagReference<>(MVComponentType.POTION_CONTENTS,
-					() -> new PotionContentsComponent(Optional.empty(), Optional.empty(), List.of()),
+					() -> MVMisc.newPotionContentsComponent(Optional.empty(), Optional.empty(), List.of()),
 					contents -> new CustomPotionContents(contents.customColor(), contents.customEffects()),
-					contents -> new PotionContentsComponent(Optional.empty(), contents.color(), contents.effects())))
+					contents -> MVMisc.newPotionContentsComponent(Optional.empty(), contents.color(), contents.effects())))
 			.range(null, "1.20.4", () -> new CustomPotionContentsNBTTagReference())
 			.get();
 	
@@ -95,7 +94,7 @@ public class ItemTagReferences {
 			.get();
 	
 	public static final TagReference<NbtCompound, ItemStack> CUSTOM_DATA = Version.<TagReference<NbtCompound, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.CUSTOM_DATA, false))
+			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.CUSTOM_DATA))
 			.range(null, "1.20.4", () -> new CustomDataNBTTagReference())
 			.get();
 	
@@ -105,18 +104,18 @@ public class ItemTagReferences {
 					component -> component == null ? new HashMap<>() : new HashMap<>(component.properties()),
 					BlockStateComponent::new))
 			.range(null, "1.20.4", () -> TagReference.forItems(HashMap::new, TagReference.forMaps(
-					element -> element instanceof NbtString str ? str.value : null,
+					element -> element instanceof NbtString str ? str.asString() : null,
 					NbtString::of,
 					new NBTTagReference<>(NbtCompound.class, "BlockStateTag"))))
 			.get();
 	
 	public static final TagReference<NbtCompound, ItemStack> BLOCK_ENTITY_DATA = Version.<TagReference<NbtCompound, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.BLOCK_ENTITY_DATA, true))
+			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.BLOCK_ENTITY_DATA))
 			.range(null, "1.20.4", () -> TagReference.forItems(NbtCompound::new, new NBTTagReference<>(NbtCompound.class, "BlockEntityTag")))
 			.get();
 	
 	public static final TagReference<NbtCompound, ItemStack> ENTITY_DATA = Version.<TagReference<NbtCompound, ItemStack>>newSwitch()
-			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.ENTITY_DATA, true))
+			.range("1.20.5", null, () -> getComponentTagRefOfNBT(MVComponentType.ENTITY_DATA))
 			.range(null, "1.20.4", () -> TagReference.forItems(NbtCompound::new, new NBTTagReference<>(NbtCompound.class, "EntityTag")))
 			.get();
 	

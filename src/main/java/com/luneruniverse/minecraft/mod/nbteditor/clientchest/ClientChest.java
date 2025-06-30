@@ -298,7 +298,7 @@ public class ClientChest {
 	}
 	
 	public CompletableFuture<Void> unloadAllPages(PageLoadLevel loadLevel) {
-		if (loadLevel == PageLoadLevel.DYNAMIC_ITEMS)
+		if (!CLIENT_CHEST_FOLDER.exists() || loadLevel == PageLoadLevel.DYNAMIC_ITEMS)
 			return CompletableFuture.completedFuture(null);
 		
 		startUncachedProcessingAll();
@@ -735,7 +735,10 @@ public class ClientChest {
 		Files.copy(file.toPath(), new File(CLIENT_CHEST_FOLDER, "importing_page" + page + "_" + System.currentTimeMillis() + ".nbt").toPath());
 		
 		pageNbt.putInt("DataVersion", Version.getDataVersion());
-		MixinLink.throwHiddenException(() -> MVMisc.writeNbt(pageNbt, file));
+		
+		File tmpFile = new File(CLIENT_CHEST_FOLDER, "saving_page" + page + "_" + System.currentTimeMillis() + ".nbt");
+		MixinLink.throwHiddenException(() -> MVMisc.writeNbt(pageNbt, tmpFile));
+		Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		
 		PageLoadLevel loadLevel = getLoadLevel(page);
 		cache.discardPageCache(page);

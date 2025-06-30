@@ -104,23 +104,22 @@ public class MVMatrix4f {
 		return value;
 	}
 	
-	// Wrapper handler
 	private final Cache<String, Reflection.MethodInvoker> methodCache = CacheBuilder.newBuilder().build();
 	@SuppressWarnings("unchecked")
-	private <R> R call(String oldMethod, String newMethod, MethodType type, Object... args) {
+	private <R> R call(String oldMethod, String newMethod, Supplier<MethodType> type, Object... args) {
 		String method = Version.<String>newSwitch()
 				.range("1.19.3", null, () -> newMethod)
 				.range(null, "1.19.2", () -> oldMethod)
 				.get();
 		try {
-			return (R) methodCache.get(method, () -> Reflection.getMethod(Matrix4f_class, method, type)).invoke(value, args);
+			return (R) methodCache.get(method, () -> Reflection.getMethod(Matrix4f_class, method, type.get())).invoke(value, args);
 		} catch (ExecutionException | UncheckedExecutionException e) {
 			throw new RuntimeException("Error invoking method", e);
 		}
 	}
 	
 	public MVMatrix4f multiply(MVMatrix4f right) {
-		call("method_22672", "mul", MethodType.methodType(
+		call("method_22672", "mul", () -> MethodType.methodType(
 				Version.<Class<?>>newSwitch()
 						.range("1.19.3", null, () -> Matrix4f_class)
 						.range(null, "1.19.2", void.class)

@@ -15,7 +15,8 @@ import org.lwjgl.glfw.GLFW;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientScreenHandler;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.util.StringInputScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.InputOverlay;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.StringInput;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -258,8 +259,13 @@ public class PagedPane extends ClientHandledScreen {
                     "&7Right-Click to go to a &6Specific Page");
             controlMain = new Button(itemStack, event -> {
                 if (event.getClickType() == ClickTypeMod.RIGHT) {
-                	new StringInputScreen(this, page -> selectPage(Integer.parseInt(page) - 1),
-                			MainUtil.intPredicate(1, getPageAmount(), false)).show("Page number");
+                	InputOverlay.show(
+                			TextInst.of("Go to a Specific Page"),
+                			StringInput.builder()
+                					.withPlaceholder(TextInst.of("Page #"))
+                					.withValidator(MainUtil.intPredicate(1, getPageAmount(), false))
+                					.build(),
+                			page -> selectPage(Integer.parseInt(page) - 1));
                 } else {
                     InventoryUtils.openDatabase();
                 }

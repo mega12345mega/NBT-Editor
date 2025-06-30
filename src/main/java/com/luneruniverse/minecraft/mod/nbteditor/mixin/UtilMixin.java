@@ -11,13 +11,13 @@ import net.minecraft.util.Util;
 
 @Mixin(Util.class)
 public class UtilMixin {
-	@Inject(method = "error(Ljava/lang/String;Ljava/lang/Throwable;)V", at = @At("HEAD"), require = 0)
-	private static void error(String message, Throwable throwable, CallbackInfo info) {
+	@Inject(method = "logErrorOrPause(Ljava/lang/String;Ljava/lang/Throwable;)V", at = @At("HEAD"), require = 0)
+	private static void logErrorOrPause(String message, Throwable throwable, CallbackInfo info) {
 		if (MixinLink.hiddenExceptionHandlers.contains(Thread.currentThread()))
 			throw new MixinLink.HiddenException(message, throwable);
 	}
-	@Inject(method = "error(Ljava/lang/String;)V", at = @At("HEAD"))
-	private static void error(String message, CallbackInfo info) {
+	@Inject(method = "logErrorOrPause(Ljava/lang/String;)V", at = @At("HEAD"))
+	private static void logErrorOrPause(String message, CallbackInfo info) {
 		if (MixinLink.hiddenExceptionHandlers.contains(Thread.currentThread()))
 			throw new MixinLink.HiddenException(message, new RuntimeException(message));
 	}

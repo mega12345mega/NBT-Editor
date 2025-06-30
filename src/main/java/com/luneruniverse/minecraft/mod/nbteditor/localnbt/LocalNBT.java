@@ -86,7 +86,7 @@ public interface LocalNBT {
 		});
 	}
 	
-	public void renderIcon(MatrixStack matrices, int x, int y);
+	public void renderIcon(MatrixStack matrices, int x, int y, float tickDelta);
 	
 	public Optional<ItemStack> toItem();
 	public NbtCompound serialize();

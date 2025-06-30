@@ -13,6 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.screen.Screen;
@@ -133,11 +134,18 @@ public class MVDrawableHelper {
 		call("method_27534", void.class, new Class<?>[] {TextRenderer.class, Text.class, int.class, int.class, int.class}, matrices, textRenderer, text, x, y, color);
 	}
 	
+	private static final Supplier<Reflection.MethodInvoker> DrawContext_drawTexture =
+			Reflection.getOptionalMethod(DrawContext.class, "method_25290", MethodType.methodType(void.class, Identifier.class, int.class, int.class, float.class, float.class, int.class, int.class, int.class, int.class));
+	private static final Supplier<Reflection.MethodInvoker> GameRenderer_getPositionTexProgram =
+			Reflection.getOptionalMethod(GameRenderer.class, "method_34542", MethodType.methodType(ShaderProgram.class));
+	private static final Supplier<Reflection.MethodInvoker> RenderSystem_setShader =
+			Reflection.getOptionalMethod(RenderSystem.class, "setShader", MethodType.methodType(void.class, Supplier.class));
 	public static void drawTexture(MatrixStack matrices, Identifier texture, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight) {
 		Version.newSwitch()
-				.range("1.20.0", null, () -> getDrawContext(matrices).drawTexture(texture, x, y, u, v, width, height, textureWidth, textureHeight))
+				.range("1.21.2", null, () -> getDrawContext(matrices).drawTexture(RenderLayer::getGuiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight))
+				.range("1.20.0", "1.21.1", () -> DrawContext_drawTexture.get().invoke(getDrawContext(matrices), texture, x, y, u, v, width, height, textureWidth, textureHeight))
 				.range(null, "1.19.4", () -> {
-					RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+					RenderSystem_setShader.get().invoke(null, (Supplier<ShaderProgram>) () -> GameRenderer_getPositionTexProgram.get().invoke(null));
 					RenderSystem.setShaderTexture(0, texture);
 					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 					call("method_25290", void.class,
@@ -180,14 +188,14 @@ public class MVDrawableHelper {
 			Reflection.getOptionalMethod(ItemRenderer.class, "method_4023", MethodType.methodType(void.class, ItemStack.class, int.class, int.class));
 	private static final Supplier<Reflection.MethodInvoker> ItemRenderer_renderGuiItemOverlay =
 			Reflection.getOptionalMethod(ItemRenderer.class, "method_4025", MethodType.methodType(void.class, TextRenderer.class, ItemStack.class, int.class, int.class));
-	public static final void renderItem(MatrixStack matrices, float zOffset, boolean setScreenZOffset, ItemStack item, int x, int y) {
+	public static void renderItem(MatrixStack matrices, float zOffset, boolean setScreenZOffset, ItemStack item, int x, int y) {
 		ItemRenderer itemRenderer = MainUtil.client.getItemRenderer();
 		TextRenderer textRenderer = MainUtil.client.textRenderer;
 		Version.newSwitch()
 				.range("1.20.0", null, () -> {
 					DrawContext context = getDrawContext(matrices);
 					context.drawItem(item, x, y);
-					context.drawItemInSlot(textRenderer, item, x, y);
+					context.drawStackOverlay(textRenderer, item, x, y);
 				})
 				.range("1.19.4", "1.19.4", () -> {
 					ItemRenderer_renderInGuiWithOverrides_MatrixStack.get().invoke(itemRenderer, matrices, item, x, y);
@@ -237,6 +245,35 @@ public class MVDrawableHelper {
 					RenderSystem.colorMask(true, true, true, true);
 					RenderSystem.enableDepthTest();
 				})
+				.run();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> RenderSystem_applyModelViewMatrix =
+			Reflection.getOptionalMethod(RenderSystem.class, "applyModelViewMatrix", MethodType.methodType(void.class));
+	public static void applyModelViewMatrix() {
+		Version.newSwitch()
+				.range("1.21.2", null, () -> {})
+				.range(null, "1.21.1", () -> RenderSystem_applyModelViewMatrix.get().invoke(null))
+				.run();
+	}
+	
+	public static void enableScissor(MatrixStack matrices, int x, int y, int width, int height) {
+		Version.newSwitch()
+				.range("1.20.0", null, () -> getDrawContext(matrices).enableScissor(x, y, x + width, y + height))
+				.range(null, "1.19.4", () -> {
+					double scale = MainUtil.client.getWindow().getScaleFactor();
+					RenderSystem.enableScissor(
+							(int) (x * scale),
+							(int) ((MainUtil.client.getWindow().getScaledHeight() - (y + height)) * scale),
+							(int) (width * scale),
+							(int) (height * scale));
+				})
+				.run();
+	}
+	public static void disableScissor(MatrixStack matrices) {
+		Version.newSwitch()
+				.range("1.20.0", null, () -> getDrawContext(matrices).disableScissor())
+				.range(null, "1.19.4", () -> RenderSystem.disableScissor())
 				.run();
 	}
 	

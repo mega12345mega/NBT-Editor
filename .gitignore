@@ -6,7 +6,10 @@ build/
 run/
 .classpath
 .project
+
 nbteditor_client.launch
 nbteditor_server.launch
+nbteditor_1.17_client.launch
+nbteditor_1.17_server.launch
 
 src/test/

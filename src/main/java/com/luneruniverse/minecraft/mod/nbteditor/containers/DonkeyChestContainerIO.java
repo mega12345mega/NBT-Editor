@@ -5,7 +5,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 
-public class DonkeyChestContainerIO implements NBTContainerIO {
+public class DonkeyChestContainerIO implements NonItemNBTContainerIO {
 	
 	private static final boolean ITEMS_SHIFTED = Version.<Boolean>newSwitch()
 			.range("1.20.5", null, false)

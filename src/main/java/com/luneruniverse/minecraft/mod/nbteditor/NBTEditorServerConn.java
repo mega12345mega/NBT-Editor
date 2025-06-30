@@ -20,6 +20,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientChestScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.Screen;
@@ -64,7 +65,7 @@ public class NBTEditorServerConn implements MVClientNetworking.PlayNetworkStateE
 		if (status != Status.BOTH)
 			return false;
 		GameMode gameMode = MainUtil.client.interactionManager.getCurrentGameMode();
-		return (gameMode.isCreative() || gameMode.isSurvivalLike()) && MainUtil.client.player.hasPermissionLevel(2);
+		return (gameMode.isCreative() || gameMode.isSurvivalLike()) && ServerMVMisc.hasPermissionLevel(MainUtil.client.player, 2);
 	}
 	public boolean isEditingAllowed() {
 		return MainUtil.client.interactionManager.getCurrentGameMode().isCreative() || isEditingExpanded();

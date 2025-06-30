@@ -14,12 +14,10 @@ public class ItemTagContainerIO implements ItemContainerIO {
 	}
 	
 	private final String tag;
-	private final boolean fillId;
 	private final NBTContainerIO nbtIO;
 	
-	public ItemTagContainerIO(String tag, boolean fillId, NBTContainerIO nbtIO) {
+	public ItemTagContainerIO(String tag, NBTContainerIO nbtIO) {
 		this.tag = tag;
-		this.fillId = fillId;
 		this.nbtIO = nbtIO;
 	}
 	
@@ -28,20 +26,26 @@ public class ItemTagContainerIO implements ItemContainerIO {
 		if (nbt == null)
 			nbt = new NbtCompound();
 		
-		if (tag == null || nbtIO.passRootNbt(SourceContainerType.ITEM))
+		if (tag == null || nbtIO.getDefaultEntityId() == null)
 			return nbt;
 		return nbt.getCompound(tag);
 	}
 	private void setNBT(ItemStack item, NbtCompound nbt) {
-		if (tag == null || nbtIO.passRootNbt(SourceContainerType.ITEM))
+		String defaultEntityId = nbtIO.getDefaultEntityId();
+		if (tag == null || defaultEntityId == null)
 			item.manager$setNbt(nbt);
 		else
-			item.manager$modifyNbt(itemNbt -> itemNbt.put(tag, fillId ? MainUtil.fillId(nbt) : nbt));
+			item.manager$modifyNbt(itemNbt -> itemNbt.put(tag, MainUtil.fillId(nbt, defaultEntityId)));
 	}
 	
 	@Override
 	public int getMaxItemSize(ItemStack item) {
 		return nbtIO.getMaxNBTSize(item == null ? null : getNBT(item), SourceContainerType.ITEM);
+	}
+	
+	@Override
+	public boolean isItemReadable(ItemStack item) {
+		return nbtIO.isNBTReadable(getNBT(item), SourceContainerType.ITEM);
 	}
 	
 	@Override
@@ -55,6 +59,11 @@ public class ItemTagContainerIO implements ItemContainerIO {
 		int output = nbtIO.writeNBT(nbt, contents, SourceContainerType.ITEM);
 		setNBT(container, nbt);
 		return output;
+	}
+	
+	@Override
+	public int getWrittenItemSlotIndex(ItemStack container, ItemStack[] contents, int slot) {
+		return nbtIO.getWrittenNBTSlotIndex(getNBT(container), contents, slot, SourceContainerType.ITEM);
 	}
 	
 }

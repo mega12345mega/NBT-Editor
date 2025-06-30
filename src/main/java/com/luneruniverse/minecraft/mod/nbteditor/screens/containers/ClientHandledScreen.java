@@ -1,19 +1,18 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IgnoreCloseScreenPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.OldEventBehavior;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.PassContainerSlotUpdates;
-import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.HandledScreenItemReference.HandledScreenItemReferenceParent;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.InventoryItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -28,8 +27,6 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.GenericContainerScreenHandler;
@@ -38,67 +35,25 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class ClientHandledScreen extends GenericContainerScreen implements OldEventBehavior, PassContainerSlotUpdates {
+public class ClientHandledScreen extends GenericContainerScreen implements OldEventBehavior, IgnoreCloseScreenPacket {
 	
 	private static final Identifier TEXTURE = IdentifierInst.of("textures/gui/container/generic_54.png");
 	
-	private static Inventory SERVER_INV;
-	private static ItemStack SERVER_CURSOR;
-	
-	private static boolean updatingServerInventory;
-	private static void updateServerInventory() {
-		if (!(MainUtil.client.currentScreen instanceof ClientHandledScreen)) {
-			NBTEditor.LOGGER.warn("Attempted to update the server inventory when a ClientHandledScreen wasn't open!");
-			return;
-		}
-		
-		try {
-			updatingServerInventory = true;
-			
-			ClientHandledScreen screen = (ClientHandledScreen) MainUtil.client.currentScreen;
-			Inventory clientInv = MainUtil.client.player.getInventory();
-			ItemStack clientCursor = screen.handler.getCursorStack();
-			
-			for (int i = 0; i < clientInv.size(); i++) {
-				ItemStack clientStack = clientInv.getStack(i);
-				if (!ItemStack.areEqual(clientStack, SERVER_INV.getStack(i))) {
-					if (36 <= i && i <= 39) { // Armor
-						SERVER_INV.setStack(i, clientStack.copy());
-						continue;
-					}
-					MainUtil.clickCreativeStack(clientStack, i == 40 ? 45 : (i < 9 ? i + 36 : i));
-					SERVER_INV.setStack(i, clientStack.copy());
-				}
-			}
-			if (!ItemStack.areEqual(clientCursor, SERVER_CURSOR)) {
-				// Don't update server; cursor acts like the creative inventory
-				SERVER_CURSOR = clientCursor.copy();
-			}
-		} finally {
-			updatingServerInventory = false;
-		}
-	}
-	public static boolean isUpdatingServerInventory() {
-		return updatingServerInventory;
-	}
-	
-	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, HandledScreenItemReferenceParent parent,
-			Function<Slot, ItemReference> containerRef, ItemStack cursor) {
+	public static boolean handleKeybind(int keyCode, Slot hoveredSlot, Runnable parent, Function<Slot, ItemReference> containerRef) {
 		if (hoveredSlot != null &&
 				(ConfigScreen.isAirEditable() || hoveredSlot.getStack() != null && !hoveredSlot.getStack().isEmpty())) {
-			int slot = hoveredSlot.getIndex();
 			ItemReference ref;
 			if (hoveredSlot.inventory == MainUtil.client.player.getInventory()) {
-				ref = new InventoryItemReference(slot >= 36 ? slot - 36 : slot);
+				ref = new InventoryItemReference(hoveredSlot.getIndex());
 				if (parent != null)
 					((InventoryItemReference) ref).setParent(parent);
 			} else
 				ref = containerRef.apply(hoveredSlot);
-			return handleKeybind(keyCode, hoveredSlot.getStack(), ref, cursor);
+			return handleKeybind(keyCode, hoveredSlot.getStack(), ref);
 		}
 		return false;
 	}
-	public static boolean handleKeybind(int keyCode, ItemStack item, ItemReference ref, ItemStack cursor) {
+	public static boolean handleKeybind(int keyCode, ItemStack item, ItemReference ref) {
 		if (keyCode == GLFW.GLFW_KEY_DELETE) {
 			if (item == null || item.isEmpty())
 				return false;
@@ -112,40 +67,31 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		boolean notAir = item != null && !item.isEmpty();
 		if (hasControlDown()) {
 			if (notAir && ContainerIO.isContainer(item))
-				ContainerScreen.show(ref, Optional.of(cursor));
+				ContainerScreen.show(ref);
 		} else if (hasShiftDown()) {
-			if (notAir) {
-				if (cursor != null && !cursor.isEmpty()) {
-					MainUtil.get(cursor, true);
-					ref.clearParentCursor();
-				}
+			if (notAir)
 				MainUtil.client.setScreen(new LocalFactoryScreen<>(ref));
-			}
-		} else {
-			if (cursor != null && !cursor.isEmpty()) {
-				MainUtil.get(cursor, true);
-				ref.clearParentCursor();
-			}
+		} else
 			MainUtil.client.setScreen(new NBTEditorScreen<>(ref));
-		}
 		
 		return true;
 	}
 	
-	public ClientHandledScreen(GenericContainerScreenHandler handler, Text title) {
+	private ServerInventoryManager serverInv;
+	
+	protected ClientHandledScreen(GenericContainerScreenHandler handler, Text title) {
 		super(handler, MainUtil.client.player.getInventory(), title);
 		handler.disableSyncing();
-		MainUtil.client.player.currentScreenHandler = handler;
+	}
+	
+	public ServerInventoryManager getServerInventoryManager() {
+		return serverInv;
 	}
 	
 	@Override
 	protected void init() {
 		super.init();
-		
-		SERVER_INV = new SimpleInventory(client.player.getInventory().size());
-		for (int i = 0; i < client.player.getInventory().size(); i++)
-			SERVER_INV.setStack(i, client.player.getInventory().getStack(i).copy());
-		SERVER_CURSOR = this.handler.getCursorStack().copy();
+		serverInv = new ServerInventoryManager();
 	}
 	
 	protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
@@ -193,14 +139,26 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		return false;
 	}
 	
+	@Override
+	public final void tick() {
+		super.tick();
+		Version.newSwitch()
+				.range("1.17.1", null, () -> {})
+				.range(null, "1.17", () -> {
+					if (client.player.isAlive() && !client.player.isRemoved())
+						handledScreenTick();
+				})
+				.run();
+	}
+	@Override
+	protected void handledScreenTick() {}
+	
 	public void close() {
-		MainUtil.setInventoryCursorStack(handler.getCursorStack());
-		handler.setCursorStack(ItemStack.EMPTY);
-		
-		MainUtil.client.player.closeHandledScreen();
+		NBTEditorClient.CURSOR_MANAGER.closeRoot();
 	}
 	@Override
 	public void removed() {
+		serverInv = null;
 		// Don't always drop cursor in older versions
 	}
 	
@@ -227,7 +185,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 								handler.setCursorStack(cursor);
 							} else
 								handler.setCursorStack(item.copy());
-							updateServerInventory();
+							serverInv.updateServer();
 						}
 						case CLONE -> {
 							ItemStack item = slot.getStack();
@@ -238,13 +196,13 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 							item = item.copy();
 							item.setCount(item.getMaxCount());
 							handler.setCursorStack(item);
-							updateServerInventory();
+							serverInv.updateServer();
 						}
 						case QUICK_MOVE -> {
 							ItemStack prevItem = slot.getStack().copy();
 							LockableSlot.unlockDuring(() -> handler.onSlotClick(slot.id, button, actionType, MainUtil.client.player));
-							slot.setStack(prevItem);
-							updateServerInventory();
+							slot.setStackNoCallbacks(prevItem);
+							serverInv.updateServer();
 						}
 						case THROW -> {
 							ItemStack item = slot.getStack();
@@ -271,7 +229,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		if (!(this instanceof CursorHistoryScreen))
 			GetLostItemCommand.addToHistory(handler.getCursorStack());
 		
-		updateServerInventory();
+		serverInv.updateServer();
 		onChange();
 	}
 	

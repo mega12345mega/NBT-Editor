@@ -15,6 +15,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.It
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.DisplayScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
+import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -129,7 +130,7 @@ public class LoreCommand extends ClientCommand {
 								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/factory display lore remove " + finalI))))
 						.append(TextInst.literal(" ").formatted(Formatting.DARK_PURPLE).formatted(Formatting.ITALIC).append(line)
 						.styled(style -> MixinLink.withRunClickEvent(style, () -> MainUtil.client.currentScreen.handleTextClick(Style.EMPTY.withClickEvent(
-									new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore set " + finalI + " " + FancyTextArgumentType.stringifyFancyText(line, true, true)))))
+									new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore set " + finalI + " " + FancyTextArgumentType.stringifyFancyText(line, StyleUtil.BASE_LORE_STYLE, true)))))
 								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/factory display lore set " + finalI))))));
 				i++;
 			}
@@ -140,14 +141,14 @@ public class LoreCommand extends ClientCommand {
 		};
 		
 		builder.then(literal("add")
-						.then(argument("line", IntegerArgumentType.integer()).then(argument("text", FancyTextArgumentType.fancyText()).executes(add)))
-						.then(argument("text", FancyTextArgumentType.fancyText()).executes(add)))
+						.then(argument("line", IntegerArgumentType.integer()).then(argument("text", FancyTextArgumentType.fancyText(StyleUtil.BASE_LORE_STYLE)).executes(add)))
+						.then(argument("text", FancyTextArgumentType.fancyText(StyleUtil.BASE_LORE_STYLE)).executes(add)))
 				.then(literal("remove")
 						.then(argument("line", IntegerArgumentType.integer()).executes(remove))
 						.executes(remove))
 				.then(literal("set")
-						.then(argument("line", IntegerArgumentType.integer()).then(argument("text", FancyTextArgumentType.fancyText()).executes(set)))
-						.then(argument("text", FancyTextArgumentType.fancyText()).executes(set)))
+						.then(argument("line", IntegerArgumentType.integer()).then(argument("text", FancyTextArgumentType.fancyText(StyleUtil.BASE_LORE_STYLE)).executes(set)))
+						.then(argument("text", FancyTextArgumentType.fancyText(StyleUtil.BASE_LORE_STYLE)).executes(set)))
 				.then(literal("clear").executes(clear))
 				.then(literal("list").executes(list))
 			.executes(context -> {

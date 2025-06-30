@@ -4,7 +4,7 @@ import net.minecraft.item.ItemStack;
 
 public interface ItemContainerIO {
 	public static ItemContainerIO forNBTIO(NBTContainerIO io) {
-		return new ItemTagContainerIO(null, false, io);
+		return new ItemTagContainerIO(null, io);
 	}
 	
 	/**
@@ -16,4 +16,7 @@ public interface ItemContainerIO {
 	}
 	public ItemStack[] readItem(ItemStack container);
 	public int writeItem(ItemStack container, ItemStack[] contents);
+	public default int getWrittenItemSlotIndex(ItemStack container, ItemStack[] contents, int slot) {
+		return slot;
+	}
 }

@@ -7,9 +7,6 @@ accessible field net/minecraft/nbt/NbtTypes VALUES [Lnet/minecraft/nbt/NbtType;
 
 accessible field net/minecraft/client/gui/widget/TextFieldWidget text Ljava/lang/String;
 
-accessible field net/minecraft/nbt/NbtString value Ljava/lang/String;
-mutable field net/minecraft/nbt/NbtString value Ljava/lang/String;
-
 accessible method net/minecraft/client/gui/screen/Screen addDrawableChild (Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;
 
 accessible method net/minecraft/client/gui/screen/ingame/HandledScreens register (Lnet/minecraft/screen/ScreenHandlerType;Lnet/minecraft/client/gui/screen/ingame/HandledScreens$Provider;)V
@@ -23,6 +20,7 @@ accessible field net/minecraft/text/Style italic Ljava/lang/Boolean;
 accessible field net/minecraft/text/Style underlined Ljava/lang/Boolean;
 accessible field net/minecraft/text/Style strikethrough Ljava/lang/Boolean;
 accessible field net/minecraft/text/Style obfuscated Ljava/lang/Boolean;
+accessible field net/minecraft/text/Style font Lnet/minecraft/util/Identifier;
 
 extendable method net/minecraft/client/gui/widget/ClickableWidget render (Lnet/minecraft/client/gui/DrawContext;IIF)V
 
@@ -48,11 +46,9 @@ accessible method net/minecraft/text/Text$Serialization toJson (Lnet/minecraft/t
 
 accessible field net/minecraft/util/Rarity formatting Lnet/minecraft/util/Formatting;
 
-accessible method net/minecraft/client/MinecraftClient addBlockEntityNbt (Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/registry/DynamicRegistryManager;)V
-
 accessible method net/minecraft/component/type/ItemEnchantmentsComponent <init> (Lit/unimi/dsi/fastutil/objects/Object2IntOpenHashMap;Z)V
 accessible field net/minecraft/component/type/ItemEnchantmentsComponent showInTooltip Z
-accessible field net/minecraft/item/trim/ArmorTrim showInTooltip Z
+accessible field net/minecraft/item/equipment/trim/ArmorTrim showInTooltip Z
 
 accessible field net/minecraft/client/render/GameRenderer buffers Lnet/minecraft/client/render/BufferBuilderStorage;
 
@@ -68,6 +64,15 @@ accessible class com/mojang/blaze3d/platform/GlStateManager$ScissorTestState
 accessible class com/mojang/blaze3d/platform/GlStateManager$CapabilityTracker
 accessible field com/mojang/blaze3d/platform/GlStateManager SCISSOR Lcom/mojang/blaze3d/platform/GlStateManager$ScissorTestState;
 accessible field com/mojang/blaze3d/platform/GlStateManager$CapabilityTracker state Z
+
+accessible field net/minecraft/client/gui/DrawContext vertexConsumers Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;
+
+accessible field net/minecraft/client/MinecraftClient fontManager Lnet/minecraft/client/font/FontManager;
+accessible field net/minecraft/client/font/FontManager fontStorages Ljava/util/Map;
+
+accessible field net/minecraft/client/gui/screen/ingame/HandledScreen cancelNextRelease Z
+
+extendable method net/minecraft/client/gui/screen/ingame/HandledScreen tick ()V
 
 # Private in older versions
 accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;

@@ -1,13 +1,14 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
 import java.lang.invoke.MethodType;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
@@ -17,6 +18,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.AlertWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -108,11 +110,11 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		super.renderMain(matrices, mouseX, mouseY, delta);
 		renderEditor(matrices, mouseX, mouseY, delta);
 		MainUtil.renderLogo(matrices);
-		renderPreview(matrices);
+		renderPreview(matrices, delta);
 	}
 	private static final Supplier<Reflection.MethodInvoker> RenderSystem_getModelViewStack =
 			Reflection.getOptionalMethod(RenderSystem.class, "getModelViewStack", MethodType.methodType(MatrixStack.class));
-	private void renderPreview(MatrixStack matrices) {
+	private void renderPreview(MatrixStack matrices, float tickDelta) {
 		int x = 16 + 32 + 8;
 		int y = 16;
 		int scaleX = 2;
@@ -132,13 +134,13 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		matrices.translate(0.0D, 0.0D, 32.0D);
 		matrices.scale(scaleX, scaleY, 1);
 		if (oldMatrix)
-			RenderSystem.applyModelViewMatrix();
+			MVDrawableHelper.applyModelViewMatrix();
 		
-		localNBT.renderIcon(matrices, x, y);
+		localNBT.renderIcon(matrices, x, y, tickDelta);
 		
 		matrices.pop();
 		if (oldMatrix)
-			RenderSystem.applyModelViewMatrix();
+			MVDrawableHelper.applyModelViewMatrix();
 	}
 	protected void preRenderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {}
 	protected void renderEditor(MatrixStack matrices, int mouseX, int mouseY, float delta) {}
@@ -153,6 +155,8 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 	
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (getOverlay() != null)
+			return super.keyPressed(keyCode, scanCode, modifiers);
 		if (super.keyPressed(keyCode, scanCode, modifiers))
 			return true;
 		
@@ -173,12 +177,21 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 		return saved;
 	}
 	protected boolean save() {
-		savedLocalNBT = LocalNBT.copy(localNBT);
-		saveBtn.setMessage(TextInst.translatable("nbteditor.editor.saving"));
-		setSaved(true);
-		ref.saveLocalNBT(savedLocalNBT, () -> {
-			saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
-		});
+		if (ref.exists()) {
+			savedLocalNBT = LocalNBT.copy(localNBT);
+			saveBtn.setMessage(TextInst.translatable("nbteditor.editor.saving"));
+			setSaved(true);
+			ref.saveLocalNBT(savedLocalNBT, () -> {
+				saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
+			});
+		} else {
+			localNBT.toItem().ifPresentOrElse(item -> {
+				savedLocalNBT = LocalNBT.copy(localNBT);
+				GetLostItemCommand.loseItem(item);
+				setSaved(true);
+				saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
+			}, () -> setOverlay(new AlertWidget(() -> setOverlay(null), TextInst.translatable("nbteditor.editor.ref_broken")), 500));
+		}
 		return true;
 	}
 	protected void checkSave() {
@@ -189,10 +202,10 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 	
 	@Override
 	public void close() {
-		closeSafely(() -> ref.showParent(Optional.empty()));
+		closeSafely(ref::showParent);
 	}
 	
-	public void closeSafely(Runnable onClose) {
+	protected void closeSafely(Runnable onClose) {
 		if (saved)
 			onClose.run();
 		else {

@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.ComponentTagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.TagReference;
@@ -14,10 +15,11 @@ import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.HideFlag
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.component.type.JukeboxPlayableComponent;
 import net.minecraft.component.type.UnbreakableComponent;
 import net.minecraft.item.BlockPredicatesChecker;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.trim.ArmorTrim;
+import net.minecraft.item.equipment.trim.ArmorTrim;
 import net.minecraft.text.Text;
 
 public enum HideFlag implements TagReference<Boolean, ItemStack> {
@@ -44,7 +46,10 @@ public enum HideFlag implements TagReference<Boolean, ItemStack> {
 	STORED_ENCHANTMENTS(TextInst.translatable("nbteditor.hide_flags.stored_enchantments"), -1,
 			getComponent(MVComponentType.STORED_ENCHANTMENTS, () -> component -> component.showInTooltip, () -> ItemEnchantmentsComponent::withShowInTooltip)),
 	TRIM(TextInst.translatable("nbteditor.hide_flags.trim"), -1,
-			getComponent(MVComponentType.TRIM, () -> component -> component.showInTooltip, () -> ArmorTrim::withShowInTooltip));
+			getComponent(MVComponentType.TRIM, () -> component -> component.showInTooltip, () -> ArmorTrim::withShowInTooltip)),
+	
+	JUKEBOX_PLAYABLE(TextInst.translatable("nbteditor.hide_flags.jukebox_playable"), "1.20.6", "1.21.0",
+			getComponent(MVComponentType.JUKEBOX_PLAYABLE, () -> JukeboxPlayableComponent::showInTooltip, () -> JukeboxPlayableComponent::withShowInTooltip));
 	
 	private static <C> Supplier<ComponentTagReference<Boolean, C>> getComponent(MVComponentType<C> component,
 			Supplier<Predicate<C>> getter, Supplier<BiFunction<C, Boolean, C>> setter) {
@@ -64,15 +69,20 @@ public enum HideFlag implements TagReference<Boolean, ItemStack> {
 		this.code = code;
 		this.tagRef = NBTManagers.COMPONENTS_EXIST ? compTagRef.get() : new HideFlagsNBTTagReference(this);
 	}
+	private <C> HideFlag(Text text, String maxMissingVersion, String minVersion, Supplier<ComponentTagReference<Boolean, C>> compTagRef) {
+		this.text = text;
+		this.code = -1;
+		this.tagRef = Version.<TagReference<Boolean, ItemStack>>newSwitch()
+				.range(minVersion, null, compTagRef::get)
+				.range(null, maxMissingVersion, () -> null)
+				.get();
+	}
 	
 	public Text getText() {
 		return text;
 	}
-	public boolean isOnlyForComponents() {
-		return code <= 0;
-	}
 	public boolean isInThisVersion() {
-		return code > 0 || NBTManagers.COMPONENTS_EXIST;
+		return code > 0 || NBTManagers.COMPONENTS_EXIST && tagRef != null;
 	}
 	
 	public boolean isEnabled(int code) {

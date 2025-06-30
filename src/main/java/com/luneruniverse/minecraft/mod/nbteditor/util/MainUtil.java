@@ -21,18 +21,17 @@ import java.util.zip.ZipException;
 import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders.MVShader;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ActionResult;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVShaders.MVShaderAndLayer;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
-import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.DSL.TypeReference;
 import com.mojang.serialization.Dynamic;
@@ -41,6 +40,7 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EquipmentSlot;
@@ -52,9 +52,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -66,18 +64,23 @@ public class MainUtil {
 	
 	// Same as ClientPlayerInteractionManager#clickCreativeSlot, but without a feature flag check
 	// Also includes survival bypass
+	/**
+	 * @param item
+	 * @param slot Format: container
+	 */
 	public static void clickCreativeStack(ItemStack item, int slot) {
 		if (NBTEditorClient.SERVER_CONN.isEditingAllowed())
-			MVMisc.sendC2SPacket(new CreativeInventoryActionC2SPacket(slot, item));
+			MVMisc.sendC2SPacket(new CreativeInventoryActionC2SPacket(slot, item.copy()));
 	}
 	public static void dropCreativeStack(ItemStack item) {
 		if (NBTEditorClient.SERVER_CONN.isEditingAllowed() && !item.isEmpty())
-			MVMisc.sendC2SPacket(new CreativeInventoryActionC2SPacket(-1, item));
+			MVMisc.sendC2SPacket(new CreativeInventoryActionC2SPacket(-1, item.copy()));
 	}
 	
 	public static void saveItem(Hand hand, ItemStack item) {
 		client.player.setStackInHand(hand, item.copy());
-		clickCreativeStack(item, hand == Hand.OFF_HAND ? 45 : client.player.getInventory().selectedSlot + 36);
+		clickCreativeStack(item, hand == Hand.OFF_HAND ? SlotUtil.createOffHandInContainer() :
+			SlotUtil.createHotbarInContainer(client.player.getInventory().selectedSlot));
 	}
 	public static void saveItem(EquipmentSlot equipment, ItemStack item) {
 		if (equipment == EquipmentSlot.MAINHAND)
@@ -86,16 +89,17 @@ public class MainUtil {
 			saveItem(Hand.OFF_HAND, item);
 		else {
 			client.player.getInventory().armor.set(equipment.getEntitySlotId(), item.copy());
-			clickCreativeStack(item, 8 - equipment.getEntitySlotId());
+			clickCreativeStack(item, SlotUtil.createArmorInContainer(equipment));
 		}
 	}
 	
+	/**
+	 * @param slot Format: inv
+	 * @param item
+	 */
 	public static void saveItem(int slot, ItemStack item) {
-		client.player.getInventory().setStack(slot == 45 ? 40 : slot, item.copy());
-		clickCreativeStack(item, slot < 9 ? slot + 36 : slot);
-	}
-	public static void saveItemInvSlot(int slot, ItemStack item) {
-		saveItem(slot == 45 ? 45 : (slot >= 36 ? slot - 36 : slot), item);
+		client.player.getInventory().setStack(slot, item.copy());
+		clickCreativeStack(item, SlotUtil.invToContainer(slot));
 	}
 	
 	public static void get(ItemStack item, boolean dropIfNoSpace) {
@@ -118,7 +122,7 @@ public class MainUtil {
 				overflow = item.getCount() - item.getMaxCount();
 				item.setCount(item.getMaxCount());
 			}
-			saveItem(slot == 40 ? 45 : slot, item);
+			saveItem(slot, item);
 			if (overflow != 0) {
 				item = item.copy();
 				item.setCount(overflow);
@@ -255,7 +259,7 @@ public class MainUtil {
 			if (name != null)
 				return name;
 		}
-		return item.getItem().getName();
+		return MVMisc.getName(item.getItem());
 	}
 	public static Text getCustomItemNameSafely(ItemStack item) {
 		if (NBTManagers.COMPONENTS_EXIST)
@@ -450,7 +454,7 @@ public class MainUtil {
 	}
 	
 	
-	public static void fillShader(MatrixStack matrices, MVShader shader, Consumer<VertexConsumer> data, int x, int y, int width, int height) {
+	public static void fillShader(MatrixStack matrices, MVShaderAndLayer shader, Consumer<VertexConsumer> data, int x, int y, int width, int height) {
 		int x1 = x;
 		int y1 = y;
 		int x2 = x + width;
@@ -510,11 +514,11 @@ public class MainUtil {
 		return updateDynamic(typeRef, nbt, -1);
 	}
 	
-	public static NbtCompound fillId(NbtCompound nbt) {
+	public static NbtCompound fillId(NbtCompound nbt, String id) {
 		if (!NBTManagers.COMPONENTS_EXIST)
 			return nbt;
 		if (!nbt.contains("id", NbtElement.STRING_TYPE))
-			nbt.putString("id", "");
+			nbt.putString("id", id);
 		return nbt;
 	}
 	
@@ -524,24 +528,6 @@ public class MainUtil {
 		if (component.startsWith("!"))
 			return "!minecraft:" + component.substring(1);
 		return "minecraft:" + component;
-	}
-	
-	public static void setRootCursorStack(ScreenHandler handler, ItemStack cursor) {
-		handler.setCursorStack(cursor);
-		handler.setPreviousCursorStack(cursor);
-		if (client.player.playerScreenHandler != handler || client.interactionManager.getCurrentGameMode().isSurvivalLike())
-			MVClientNetworking.send(new SetCursorC2SPacket(cursor));
-	}
-	public static void setInventoryCursorStack(ItemStack cursor) {
-		if (MainUtil.client.interactionManager.getCurrentGameMode().isCreative())
-			MainUtil.client.player.playerScreenHandler.setCursorStack(cursor);
-		else {
-			if (!cursor.isEmpty())
-				MainUtil.get(cursor, true);
-			MainUtil.client.player.playerScreenHandler.setCursorStack(ItemStack.EMPTY);
-			MainUtil.client.player.playerScreenHandler.setPreviousCursorStack(ItemStack.EMPTY);
-			MVClientNetworking.send(new SetCursorC2SPacket(ItemStack.EMPTY));
-		}
 	}
 	
 	public static <T> CompletableFuture<T> mergeFutures(List<CompletableFuture<T>> futures) {
@@ -554,16 +540,11 @@ public class MainUtil {
 		return output;
 	}
 	
-	public static void enableScissor(int x, int y, int width, int height) {
-		double scale = client.getWindow().getScaleFactor();
-		RenderSystem.enableScissor(
-				(int) (x * scale),
-				(int) ((client.getWindow().getScaledHeight() - (y + height)) * scale),
-				(int) (width * scale),
-				(int) (height * scale));
-	}
-	public static void disableScissor() {
-		RenderSystem.disableScissor();
+	public static void setTextFieldValueSilently(TextFieldWidget widget, String text, boolean scrollToEnd) {
+		widget.text = text;
+		int cursor = (scrollToEnd ? text.length() : 0);
+		widget.setSelectionStart(cursor);
+		widget.setSelectionEnd(cursor);
 	}
 	
 }

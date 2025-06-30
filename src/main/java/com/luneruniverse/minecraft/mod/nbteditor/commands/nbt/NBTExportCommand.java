@@ -134,7 +134,7 @@ public class NBTExportCommand extends ClientCommand {
 				NBTReference.getReference(EXPORT_FILTER, false, ref -> {
 					ItemStack cmdBlock = new ItemStack(Items.COMMAND_BLOCK);
 					cmdBlock.manager$modifySubNbt(TagNames.BLOCK_ENTITY_TAG,
-							nbt -> MainUtil.fillId(nbt).putString("Command", getVanillaCommand(ref)));
+							nbt -> MainUtil.fillId(nbt, "minecraft:command_block").putString("Command", getVanillaCommand(ref)));
 					MainUtil.getWithMessage(cmdBlock);
 				});
 				return Command.SINGLE_SUCCESS;

@@ -38,8 +38,15 @@ public class SpawnEggContainerIO implements ItemContainerIO {
 		LocalEntity entity = new LocalEntity(MVMisc.getEntityType(container),
 				container.manager$getOrCreateNbt().getCompound(TagNames.ENTITY_TAG));
 		int output = ContainerIO.write(entity, contents);
-		container.manager$modifyNbt(nbt -> nbt.put(TagNames.ENTITY_TAG, MainUtil.fillId(entity.getNBT())));
+		container.manager$modifyNbt(nbt -> nbt.put(TagNames.ENTITY_TAG, MainUtil.fillId(entity.getNBT(), entity.getId().toString())));
 		return output;
+	}
+	
+	@Override
+	public int getWrittenItemSlotIndex(ItemStack container, ItemStack[] contents, int slot) {
+		LocalEntity entity = new LocalEntity(MVMisc.getEntityType(container),
+				container.manager$getOrCreateNbt().getCompound(TagNames.ENTITY_TAG));
+		return ContainerIO.getWrittenSlotIndex(entity, contents, slot);
 	}
 	
 }

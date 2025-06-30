@@ -5,8 +5,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
 import net.minecraft.item.ItemStack;
 
 public interface BlockContainerIO {
-	public static BlockContainerIO forNBTIO(NBTContainerIO io) {
-		return (BlockContainerIO) new BlockEntityTagContainerIO(io);
+	public static BlockContainerIO forNBTIO(NonItemNBTContainerIO io) {
+		return (BlockContainerIO) new BlockEntityTagContainerIO(io.withItemSupport((String) null));
 	}
 	
 	/**
@@ -18,4 +18,7 @@ public interface BlockContainerIO {
 	}
 	public ItemStack[] readBlock(LocalBlock container);
 	public int writeBlock(LocalBlock container, ItemStack[] contents);
+	public default int getWrittenBlockSlotIndex(LocalBlock container, ItemStack[] contents, int slot) {
+		return slot;
+	}
 }

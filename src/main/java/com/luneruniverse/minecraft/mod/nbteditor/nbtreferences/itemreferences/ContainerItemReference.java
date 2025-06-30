@@ -1,6 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
@@ -28,7 +27,6 @@ public class ContainerItemReference<L extends LocalNBT> implements ItemReference
 			contents[slot] = toSave;
 			ContainerIO.write(containerValue, contents);
 			
-			// The recursive nature causes parent containers to also write items to the screen, hence the check
 			if (MainUtil.client.currentScreen instanceof ContainerScreen screen && screen.getReference() == container)
 				screen.getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
 			
@@ -60,8 +58,21 @@ public class ContainerItemReference<L extends LocalNBT> implements ItemReference
 	}
 	
 	@Override
+	public boolean exists() {
+		if (!container.exists())
+			return false;
+		
+		L containerValue = container.getLocalNBT();
+		return ContainerIO.isContainer(containerValue) && slot < ContainerIO.getMaxSize(containerValue);
+	}
+	
+	@Override
 	public ItemStack getItem() {
-		return ContainerIO.read(container.getLocalNBT())[slot];
+		L containerValue = container.getLocalNBT();
+		ItemStack[] contents = ContainerIO.read(containerValue);
+		if (slot >= contents.length && slot < ContainerIO.getMaxSize(containerValue))
+			return ItemStack.EMPTY;
+		return contents[slot];
 	}
 	
 	@Override
@@ -80,26 +91,18 @@ public class ContainerItemReference<L extends LocalNBT> implements ItemReference
 	}
 	
 	@Override
-	public int getBlockedInvSlot() {
-		return container instanceof ItemReference item ? item.getBlockedInvSlot() : -1;
+	public int getBlockedSlot() {
+		return container instanceof ItemReference item ? item.getBlockedSlot() : -1;
 	}
 	
 	@Override
-	public int getBlockedHotbarSlot() {
-		return container instanceof ItemReference item ? item.getBlockedHotbarSlot() : -1;
+	public void showParent() {
+		ContainerScreen.show(container);
 	}
 	
 	@Override
-	public void showParent(Optional<ItemStack> cursor) {
-		ContainerScreen.show(container, cursor);
+	public void escapeParent() {
+		container.escapeParent();
 	}
-	
-	@Override
-	public void escapeParent(Optional<ItemStack> cursor) {
-		container.escapeParent(cursor);
-	}
-	
-	@Override
-	public void clearParentCursor() {}
 	
 }

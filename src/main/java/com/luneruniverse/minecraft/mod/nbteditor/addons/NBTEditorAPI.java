@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.addons;
 
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -16,16 +17,15 @@ import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.EntityContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.EntityTagContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ItemContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.NbtTypeModifier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.CreativeTab;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
-import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtmenugenerators.MenuGenerator;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtfolder.NBTFolder;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.CreativeTabWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.mojang.brigadier.Command;
@@ -33,6 +33,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.DSL.TypeReference;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.entity.EntityType;
@@ -41,8 +42,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtType;
-import net.minecraft.nbt.NbtTypes;
 import net.minecraft.text.Text;
 
 /**
@@ -116,7 +115,10 @@ public class NBTEditorAPI {
 	}
 	
 	/**
-	 * Register a normal factory, adding it to the factory gui
+	 * Register a normal factory, adding it to the factory gui<br>
+	 * <strong>Warning:</strong> If this factory opens its own GUI, make sure call {@link NBTReference#showParent()}
+	 * (recommended) or {@link NBTReference#escapeParent()} when the GUI is closed. This ensures that, if the user
+	 * has an item on their cursor, it doesn't get lost.
 	 * @param name The name of the factory (used in the factory command)
 	 * @param extremeAlias The extreme alias
 	 * @param buttonMsg The text to display in the factory gui
@@ -207,10 +209,10 @@ public class NBTEditorAPI {
 	 * This is used with the {@code /open} command to edit special containers (like item frames)
 	 * @param item The item that this container applies to
 	 * @param container The container reader and writer
-	 * @see #registerBlockContainer(Block, BlockContainerIO)
-	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
 	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, Function)
 	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, Function)
 	 */
 	public static void registerItemContainer(Item item, ItemContainerIO container) {
 		ContainerIO.registerItemIO(item, container);
@@ -220,10 +222,8 @@ public class NBTEditorAPI {
 	 * This is used with the {@code /open} command to edit special containers (like item frames)
 	 * @param block The block that this container applies to
 	 * @param container The container reader and writer
-	 * @see #registerItemContainer(Item, ItemContainerIO)
-	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
 	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
-	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, Function)
 	 */
 	public static void registerBlockContainer(Block block, BlockContainerIO container) {
 		ContainerIO.registerBlockIO(block, container);
@@ -233,10 +233,8 @@ public class NBTEditorAPI {
 	 * This is used with the {@code /open} command to edit special containers (like item frames)
 	 * @param entity The entity that this container applies to, including spawn eggs of this type
 	 * @param container The container reader and writer
-	 * @see #registerItemContainer(Item, ItemContainerIO)
-	 * @see #registerBlockContainer(Block, BlockContainerIO)
-	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
 	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, Function)
 	 */
 	public static void registerEntityContainer(EntityType<?> entity, EntityContainerIO container) {
 		ContainerIO.registerEntityIO(entity, container);
@@ -248,10 +246,21 @@ public class NBTEditorAPI {
 	 * @param container The container reader and writer
 	 * @see #registerItemContainer(Item, ItemContainerIO)
 	 * @see #registerBlockContainer(Block, BlockContainerIO)
-	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
-	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, Function)
 	 */
 	public static void registerBlockEntityTagContainer(BlockItem blockItem, BlockEntityTagContainerIO container) {
+		ContainerIO.registerBlockEntityTagIO(blockItem, container);
+	}
+	/**
+	 * Register a container<br>
+	 * This is used with the {@code /open} command to edit special containers (like item frames)
+	 * @param blockItem The item and block that this container applies to
+	 * @param container The container reader and writer
+	 * @see #registerItemContainer(Item, ItemContainerIO)
+	 * @see #registerBlockContainer(Block, BlockContainerIO)
+	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
+	 */
+	public static void registerBlockEntityTagContainer(BlockItem blockItem, Function<BlockEntityType<?>, BlockEntityTagContainerIO> container) {
 		ContainerIO.registerBlockEntityTagIO(blockItem, container);
 	}
 	/**
@@ -262,11 +271,24 @@ public class NBTEditorAPI {
 	 * @param entity The entity that this container applies to, including spawn eggs of this type
 	 * @param container The container reader and writer
 	 * @see #registerItemContainer(Item, ItemContainerIO)
-	 * @see #registerBlockContainer(Block, BlockContainerIO)
 	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
-	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, Function)
 	 */
 	public static void registerEntityTagContainer(Item item, EntityType<?> entity, EntityTagContainerIO container) {
+		ContainerIO.registerEntityTagIO(item, entity, container);
+	}
+	/**
+	 * Register a container<br>
+	 * This is used with the {@code /open} command to edit special containers (like item frames)<br>
+	 * DO NOT pass in the spawn egg to <code>item</code>; use {@link #registerEntityContainer(EntityType, EntityContainerIO)}
+	 * @param item The item that this container applies to
+	 * @param entity The entity that this container applies to, including spawn eggs of this type
+	 * @param container The container reader and writer
+	 * @see #registerItemContainer(Item, ItemContainerIO)
+	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
+	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 */
+	public static void registerEntityTagContainer(Item item, EntityType<?> entity, Function<EntityType<?>, EntityTagContainerIO> container) {
 		ContainerIO.registerEntityTagIO(item, entity, container);
 	}
 	
@@ -274,25 +296,12 @@ public class NBTEditorAPI {
 	 * Register a way to open usually unopenable NBT types in the editor<br>
 	 * This technique is used to allow opening parsable strings<br>
 	 * This could be used to open a number as a list of bits for example<br>
-	 * You must properly handle immutable types to prevent issues<br>
 	 * This is an advanced, somewhat obscure feature of the API
-	 * @param type The NBT type to open
-	 * @param generator The generator for the editor's menu
-	 * @see #makeMutable(byte)
+	 * @param clazz The NBT class to make openable (can be a superclass)
+	 * @param folder The constructor for the folder manager
 	 */
-	public static void registerNBTMenuGenerator(byte type, MenuGenerator generator) {
-		MenuGenerator.TYPES.put(type, generator);
-	}
-	
-	/**
-	 * The NBT type is set to mutable<br>
-	 * You must create a mixin for the nbt element, overriding copy and getNbtType
-	 * @param type The NBT type to modify
-	 * @return The new NBT type that should be returned from getNbtType
-	 * @see #registerNBTMenuGenerator(byte, MenuGenerator)
-	 */
-	public static NbtType<?> makeMutable(byte type) {
-		return NbtTypeModifier.makeMutable(NbtTypes.byId(type));
+	public static void registerNBTFolderType(Class<? extends NbtElement> clazz, NBTFolder.Constructor<?> folder) {
+		NBTFolder.TYPES.put(clazz, folder);
 	}
 	
 	/**
@@ -323,7 +332,7 @@ public class NBTEditorAPI {
 	 * @see #registerInventoryTab(ItemStack, Runnable)
 	 */
 	public static void registerInventoryTab(ItemStack item, Runnable onClick, Predicate<Screen> whenToShow) {
-		CreativeTab.TABS.add(new CreativeTab.CreativeTabData(item, onClick, whenToShow));
+		CreativeTabWidget.TABS.add(new CreativeTabWidget.CreativeTabData(item, onClick, whenToShow));
 	}
 	
 	/**
