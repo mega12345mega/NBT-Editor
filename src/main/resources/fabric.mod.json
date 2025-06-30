@@ -51,7 +51,9 @@
   "custom": {
     "modmenu": {
       "links": {
-      	"modmenu.discord": "https://discord.gg/PzeYTbEZjn"
+      	"modmenu.discord": "https://discord.gg/PzeYTbEZjn",
+      	"modmenu.wiki": "https://github.com/mega12345mega/NBT-Editor/wiki",
+      	"modmenu.buymeacoffee": "https://buymeacoffee.com/mega12345mega"
       }
     },
     "loom:injected_interfaces": {
