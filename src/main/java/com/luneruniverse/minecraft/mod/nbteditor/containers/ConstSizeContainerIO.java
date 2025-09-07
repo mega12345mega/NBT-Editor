@@ -1,6 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -30,13 +30,13 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 		boolean itemComponent = NBTManagers.COMPONENTS_EXIST && source == SourceContainerType.ITEM;
 		
 		ItemStack[] items = new ItemStack[numItems];
-		NbtList itemsNbt = container.getList(itemComponent ? "minecraft:container" : "Items", NbtElement.COMPOUND_TYPE);
-		for (NbtElement itemNbtElement : itemsNbt) {
+		NbtList itemsNbt = container.nbte$getListOrDefault(itemComponent ? "minecraft:container" : "Items", NbtElement.COMPOUND_TYPE);
+		for (NbtElement itemNbtElement : itemsNbt.nbte$iterable()) {
 			NbtCompound itemNbt = (NbtCompound) itemNbtElement;
-			int slot = itemNbt.getInt(itemComponent ? "slot" : "Slot");
+			int slot = itemNbt.nbte$getIntOrDefault(itemComponent ? "slot" : "Slot");
 			if (slot < 0 || slot >= numItems)
 				continue;
-			items[slot] = NBTManagers.ITEM.deserialize(itemComponent ? itemNbt.getCompound("item") : itemNbt, true);
+			items[slot] = NBTManagers.ITEM.deserialize(itemComponent ? itemNbt.nbte$getCompoundOrDefault("item") : itemNbt, true);
 		}
 		return items;
 	}
@@ -50,7 +50,7 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 			ItemStack item = contents[i];
 			if (item == null || item.isEmpty())
 				continue;
-			NbtCompound itemNbt = item.manager$serialize(true);
+			NbtCompound itemNbt = item.nbte$serialize(true);
 			if (itemComponent) {
 				NbtCompound wrapper = new NbtCompound();
 				wrapper.put("item", itemNbt);

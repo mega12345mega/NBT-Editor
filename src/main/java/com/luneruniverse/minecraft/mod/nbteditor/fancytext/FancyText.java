@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.util.StyleUtil;
 import com.mojang.brigadier.StringReader;
@@ -81,29 +81,32 @@ public class FancyText {
 				insertion.setPlain(partStyle.getInsertion());
 				font.setPlain(partStyle.font);
 				if (partStyle.getClickEvent() != null) {
+					MVTextEvents.ClickAction<?> clickAction = MVTextEvents.ClickAction.getAction(partStyle.getClickEvent());
 					output.append('[');
-					output.append(MVMisc.getClickEventActionName(partStyle.getClickEvent().getAction()));
+					output.append(clickAction.getName());
 					output.append("]{");
-					output.append(partStyle.getClickEvent().getValue().replace("\\", "\\\\").replace("{", "\\{").replace("}", "\\}"));
+					output.append(clickAction.getStringifiedValue(partStyle.getClickEvent())
+							.replace("\\", "\\\\").replace("{", "\\{").replace("}", "\\}"));
 					output.append("}(");
 				}
 				if (partStyle.getHoverEvent() != null) {
+					MVTextEvents.HoverAction<?> hoverAction = MVTextEvents.HoverAction.getAction(partStyle.getHoverEvent());
 					output.append('[');
-					output.append(MVMisc.getHoverEventActionName(partStyle.getHoverEvent().getAction()));
+					output.append(hoverAction.getName());
 					output.append(']');
-					if (partStyle.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT) {
+					if (hoverAction == MVTextEvents.HoverAction.SHOW_TEXT) {
 						Map.Entry<String, Boolean> showTextContents =
-								stringify(partStyle.getHoverEvent().getValue(HoverEvent.Action.SHOW_TEXT));
+								stringify(MVTextEvents.HoverAction.SHOW_TEXT.getValue(partStyle.getHoverEvent()));
 						if (showTextContents.getValue())
 							errors.setPlain(true);
 						output.append('{');
 						output.append(showTextContents.getKey());
 						output.append('}');
-					} else if (partStyle.getHoverEvent().getAction() == HoverEvent.Action.SHOW_ITEM) {
+					} else if (hoverAction == MVTextEvents.HoverAction.SHOW_ITEM) {
 						errors.setPlain(true);
-					} else if (partStyle.getHoverEvent().getAction() == HoverEvent.Action.SHOW_ENTITY) {
+					} else if (hoverAction == MVTextEvents.HoverAction.SHOW_ENTITY) {
 						output.append('{');
-						output.append(partStyle.getHoverEvent().getValue(HoverEvent.Action.SHOW_ENTITY).uuid.toString());
+						output.append(MVTextEvents.HoverAction.SHOW_ENTITY.getValue(partStyle.getHoverEvent()).uuid.toString());
 						output.append('}');
 						errors.setPlain(true);
 					}

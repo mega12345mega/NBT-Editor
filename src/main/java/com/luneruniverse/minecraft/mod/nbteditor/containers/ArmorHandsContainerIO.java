@@ -1,6 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -18,13 +18,13 @@ public class ArmorHandsContainerIO implements NonItemNBTContainerIO {
 	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
 		ItemStack[] items = new ItemStack[6];
 		
-		NbtList armorItemsNbt = container.getList("ArmorItems", NbtElement.COMPOUND_TYPE);
-		for (int i = 0; i < armorItemsNbt.size() && i < 4; i++)
-			items[3 - i] = NBTManagers.ITEM.deserialize(armorItemsNbt.getCompound(i), true);
+		NbtList armorItemsNbt = container.nbte$getListOrDefault("ArmorItems", NbtElement.COMPOUND_TYPE);
+		for (int i = 0; i < armorItemsNbt.nbte$size() && i < 4; i++)
+			items[3 - i] = NBTManagers.ITEM.deserialize((NbtCompound) armorItemsNbt.nbte$get(i), true);
 		
-		NbtList handItemsNbt = container.getList("HandItems", NbtElement.COMPOUND_TYPE);
-		for (int i = 0; i < handItemsNbt.size() && i < 2; i++)
-			items[4 + i] = NBTManagers.ITEM.deserialize(handItemsNbt.getCompound(i), true);
+		NbtList handItemsNbt = container.nbte$getListOrDefault("HandItems", NbtElement.COMPOUND_TYPE);
+		for (int i = 0; i < handItemsNbt.nbte$size() && i < 2; i++)
+			items[4 + i] = NBTManagers.ITEM.deserialize((NbtCompound) handItemsNbt.nbte$get(i), true);
 		
 		return items;
 	}
@@ -43,12 +43,12 @@ public class ArmorHandsContainerIO implements NonItemNBTContainerIO {
 		
 		NbtList armorItemsNbt = new NbtList();
 		for (int i = 0; i < 4; i++)
-			armorItemsNbt.add(actualContents[3 - i].manager$serialize(true));
+			armorItemsNbt.add(actualContents[3 - i].nbte$serialize(true));
 		container.put("ArmorItems", armorItemsNbt);
 		
 		NbtList handItemsNbt = new NbtList();
 		for (int i = 0; i < 2; i++)
-			handItemsNbt.add(actualContents[4 + i].manager$serialize(true));
+			handItemsNbt.add(actualContents[4 + i].nbte$serialize(true));
 		container.put("HandItems", handItemsNbt);
 		
 		return 6;

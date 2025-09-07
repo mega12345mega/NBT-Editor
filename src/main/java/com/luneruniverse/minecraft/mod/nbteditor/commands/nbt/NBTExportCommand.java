@@ -15,10 +15,11 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.TagNames;
@@ -32,9 +33,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.text.ClickEvent;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.PathUtil;
+import net.minecraft.util.path.PathUtil;
 
 public class NBTExportCommand extends ClientCommand {
 	
@@ -62,7 +62,7 @@ public class NBTExportCommand extends ClientCommand {
 	private static void stripEntityTags(NbtCompound nbt, String... tags) {
 		for (String tag : tags)
 			nbt.remove(tag);
-		for (NbtElement passenger : nbt.getList("Passengers", NbtElement.COMPOUND_TYPE))
+		for (NbtElement passenger : nbt.nbte$getPartialListOrDefault("Passengers", NbtElement.COMPOUND_TYPE).nbte$iterable())
 			stripEntityTags((NbtCompound) passenger, tags);
 	}
 	
@@ -70,10 +70,10 @@ public class NBTExportCommand extends ClientCommand {
 		return MVRegistry.ITEM.getId(item.getItem()).toString() + NBTManagers.ITEM.getNbtString(item) + " " + item.getCount();
 	}
 	private static String getBlockArgs(LocalBlock block) {
-		return block.getId().toString() + block.getState().toString() + (block.getNBT() == null ? "" : block.getNBT().asString());
+		return block.getId().toString() + block.getState().toString() + (block.getNBT() == null ? "" : block.getNBT().toString());
 	}
 	private static String getEntityArgs(LocalEntity entity) {
-		return entity.getId().toString() + " ~ ~ ~" + (entity.getNBT() == null ? "" : " " + entity.getNBT().asString());
+		return entity.getId().toString() + " ~ ~ ~" + (entity.getNBT() == null ? "" : " " + entity.getNBT().toString());
 	}
 	
 	private static String getCommand(String itemPrefix, String blockPrefix, String entityPrefix, LocalNBT nbt, boolean stripEntityUUIDs) {
@@ -107,7 +107,7 @@ public class NBTExportCommand extends ClientCommand {
 			MVMisc.writeCompressedNbt(nbt, output);
 			MainUtil.client.player.sendMessage(TextUtil.attachFileTextOptions(TextInst.translatable("nbteditor.nbt.export.file.success",
 					TextInst.literal(output.getName()).formatted(Formatting.UNDERLINE).styled(style ->
-					style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, output.getAbsolutePath())))), output), false);
+					style.withClickEvent(MVTextEvents.ClickAction.OPEN_FILE.newEvent(output.getAbsolutePath())))), output), false);
 		} catch (Exception e) {
 			NBTEditor.LOGGER.error("Error while exporting item", e);
 			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.nbt.export.file.error", e.getMessage()), false);
@@ -133,7 +133,7 @@ public class NBTExportCommand extends ClientCommand {
 			})).then(literal("cmdblock").executes(context -> {
 				NBTReference.getReference(EXPORT_FILTER, false, ref -> {
 					ItemStack cmdBlock = new ItemStack(Items.COMMAND_BLOCK);
-					cmdBlock.manager$modifySubNbt(TagNames.BLOCK_ENTITY_TAG,
+					cmdBlock.nbte$modifySubNbt(TagNames.BLOCK_ENTITY_TAG,
 							nbt -> MainUtil.fillId(nbt, "minecraft:command_block").putString("Command", getVanillaCommand(ref)));
 					MainUtil.getWithMessage(cmdBlock);
 				});

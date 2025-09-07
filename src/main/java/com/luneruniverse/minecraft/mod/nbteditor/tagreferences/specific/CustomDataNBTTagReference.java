@@ -9,7 +9,7 @@ public class CustomDataNBTTagReference implements TagReference<NbtCompound, Item
 	
 	@Override
 	public NbtCompound get(ItemStack object) {
-		NbtCompound nbt = object.manager$getNbt();
+		NbtCompound nbt = object.nbte$getNbt();
 		if (nbt == null)
 			return new NbtCompound();
 		return nbt;
@@ -17,7 +17,7 @@ public class CustomDataNBTTagReference implements TagReference<NbtCompound, Item
 	
 	@Override
 	public void set(ItemStack object, NbtCompound value) {
-		object.manager$setNbt(value);
+		object.nbte$setNbt(value);
 	}
 	
 }

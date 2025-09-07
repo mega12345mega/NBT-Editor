@@ -9,7 +9,6 @@ import org.lwjgl.opengl.GL20;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
-import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -131,7 +130,7 @@ public class MVTooltip {
 		float[] translation = MVMatrix4f.getTranslation(matrices);
 		matrices.push();
 		matrices.translate(-translation[0], -translation[1], 0.0);
-		boolean scissor = GlStateManager.SCISSOR.capState.state;
+		boolean scissor = MVGlStateManager.isScissorEnabled();
 		if (scissor)
 			GL20.glDisable(GL20.GL_SCISSOR_TEST);
 		

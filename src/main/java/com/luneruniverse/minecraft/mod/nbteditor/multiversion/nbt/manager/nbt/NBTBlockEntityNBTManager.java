@@ -1,12 +1,12 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.nbt;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.nbt;
 
 import java.lang.invoke.MethodType;
 import java.util.function.Supplier;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.Attempt;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManager;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
 import net.minecraft.block.entity.BlockEntity;

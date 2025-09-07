@@ -8,6 +8,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTValue;
 import com.luneruniverse.minecraft.mod.nbteditor.util.StringJsonWriterQuoted;
@@ -18,6 +20,11 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
 
 public class StringNBTFolder implements NBTFolder<NbtString> {
+	
+	public static final boolean JSON = Version.<Boolean>newSwitch()
+			.range("1.21.5", null, false)
+			.range(null, "1.21.4", true)
+			.get();
 	
 	private final Supplier<NbtString> get;
 	private final Consumer<NbtString> set;
@@ -85,7 +92,7 @@ public class StringNBTFolder implements NBTFolder<NbtString> {
 	private <R> R exec(Function<NBTFolder<?>, R> executor, R defaultReturnValue, boolean save) {
 		NbtElement parsedNbt;
 		try {
-			parsedNbt = MixinLink.parseSpecialElement(new StringReader(getNBT().asString()));
+			parsedNbt = MixinLink.parseSpecialElement(new StringReader(MVMisc.value(getNBT())));
 		} catch (CommandSyntaxException e) {
 			return defaultReturnValue;
 		}
@@ -99,7 +106,7 @@ public class StringNBTFolder implements NBTFolder<NbtString> {
 		
 		R output = executor.apply(folder);
 		if (save)
-			setNBT(NbtString.of(new StringJsonWriterQuoted().apply(folder.getNBT())));
+			setNBT(NbtString.of(JSON ? new StringJsonWriterQuoted().apply(folder.getNBT()) : folder.getNBT().toString()));
 		return output;
 	}
 	private boolean execVoid(Consumer<NBTFolder<?>> executor, boolean save) {

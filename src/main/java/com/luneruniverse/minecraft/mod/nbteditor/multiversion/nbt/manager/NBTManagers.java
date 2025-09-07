@@ -1,12 +1,12 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.components.ComponentBlockEntityNBTManager;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.components.ComponentEntityNBTManager;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.components.ComponentItemNBTManager;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.nbt.NBTBlockEntityNBTManager;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.nbt.NBTEntityNBTManager;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.nbt.NBTItemNBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.components.ComponentBlockEntityNBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.components.ComponentEntityNBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.components.ComponentItemNBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.nbt.NBTBlockEntityNBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.nbt.NBTEntityNBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.nbt.NBTItemNBTManager;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;

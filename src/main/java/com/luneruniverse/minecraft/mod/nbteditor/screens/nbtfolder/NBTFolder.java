@@ -24,7 +24,7 @@ public interface NBTFolder<T extends NbtElement> {
 	public static final ClassMap<NbtElement, Constructor<?>> TYPES = getTypesMap();
 	private static ClassMap<NbtElement, Constructor<?>> getTypesMap() {
 		ClassMap<NbtElement, Constructor<?>> output = new ClassMap<>();
-		output.put(AbstractNbtList.class, (Constructor<AbstractNbtList<?>>) ListNBTFolder::new);
+		output.put(AbstractNbtList.class, (Constructor<AbstractNbtList>) ListNBTFolder::new);
 		output.put(NbtCompound.class, (Constructor<NbtCompound>) CompoundNBTFolder::new);
 		output.put(NbtString.class, (Constructor<NbtString>) StringNBTFolder::new);
 		return output;

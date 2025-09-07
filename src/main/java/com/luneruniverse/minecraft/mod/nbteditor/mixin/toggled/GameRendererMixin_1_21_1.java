@@ -9,15 +9,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVShaders.MVShaderProgram;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders.MVShader1;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.VertexFormat;
 import net.minecraft.resource.ResourceFactory;
 
 @Mixin(GameRenderer.class)
@@ -40,12 +38,12 @@ public class GameRendererMixin_1_21_1 {
 	}
 	private void loadPrograms(List<Pair<ShaderProgram, Consumer<ShaderProgram>>> fragShaders) {
 		try {
-			for (MVShaderProgram shader : Shaders.SHADERS) {
+			for (MVShader1 shader : MVShader1.SHADERS) {
 				fragShaders.add(Pair.of(
 						Reflection.newInstanceThrowable(IOException.class, ShaderProgram.class,
-								new Class<?>[] {ResourceFactory.class, String.class, VertexFormat.class},
-								MainUtil.client.getResourceManager(), shader.key.name(), shader.key.vertexFormat()),
-						program -> shader.shader = program));
+								new Class<?>[] {ResourceFactory.class, String.class, Reflection.getClass("net.minecraft.class_293")},
+								MainUtil.client.getResourceManager(), shader.getShaderName(), shader.getVertexFormat().getInternalValue()),
+						shader::setShaderProgram));
 			}
 		} catch (IOException e) {
 			throw new RuntimeException("could not reload shaders", e);

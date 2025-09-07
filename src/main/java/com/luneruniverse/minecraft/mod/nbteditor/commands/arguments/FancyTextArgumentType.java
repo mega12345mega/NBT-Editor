@@ -53,8 +53,8 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	}
 	
 	public static String stringifyFancyText(Text text, Style base, boolean printErrors) {
-		if (ConfigScreen.isJsonText())
-			return TextInst.toJsonString(text);
+		if (ConfigScreen.isNormalText())
+			return TextInst.toString(text);
 		
 		Map.Entry<String, Boolean> output = FancyText.stringify(text, base);
 		if (output.getValue() && printErrors)
@@ -70,7 +70,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	
 	@Override
 	public Text parse(StringReader reader) throws CommandSyntaxException {
-		if (ConfigScreen.isJsonText())
+		if (ConfigScreen.isNormalText())
 			return MVMisc.getTextArg().parse(reader);
 		
 		Text output = FancyText.parse(reader.getRemaining(), base);
@@ -80,7 +80,7 @@ public class FancyTextArgumentType implements ArgumentType<Text> {
 	
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-		if (ConfigScreen.isJsonText())
+		if (ConfigScreen.isNormalText())
 			return MVMisc.getTextArg().listSuggestions(context, builder);
 		
 		if (builder.getRemaining().isEmpty())

@@ -11,7 +11,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.suggestion.Suggestion;
@@ -24,7 +25,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.nbt.visitor.StringNbtWriter;
 import net.minecraft.util.Identifier;
 
 public class NBTAutocompleteIntegration extends Integration {
@@ -161,7 +161,7 @@ public class NBTAutocompleteIntegration extends Integration {
 		});
 	}
 	private String escapeKey(String key) {
-		if (key.isEmpty() || StringNbtWriter.SIMPLE_NAME.matcher(key).matches())
+		if (key.isEmpty() || MVMisc.isSimpleName(key))
 			return key;
 		return NbtString.escape(key);
 	}

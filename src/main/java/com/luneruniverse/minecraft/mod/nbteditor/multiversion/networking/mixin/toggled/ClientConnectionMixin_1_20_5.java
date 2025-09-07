@@ -14,8 +14,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
-import net.minecraft.network.NetworkState;
 import net.minecraft.network.listener.PacketListener;
+import net.minecraft.network.state.NetworkState;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 
 @Mixin(ClientConnection.class)

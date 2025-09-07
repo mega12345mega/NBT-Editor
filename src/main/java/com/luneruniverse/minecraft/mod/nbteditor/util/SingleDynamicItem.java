@@ -40,7 +40,7 @@ public class SingleDynamicItem {
 	public synchronized NbtCompound getOriginalNbt() {
 		if (items.isSlot(SLOT))
 			return items.getOriginalNbt(SLOT);
-		return item.manager$serialize(true);
+		return item.nbte$serialize(true);
 	}
 	
 	public synchronized boolean isDynamic() {

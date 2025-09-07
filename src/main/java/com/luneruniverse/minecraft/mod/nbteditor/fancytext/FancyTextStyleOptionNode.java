@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -12,7 +13,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.util.InvalidIdentifierException;
@@ -22,10 +22,10 @@ public record FancyTextStyleOptionNode(StyleOption option, String value, List<Fa
 	@Override
 	public Style modifyStyle(Style style) {
 		return switch (option) {
-			case OPEN_URL, RUN_COMMAND, SUGGEST_COMMAND, CHANGE_PAGE, COPY_TO_CLIPBOARD -> style.withClickEvent(
-					new ClickEvent(ClickEvent.Action.valueOf(option.name()), value == null ? "" : value));
+			case OPEN_URL, RUN_COMMAND, SUGGEST_COMMAND, CHANGE_PAGE, COPY_TO_CLIPBOARD -> MVTextEvents.ClickAction.fromName(
+					option.name().toLowerCase()).newEventParse(value == null ? "" : value).map(style::withClickEvent).orElse(style);
 			case SHOW_TEXT -> style.withHoverEvent(
-					new HoverEvent(HoverEvent.Action.SHOW_TEXT, value == null ? TextInst.of("") : FancyText.parse(value)));
+					MVTextEvents.HoverAction.SHOW_TEXT.newEvent(value == null ? TextInst.of("") : FancyText.parse(value)));
 			case SHOW_ITEM -> {
 				ItemStack item;
 				try {
@@ -37,7 +37,7 @@ public record FancyTextStyleOptionNode(StyleOption option, String value, List<Fa
 						item = ItemStack.EMPTY;
 					}
 				}
-				yield style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(item)));
+				yield style.withHoverEvent(MVTextEvents.HoverAction.SHOW_ITEM.newEvent(item));
 			}
 			case SHOW_ENTITY -> {
 				Entity entity;
@@ -57,7 +57,7 @@ public record FancyTextStyleOptionNode(StyleOption option, String value, List<Fa
 					else
 						entity = MainUtil.client.player;
 				}
-				yield style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
+				yield style.withHoverEvent(MVTextEvents.HoverAction.SHOW_ENTITY.newEvent(
 						new HoverEvent.EntityContent(entity.getType(), entity.getUuid(), entity.getName())));
 			}
 			case INSERTION -> style.withInsertion(value);

@@ -67,11 +67,8 @@ public class CursorManager {
 		ScreenHandler handler = branch.getScreenHandler();
 		ScreenHandler currentHandler = currentBranch.getScreenHandler();
 		
-		handler.setCursorStack(currentHandler.getCursorStack());
-		handler.setPreviousCursorStack(handler.getCursorStack());
-		
-		currentHandler.setCursorStack(ItemStack.EMPTY);
-		currentHandler.setPreviousCursorStack(ItemStack.EMPTY);
+		MainUtil.setCursorStackSilently(handler, currentHandler.getCursorStack());
+		MainUtil.setCursorStackSilently(currentHandler, ItemStack.EMPTY);
 		
 		if (currentRootHasServerCursor) {
 			if (branch == currentRoot)
@@ -83,7 +80,7 @@ public class CursorManager {
 	
 	public void showBranch(HandledScreen<?> branch) {
 		if (currentRoot == null) {
-			if (MainUtil.client.interactionManager.hasCreativeInventory()) {
+			if (MVMisc.hasCreativeInventory()) {
 				currentRoot = MVMisc.newCreativeInventoryScreen(MainUtil.client.player);
 				currentRootHasServerCursor = false;
 			} else {
@@ -132,8 +129,7 @@ public class CursorManager {
 					}
 					cursor = ItemStack.EMPTY;
 				}
-				currentRoot.getScreenHandler().setCursorStack(cursor);
-				currentRoot.getScreenHandler().setPreviousCursorStack(cursor);
+				MainUtil.setCursorStackSilently(currentRoot.getScreenHandler(), cursor);
 			}
 			MainUtil.client.player.closeScreen(); // will trigger #onNoScreenSet()
 			return;
@@ -147,8 +143,7 @@ public class CursorManager {
 		if (currentRoot == null)
 			throw new IllegalStateException("There is no root to set the cursor of");
 		
-		currentBranch.getScreenHandler().setCursorStack(item);
-		currentBranch.getScreenHandler().setPreviousCursorStack(item);
+		MainUtil.setCursorStackSilently(currentBranch.getScreenHandler(), item);
 		
 		if (currentRootHasServerCursor && currentBranch == currentRoot)
 			MVClientNetworking.send(new SetCursorC2SPacket(item));

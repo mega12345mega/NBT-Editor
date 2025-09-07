@@ -3,12 +3,19 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 import java.lang.invoke.MethodType;
 import java.util.function.Supplier;
 
-import com.google.gson.JsonElement;
+import org.jetbrains.annotations.Nullable;
+
 import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.minecraft.nbt.InvalidNbtException;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 
 public class TextInst {
 	
@@ -41,12 +48,101 @@ public class TextInst {
 	}
 	
 	
+	/**
+	 * <strong>CONSIDER USING {@link TextUtil#fromStringSafely(String, boolean)}</strong>
+	 */
+	public static @Nullable Text fromString(String str, boolean eitherFormat) throws IllegalArgumentException {
+		return Version.<Text>newSwitch()
+				.range("1.21.5", null, () -> {
+					IllegalArgumentException wrapper;
+					try {
+						return fromSNbt(str);
+					} catch (CommandSyntaxException | InvalidNbtException e) {
+						wrapper = new IllegalArgumentException("Failed to parse text");
+						wrapper.addSuppressed(e);
+						if (!eitherFormat)
+							throw wrapper;
+					}
+					
+					try {
+						return fromJson(str);
+					} catch (JsonParseException e) {
+						wrapper.addSuppressed(e);
+						throw wrapper;
+					}
+				})
+				.range(null, "1.21.4", () -> {
+					IllegalArgumentException wrapper;
+					try {
+						return fromJson(str);
+					} catch (JsonParseException e) {
+						wrapper = new IllegalArgumentException("Failed to parse text");
+						wrapper.addSuppressed(e);
+						if (!eitherFormat)
+							throw wrapper;
+					}
+					
+					try {
+						return fromSNbt(str);
+					} catch (CommandSyntaxException | InvalidNbtException e) {
+						wrapper.addSuppressed(e);
+						throw wrapper;
+					}
+				})
+				.get();
+	}
+	public static String toString(Text text) throws IllegalArgumentException {
+		try {
+			return Version.<String>newSwitch()
+					.range("1.21.5", null, () -> toSNbt(text))
+					.range(null, "1.21.4", () -> toJson(text))
+					.get();
+		} catch (InvalidNbtException | JsonParseException e) {
+			throw new IllegalArgumentException("Failed to stringify text", e);
+		}
+	}
+	
+	public static @Nullable Text fromMinecraft(NbtElement mc) throws IllegalArgumentException {
+		try {
+			return Version.<Text>newSwitch()
+					.range("1.21.5", null, () -> fromNbt(mc))
+					.range(null, "1.21.4", () -> {
+						if (!(mc instanceof NbtString mcStr))
+							throw new IllegalArgumentException("Failed to parse text: not a string");
+						return fromJson(MVMisc.value(mcStr));
+					})
+					.get();
+		} catch (InvalidNbtException | JsonParseException e) {
+			throw new IllegalArgumentException("Failed to parse text", e);
+		}
+	}
+	public static NbtElement toMinecraft(Text text) throws IllegalArgumentException {
+		try {
+			return Version.<NbtElement>newSwitch()
+					.range("1.21.5", null, () -> toNbt(text))
+					.range(null, "1.21.4", () -> NbtString.of(toJson(text)))
+					.get();
+		} catch (InvalidNbtException | JsonParseException e) {
+			throw new IllegalArgumentException("Failed to stringify text", e);
+		}
+	}
+	
+	/**
+	 * <strong>CONSIDER USING {@link TextUtil#fromSNbtSafely(String)}</strong>
+	 */
+	public static Text fromSNbt(String snbt) throws CommandSyntaxException, InvalidNbtException {
+		return fromNbt(MVMisc.parseNbt(snbt));
+	}
+	public static String toSNbt(Text text) throws InvalidNbtException {
+		return toNbt(text).toString();
+	}
+	
 	private static final Supplier<Reflection.MethodInvoker> Text$Serialization_fromJson =
 			Reflection.getOptionalMethod(Text.Serialization.class, "method_10877", MethodType.methodType(MutableText.class, String.class));
 	/**
 	 * <strong>CONSIDER USING {@link TextUtil#fromJsonSafely(String)}</strong>
 	 */
-	public static Text fromJson(String json) {
+	public static @Nullable Text fromJson(String json) throws JsonParseException {
 		return Version.<Text>newSwitch()
 				.range("1.20.5", null, () -> Text.Serialization.fromJson(json, DynamicRegistryManagerHolder.get()))
 				.range(null, "1.20.4", () -> Text$Serialization_fromJson.get().invokeThrowable(JsonParseException.class, null, json))
@@ -54,19 +150,18 @@ public class TextInst {
 	}
 	private static final Supplier<Reflection.MethodInvoker> Text$Serialization_toJsonString =
 			Reflection.getOptionalMethod(Text.Serialization.class, "method_10867", MethodType.methodType(String.class, Text.class));
-	public static String toJsonString(Text text) {
+	public static String toJson(Text text) throws JsonParseException {
 		return Version.<String>newSwitch()
 				.range("1.20.5", null, () -> Text.Serialization.toJsonString(text, DynamicRegistryManagerHolder.get()))
 				.range(null, "1.20.4", () -> Text$Serialization_toJsonString.get().invoke(null, text))
 				.get();
 	}
-	private static final Supplier<Reflection.MethodInvoker> Text$Serialization_toJsonTree =
-			Reflection.getOptionalMethod(Text.Serialization.class, "method_10868", MethodType.methodType(JsonElement.class, Text.class));
-	public static JsonElement toJsonTree(Text text) {
-		return Version.<JsonElement>newSwitch()
-				.range("1.20.5", null, () -> Text.Serialization.toJson(text, DynamicRegistryManagerHolder.get()))
-				.range(null, "1.20.4", () -> Text$Serialization_toJsonTree.get().invoke(null, text))
-				.get();
+	
+	public static Text fromNbt(NbtElement nbt) throws InvalidNbtException {
+		return Attempt.ofResult(TextCodecs.CODEC.parse(NbtOps.INSTANCE, nbt)).getSuccessOrThrow(InvalidNbtException::new);
+	}
+	public static NbtElement toNbt(Text text) throws InvalidNbtException {
+		return Attempt.ofResult(TextCodecs.CODEC.encodeStart(NbtOps.INSTANCE, text)).getSuccessOrThrow(InvalidNbtException::new);
 	}
 	
 }

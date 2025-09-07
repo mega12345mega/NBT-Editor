@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
 import java.util.function.Supplier;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifiersComponent;
@@ -15,7 +15,6 @@ import net.minecraft.component.type.NbtComponent;
 import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.component.type.SuspiciousStewEffectsComponent;
-import net.minecraft.component.type.UnbreakableComponent;
 import net.minecraft.component.type.WritableBookContentComponent;
 import net.minecraft.component.type.WrittenBookContentComponent;
 import net.minecraft.item.BlockPredicatesChecker;
@@ -45,10 +44,10 @@ public class MVComponentType<T> {
 			new MVComponentType<>(() -> DataComponentTypes.ENCHANTMENTS);
 	public static final MVComponentType<NbtComponent> ENTITY_DATA =
 			new MVComponentType<>(() -> DataComponentTypes.ENTITY_DATA);
-	public static final MVComponentType<Unit> HIDE_ADDITIONAL_TOOLTIP =
-			new MVComponentType<>(() -> DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP);
-	public static final MVComponentType<Unit> HIDE_TOOLTIP =
-			new MVComponentType<>(() -> DataComponentTypes.HIDE_TOOLTIP);
+	public static final MVComponentType<Unit> HIDE_ADDITIONAL_TOOLTIP_1_20_5_1_21_4 =
+			new MVComponentType<>("field_49638", "1.20.5", "1.21.4");
+	public static final MVComponentType<Unit> HIDE_TOOLTIP_1_20_5_1_21_4 =
+			new MVComponentType<>("field_50074", "1.20.5", "1.21.4");
 	public static final MVComponentType<Text> ITEM_NAME =
 			new MVComponentType<>(() -> DataComponentTypes.ITEM_NAME);
 	public static final MVComponentType<LoreComponent> LORE =
@@ -67,25 +66,30 @@ public class MVComponentType<T> {
 			new MVComponentType<>(() -> DataComponentTypes.SUSPICIOUS_STEW_EFFECTS);
 	public static final MVComponentType<ArmorTrim> TRIM =
 			new MVComponentType<>(() -> DataComponentTypes.TRIM);
-	public static final MVComponentType<UnbreakableComponent> UNBREAKABLE =
-			new MVComponentType<>(() -> DataComponentTypes.UNBREAKABLE);
+	public static final MVComponentType<Object> UNBREAKABLE_1_20_5_1_21_4 =
+			new MVComponentType<>(() -> DataComponentTypes.UNBREAKABLE, "1.20.5", "1.21.4");
+	public static final MVComponentType<Unit> UNBREAKABLE_1_21_5 =
+			new MVComponentType<>(() -> DataComponentTypes.UNBREAKABLE, "1.21.5", null);
 	public static final MVComponentType<WritableBookContentComponent> WRITABLE_BOOK_CONTENT =
 			new MVComponentType<>(() -> DataComponentTypes.WRITABLE_BOOK_CONTENT);
 	public static final MVComponentType<WrittenBookContentComponent> WRITTEN_BOOK_CONTENT =
 			new MVComponentType<>(() -> DataComponentTypes.WRITTEN_BOOK_CONTENT);
 	public static final MVComponentType<JukeboxPlayableComponent> JUKEBOX_PLAYABLE =
-			new MVComponentType<>(() -> DataComponentTypes.JUKEBOX_PLAYABLE, "1.20.6", "1.21.0");
+			new MVComponentType<>(() -> DataComponentTypes.JUKEBOX_PLAYABLE, "1.21.0", null);
 	
 	private final Object component;
 	
 	public MVComponentType(Supplier<Object> component) {
 		this.component = (NBTManagers.COMPONENTS_EXIST ? component.get() : null);
 	}
-	public MVComponentType(Supplier<Object> component, String maxMissingVersion, String minVersion) {
+	public MVComponentType(Supplier<Object> component, String minVersion, String maxVersion) {
 		this.component = Version.<Object>newSwitch()
-				.range(minVersion, null, component)
-				.range(null, maxMissingVersion, () -> null)
-				.get();
+				.range(minVersion, maxVersion, component)
+				.getOptionally().orElse(null);
+	}
+	public MVComponentType(String fieldName, String minVersion, String maxVersion) {
+		this(() -> Reflection.getField(DataComponentTypes.class, fieldName, "Lnet/minecraft/class_9331;").get(null),
+				minVersion, maxVersion);
 	}
 	
 	public Object getInternalValue() {

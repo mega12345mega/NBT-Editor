@@ -5,21 +5,29 @@ import java.util.Collections;
 
 import com.google.common.collect.Lists;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.StringNbtWriterAccessor;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 
 import net.minecraft.nbt.NbtByte;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.nbt.visitor.StringNbtWriter;
 
 public class StringJsonWriterQuoted extends StringNbtWriter {
 	
+	// From StringNbtWriter.apply in <= 1.21.4
+	public String apply(NbtElement element) {
+		element.accept(this);
+		return ((StringNbtWriterAccessor) this).getResult().toString();
+	}
+	
 	@Override
 	public void visitByte(NbtByte element) {
-		if (element.byteValue() == 0)
+		if (element.nbte$byteValue() == 0)
 			((StringNbtWriterAccessor) this).getResult().append(false);
-		else if (element.byteValue() == 1)
+		else if (element.nbte$byteValue() == 1)
 			((StringNbtWriterAccessor) this).getResult().append(true);
 		else
 			super.visitByte(element);
@@ -27,7 +35,7 @@ public class StringJsonWriterQuoted extends StringNbtWriter {
 	
 	@Override
 	public void visitString(NbtString element) {
-		((StringNbtWriterAccessor) this).getResult().append(ConfigScreen.isSingleQuotesAllowed() ? NbtString.escape(element.asString()) : escape(element.asString()));
+		((StringNbtWriterAccessor) this).getResult().append(escape(MVMisc.value(element)));
 	}
 	
     @Override
@@ -35,7 +43,7 @@ public class StringJsonWriterQuoted extends StringNbtWriter {
 		StringBuilder result = ((StringNbtWriterAccessor) this).getResult();
 		
         result.append('[');
-        for (int i = 0; i < element.size(); ++i) {
+        for (int i = 0; i < element.nbte$size(); ++i) {
             if (i != 0) {
                 result.append(',');
             }
@@ -55,52 +63,34 @@ public class StringJsonWriterQuoted extends StringNbtWriter {
             if (result.length() != 1) {
                 result.append(',');
             }
-            result.append(escapeNameWithQuotes(string)).append(':').append(new StringJsonWriterQuoted().apply(compound.get(string)));
+            result.append(escape(string)).append(':').append(new StringJsonWriterQuoted().apply(compound.get(string)));
         }
         result.append('}');
 	}
 	
-	private String escapeNameWithQuotes(String str) {
-		String output = escapeName(str);
-		if (output.startsWith("\"") || output.startsWith("\'"))
-			return output;
-		return "\"" + output + "\"";
-	}
-	
-	protected static String escapeName(String str) {
-		String superEsc = StringNbtWriter.escapeName(str);
-		
-		if (ConfigScreen.isSingleQuotesAllowed() || superEsc.equals(str))
-			return superEsc;
-		else
-			return escape(str);
-	}
-	
 	// From NbtString.escape
-	// Edited to always use double quotes
+	// Edited to optionally force double quotes
 	private static String escape(String value) {
-		StringBuilder stringBuilder = new StringBuilder(" ");
-		int c = 34; // Force using double quotes
-		for (int i = 0; i < value.length(); ++i) {
-			int d = value.charAt(i);
-			if (d == 92) {
-				stringBuilder.append('\\');
-			} else if (d == 34 || d == 39) {
-				if (c == 0) {
-					c = d == 34 ? 39 : 34;
-				}
-				if (c == d) {
-					stringBuilder.append('\\');
-				}
+		StringBuilder builder = new StringBuilder(" ");
+		char quote = (ConfigScreen.isSingleQuotesAllowed() ? '\0' : '"');
+		
+		for (char c : value.toCharArray()) {
+			if (c == '\\') {
+				builder.append('\\');
+			} else if (c == '"' || c == '\'') {
+				if (quote == '\0')
+					quote = (c == '"' ? '\'' : '"');
+				if (quote == c)
+					builder.append('\\');
 			}
-			stringBuilder.append((char) d);
+			builder.append(c);
 		}
-		if (c == 0) {
-			c = 34;
-		}
-		stringBuilder.setCharAt(0, (char) c);
-		stringBuilder.append((char) c);
-		return stringBuilder.toString();
+		
+		if (quote == '\0')
+			quote = '"';
+		builder.setCharAt(0, quote);
+		builder.append(quote);
+		return builder.toString();
 	}
 	
 }

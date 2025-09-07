@@ -1,13 +1,12 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.components;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.components;
 
 import java.util.Map;
 import java.util.Optional;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.Attempt;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.DeserializableNBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.DeserializableNBTManager;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 
@@ -34,10 +33,9 @@ public class ComponentItemNBTManager implements DeserializableNBTManager<ItemSta
 	}
 	@Override
 	public Attempt<ItemStack> tryDeserialize(NbtCompound nbt) {
-		if (nbt.contains("id", NbtElement.STRING_TYPE) &&
-				IdentifierInst.of(nbt.getString("id")).equals(IdentifierInst.of("minecraft", "air")))
+		if (nbt.nbte$getString("id").filter(id -> id.equals("minecraft:air") || id.equals(":air") || id.equals("air")).isPresent())
 			return new Attempt<>(ItemStack.EMPTY);
-		if (nbt.contains("count", NbtElement.INT_TYPE) && nbt.getInt("count") <= 0)
+		if (nbt.nbte$getInt("count").filter(count -> count <= 0).isPresent())
 			return new Attempt<>(ItemStack.EMPTY);
 		
 		DataResult<Pair<ItemStack, NbtElement>> result = ItemStack.OPTIONAL_CODEC.decode(

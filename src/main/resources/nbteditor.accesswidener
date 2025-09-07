@@ -46,13 +46,11 @@ accessible method net/minecraft/text/Text$Serialization toJson (Lnet/minecraft/t
 
 accessible field net/minecraft/util/Rarity formatting Lnet/minecraft/util/Formatting;
 
-accessible method net/minecraft/component/type/ItemEnchantmentsComponent <init> (Lit/unimi/dsi/fastutil/objects/Object2IntOpenHashMap;Z)V
-accessible field net/minecraft/component/type/ItemEnchantmentsComponent showInTooltip Z
-accessible field net/minecraft/item/equipment/trim/ArmorTrim showInTooltip Z
+accessible method net/minecraft/component/type/ItemEnchantmentsComponent <init> (Lit/unimi/dsi/fastutil/objects/Object2IntOpenHashMap;)V
 
 accessible field net/minecraft/client/render/GameRenderer buffers Lnet/minecraft/client/render/BufferBuilderStorage;
 
-accessible field net/minecraft/nbt/visitor/StringNbtWriter SIMPLE_NAME Ljava/util/regex/Pattern;
+accessible field net/minecraft/nbt/visitor/StringNbtWriter QUOTATION_UNNECESSARY_PATTERN Ljava/util/regex/Pattern;
 
 accessible method net/minecraft/block/entity/BlockEntity writeNbt (Lnet/minecraft/nbt/NbtCompound;Lnet/minecraft/registry/RegistryWrapper$WrapperLookup;)V
 accessible method net/minecraft/block/entity/BlockEntity writeIdToNbt (Lnet/minecraft/nbt/NbtCompound;)V
@@ -60,10 +58,10 @@ accessible class net/minecraft/block/entity/BlockEntity$Components
 
 accessible field net/minecraft/registry/entry/RegistryEntry$Reference owner Lnet/minecraft/registry/entry/RegistryEntryOwner;
 
-accessible class com/mojang/blaze3d/platform/GlStateManager$ScissorTestState
-accessible class com/mojang/blaze3d/platform/GlStateManager$CapabilityTracker
-accessible field com/mojang/blaze3d/platform/GlStateManager SCISSOR Lcom/mojang/blaze3d/platform/GlStateManager$ScissorTestState;
-accessible field com/mojang/blaze3d/platform/GlStateManager$CapabilityTracker state Z
+accessible class com/mojang/blaze3d/opengl/GlStateManager$ScissorTestState
+accessible class com/mojang/blaze3d/opengl/GlStateManager$CapabilityTracker
+accessible field com/mojang/blaze3d/opengl/GlStateManager SCISSOR Lcom/mojang/blaze3d/opengl/GlStateManager$ScissorTestState;
+accessible field com/mojang/blaze3d/opengl/GlStateManager$CapabilityTracker state Z
 
 accessible field net/minecraft/client/gui/DrawContext vertexConsumers Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;
 
@@ -73,6 +71,10 @@ accessible field net/minecraft/client/font/FontManager fontStorages Ljava/util/M
 accessible field net/minecraft/client/gui/screen/ingame/HandledScreen cancelNextRelease Z
 
 extendable method net/minecraft/client/gui/screen/ingame/HandledScreen tick ()V
+
+accessible field net/minecraft/entity/player/PlayerInventory selectedSlot I
+
+accessible field net/minecraft/screen/ScreenHandler trackedCursorSlot Lnet/minecraft/screen/sync/TrackedSlot;
 
 # Private in older versions
 accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;

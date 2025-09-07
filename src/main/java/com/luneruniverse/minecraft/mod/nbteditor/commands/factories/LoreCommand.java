@@ -9,6 +9,7 @@ import java.util.List;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.arguments.FancyTextArgumentType;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
@@ -23,8 +24,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -115,23 +114,23 @@ public class LoreCommand extends ClientCommand {
 			ItemStack item = heldItem.getItem();
 			
 			context.getSource().sendFeedback(TextInst.literal("[").formatted(Formatting.GRAY).append(TextInst.literal("+").formatted(Formatting.GREEN)).append(TextInst.literal("] ").formatted(Formatting.GRAY))
-					.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore add "))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/factory display lore add"))))
+					.styled(style -> style.withClickEvent(MVTextEvents.ClickAction.SUGGEST_COMMAND.newEvent("/factory display lore add "))
+							.withHoverEvent(MVTextEvents.HoverAction.SHOW_TEXT.newEvent(TextInst.of("/factory display lore add"))))
 					.append(TextInst.literal("[").formatted(Formatting.GRAY).append(TextInst.literal("Clear").formatted(Formatting.RED)).append(TextInst.literal("] ").formatted(Formatting.GRAY))
-					.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore clear"))
-							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/factory display lore clear"))))));
+					.styled(style -> style.withClickEvent(MVTextEvents.ClickAction.SUGGEST_COMMAND.newEvent("/factory display lore clear"))
+							.withHoverEvent(MVTextEvents.HoverAction.SHOW_TEXT.newEvent(TextInst.of("/factory display lore clear"))))));
 			
 			List<Text> lore = ItemTagReferences.LORE.get(item);
 			int i = 0;
 			for (Text line : lore) {
 				final int finalI = i;
 				context.getSource().sendFeedback(TextInst.literal("[").formatted(Formatting.GRAY).append(TextInst.literal("-").formatted(Formatting.RED)).append(TextInst.literal("]").formatted(Formatting.GRAY))
-						.styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore remove " + finalI))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/factory display lore remove " + finalI))))
+						.styled(style -> style.withClickEvent(MVTextEvents.ClickAction.SUGGEST_COMMAND.newEvent("/factory display lore remove " + finalI))
+								.withHoverEvent(MVTextEvents.HoverAction.SHOW_TEXT.newEvent(TextInst.of("/factory display lore remove " + finalI))))
 						.append(TextInst.literal(" ").formatted(Formatting.DARK_PURPLE).formatted(Formatting.ITALIC).append(line)
 						.styled(style -> MixinLink.withRunClickEvent(style, () -> MainUtil.client.currentScreen.handleTextClick(Style.EMPTY.withClickEvent(
-									new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/factory display lore set " + finalI + " " + FancyTextArgumentType.stringifyFancyText(line, StyleUtil.BASE_LORE_STYLE, true)))))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextInst.of("/factory display lore set " + finalI))))));
+									MVTextEvents.ClickAction.SUGGEST_COMMAND.newEvent("/factory display lore set " + finalI + " " + FancyTextArgumentType.stringifyFancyText(line, StyleUtil.BASE_LORE_STYLE, true)))))
+								.withHoverEvent(MVTextEvents.HoverAction.SHOW_TEXT.newEvent(TextInst.of("/factory display lore set " + finalI))))));
 				i++;
 			}
 			if (lore.isEmpty())

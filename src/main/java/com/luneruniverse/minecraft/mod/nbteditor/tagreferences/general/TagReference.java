@@ -51,13 +51,13 @@ public interface TagReference<T, O> {
 		return new TagReference<>() {
 			@Override
 			public T get(ItemStack object) {
-				if (!object.manager$hasNbt())
+				if (!object.nbte$hasNbt())
 					return defaultValue.get();
-				return tagRef.get(object.manager$getNbt());
+				return tagRef.get(object.nbte$getNbt());
 			}
 			@Override
 			public void set(ItemStack object, T value) {
-				object.manager$modifyNbt(nbt -> tagRef.set(nbt, value));
+				object.nbte$modifyNbt(nbt -> tagRef.set(nbt, value));
 			}
 		};
 	}
@@ -87,7 +87,7 @@ public interface TagReference<T, O> {
 		return mapValue(
 				nbtList -> {
 					List<C> list = new ArrayList<>();
-					for (NbtElement elementNbt : nbtList) {
+					for (NbtElement elementNbt : nbtList.nbte$iterable()) {
 						C elementValue = getter.apply(elementNbt);
 						if (elementValue != null)
 							list.add(elementValue);
@@ -144,7 +144,7 @@ public interface TagReference<T, O> {
 				String[] pathParts = path.split("/");
 				NbtCompound nbt = object;
 				for (int i = 0; i < pathParts.length - 1; i++)
-					nbt = nbt.getCompound(pathParts[i]);
+					nbt = nbt.nbte$getCompoundOrDefault(pathParts[i]);
 				nbt.remove(pathParts[pathParts.length - 1]);
 			}
 		};

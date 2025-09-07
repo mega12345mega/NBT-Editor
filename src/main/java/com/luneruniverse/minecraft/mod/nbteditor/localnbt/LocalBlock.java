@@ -7,17 +7,18 @@ import java.util.Set;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVGlStateManager;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.BlockStateProperties;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
@@ -33,7 +34,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -43,16 +43,18 @@ public class LocalBlock implements LocalNBT {
 	public static LocalBlock deserialize(NbtCompound nbt, int defaultDataVersion) {
 		NbtElement dataVersion = nbt.get("DataVersion");
 		
-		String id = MainUtil.updateDynamic(TypeReferences.BLOCK_NAME, NbtString.of(nbt.getString("id")), dataVersion, defaultDataVersion).asString();
+		String id = MVMisc.value(MainUtil.updateDynamic(TypeReferences.BLOCK_NAME,
+				NbtString.of(nbt.nbte$getStringOrDefault("id")), dataVersion, defaultDataVersion));
 		Block block = MVRegistry.BLOCK.get(IdentifierInst.of(id));
 		
 		BlockStateProperties state = new BlockStateProperties(block.getDefaultState());
-		state.setValues(MainUtil.updateDynamic(TypeReferences.BLOCK_STATE, nbt.getCompound("state"), dataVersion, defaultDataVersion));
+		state.setValues(MainUtil.updateDynamic(TypeReferences.BLOCK_STATE,
+				nbt.nbte$getCompoundOrDefault("state"), dataVersion, defaultDataVersion));
 		
 		NbtCompound tag = null;
-		if (nbt.contains("tag", NbtElement.COMPOUND_TYPE)) {
-			tag = nbt.getCompound("tag");
-			tag.putString("id", nbt.getString("id"));
+		if (nbt.nbte$contains("tag", NbtElement.COMPOUND_TYPE)) {
+			tag = nbt.nbte$getCompoundOrDefault("tag");
+			tag.putString("id", nbt.nbte$getStringOrDefault("id"));
 			tag = MainUtil.updateDynamic(TypeReferences.BLOCK_ENTITY, tag, dataVersion, defaultDataVersion);
 			tag.remove("id");
 		}
@@ -112,7 +114,7 @@ public class LocalBlock implements LocalNBT {
 		if (name == null)
 			getOrCreateNBT().remove("CustomName");
 		else
-			getOrCreateNBT().putString("CustomName", TextInst.toJsonString(name));
+			getOrCreateNBT().put("CustomName", TextInst.toMinecraft(name));
 	}
 	@Override
 	public String getDefaultName() {
@@ -158,7 +160,7 @@ public class LocalBlock implements LocalNBT {
 	
 	@Override
 	public void renderIcon(MatrixStack matrices, int x, int y, float tickDelta) {
-		RenderSystem.disableCull();
+		MVGlStateManager._disableCull();
 		
 		matrices.push();
 		MatrixStack renderMatrices = Version.<MatrixStack>newSwitch()
@@ -181,7 +183,7 @@ public class LocalBlock implements LocalNBT {
 		
 		matrices.pop();
 		
-		RenderSystem.enableCull();
+		MVGlStateManager._enableCull();
 	}
 	
 	@Override
@@ -200,7 +202,7 @@ public class LocalBlock implements LocalNBT {
 					} else {
 						NbtCompound nbt = new NbtCompound();
 						nbt.put("BlockEntityTag", this.nbt);
-						output.manager$setNbt(nbt);
+						output.nbte$setNbt(nbt);
 					}
 				}
 				ItemTagReferences.BLOCK_STATE.set(output, state.getValuesMap());
@@ -229,7 +231,7 @@ public class LocalBlock implements LocalNBT {
 			tooltip = TextInst.literal("").append(customName).append("\n").append(tooltip);
 		final Text finalTooltip = tooltip;
 		return TextInst.bracketed(getName()).styled(
-				style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, finalTooltip)));
+				style -> style.withHoverEvent(MVTextEvents.HoverAction.SHOW_TEXT.newEvent(finalTooltip)));
 	}
 	
 	public BlockReference place(BlockPos pos) {

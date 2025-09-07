@@ -1,4 +1,6 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager;
+
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 
 import net.minecraft.nbt.NbtCompound;
 
@@ -7,7 +9,7 @@ import net.minecraft.nbt.NbtCompound;
  */
 public interface NBTManager<T> {
 	public Attempt<NbtCompound> trySerialize(T subject);
-	public default NbtCompound serialize(T subject, boolean requireSuccess) {
+	public default NbtCompound serialize(T subject, boolean requireSuccess) throws IllegalStateException {
 		Attempt<NbtCompound> attempt = trySerialize(subject);
 		return requireSuccess ? attempt.getSuccessOrThrow() : attempt.getAttemptOrThrow();
 	}
@@ -24,6 +26,6 @@ public interface NBTManager<T> {
 		NbtCompound nbt = getNbt(subject);
 		if (nbt == null)
 			return "";
-		return nbt.asString();
+		return nbt.toString();
 	}
 }

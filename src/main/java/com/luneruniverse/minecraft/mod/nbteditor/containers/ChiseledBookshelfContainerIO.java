@@ -21,7 +21,7 @@ public class ChiseledBookshelfContainerIO extends BlockEntityTagContainerIO {
 		int output = super.writeItem(container, contents);
 		
 		contents = readItem(container);
-		NbtCompound blockStatesTag = container.manager$getNbt().getCompound(TagNames.BLOCK_STATE_TAG);
+		NbtCompound blockStatesTag = container.nbte$getNbt().nbte$getCompoundOrDefault(TagNames.BLOCK_STATE_TAG);
 		for (int i = 0; i < 6; i++) {
 			String state = "slot_" + i + "_occupied";
 			if (contents[i] != null && !contents[i].isEmpty())
@@ -29,7 +29,7 @@ public class ChiseledBookshelfContainerIO extends BlockEntityTagContainerIO {
 			else
 				blockStatesTag.remove(state);
 		}
-		container.manager$modifyNbt(nbt -> nbt.put(TagNames.BLOCK_STATE_TAG, blockStatesTag));
+		container.nbte$modifyNbt(nbt -> nbt.put(TagNames.BLOCK_STATE_TAG, blockStatesTag));
 		
 		return output;
 	}

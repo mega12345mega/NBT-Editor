@@ -14,38 +14,38 @@ public class SpawnEggContainerIO implements ItemContainerIO {
 	public int getMaxItemSize(ItemStack item) {
 		if (item == null)
 			return 0;
-		NbtCompound nbt = item.manager$getNbt();
-		NbtCompound entityTag = (nbt == null ? new NbtCompound() : nbt.getCompound(TagNames.ENTITY_TAG));
+		NbtCompound nbt = item.nbte$getNbt();
+		NbtCompound entityTag = (nbt == null ? new NbtCompound() : nbt.nbte$getCompoundOrDefault(TagNames.ENTITY_TAG));
 		return ContainerIO.getMaxSize(new LocalEntity(MVMisc.getEntityType(item), entityTag));
 	}
 	
 	@Override
 	public boolean isItemReadable(ItemStack item) {
-		NbtCompound nbt = item.manager$getNbt();
-		NbtCompound entityTag = (nbt == null ? new NbtCompound() : nbt.getCompound(TagNames.ENTITY_TAG));
+		NbtCompound nbt = item.nbte$getNbt();
+		NbtCompound entityTag = (nbt == null ? new NbtCompound() : nbt.nbte$getCompoundOrDefault(TagNames.ENTITY_TAG));
 		return ContainerIO.isContainer(new LocalEntity(MVMisc.getEntityType(item), entityTag));
 	}
 	
 	@Override
 	public ItemStack[] readItem(ItemStack container) {
-		NbtCompound nbt = container.manager$getNbt();
-		NbtCompound entityTag = (nbt == null ? new NbtCompound() : nbt.getCompound(TagNames.ENTITY_TAG));
+		NbtCompound nbt = container.nbte$getNbt();
+		NbtCompound entityTag = (nbt == null ? new NbtCompound() : nbt.nbte$getCompoundOrDefault(TagNames.ENTITY_TAG));
 		return ContainerIO.read(new LocalEntity(MVMisc.getEntityType(container), entityTag));
 	}
 	
 	@Override
 	public int writeItem(ItemStack container, ItemStack[] contents) {
 		LocalEntity entity = new LocalEntity(MVMisc.getEntityType(container),
-				container.manager$getOrCreateNbt().getCompound(TagNames.ENTITY_TAG));
+				container.nbte$getOrCreateNbt().nbte$getCompoundOrDefault(TagNames.ENTITY_TAG));
 		int output = ContainerIO.write(entity, contents);
-		container.manager$modifyNbt(nbt -> nbt.put(TagNames.ENTITY_TAG, MainUtil.fillId(entity.getNBT(), entity.getId().toString())));
+		container.nbte$modifyNbt(nbt -> nbt.put(TagNames.ENTITY_TAG, MainUtil.fillId(entity.getNBT(), entity.getId().toString())));
 		return output;
 	}
 	
 	@Override
 	public int getWrittenItemSlotIndex(ItemStack container, ItemStack[] contents, int slot) {
 		LocalEntity entity = new LocalEntity(MVMisc.getEntityType(container),
-				container.manager$getOrCreateNbt().getCompound(TagNames.ENTITY_TAG));
+				container.nbte$getOrCreateNbt().nbte$getCompoundOrDefault(TagNames.ENTITY_TAG));
 		return ContainerIO.getWrittenSlotIndex(entity, contents, slot);
 	}
 	

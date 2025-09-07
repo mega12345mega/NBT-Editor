@@ -14,12 +14,14 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import net.minecraft.block.Block;
+import net.minecraft.component.ComponentType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
 import net.minecraft.potion.Potion;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -78,6 +80,13 @@ public class MVRegistry<T> implements Iterable<T> {
 				ENCHANTMENT = getRegistry("field_11160", "field_41176", false);
 		}
 		return ENCHANTMENT;
+	}
+	
+	private static MVRegistry<ComponentType<?>> COMPONENTS;
+	public static MVRegistry<ComponentType<?>> getComponentsRegistry() {
+		if (COMPONENTS == null)
+			COMPONENTS = new MVRegistry<>(Registries.DATA_COMPONENT_TYPE);
+		return COMPONENTS;
 	}
 	
 	public static <V, T extends V> T register(MVRegistry<V> registry, Identifier id, T entry) {

@@ -24,16 +24,16 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.ChatScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.HandledScreenAccessor;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.hideflags.HideFlag;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -53,10 +53,8 @@ import net.minecraft.component.ComponentChanges;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
@@ -72,7 +70,7 @@ public class MixinLink {
 	public static Style withRunClickEvent(Style style, Runnable onClick) {
 		String id = "\0nbteditor_runnable@" + new Random().nextLong(); // \0 is not valid in file paths on most OSs
 		events.put(id, onClick);
-		return style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, id));
+		return style.withClickEvent(MVTextEvents.ClickAction.OPEN_FILE.newEvent(id));
 	}
 	public static boolean tryRunClickEvent(String id) {
 		Runnable onClick = events.get(id);
@@ -171,7 +169,7 @@ public class MixinLink {
 	public static NbtElement parseSpecialElement(StringReader reader) throws CommandSyntaxException {
 		specialNumbers.add(Thread.currentThread());
 		try {
-			return new StringNbtReader(reader).parseElement();
+			return MVMisc.parseNbt(reader);
 		} finally {
 			specialNumbers.remove(Thread.currentThread());
 		}
@@ -255,7 +253,7 @@ public class MixinLink {
 		if (MainUtil.client.world == null)
 			return;
 		
-		if (NBTManagers.COMPONENTS_EXIST && source.contains(MVComponentType.HIDE_TOOLTIP))
+		if (HideFlag.TOOLTIP != null && ItemTagReferences.HIDE_FLAGS.get(source).get(HideFlag.TOOLTIP))
 			return;
 		
 		ConfigScreen.ItemSizeFormat sizeConfig = ConfigScreen.getItemSizeFormat();

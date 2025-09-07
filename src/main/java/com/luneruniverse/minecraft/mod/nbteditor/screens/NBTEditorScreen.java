@@ -298,7 +298,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			NBTFolder<?> folder = currentFolder.getSubFolder(key);
 			if (folder != null) {
 				currentFolder = folder;
-				if (currentFolder instanceof StringNBTFolder)
+				if (currentFolder instanceof StringNBTFolder && StringNBTFolder.JSON)
 					json = true;
 			} else {
 				keys.remove();

@@ -14,7 +14,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.state.property.Property;
 
@@ -123,16 +122,15 @@ public class BlockStateProperties {
 	public Set<String> setValues(NbtCompound blockStateTag) {
 		Set<String> unset = new HashSet<>(properties.keySet());
 		for (String tag : blockStateTag.getKeys()) {
-			if (!blockStateTag.contains(tag, NbtElement.STRING_TYPE))
-				continue;
-			BlockStateProperty property = properties.get(tag);
-			if (property == null)
-				continue;
-			String value = blockStateTag.getString(tag);
-			if (property.options.contains(value)) {
-				property.value = value;
-				unset.remove(tag);
-			}
+			blockStateTag.nbte$getString(tag).ifPresent(value -> {
+				BlockStateProperty property = properties.get(tag);
+				if (property == null)
+					return;
+				if (property.options.contains(value)) {
+					property.value = value;
+					unset.remove(tag);
+				}
+			});
 		}
 		return unset;
 	}

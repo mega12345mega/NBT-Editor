@@ -3,9 +3,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 
-import com.google.gson.JsonParseException;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
 import net.minecraft.nbt.AbstractNbtList;
 import net.minecraft.nbt.AbstractNbtNumber;
@@ -28,12 +27,12 @@ public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 	
 	private static Object deserialize(NbtElement element, Class<?> target) {
 		if (target.isArray()) {
-			if (!(element instanceof AbstractNbtList<?> list))
+			if (!(element instanceof AbstractNbtList list))
 				return Array.newInstance(target.componentType(), 0);
 			
-			Object output = Array.newInstance(target.componentType(), list.size());
-			for (int i = 0; i < list.size(); i++)
-				Array.set(output, i, deserialize(list.get(i), target.componentType()));
+			Object output = Array.newInstance(target.componentType(), list.nbte$size());
+			for (int i = 0; i < list.nbte$size(); i++)
+				Array.set(output, i, deserialize(list.nbte$get(i), target.componentType()));
 			return output;
 		}
 		
@@ -47,31 +46,34 @@ public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 		Class<?> primitiveTarget = (target.isPrimitive() ? target : MethodType.methodType(target).unwrap().returnType());
 		if (primitiveTarget.isPrimitive()) {
 			if (primitiveTarget == boolean.class)
-				return (element instanceof AbstractNbtNumber num ? num.byteValue() != 0 : false);
+				return (element instanceof AbstractNbtNumber num ? num.nbte$byteValue() != 0 : false);
 			if (primitiveTarget == byte.class)
-				return (element instanceof AbstractNbtNumber num ? num.byteValue() : (byte) 0);
+				return (element instanceof AbstractNbtNumber num ? num.nbte$byteValue() : (byte) 0);
 			if (primitiveTarget == short.class)
-				return (element instanceof AbstractNbtNumber num ? num.shortValue() : (short) 0);
+				return (element instanceof AbstractNbtNumber num ? num.nbte$shortValue() : (short) 0);
 			if (primitiveTarget == char.class)
-				return (element instanceof AbstractNbtNumber num ? (char) num.shortValue() : (char) 0);
+				return (element instanceof AbstractNbtNumber num ? (char) num.nbte$shortValue() : (char) 0);
 			if (primitiveTarget == int.class)
-				return (element instanceof AbstractNbtNumber num ? num.intValue() : (int) 0);
+				return (element instanceof AbstractNbtNumber num ? num.nbte$intValue() : (int) 0);
 			if (primitiveTarget == long.class)
-				return (element instanceof AbstractNbtNumber num ? num.longValue() : (long) 0);
+				return (element instanceof AbstractNbtNumber num ? num.nbte$longValue() : (long) 0);
 			if (primitiveTarget == float.class)
-				return (element instanceof AbstractNbtNumber num ? num.floatValue() : (float) 0);
+				return (element instanceof AbstractNbtNumber num ? num.nbte$floatValue() : (float) 0);
 			if (primitiveTarget == double.class)
-				return (element instanceof AbstractNbtNumber num ? num.doubleValue() : (double) 0);
+				return (element instanceof AbstractNbtNumber num ? num.nbte$doubleValue() : (double) 0);
 			throw new IllegalArgumentException("Unknown primitive type " + primitiveTarget.getName());
 		}
 		
 		if (target.isAssignableFrom(String.class))
-			return (element instanceof NbtString str ? str.asString() : "");
+			return (element instanceof NbtString str ? MVMisc.value(str) : "");
 		
 		if (target.isAssignableFrom(Text.class)) {
 			try {
-				return (element instanceof NbtString str ? TextUtil.fromJsonSafely(str.asString()) : TextInst.of(""));
-			} catch (JsonParseException e) {
+				Text output = TextInst.fromMinecraft(element);
+				if (output == null)
+					return TextInst.of("");
+				return output;
+			} catch (IllegalArgumentException e) {
 				return TextInst.of("");
 			}
 		}
@@ -131,7 +133,7 @@ public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 			return NbtString.of(((CharSequence) value).toString());
 		
 		if (Text.class.isAssignableFrom(valueType))
-			return NbtString.of(TextInst.toJsonString((Text) value));
+			return TextInst.toMinecraft((Text) value);
 		
 		throw new IllegalArgumentException("Cannot convert " + valueType.getName() + " to nbt!");
 	}

@@ -1,10 +1,10 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.nbt;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.nbt;
 
 import java.lang.invoke.MethodType;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.Attempt;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.DeserializableNBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.DeserializableNBTManager;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;

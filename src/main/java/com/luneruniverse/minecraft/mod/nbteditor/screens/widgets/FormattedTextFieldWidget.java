@@ -11,13 +11,11 @@ import java.util.function.UnaryOperator;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
@@ -45,71 +43,58 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		private static class EventEditorWidget extends GroupWidget implements InitializableOverlay<Screen> {
 			public enum ClickAction {
 				NONE(null),
-				OPEN_URL(ClickEvent.Action.OPEN_URL),
-				RUN_COMMAND(ClickEvent.Action.RUN_COMMAND),
-				SUGGEST_COMMAND(ClickEvent.Action.SUGGEST_COMMAND),
-				CHANGE_PAGE(ClickEvent.Action.CHANGE_PAGE),
-				COPY_TO_CLIPBOARD(ClickEvent.Action.COPY_TO_CLIPBOARD);
+				OPEN_URL(MVTextEvents.ClickAction.OPEN_URL),
+				RUN_COMMAND(MVTextEvents.ClickAction.RUN_COMMAND),
+				SUGGEST_COMMAND(MVTextEvents.ClickAction.SUGGEST_COMMAND),
+				CHANGE_PAGE(MVTextEvents.ClickAction.CHANGE_PAGE),
+				COPY_TO_CLIPBOARD(MVTextEvents.ClickAction.COPY_TO_CLIPBOARD);
 				
-				public static ClickAction get(ClickEvent.Action value) {
+				public static ClickAction get(MVTextEvents.ClickAction<?> value) {
 					for (ClickAction action : values()) {
 						if (action.value == value)
 							return action;
 					}
-					if (value == ClickEvent.Action.OPEN_FILE)
+					if (value == MVTextEvents.ClickAction.OPEN_FILE)
 						return NONE;
-					throw new IllegalArgumentException("Invalid click action: " + value);
+					throw new IllegalArgumentException("Invalid ClickAction: " + value);
 				}
 				
-				private final ClickEvent.Action value;
-				private ClickAction(ClickEvent.Action value) {
+				public final MVTextEvents.ClickAction<?> value;
+				private ClickAction(MVTextEvents.ClickAction<?> value) {
 					this.value = value;
-				}
-				public ClickEvent toEvent(String value) {
-					if (this == NONE)
-						return null;
-					return new ClickEvent(this.value, value);
 				}
 				
 				@Override
 				public String toString() {
 					if (this == NONE)
 						return "none";
-					return MVMisc.getClickEventActionName(value);
+					return value.getName();
 				}
 			}
 			public enum HoverAction {
 				NONE(null),
-				SHOW_TEXT(HoverEvent.Action.SHOW_TEXT),
-				SHOW_ITEM(HoverEvent.Action.SHOW_ITEM),
-				SHOW_ENTITY(HoverEvent.Action.SHOW_ENTITY);
+				SHOW_TEXT(MVTextEvents.HoverAction.SHOW_TEXT),
+				SHOW_ITEM(MVTextEvents.HoverAction.SHOW_ITEM),
+				SHOW_ENTITY(MVTextEvents.HoverAction.SHOW_ENTITY);
 				
-				public static HoverAction get(HoverEvent.Action<?> value) {
+				public static HoverAction get(MVTextEvents.HoverAction<?> value) {
 					for (HoverAction action : values()) {
 						if (action.value == value)
 							return action;
 					}
-					throw new IllegalArgumentException("Invalid hover action: " + value);
+					throw new IllegalArgumentException("Invalid HoverAction: " + value);
 				}
 				
-				private final HoverEvent.Action<?> value;
-				private HoverAction(HoverEvent.Action<?> value) {
+				public final MVTextEvents.HoverAction<?> value;
+				private HoverAction(MVTextEvents.HoverAction<?> value) {
 					this.value = value;
-				}
-				public HoverEvent toEvent(String value) {
-					if (this == NONE)
-						return null;
-					JsonObject json = new JsonObject();
-					json.addProperty("action", MVMisc.getHoverEventActionName(this.value));
-					json.add("contents", new Gson().fromJson(value, JsonElement.class));
-					return MVMisc.getHoverEvent(json);
 				}
 				
 				@Override
 				public String toString() {
 					if (this == NONE)
 						return "none";
-					return MVMisc.getHoverEventActionName(value);
+					return value.getName();
 				}
 			}
 			public interface EventPairCallback {
@@ -128,10 +113,10 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			private final ButtonWidget cancel;
 			
 			public EventEditorWidget(ClickEvent clickEvent, HoverEvent hoverEvent, EventPairCallback onDone) {
-				ClickEvent.Action clickAction = (clickEvent == null ? null : clickEvent.getAction());
-				String clickValue = (clickEvent == null ? "" : clickEvent.getValue());
-				HoverEvent.Action<?> hoverAction = (hoverEvent == null ? null : hoverEvent.getAction());
-				String hoverValue = (hoverEvent == null ? "" : MVMisc.getHoverEventContentsJson(hoverEvent).toString());
+				MVTextEvents.ClickAction<?> clickAction = (clickEvent == null ? null : MVTextEvents.ClickAction.getAction(clickEvent));
+				String clickValue = (clickEvent == null ? "" : clickAction.getStringifiedValue(clickEvent));
+				MVTextEvents.HoverAction<?> hoverAction = (hoverEvent == null ? null : MVTextEvents.HoverAction.getAction(hoverEvent));
+				String hoverValue = (hoverEvent == null ? "" : hoverAction.getStringifiedValue(hoverEvent));
 				
 				clickActionDropdown = ConfigValueDropdown.forEnum(ClickAction.get(clickAction), ClickAction.NONE, ClickAction.class);
 				clickActionDropdown.setWidth(150);
@@ -152,8 +137,9 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				hoverValueField.setChangedListener(str -> updateOk());
 				
 				ok = addWidget(MVMisc.newButton(0, 0, 150, 20, TextInst.translatable("nbteditor.ok"), btn -> {
-					onDone.onEventChange(clickActionDropdown.getValidValue().toEvent(clickValueField.getText()),
-							hoverActionDropdown.getValidValue().toEvent(hoverValueField.getText()));
+					onDone.onEventChange(
+							clickActionDropdown.getValidValue().value.newEventParse(clickValueField.getText()).get(),
+							hoverActionDropdown.getValidValue().value.newEventParse(hoverValueField.getText()).get());
 					OverlaySupportingScreen.setOverlayStatic(null);
 				}));
 				cancel = addWidget(MVMisc.newButton(0, 0, 150, 20, TextInst.translatable("nbteditor.cancel"), btn -> {
@@ -185,16 +171,10 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			}
 			
 			private void updateOk() {
-				if (hoverActionDropdown.getValidValue() == HoverAction.NONE) {
-					ok.active = true;
-					return;
-				}
-				try {
-					hoverActionDropdown.getValidValue().toEvent(hoverValueField.getText());
-					ok.active = true;
-				} catch (Exception e) {
-					ok.active = false;
-				}
+				ok.active = (clickActionDropdown.getValidValue() == ClickAction.NONE ||
+						clickActionDropdown.getValidValue().value.newEventParse(clickValueField.getText()).isPresent()) &&
+						(hoverActionDropdown.getValidValue() == HoverAction.NONE ||
+						hoverActionDropdown.getValidValue().value.newEventParse(hoverValueField.getText()).isPresent());
 			}
 			
 			@Override
@@ -618,13 +598,13 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		
 		@Override
 		protected String onCopy(String text, int pos, int len) {
-			return TextInst.toJsonString(TextUtil.substring(this.text, pos, pos + len));
+			return TextInst.toString(TextUtil.substring(this.text, pos, pos + len));
 		}
 		
 		@Override
 		protected String onPaste(String text, int pos, int overwrittenLen) {
 			try {
-				Text textValue = pasteFilter(TextUtil.fromJsonSafely(text));
+				Text textValue = pasteFilter(TextUtil.fromStringSafely(text, true));
 				String textValueStr = textValue.getString();
 				int textLen = textValueStr.length();
 				

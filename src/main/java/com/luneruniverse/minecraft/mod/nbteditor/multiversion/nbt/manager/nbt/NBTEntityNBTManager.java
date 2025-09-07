@@ -1,7 +1,7 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.nbt;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.nbt;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.Attempt;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManager;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

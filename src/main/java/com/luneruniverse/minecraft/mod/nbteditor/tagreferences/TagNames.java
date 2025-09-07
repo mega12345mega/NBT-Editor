@@ -1,6 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.tagreferences;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 
 public class TagNames {
 	

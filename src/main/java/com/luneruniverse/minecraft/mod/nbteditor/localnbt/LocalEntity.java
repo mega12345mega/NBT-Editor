@@ -13,9 +13,10 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVQuaternionf;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.EntityReference;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
@@ -45,10 +46,10 @@ import net.minecraft.world.World;
 public class LocalEntity implements LocalNBT {
 	
 	public static LocalEntity deserialize(NbtCompound nbt, int defaultDataVersion) {
-		NbtCompound tag = nbt.getCompound("tag");
-		tag.putString("id", nbt.getString("id"));
+		NbtCompound tag = nbt.nbte$getCompoundOrDefault("tag");
+		tag.putString("id", nbt.nbte$getStringOrDefault("id"));
 		tag = MainUtil.updateDynamic(TypeReferences.ENTITY, tag, nbt.get("DataVersion"), defaultDataVersion);
-		String id = tag.getString("id");
+		String id = tag.nbte$getStringOrDefault("id");
 		tag.remove("id");
 		return new LocalEntity(MVRegistry.ENTITY_TYPE.get(IdentifierInst.of(id)), tag);
 	}
@@ -90,7 +91,7 @@ public class LocalEntity implements LocalNBT {
 		if (name == null)
 			getOrCreateNBT().remove("CustomName");
 		else
-			getOrCreateNBT().putString("CustomName", TextInst.toJsonString(name));
+			getOrCreateNBT().put("CustomName", TextInst.toMinecraft(name));
 	}
 	@Override
 	public String getDefaultName() {
@@ -151,7 +152,7 @@ public class LocalEntity implements LocalNBT {
 		}
 		MVDrawableHelper.applyModelViewMatrix();
 		
-		DiffuseLighting.method_34742();
+		DiffuseLighting.enableGuiShaderLighting();
 		VertexConsumerProvider.Immediate provider = MVDrawableHelper.getVertexConsumerProvider();
 		EntityRenderDispatcher dispatcher = MainUtil.client.getEntityRenderDispatcher();
 		dispatcher.setRenderShadows(false);
@@ -194,9 +195,9 @@ public class LocalEntity implements LocalNBT {
 	}
 	@Override
 	public Text toHoverableText() {
-		UUID uuid = (nbt.containsUuid("UUID") ? nbt.getUuid("UUID") : UUID.nameUUIDFromBytes(new byte[] {0, 0, 0, 0}));
+		UUID uuid = nbt.nbte$getUuid("UUID").orElseGet(() -> new UUID(0, 0));
 		return TextInst.bracketed(getName()).styled(
-				style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityContent(
+				style -> style.withHoverEvent(MVTextEvents.HoverAction.SHOW_ENTITY.newEvent(new HoverEvent.EntityContent(
 						entityType, uuid, MainUtil.getNbtNameSafely(nbt, "CustomName", () -> null)))));
 	}
 	

@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import java.util.Arrays;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -26,19 +26,19 @@ public class DynamicSizeContainerIO implements NonItemNBTContainerIO {
 	
 	@Override
 	public boolean isNBTReadable(NbtCompound nbt, SourceContainerType source) {
-		return nbt.getList(key, NbtElement.COMPOUND_TYPE).size() <= maxSize;
+		return nbt.nbte$getListOrDefault(key, NbtElement.COMPOUND_TYPE).nbte$size() <= maxSize;
 	}
 	
 	@Override
 	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
-		return container.getList(key, NbtElement.COMPOUND_TYPE).stream().limit(maxSize)
+		return container.nbte$getListOrDefault(key, NbtElement.COMPOUND_TYPE).nbte$stream().limit(maxSize)
 				.map(item -> NBTManagers.ITEM.deserialize((NbtCompound) item, true)).toArray(ItemStack[]::new);
 	}
 	
 	@Override
 	public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
 		NbtList nbt = Arrays.stream(contents).limit(maxSize)
-				.filter(item -> item != null && !item.isEmpty()).map(item -> item.manager$serialize(true))
+				.filter(item -> item != null && !item.isEmpty()).map(item -> item.nbte$serialize(true))
 				.collect(NbtList::new, NbtList::add, NbtList::addAll);
 		container.put(key, nbt);
 		return Math.min(contents.length, maxSize);

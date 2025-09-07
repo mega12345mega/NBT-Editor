@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import java.util.stream.Stream;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -17,18 +17,18 @@ public class SpecificItemsContainerIO implements NonItemNBTContainerIO {
 	}
 	
 	private ItemStack readKey(NbtCompound container, String key) {
-		if (!container.contains(key, NbtElement.COMPOUND_TYPE))
+		if (!container.nbte$contains(key, NbtElement.COMPOUND_TYPE))
 			return null;
-		return NBTManagers.ITEM.deserialize(container.getCompound(key), true);
+		return NBTManagers.ITEM.deserialize(container.nbte$getCompoundOrDefault(key), true);
 	}
 	private void writeKey(NbtCompound container, String key, ItemStack item, SourceContainerType source) {
 		if (item == null || item.isEmpty()) {
 			if (source == SourceContainerType.ITEM || NBTManagers.COMPONENTS_EXIST)
 				container.remove(key);
 			else
-				container.put(key, ItemStack.EMPTY.manager$serialize(true));
+				container.put(key, ItemStack.EMPTY.nbte$serialize(true));
 		} else
-			container.put(key, item.manager$serialize(true));
+			container.put(key, item.nbte$serialize(true));
 	}
 	
 	@Override

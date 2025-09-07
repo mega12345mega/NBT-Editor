@@ -97,6 +97,9 @@ public class Reflection {
 			throw new RuntimeException("Error getting field", e);
 		}
 	}
+	public static Supplier<FieldReference> getOptionalField(Supplier<Class<?>> clazz, Supplier<String> field, Supplier<String> descriptor) {
+		return jitSupplier(() -> getField(clazz.get(), field.get(), descriptor.get()));
+	}
 	public static Supplier<FieldReference> getOptionalField(Class<?> clazz, String field, String descriptor) {
 		return jitSupplier(() -> getField(clazz, field, descriptor));
 	}
@@ -169,7 +172,7 @@ public class Reflection {
 		return jitSupplier(() -> getMethod(clazz.get(), method.get(), type.get()));
 	}
 	public static Supplier<MethodInvoker> getOptionalMethod(Class<?> clazz, String method, MethodType type) {
-		return getOptionalMethod(() -> clazz, () -> method, () -> type);
+		return jitSupplier(() -> getMethod(clazz, method, type));
 	}
 	
 	

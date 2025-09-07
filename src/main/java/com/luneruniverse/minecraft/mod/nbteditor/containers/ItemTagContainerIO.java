@@ -22,20 +22,20 @@ public class ItemTagContainerIO implements ItemContainerIO {
 	}
 	
 	private NbtCompound getNBT(ItemStack item) {
-		NbtCompound nbt = item.manager$getNbt();
+		NbtCompound nbt = item.nbte$getNbt();
 		if (nbt == null)
 			nbt = new NbtCompound();
 		
 		if (tag == null || nbtIO.getDefaultEntityId() == null)
 			return nbt;
-		return nbt.getCompound(tag);
+		return nbt.nbte$getCompoundOrDefault(tag);
 	}
 	private void setNBT(ItemStack item, NbtCompound nbt) {
 		String defaultEntityId = nbtIO.getDefaultEntityId();
 		if (tag == null || defaultEntityId == null)
-			item.manager$setNbt(nbt);
+			item.nbte$setNbt(nbt);
 		else
-			item.manager$modifyNbt(itemNbt -> itemNbt.put(tag, MainUtil.fillId(nbt, defaultEntityId)));
+			item.nbte$modifyNbt(itemNbt -> itemNbt.put(tag, MainUtil.fillId(nbt, defaultEntityId)));
 	}
 	
 	@Override

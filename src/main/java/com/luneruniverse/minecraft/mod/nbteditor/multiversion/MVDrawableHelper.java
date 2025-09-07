@@ -140,13 +140,15 @@ public class MVDrawableHelper {
 			Reflection.getOptionalMethod(GameRenderer.class, "method_34542", MethodType.methodType(ShaderProgram.class));
 	private static final Supplier<Reflection.MethodInvoker> RenderSystem_setShader =
 			Reflection.getOptionalMethod(RenderSystem.class, "setShader", MethodType.methodType(void.class, Supplier.class));
+	private static final Supplier<Reflection.MethodInvoker> RenderSystem_setShaderTexture =
+			Reflection.getOptionalMethod(RenderSystem.class, "setShaderTexture", MethodType.methodType(void.class, int.class, Identifier.class));
 	public static void drawTexture(MatrixStack matrices, Identifier texture, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight) {
 		Version.newSwitch()
 				.range("1.21.2", null, () -> getDrawContext(matrices).drawTexture(RenderLayer::getGuiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight))
 				.range("1.20.0", "1.21.1", () -> DrawContext_drawTexture.get().invoke(getDrawContext(matrices), texture, x, y, u, v, width, height, textureWidth, textureHeight))
 				.range(null, "1.19.4", () -> {
 					RenderSystem_setShader.get().invoke(null, (Supplier<ShaderProgram>) () -> GameRenderer_getPositionTexProgram.get().invoke(null));
-					RenderSystem.setShaderTexture(0, texture);
+					RenderSystem_setShaderTexture.get().invoke(null, 0, texture);
 					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 					call("method_25290", void.class,
 							new Class<?>[] {int.class, int.class, float.class, float.class, int.class, int.class, int.class, int.class},
@@ -239,11 +241,11 @@ public class MVDrawableHelper {
 		Version.newSwitch()
 				.range("1.20.0", null, () -> getDrawContext(matrices).fillGradient(RenderLayer.getGuiOverlay(), x, y, x + 16, y + 16, color, color, 0))
 				.range(null, "1.19.4", () -> {
-					RenderSystem.disableDepthTest();
-					RenderSystem.colorMask(true, true, true, false);
+					MVGlStateManager._disableDepthTest();
+					MVGlStateManager._colorMask(true, true, true, false);
 					DrawableHelper_fillGradient.get().invoke(null, matrices, x, y, x + 16, y + 16, color, color, 0);
-					RenderSystem.colorMask(true, true, true, true);
-					RenderSystem.enableDepthTest();
+					MVGlStateManager._colorMask(true, true, true, true);
+					MVGlStateManager._enableDepthTest();
 				})
 				.run();
 	}

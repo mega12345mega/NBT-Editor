@@ -7,13 +7,13 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundParent;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.TagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.CustomPotionContents;
 
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 
 public class CustomPotionContentsNBTTagReference implements TagReference<CustomPotionContents, ItemStack> {
 	
@@ -24,10 +24,10 @@ public class CustomPotionContentsNBTTagReference implements TagReference<CustomP
 	@Override
 	public CustomPotionContents get(ItemStack object) {
 		Integer color = null;
-		if (object.manager$hasNbt()) {
-			NbtCompound nbt = object.manager$getNbt();
-			if (nbt.contains("CustomPotionColor", NbtElement.NUMBER_TYPE))
-				color = nbt.getInt("CustomPotionColor");
+		if (object.nbte$hasNbt()) {
+			NbtCompound nbt = object.nbte$getNbt();
+			if (nbt.nbte$contains("CustomPotionColor", MVNbtCompoundParent.NUMBER_TYPE))
+				color = nbt.nbte$getIntOrDefault("CustomPotionColor");
 		}
 		List<StatusEffectInstance> effects = PotionUtil_getCustomPotionEffects.get().invoke(null, object);
 		return new CustomPotionContents(Optional.ofNullable(color), effects);
@@ -38,10 +38,10 @@ public class CustomPotionContentsNBTTagReference implements TagReference<CustomP
 	@Override
 	public void set(ItemStack object, CustomPotionContents value) {
 		if (value.color().isEmpty()) {
-			if (object.manager$hasNbt())
-				object.manager$modifyNbt(nbt -> nbt.remove("CustomPotionColor"));
+			if (object.nbte$hasNbt())
+				object.nbte$modifyNbt(nbt -> nbt.remove("CustomPotionColor"));
 		} else
-			object.manager$modifyNbt(nbt -> nbt.putInt("CustomPotionColor", value.color().get()));
+			object.nbte$modifyNbt(nbt -> nbt.putInt("CustomPotionColor", value.color().get()));
 		PotionUtil_setCustomPotionEffects.get().invoke(null, object, value.effects());
 	}
 	

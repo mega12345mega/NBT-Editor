@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.ComponentTagReference;
@@ -29,22 +30,22 @@ public class EnchantsTagReference implements TagReference<Enchants, ItemStack> {
 						null,
 						componentValue -> componentValue == null ? new Enchants() : new Enchants(componentValue.getEnchantmentEntries().stream()
 								.map(entry -> new Enchants.EnchantWithLevel(entry.getKey().value(), entry.getIntValue())).collect(Collectors.toList())),
-						(componentValue, enchants) -> new ItemEnchantmentsComponent(new Object2IntOpenHashMap<>(
-								enchants.getEnchants().stream().collect(Collectors.toMap(
+						(componentValue, enchants) -> (ItemEnchantmentsComponent) MVMisc.withEnchantments(componentValue,
+								new Object2IntOpenHashMap<>(enchants.getEnchants().stream().collect(Collectors.toMap(
 										enchant -> MVRegistry.getEnchantmentRegistry().getInternalValue().getEntry(enchant.enchant()),
 										enchant -> Math.min(255, enchant.level()),
-										Math::max))),
-								componentValue == null ? true : componentValue.showInTooltip)))
+										Math::max))))))
 				.range(null, "1.20.4", () -> TagReference.mapValue(Enchants::new, Enchants::getEnchants,
 						TagReference.forItems(ArrayList::new, TagReference.forLists(element -> {
 							if (!(element instanceof NbtCompound compound))
 								return null;
-							if (!compound.contains("id", NbtElement.STRING_TYPE))
+							if (!compound.nbte$contains("id", NbtElement.STRING_TYPE))
 								return null;
-							Enchantment enchant = MVRegistry.getEnchantmentRegistry().get(IdentifierInst.of(compound.getString("id")));
+							Enchantment enchant = MVRegistry.getEnchantmentRegistry().get(
+									IdentifierInst.of(compound.nbte$getStringOrDefault("id")));
 							if (enchant == null)
 								return null;
-							int level = compound.getShort("lvl");
+							int level = compound.nbte$getShortOrDefault("lvl");
 							if (level < 1)
 								return null;
 							return new Enchants.EnchantWithLevel(enchant, level);
