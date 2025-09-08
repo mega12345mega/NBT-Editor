@@ -21,7 +21,7 @@ public class ItemRenderStateLayerRenderStateMixin {
 	@Shadow
 	private ItemRenderState.Glint glint;
 	
-	@ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/item/model/special/SpecialModelRenderer;render(Ljava/lang/Object;Lnet/minecraft/item/ModelTransformationMode;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;IIZ)V"))
+	@ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/item/model/special/SpecialModelRenderer;render(Ljava/lang/Object;Lnet/minecraft/item/ItemDisplayContext;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;IIZ)V"))
 	private VertexConsumerProvider render(VertexConsumerProvider provider) {
 		ItemStack item = com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink.ITEM_BEING_RENDERED.remove(Thread.currentThread());
 		if (item == null)

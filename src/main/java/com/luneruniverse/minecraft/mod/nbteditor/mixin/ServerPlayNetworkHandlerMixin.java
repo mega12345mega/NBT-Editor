@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.mixin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -21,8 +22,14 @@ public class ServerPlayNetworkHandlerMixin {
 	@Shadow
 	public ServerPlayerEntity player;
 	
-	@Redirect(method = "onCreativeInventoryAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerInteractionManager;isCreative()Z"))
-	private boolean isCreative(ServerPlayerInteractionManager manager) {
+	@Redirect(method = "onCreativeInventoryAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;isInCreativeMode()Z"))
+	@Group(name = "onCreativeInventoryAction_isInCreativeMode", min = 1)
+	private boolean onCreativeInventoryAction_isInCreativeMode(ServerPlayerEntity player) {
+		return player.isInCreativeMode() || ServerMVMisc.hasPermissionLevel(player, 2);
+	}
+	@Redirect(method = "method_12070(Lnet/minecraft/class_2873;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_3225;method_14268()Z"), remap = false)
+	@Group(name = "onCreativeInventoryAction_isInCreativeMode", min = 1)
+	private boolean onCreativeInventoryAction_isCreative(ServerPlayerInteractionManager manager) {
 		return manager.isCreative() || ServerMVMisc.hasPermissionLevel(player, 2);
 	}
 	

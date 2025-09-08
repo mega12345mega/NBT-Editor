@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.mixin;
+package com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,13 +16,13 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 
 @Mixin(ClickSlotC2SPacket.class)
-public class ClickSlotC2SPacketMixin implements ClickSlotC2SPacketParent {
+public class ClickSlotC2SPacketMixin_1_21_4 implements ClickSlotC2SPacketParent {
 	private static final int NO_SLOT_RESTRICTIONS_FLAG = 0b01000000;
 	
-	@Shadow
-	private int button;
+	@Shadow(remap = false)
+	private int field_12817; // button
 	
-	@ModifyVariable(method = "<init>(IIIILnet/minecraft/screen/slot/SlotActionType;Lnet/minecraft/item/ItemStack;Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;)V", at = @At("HEAD"), ordinal = 3)
+	@ModifyVariable(method = "<init>(IIIILnet/minecraft/class_1713;Lnet/minecraft/class_1799;Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;)V", at = @At("HEAD"), ordinal = 3, remap = false)
 	@Group(name = "<init>", min = 1)
 	private static int init_new(int button) {
 		if (ConfigScreen.isNoSlotRestrictions() && NBTEditorClient.SERVER_CONN.isEditingExpanded())
@@ -45,12 +45,12 @@ public class ClickSlotC2SPacketMixin implements ClickSlotC2SPacketParent {
 		return button;
 	}
 	
-	@Inject(method = "getButton", at = @At("RETURN"), cancellable = true)
+	@Inject(method = "method_12193()I", at = @At("RETURN"), cancellable = true, remap = false)
 	private void getButton(CallbackInfoReturnable<Integer> info) {
 		info.setReturnValue(info.getReturnValue() & ~NO_SLOT_RESTRICTIONS_FLAG);
 	}
 	@Override
 	public boolean isNoSlotRestrictions() {
-		return (button & NO_SLOT_RESTRICTIONS_FLAG) != 0;
+		return (field_12817 & NO_SLOT_RESTRICTIONS_FLAG) != 0;
 	}
 }

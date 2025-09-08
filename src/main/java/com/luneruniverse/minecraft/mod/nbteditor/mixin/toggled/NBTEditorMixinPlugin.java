@@ -34,6 +34,10 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				.range("1.21.0", null, () -> output.add("toggled.EnchantmentMixin"))
 				.range(null, "1.20.6", () -> {})
 				.run();
+		Version.newSwitch()
+				.range("1.21.5", null, () -> output.add("toggled.ClickSlotC2SPacketMixin_1_21_5"))
+				.range(null, "1.21.4", () -> output.add("toggled.ClickSlotC2SPacketMixin_1_21_4"))
+				.run();
 		
 		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER)
 			return;
@@ -73,6 +77,10 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 		Version.newSwitch()
 				.range("1.21.2", null, () -> output.add("toggled.ClientPlayNetworkHandlerMixin"))
 				.range(null, "1.21.1", () -> {})
+				.run();
+		Version.newSwitch()
+				.range("1.21.5", null, () -> output.add("toggled.SnbtParsingMixin"))
+				.range(null, "1.21.4", () -> output.add("toggled.StringNbtReaderMixin"))
 				.run();
 	}
 	
