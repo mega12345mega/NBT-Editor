@@ -13,7 +13,7 @@ import net.minecraft.nbt.SnbtParsing;
 
 @Mixin(SnbtParsing.class)
 public class SnbtParsingMixin {
-	@Redirect(method = "method_68722", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/DynamicOps;createString(Ljava/lang/String;)Ljava/lang/Object;"))
+	@Redirect(method = "method_68722", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/DynamicOps;createString(Ljava/lang/String;)Ljava/lang/Object;", remap = false))
 	private static Object createParser$method_68722_createString(DynamicOps<?> ops, String str) {
 		if (ConfigScreen.isSpecialNumbers() && MixinLink.specialNumbers.contains(Thread.currentThread())) {
 			Number specialNum = NbtFormatter.SPECIAL_NUMS.get(str);

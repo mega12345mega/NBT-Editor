@@ -20,10 +20,12 @@ public class ClickSlotC2SPacketMixin_1_21_4 implements ClickSlotC2SPacketParent 
 	private static final int NO_SLOT_RESTRICTIONS_FLAG = 0b01000000;
 	
 	@Shadow(remap = false)
+	@SuppressWarnings("target")
 	private int field_12817; // button
 	
 	@ModifyVariable(method = "<init>(IIIILnet/minecraft/class_1713;Lnet/minecraft/class_1799;Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;)V", at = @At("HEAD"), ordinal = 3, remap = false)
 	@Group(name = "<init>", min = 1)
+	@SuppressWarnings("target")
 	private static int init_new(int button) {
 		if (ConfigScreen.isNoSlotRestrictions() && NBTEditorClient.SERVER_CONN.isEditingExpanded())
 			return button | NO_SLOT_RESTRICTIONS_FLAG;
@@ -46,6 +48,7 @@ public class ClickSlotC2SPacketMixin_1_21_4 implements ClickSlotC2SPacketParent 
 	}
 	
 	@Inject(method = "method_12193()I", at = @At("RETURN"), cancellable = true, remap = false)
+	@SuppressWarnings("target")
 	private void getButton(CallbackInfoReturnable<Integer> info) {
 		info.setReturnValue(info.getReturnValue() & ~NO_SLOT_RESTRICTIONS_FLAG);
 	}

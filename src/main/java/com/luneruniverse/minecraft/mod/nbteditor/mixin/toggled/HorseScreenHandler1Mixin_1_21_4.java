@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.mixin;
+package com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,8 +11,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -20,18 +18,19 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.HorseScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
 
-@Mixin(targets = {"net.minecraft.screen.HorseScreenHandler$2"})
-public class HorseScreenHandler2Mixin {
-	@Inject(method = "<init>(Lnet/minecraft/screen/HorseScreenHandler;Lnet/minecraft/inventory/Inventory;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/entity/EquipmentSlot;IIILnet/minecraft/util/Identifier;Lnet/minecraft/entity/passive/AbstractHorseEntity;)V", at = @At("RETURN"), require = 0)
-	private void init(HorseScreenHandler handler, Inventory inventory, LivingEntity entity, EquipmentSlot slot, int index, int x, int y, Identifier backgroundSprite, AbstractHorseEntity horse, CallbackInfo info) {
+@Mixin(targets = {"net.minecraft.screen.HorseScreenHandler$1"})
+public class HorseScreenHandler1Mixin_1_21_4 {
+	@Inject(method = "<init>(Lnet/minecraft/class_1724;Lnet/minecraft/class_1263;IIILnet/minecraft/class_1496;)V", at = @At("RETURN"), remap = false)
+	@SuppressWarnings("target")
+	private void init(HorseScreenHandler handler, Inventory inventory, int index, int x, int y, AbstractHorseEntity horse, CallbackInfo info) {
 		PlayerEntity owner = ServerMixinLink.SCREEN_HANDLER_OWNER.get(Thread.currentThread());
 		if (owner == null)
 			return;
 		ServerMixinLink.SLOT_OWNER.put((Slot) (Object) this, owner);
 	}
-	@Inject(method = "canInsert(Lnet/minecraft/item/ItemStack;)Z", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "method_7680(Lnet/minecraft/class_1799;)Z", at = @At("HEAD"), cancellable = true, remap = false)
+	@SuppressWarnings("target")
 	private void canInsert(ItemStack item, CallbackInfoReturnable<Boolean> info) {
 		PlayerEntity owner = ServerMixinLink.SLOT_OWNER.get((Slot) (Object) this);
 		if (owner == null)

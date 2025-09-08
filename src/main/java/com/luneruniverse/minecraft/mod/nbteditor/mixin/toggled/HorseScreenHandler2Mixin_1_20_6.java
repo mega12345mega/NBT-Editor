@@ -14,7 +14,7 @@ import net.minecraft.screen.HorseScreenHandler;
 import net.minecraft.screen.slot.Slot;
 
 @Mixin(targets = {"net.minecraft.screen.HorseScreenHandler$2"})
-public class HorseScreenHandler2Mixin {
+public class HorseScreenHandler2Mixin_1_20_6 {
 	@Inject(method = "<init>(Lnet/minecraft/class_1724;Lnet/minecraft/class_1263;IIILnet/minecraft/class_1496;)V", at = @At("RETURN"), remap = false)
 	@SuppressWarnings("target")
 	private void init(HorseScreenHandler handler, Inventory inventory, int index, int x, int y, AbstractHorseEntity horse, CallbackInfo info) {

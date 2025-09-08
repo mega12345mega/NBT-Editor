@@ -17,18 +17,27 @@ import net.minecraft.text.Text;
 
 @Mixin(ScreenshotRecorder.class)
 public class ScreenshotRecorderMixin {
-	@ModifyVariable(method = "saveScreenshotInner", at = @At("HEAD"), ordinal = 0)
-	@Group(name = "saveScreenshotInner", min = 1)
-	private static Consumer<Text> saveScreenshotInner(Consumer<Text> receiver) {
-		if (!ConfigScreen.isScreenshotOptions())
-			return receiver;
-		return msg -> receiver.accept(TextUtil.attachFileTextOptions(TextInst.copy(msg), MixinLink.screenshotTarget));
+	@ModifyVariable(method = "saveScreenshot(Ljava/io/File;Ljava/lang/String;Lnet/minecraft/client/gl/Framebuffer;Ljava/util/function/Consumer;)V", at = @At("HEAD"), ordinal = 0)
+	@Group(name = "saveScreenshot", min = 1)
+	private static Consumer<Text> saveScreenshot3(Consumer<Text> receiver) {
+		return saveScreenshotImpl(receiver);
+	}
+	
+	@ModifyVariable(method = "method_1662(Ljava/io/File;Ljava/lang/String;Lnet/minecraft/class_276;Ljava/util/function/Consumer;)V", at = @At("HEAD"), ordinal = 0, remap = false)
+	@Group(name = "saveScreenshot", min = 1)
+	@SuppressWarnings("target")
+	private static Consumer<Text> saveScreenshot2(Consumer<Text> receiver) {
+		return saveScreenshotImpl(receiver);
 	}
 	
 	@ModifyVariable(method = "method_1662(Ljava/io/File;Ljava/lang/String;IILnet/minecraft/class_276;Ljava/util/function/Consumer;)V", at = @At("HEAD"), ordinal = 0, remap = false)
-	@Group(name = "saveScreenshotInner", min = 1)
+	@Group(name = "saveScreenshot", min = 1)
 	@SuppressWarnings("target")
-	private static Consumer<Text> saveScreenshotInnerOld(Consumer<Text> receiver) {
+	private static Consumer<Text> saveScreenshot1(Consumer<Text> receiver) {
+		return saveScreenshotImpl(receiver);
+	}
+	
+	private static Consumer<Text> saveScreenshotImpl(Consumer<Text> receiver) {
 		if (!ConfigScreen.isScreenshotOptions())
 			return receiver;
 		return msg -> receiver.accept(TextUtil.attachFileTextOptions(TextInst.copy(msg), MixinLink.screenshotTarget));

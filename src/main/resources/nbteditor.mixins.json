@@ -9,9 +9,6 @@
     "ServerPlayerEntityMixin",
     "ShulkerBoxSlotMixin",
     "ShulkerBoxScreenHandlerMixin",
-    "HorseScreenHandlerMixin",
-    "HorseScreenHandler1Mixin",
-    "HorseScreenHandler2Mixin",
     "DataTrackerMixin",
     "ThreadExecutorMixin"
   ],

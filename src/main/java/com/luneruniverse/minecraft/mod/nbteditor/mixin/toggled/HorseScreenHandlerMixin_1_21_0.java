@@ -13,16 +13,16 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.screen.HorseScreenHandler;
 
 @Mixin(HorseScreenHandler.class)
-public class HorseScreenHandlerMixin {
-	@Inject(method = "<init>(ILnet/minecraft/class_1661;Lnet/minecraft/class_1263;Lnet/minecraft/class_1496;)V", at = @At("HEAD"), remap = false)
+public class HorseScreenHandlerMixin_1_21_0 {
+	@Inject(method = "<init>(ILnet/minecraft/class_1661;Lnet/minecraft/class_1263;Lnet/minecraft/class_1496;I)V", at = @At("HEAD"), remap = false)
 	@SuppressWarnings("target")
-	private static void initHead_old(int syncId, PlayerInventory playerInventory, Inventory inventory, AbstractHorseEntity horse, CallbackInfo info) {
+	private static void initHead(int syncId, PlayerInventory playerInventory, Inventory inventory, AbstractHorseEntity horse, int slotColumnCount, CallbackInfo info) {
 		ServerMixinLink.SCREEN_HANDLER_OWNER.put(Thread.currentThread(), playerInventory.player);
 	}
 	
-	@Inject(method = "<init>(ILnet/minecraft/class_1661;Lnet/minecraft/class_1263;Lnet/minecraft/class_1496;)V", at = @At("RETURN"), remap = false)
+	@Inject(method = "<init>(ILnet/minecraft/class_1661;Lnet/minecraft/class_1263;Lnet/minecraft/class_1496;I)V", at = @At("RETURN"), remap = false)
 	@SuppressWarnings("target")
-	private void initReturn_old(int syncId, PlayerInventory playerInventory, Inventory inventory, AbstractHorseEntity horse, CallbackInfo info) {
+	private void initReturn(int syncId, PlayerInventory playerInventory, Inventory inventory, AbstractHorseEntity horse, int slotColumnCount, CallbackInfo info) {
 		ServerMixinLink.SCREEN_HANDLER_OWNER.remove(Thread.currentThread());
 	}
 }

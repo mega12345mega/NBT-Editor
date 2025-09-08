@@ -16,7 +16,8 @@ import net.minecraft.nbt.StringNbtReader;
 
 @Mixin(StringNbtReader.class)
 public class StringNbtReaderMixin {
-	@Inject(method = "parsePrimitive", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "method_10731(Ljava/lang/String;)Lnet/minecraft/class_2520;", at = @At("HEAD"), cancellable = true, remap = false)
+	@SuppressWarnings("target")
 	private void parsePrimitive(String input, CallbackInfoReturnable<NbtElement> info) {
 		if (ConfigScreen.isSpecialNumbers() && MixinLink.specialNumbers.contains(Thread.currentThread())) {
 			Number specialNum = NbtFormatter.SPECIAL_NUMS.get(input);

@@ -29,6 +29,7 @@ public class ServerPlayNetworkHandlerMixin {
 	}
 	@Redirect(method = "method_12070(Lnet/minecraft/class_2873;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_3225;method_14268()Z"), remap = false)
 	@Group(name = "onCreativeInventoryAction_isInCreativeMode", min = 1)
+	@SuppressWarnings("target")
 	private boolean onCreativeInventoryAction_isCreative(ServerPlayerInteractionManager manager) {
 		return manager.isCreative() || ServerMVMisc.hasPermissionLevel(player, 2);
 	}

@@ -22,13 +22,21 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				.run();
 		// https://github.com/SpongePowered/Mixin/issues/677
 		Version.newSwitch()
-				.range("1.21.0", null, () -> {})
-				.range(null, "1.20.6", () -> output.add("toggled.HorseScreenHandlerMixin"))
+				.range("1.21.5", null, () -> {})
+				.range("1.21.0", "1.21.4", () -> output.add("toggled.HorseScreenHandlerMixin_1_21_0"))
+				.range(null, "1.20.6", () -> output.add("toggled.HorseScreenHandlerMixin_1_20_6"))
 				.run();
 		// https://github.com/SpongePowered/Mixin/issues/677
 		Version.newSwitch()
 				.range("1.21.0", null, () -> {})
-				.range(null, "1.20.6", () -> output.add("toggled.HorseScreenHandler2Mixin"))
+				.range(null, "1.20.6", () -> output.add("toggled.HorseScreenHandler2Mixin_1_20_6"))
+				.run();
+		Version.newSwitch()
+				.range("1.21.5", null, () -> {})
+				.range(null, "1.21.4", () -> {
+					output.add("toggled.HorseScreenHandler1Mixin_1_21_4");
+					output.add("toggled.HorseScreenHandler2Mixin_1_21_4");
+				})
 				.run();
 		Version.newSwitch()
 				.range("1.21.0", null, () -> output.add("toggled.EnchantmentMixin"))
