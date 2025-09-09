@@ -77,7 +77,7 @@ public class GetHdbCommand extends ClientCommand {
 						return Command.SINGLE_SUCCESS;
 					Category category = context.getArgument("category", Category.class);
 					ItemStack shulker = ShulkerBoxBlock.getItemStack(MainUtil.getDyeColor(category.getColor()));
-					shulker.manager$setCustomName(TextInst.of(Formatting.RESET.toString() + category.getColor() + Formatting.BOLD + category.getTranslatedName().toUpperCase()));
+					shulker.nbte$setCustomName(TextInst.of(Formatting.RESET.toString() + category.getColor() + Formatting.BOLD + category.getTranslatedName().toUpperCase()));
 					ItemTagReferences.HIDE_FLAGS.set(shulker, Map.of(HideFlag.CONTAINER, true));
 					ContainerIO.writeRecursively(shulker, HeadAPI.getHeads(category).stream().map(Head::getItemStack).toList());
 					MainUtil.getWithMessage(shulker);
@@ -87,7 +87,7 @@ public class GetHdbCommand extends ClientCommand {
 						return Command.SINGLE_SUCCESS;
 					String query = context.getArgument("query", String.class);
 					ItemStack shulker = new ItemStack(Items.BROWN_SHULKER_BOX);
-					shulker.manager$setCustomName(TextInst.of(Formatting.RESET.toString() + Formatting.GOLD + Formatting.BOLD + TextInst.translatable("nbteditor.hdb.search").getString() + ": " + query));
+					shulker.nbte$setCustomName(TextInst.of(Formatting.RESET.toString() + Formatting.GOLD + Formatting.BOLD + TextInst.translatable("nbteditor.hdb.search").getString() + ": " + query));
 					ItemTagReferences.HIDE_FLAGS.set(shulker, Map.of(HideFlag.CONTAINER, true));
 					ContainerIO.writeRecursively(shulker, HeadAPI.getHeadsByName(query).stream().map(Head::getItemStack).toList());
 					MainUtil.getWithMessage(shulker);

@@ -283,7 +283,7 @@ public class PagedPane extends ClientHandledScreen {
     }
 
     protected ItemStack setMeta(ItemStack itemStack, String name, String... lore) {
-        itemStack.manager$setCustomName(TextInst.of(Utils.colorize(name)));
+        itemStack.nbte$setCustomName(TextInst.of(Utils.colorize(name)));
         ItemTagReferences.LORE.set(itemStack, Arrays.stream(lore).map(MainUtil::colorize).map(TextInst::of).collect(Collectors.toList()));
         return itemStack;
     }

@@ -82,7 +82,7 @@ public class ImportScreen extends OverlaySupportingScreen {
 				name = name.substring(0, nameDot);
 			
 			ItemStack painting = new ItemStack(Items.PAINTING);
-			painting.manager$setCustomName(TextInst.literal(name).styled(style -> style.withItalic(false).withColor(Formatting.GOLD)));
+			painting.nbte$setCustomName(TextInst.literal(name).styled(style -> style.withItalic(false).withColor(Formatting.GOLD)));
 			ItemTagReferences.LORE.set(painting, imgLore);
 			MainUtil.getWithMessage(painting);
 		}, () -> {});

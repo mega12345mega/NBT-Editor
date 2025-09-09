@@ -9,11 +9,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
 public interface MVItemStackParent {
-	public default boolean manager$hasCustomName() {
-		throw new RuntimeException("Missing implementation for MVItemStackParent#manager$hasCustomName");
+	public default boolean nbte$hasCustomName() {
+		throw new RuntimeException("Missing implementation for MVItemStackParent#nbte$hasCustomName");
 	}
-	public default ItemStack manager$setCustomName(Text name) {
-		throw new RuntimeException("Missing implementation for MVItemStackParent#manager$setCustomName");
+	public default ItemStack nbte$setCustomName(Text name) {
+		throw new RuntimeException("Missing implementation for MVItemStackParent#nbte$setCustomName");
 	}
 	
 	public default boolean contains(MVComponentType<?> type) {

@@ -89,14 +89,14 @@ public class NBTEditorClient implements ClientModInitializer {
 		MVClientNetworking.PlayNetworkStateEvents.Stop.EVENT.register(() -> ClientChestHelper.unloadAllPages(PageLoadLevel.NORMAL_ITEMS));
 		
 		ItemStack clientChestIcon = new ItemStack(Items.ENDER_CHEST)
-				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));
+				.nbte$setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));
 		MVEnchantments.addEnchantment(clientChestIcon, MVEnchantments.LOYALTY, 1);
 		MixinLink.ENCHANT_GLINT_FIX.add(clientChestIcon);
 		NBTEditorAPI.registerInventoryTab(clientChestIcon,
 				ClientChestScreen::show,
 				screen -> screen instanceof CreativeInventoryScreen || (screen instanceof InventoryScreen && SERVER_CONN.isEditingExpanded()));
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.CHEST)
-				.manager$setCustomName(TextInst.translatable("itemGroup.nbteditor.inventory")),
+				.nbte$setCustomName(TextInst.translatable("itemGroup.nbteditor.inventory")),
 				CURSOR_MANAGER::showRoot,
 				screen -> screen instanceof ClientChestScreen);
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST),

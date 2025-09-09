@@ -298,7 +298,7 @@ public class ContainerIO {
 			
 			ItemStack section = subContainers.get();
 			String subPath = (path == null ? i + "" : path + "." + i);
-			section.manager$setCustomName(TextInst.of(TextInst.translatable("nbteditor.hdb.section").getString() + ": " + subPath));
+			section.nbte$setCustomName(TextInst.of(TextInst.translatable("nbteditor.hdb.section").getString() + ": " + subPath));
 			writeRecursively(new LocalItemStack(section), subContainers, contents.subList(i * sectionSize, Math.min(contents.size(), (i + 1) * sectionSize)), subPath);
 			sections[i] = section;
 		}

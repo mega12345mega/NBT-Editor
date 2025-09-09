@@ -26,7 +26,7 @@ public class LocalHead extends Head {
         Validate.notNull(uuid, "uuid must not be null!");
         
         ItemStack item = new ItemStack(Items.PLAYER_HEAD);
-        item.manager$setCustomName(TextInst.of(Utils.colorize("&e" + name)));
+        item.nbte$setCustomName(TextInst.of(Utils.colorize("&e" + name)));
         ItemTagReferences.PROFILE_NAME.set(item, Optional.of(name));
         ItemTagReferences.LORE.set(item, List.of(TextInst.of(Utils.colorize("&7UUID: " + uuid.toString()))));
         

@@ -37,7 +37,7 @@ public class Head {
         Validate.notNull(value, "value must not be null!");
 
         ItemStack item = new ItemStack(Items.PLAYER_HEAD);
-        item.manager$setCustomName(TextInst.of(Utils.colorize(category != null ? category.getColor() + name : "&8" + name)));
+        item.nbte$setCustomName(TextInst.of(Utils.colorize(category != null ? category.getColor() + name : "&8" + name)));
         // set skull owner
         GameProfile profile = new GameProfile(uuid, NBTManagers.COMPONENTS_EXIST ? "HDB_Head" : name);
         profile.getProperties().put("textures", new Property("textures", value));

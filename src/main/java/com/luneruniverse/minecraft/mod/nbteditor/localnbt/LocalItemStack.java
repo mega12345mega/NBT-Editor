@@ -63,7 +63,7 @@ public class LocalItemStack extends LocalItem {
 	}
 	@Override
 	public void setName(Text name) {
-		item.manager$setCustomName(name);
+		item.nbte$setCustomName(name);
 	}
 	@Override
 	public String getDefaultName() {

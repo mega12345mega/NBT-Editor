@@ -9,20 +9,20 @@ import net.minecraft.nbt.NbtCompound;
  */
 public interface IntegratedNBTManager {
 	public default NbtCompound nbte$serialize(boolean requireSuccess) {
-		throw new RuntimeException("Missing implementation for IntegratedNBTManager#manager$serialize");
+		throw new RuntimeException("Missing implementation for IntegratedNBTManager#nbte$serialize");
 	}
 	
 	public default boolean nbte$hasNbt() {
-		throw new RuntimeException("Missing implementation for IntegratedNBTManager#manager$hasNbt");
+		throw new RuntimeException("Missing implementation for IntegratedNBTManager#nbte$hasNbt");
 	}
 	public default NbtCompound nbte$getNbt() {
-		throw new RuntimeException("Missing implementation for IntegratedNBTManager#manager$getNbt");
+		throw new RuntimeException("Missing implementation for IntegratedNBTManager#nbte$getNbt");
 	}
 	public default NbtCompound nbte$getOrCreateNbt() {
-		throw new RuntimeException("Missing implementation for IntegratedNBTManager#manager$getOrCreateNbt");
+		throw new RuntimeException("Missing implementation for IntegratedNBTManager#nbte$getOrCreateNbt");
 	}
 	public default void nbte$setNbt(NbtCompound nbt) {
-		throw new RuntimeException("Missing implementation for IntegratedNBTManager#manager$setNbt");
+		throw new RuntimeException("Missing implementation for IntegratedNBTManager#nbte$setNbt");
 	}
 	
 	public default void nbte$modifyNbt(Consumer<NbtCompound> modifier) {
