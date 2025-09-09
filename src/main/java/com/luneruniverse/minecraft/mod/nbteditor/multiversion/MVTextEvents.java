@@ -116,7 +116,7 @@ public class MVTextEvents {
 		public ClickEvent newEvent(T value) {
 			return Version.<ClickEvent>newSwitch()
 					.range("1.21.5", null, () -> constructor.apply(value))
-					.range(null, "1.21.4", Reflection.newInstance(ClickEvent.class,
+					.range(null, "1.21.4", () -> Reflection.newInstance(ClickEvent.class,
 							new Class<?>[] {ClickEvent.Action.class, String.class}, action, value.toString()))
 					.get();
 		}

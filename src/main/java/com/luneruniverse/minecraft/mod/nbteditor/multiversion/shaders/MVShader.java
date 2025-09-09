@@ -76,7 +76,7 @@ public abstract class MVShader {
 		public MVShader build() {
 			return Version.<MVShader>newSwitch()
 					.range("1.21.5", null, () -> new MVShader3(this))
-					.range("1.21.2", "1.21.4", new MVShader2(this))
+					.range("1.21.2", "1.21.4", () -> new MVShader2(this))
 					.range(null, "1.21.1", () -> new MVShader1(this))
 					.get();
 		}

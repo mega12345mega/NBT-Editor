@@ -138,8 +138,10 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				
 				ok = addWidget(MVMisc.newButton(0, 0, 150, 20, TextInst.translatable("nbteditor.ok"), btn -> {
 					onDone.onEventChange(
-							clickActionDropdown.getValidValue().value.newEventParse(clickValueField.getText()).get(),
-							hoverActionDropdown.getValidValue().value.newEventParse(hoverValueField.getText()).get());
+							clickActionDropdown.getValidValue() == ClickAction.NONE ? null :
+								clickActionDropdown.getValidValue().value.newEventParse(clickValueField.getText()).get(),
+							hoverActionDropdown.getValidValue() == HoverAction.NONE ? null :
+								hoverActionDropdown.getValidValue().value.newEventParse(hoverValueField.getText()).get());
 					OverlaySupportingScreen.setOverlayStatic(null);
 				}));
 				cancel = addWidget(MVMisc.newButton(0, 0, 150, 20, TextInst.translatable("nbteditor.cancel"), btn -> {
