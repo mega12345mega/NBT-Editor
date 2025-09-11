@@ -21,7 +21,7 @@ import com.google.common.cache.CacheBuilder;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.ItemSize;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.ChatScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.HandledScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
@@ -315,7 +315,7 @@ public class MixinLink {
 					NBTEditorClient.SERVER_CONN.isScreenEditable())) {
 				tooltip.add(TextInst.translatable("nbteditor.keybind.edit"));
 				tooltip.add(TextInst.translatable("nbteditor.keybind.factory"));
-				if (ContainerIO.isContainer(source))
+				if (ContainerIOs.isSupported(source))
 					tooltip.add(TextInst.translatable("nbteditor.keybind.container"));
 				if (source.getItem() == Items.ENCHANTED_BOOK)
 					tooltip.add(TextInst.translatable("nbteditor.keybind.enchant"));

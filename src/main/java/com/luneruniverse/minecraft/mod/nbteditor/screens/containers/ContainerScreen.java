@@ -3,7 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
@@ -23,7 +23,7 @@ import net.minecraft.text.Text;
 public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	
 	public static <L extends LocalNBT> void show(NBTReference<L> ref) {
-		if (!ref.exists() || !ContainerIO.isContainer(ref.getLocalNBT())) {
+		if (!ref.exists() || !ContainerIOs.isSupported(ref.getLocalNBT())) {
 			ref.showParent();
 			return;
 		}
@@ -47,10 +47,10 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		
 		this.ref = ref;
 		this.localNBT = LocalNBT.copy(ref.getLocalNBT());
-		this.numSlots = ContainerIO.getMaxSize(localNBT);
+		this.numSlots = ContainerIOs.getMaxSlots(localNBT);
 		this.saved = true;
 		
-		ItemStack[] contents = ContainerIO.read(localNBT);
+		ItemStack[] contents = ContainerIOs.read(localNBT);
 		for (int i = 0; i < contents.length; i++)
 			handler.getSlot(i).setStackNoCallbacks(contents[i] == null ? ItemStack.EMPTY : contents[i].copy());
 	}
@@ -119,7 +119,7 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		ItemStack[] contents = new ItemStack[this.handler.getInventory().size()];
 		for (int i = 0; i < contents.length; i++)
 			contents[i] = this.handler.getInventory().getStack(i);
-		ContainerIO.write(localNBT, contents);
+		ContainerIOs.write(localNBT, contents);
 		
 		saved = false;
 		ref.saveLocalNBT(localNBT, () -> {
@@ -146,7 +146,7 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		ItemStack[] contents = new ItemStack[this.handler.getInventory().size()];
 		for (int i = 0; i < contents.length; i++)
 			contents[i] = this.handler.getInventory().getStack(i);
-		return new ContainerItemReference<>(ref, ContainerIO.getWrittenSlotIndex(localNBT, contents, slot));
+		return new ContainerItemReference<>(ref, ContainerIOs.getWrittenSlotIndex(localNBT, contents, slot));
 	}
 	
 	@Override

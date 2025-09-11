@@ -11,12 +11,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.commands.ClientCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.factories.FactoryCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetCommand;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetPresetCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.BlockContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.BlockEntityTagContainerIO;
 import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.EntityContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.EntityTagContainerIO;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.ItemContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIOs;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ItemBlockContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ItemEntityContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
+import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
@@ -33,7 +33,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.DSL.TypeReference;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.entity.EntityType;
@@ -208,88 +207,73 @@ public class NBTEditorAPI {
 	 * Register a container<br>
 	 * This is used with the {@code /open} command to edit special containers (like item frames)
 	 * @param item The item that this container applies to
-	 * @param container The container reader and writer
-	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
-	 * @see #registerBlockEntityTagContainer(BlockItem, Function)
-	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
-	 * @see #registerEntityTagContainer(Item, EntityType, Function)
+	 * @param io The container reader and writer
+	 * @see #registerItemBlockContainer(BlockItem, ItemBlockContainerIO)
+	 * @see #registerItemEntityContainer(Item, EntityType, ItemEntityContainerIO)
+	 * @see #registerItemEntityContainer(Item, EntityType, Function)
 	 */
-	public static void registerItemContainer(Item item, ItemContainerIO container) {
-		ContainerIO.registerItemIO(item, container);
+	public static void registerItemContainer(Item item, ContainerIO<ItemStack> io) {
+		ContainerIOs.registerItemIO(item, io);
 	}
 	/**
 	 * Register a container<br>
 	 * This is used with the {@code /open} command to edit special containers (like item frames)
 	 * @param block The block that this container applies to
-	 * @param container The container reader and writer
-	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
-	 * @see #registerBlockEntityTagContainer(BlockItem, Function)
+	 * @param io The container reader and writer
+	 * @see #registerItemBlockContainer(BlockItem, ItemBlockContainerIO)
 	 */
-	public static void registerBlockContainer(Block block, BlockContainerIO container) {
-		ContainerIO.registerBlockIO(block, container);
+	public static void registerBlockContainer(Block block, ContainerIO<LocalBlock> io) {
+		ContainerIOs.registerBlockIO(block, io);
 	}
 	/**
 	 * Register a container<br>
 	 * This is used with the {@code /open} command to edit special containers (like item frames)
 	 * @param entity The entity that this container applies to, including spawn eggs of this type
-	 * @param container The container reader and writer
-	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
-	 * @see #registerEntityTagContainer(Item, EntityType, Function)
+	 * @param io The container reader and writer
+	 * @see #registerItemEntityContainer(Item, EntityType, ItemEntityContainerIO)
+	 * @see #registerItemEntityContainer(Item, EntityType, Function)
 	 */
-	public static void registerEntityContainer(EntityType<?> entity, EntityContainerIO container) {
-		ContainerIO.registerEntityIO(entity, container);
-	}
-	/**
-	 * Register a container<br>
-	 * This is used with the {@code /open} command to edit special containers (like item frames)
-	 * @param blockItem The item and block that this container applies to
-	 * @param container The container reader and writer
-	 * @see #registerItemContainer(Item, ItemContainerIO)
-	 * @see #registerBlockContainer(Block, BlockContainerIO)
-	 * @see #registerBlockEntityTagContainer(BlockItem, Function)
-	 */
-	public static void registerBlockEntityTagContainer(BlockItem blockItem, BlockEntityTagContainerIO container) {
-		ContainerIO.registerBlockEntityTagIO(blockItem, container);
+	public static void registerEntityContainer(EntityType<?> entity, ContainerIO<LocalEntity> io) {
+		ContainerIOs.registerEntityIO(entity, io);
 	}
 	/**
 	 * Register a container<br>
 	 * This is used with the {@code /open} command to edit special containers (like item frames)
 	 * @param blockItem The item and block that this container applies to
-	 * @param container The container reader and writer
-	 * @see #registerItemContainer(Item, ItemContainerIO)
-	 * @see #registerBlockContainer(Block, BlockContainerIO)
-	 * @see #registerBlockEntityTagContainer(BlockItem, BlockEntityTagContainerIO)
+	 * @param io The container reader and writer
+	 * @see #registerItemContainer(Item, ContainerIO)
+	 * @see #registerBlockContainer(Block, ContainerIO)
 	 */
-	public static void registerBlockEntityTagContainer(BlockItem blockItem, Function<BlockEntityType<?>, BlockEntityTagContainerIO> container) {
-		ContainerIO.registerBlockEntityTagIO(blockItem, container);
+	public static void registerItemBlockContainer(BlockItem blockItem, ItemBlockContainerIO io) {
+		ContainerIOs.registerItemBlockIO(blockItem, io);
 	}
 	/**
 	 * Register a container<br>
 	 * This is used with the {@code /open} command to edit special containers (like item frames)<br>
-	 * DO NOT pass in the spawn egg to <code>item</code>; use {@link #registerEntityContainer(EntityType, EntityContainerIO)}
+	 * DO NOT pass in the spawn egg to <code>item</code>; use {@link #registerEntityContainer(EntityType, ContainerIO)}
 	 * @param item The item that this container applies to
 	 * @param entity The entity that this container applies to, including spawn eggs of this type
-	 * @param container The container reader and writer
-	 * @see #registerItemContainer(Item, ItemContainerIO)
-	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
-	 * @see #registerEntityTagContainer(Item, EntityType, Function)
+	 * @param io The container reader and writer
+	 * @see #registerItemContainer(Item, ContainerIO)
+	 * @see #registerEntityContainer(EntityType, ContainerIO)
+	 * @see #registerItemEntityContainer(Item, EntityType, Function)
 	 */
-	public static void registerEntityTagContainer(Item item, EntityType<?> entity, EntityTagContainerIO container) {
-		ContainerIO.registerEntityTagIO(item, entity, container);
+	public static void registerItemEntityContainer(Item item, EntityType<?> entity, ItemEntityContainerIO io) {
+		ContainerIOs.registerItemEntityIO(item, entity, io);
 	}
 	/**
 	 * Register a container<br>
 	 * This is used with the {@code /open} command to edit special containers (like item frames)<br>
-	 * DO NOT pass in the spawn egg to <code>item</code>; use {@link #registerEntityContainer(EntityType, EntityContainerIO)}
+	 * DO NOT pass in the spawn egg to <code>item</code>; use {@link #registerEntityContainer(EntityType, ContainerIO)}
 	 * @param item The item that this container applies to
 	 * @param entity The entity that this container applies to, including spawn eggs of this type
-	 * @param container The container reader and writer
-	 * @see #registerItemContainer(Item, ItemContainerIO)
-	 * @see #registerEntityContainer(EntityType, EntityContainerIO)
-	 * @see #registerEntityTagContainer(Item, EntityType, EntityTagContainerIO)
+	 * @param io The container reader and writer
+	 * @see #registerItemContainer(Item, ContainerIO)
+	 * @see #registerEntityContainer(EntityType, ContainerIO)
+	 * @see #registerItemEntityContainer(Item, EntityType, ItemEntityContainerIO)
 	 */
-	public static void registerEntityTagContainer(Item item, EntityType<?> entity, Function<EntityType<?>, EntityTagContainerIO> container) {
-		ContainerIO.registerEntityTagIO(item, entity, container);
+	public static void registerItemEntityContainer(Item item, EntityType<?> entity, Function<EntityType<?>, ItemEntityContainerIO> io) {
+		ContainerIOs.registerItemEntityIO(item, entity, io);
 	}
 	
 	/**

@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ContainerScreen;
@@ -23,9 +23,9 @@ public class ContainerItemReference<L extends LocalNBT> implements ItemReference
 		
 		this.save = new SaveQueue<>("Container", toSave -> {
 			L containerValue = LocalNBT.copy(container.getLocalNBT());
-			ItemStack[] contents = ContainerIO.read(containerValue);
+			ItemStack[] contents = ContainerIOs.read(containerValue);
 			contents[slot] = toSave;
-			ContainerIO.write(containerValue, contents);
+			ContainerIOs.write(containerValue, contents);
 			
 			if (MainUtil.client.currentScreen instanceof ContainerScreen screen && screen.getReference() == container)
 				screen.getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
@@ -63,14 +63,14 @@ public class ContainerItemReference<L extends LocalNBT> implements ItemReference
 			return false;
 		
 		L containerValue = container.getLocalNBT();
-		return ContainerIO.isContainer(containerValue) && slot < ContainerIO.getMaxSize(containerValue);
+		return ContainerIOs.isSupported(containerValue) && slot < ContainerIOs.getMaxSlots(containerValue);
 	}
 	
 	@Override
 	public ItemStack getItem() {
 		L containerValue = container.getLocalNBT();
-		ItemStack[] contents = ContainerIO.read(containerValue);
-		if (slot >= contents.length && slot < ContainerIO.getMaxSize(containerValue))
+		ItemStack[] contents = ContainerIOs.read(containerValue);
+		if (slot >= contents.length && slot < ContainerIOs.getMaxSlots(containerValue))
 			return ItemStack.EMPTY;
 		return contents[slot];
 	}

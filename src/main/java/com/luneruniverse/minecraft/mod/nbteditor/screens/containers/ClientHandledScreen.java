@@ -6,7 +6,7 @@ import org.lwjgl.glfw.GLFW;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.get.GetLostItemCommand;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IgnoreCloseScreenPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
@@ -66,7 +66,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		
 		boolean notAir = item != null && !item.isEmpty();
 		if (hasControlDown()) {
-			if (notAir && ContainerIO.isContainer(item))
+			if (notAir && ContainerIOs.isSupported(item))
 				ContainerScreen.show(ref);
 		} else if (hasShiftDown()) {
 			if (notAir)

@@ -3,7 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.commands;
 import static com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandManager.literal;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
@@ -20,7 +20,7 @@ public class OpenCommand extends ClientCommand {
 	public static final OpenCommand INSTANCE = new OpenCommand();
 	
 	public static final NBTReferenceFilter CONTAINER_FILTER = NBTReferenceFilter.create(
-			ref -> ContainerIO.isContainer(ref.getLocalNBT()),
+			ref -> ContainerIOs.isSupported(ref.getLocalNBT()),
 			TextInst.translatable("nbteditor.no_ref.container"),
 			TextInst.translatable("nbteditor.no_hand.no_item.container"));
 	

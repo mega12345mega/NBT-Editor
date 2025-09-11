@@ -22,7 +22,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricCli
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
-import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.TagNames;
+import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.Command;
@@ -133,8 +133,10 @@ public class NBTExportCommand extends ClientCommand {
 			})).then(literal("cmdblock").executes(context -> {
 				NBTReference.getReference(EXPORT_FILTER, false, ref -> {
 					ItemStack cmdBlock = new ItemStack(Items.COMMAND_BLOCK);
-					cmdBlock.nbte$modifySubNbt(TagNames.BLOCK_ENTITY_TAG,
-							nbt -> MainUtil.fillId(nbt, "minecraft:command_block").putString("Command", getVanillaCommand(ref)));
+					NbtCompound blockEntityTag = new NbtCompound();
+					MainUtil.fillId(blockEntityTag, "minecraft:command_block");
+					blockEntityTag.putString("Command", getVanillaCommand(ref));
+					ItemTagReferences.BLOCK_ENTITY_DATA.set(cmdBlock, blockEntityTag);
 					MainUtil.getWithMessage(cmdBlock);
 				});
 				return Command.SINGLE_SUCCESS;

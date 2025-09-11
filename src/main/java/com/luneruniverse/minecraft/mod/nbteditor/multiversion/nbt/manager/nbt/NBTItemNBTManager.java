@@ -21,7 +21,7 @@ public class NBTItemNBTManager implements DeserializableNBTManager<ItemStack> {
 			Reflection.getMethod(ItemStack.class, "method_7915", MethodType.methodType(ItemStack.class, NbtCompound.class));
 	@Override
 	public Attempt<ItemStack> tryDeserialize(NbtCompound nbt) {
-		return new Attempt<>(ItemStack_fromNbt.invoke(null, nbt));
+		return new Attempt<>(ItemStack_fromNbt.invoke(null, nbt.copy()));
 	}
 	
 	private static final Reflection.MethodInvoker ItemStack_hasNbt =

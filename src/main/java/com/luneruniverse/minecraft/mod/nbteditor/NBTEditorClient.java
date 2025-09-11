@@ -15,7 +15,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.clientchest.LargeClientChestPag
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.PageLoadLevel;
 import com.luneruniverse.minecraft.mod.nbteditor.clientchest.SmallClientChestPageCache;
 import com.luneruniverse.minecraft.mod.nbteditor.commands.CommandHandler;
-import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIO;
+import com.luneruniverse.minecraft.mod.nbteditor.containers.ContainerIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVEnchantments;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
@@ -78,7 +78,7 @@ public class NBTEditorClient implements ClientModInitializer {
 		} catch (IOException e) {
 			NBTEditor.LOGGER.error("Error while loading HeadDB favorites", e);
 		}
-		ContainerIO.loadClass();
+		ContainerIOs.loadClass();
 		new HeadRefreshThread().start();
 		ConfigScreen.loadSettings();
 		CURSOR_MANAGER = new CursorManager();

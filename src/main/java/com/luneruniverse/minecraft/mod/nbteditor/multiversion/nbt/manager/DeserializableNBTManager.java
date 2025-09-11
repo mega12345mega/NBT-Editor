@@ -10,4 +10,7 @@ public interface DeserializableNBTManager<T> extends NBTManager<T> {
 		Attempt<T> attempt = tryDeserialize(nbt);
 		return requireSuccess ? attempt.getSuccessOrThrow() : attempt.getAttemptOrThrow();
 	}
+	public default T deserializeOrElse(NbtCompound nbt, T defaultValue) {
+		return tryDeserialize(nbt).value().orElse(defaultValue);
+	}
 }

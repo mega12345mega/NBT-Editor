@@ -4,8 +4,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
 
-public class DonkeyChestContainerIO implements NonItemNBTContainerIO {
+public class DonkeyChestContainerIO implements ContainerIO<NbtCompound> {
 	
 	private static final boolean ITEMS_SHIFTED = Version.<Boolean>newSwitch()
 			.range("1.20.5", null, false)
@@ -13,40 +14,51 @@ public class DonkeyChestContainerIO implements NonItemNBTContainerIO {
 			.get();
 	
 	private final boolean llama;
-	private final ConstSizeContainerIO chest;
+	private final ContainerIO<NbtCompound> delegate;
+	private final Identifier[] textures;
 	
 	public DonkeyChestContainerIO(boolean llama) {
 		this.llama = llama;
-		this.chest = new ConstSizeContainerIO(ITEMS_SHIFTED ? 17 : 15);
+		this.delegate = new SlotKeyNbtListContainerIO(ITEMS_SHIFTED ? 17 : 15).forNbtCompoundItems();
+		this.textures = new Identifier[15];
 	}
 	
 	@Override
-	public int getMaxNBTSize(NbtCompound nbt, SourceContainerType source) {
+	public boolean isSupported(NbtCompound container) {
+		return delegate.isSupported(container);
+	}
+	
+	@Override
+	public int getMaxSlots(NbtCompound container) {
 		return 15;
 	}
 	
 	@Override
-	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
-		ItemStack[] output = chest.readNBT(container, SourceContainerType.ENTITY);
-		if (ITEMS_SHIFTED) {
-			ItemStack[] temp = new ItemStack[15];
-			System.arraycopy(output, 2, temp, 0, temp.length);
-			output = temp;
-		}
-		return output;
+	public Identifier[] getTextures(NbtCompound container) {
+		return textures;
 	}
 	
 	@Override
-	public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
+	public ItemStack[] read(NbtCompound container) {
+		ItemStack[] contents = delegate.read(container);
+		if (ITEMS_SHIFTED) {
+			ItemStack[] temp = new ItemStack[15];
+			System.arraycopy(contents, 2, temp, 0, temp.length);
+			contents = temp;
+		}
+		return contents;
+	}
+	
+	@Override
+	public int write(NbtCompound container, ItemStack[] contents) {
 		ItemStack[] shiftedContents = contents;
 		if (ITEMS_SHIFTED) {
-			shiftedContents = new ItemStack[contents.length + 2];
+			shiftedContents = new ItemStack[17];
 			shiftedContents[0] = ItemStack.EMPTY;
 			shiftedContents[1] = ItemStack.EMPTY;
 			System.arraycopy(contents, 0, shiftedContents, 2, contents.length);
 		}
-		
-		int output = chest.writeNBT(container, shiftedContents, SourceContainerType.ENTITY) - (ITEMS_SHIFTED ? 2 : 0);
+		delegate.write(container, shiftedContents);
 		
 		for (ItemStack item : contents) {
 			if (item != null && !item.isEmpty()) {
@@ -65,7 +77,17 @@ public class DonkeyChestContainerIO implements NonItemNBTContainerIO {
 				container.putInt("Strength", columns);
 		}
 		
-		return output;
+		return 15;
+	}
+	
+	@Override
+	public int getNumWritten(NbtCompound container, ItemStack[] contents) {
+		return 15;
+	}
+	
+	@Override
+	public int getWrittenSlotIndex(NbtCompound container, ItemStack[] contents, int slot) {
+		return slot;
 	}
 	
 }

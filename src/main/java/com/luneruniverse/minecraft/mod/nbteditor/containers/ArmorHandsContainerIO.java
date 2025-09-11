@@ -6,31 +6,63 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.util.Identifier;
 
-public class ArmorHandsContainerIO implements NonItemNBTContainerIO {
+public class ArmorHandsContainerIO implements ContainerIO<NbtCompound> {
+	
+	private static final Identifier[] TEXTURES = new Identifier[] {
+			HELMET_TEXTURE, CHESTPLATE_TEXTURE, LEGGINGS_TEXTURE, BOOTS_TEXTURE, SWORD_TEXTURE, SHIELD_TEXTURE};
 	
 	@Override
-	public int getMaxNBTSize(NbtCompound nbt, SourceContainerType source) {
+	public boolean isSupported(NbtCompound container) {
+		NbtElement armorItemsNbtElement = container.get("ArmorItems");
+		if (armorItemsNbtElement != null) {
+			if (!(armorItemsNbtElement instanceof NbtList armorItemsNbt) ||
+					armorItemsNbt.nbte$getHeldType().filter(heldType -> heldType == NbtElement.COMPOUND_TYPE).isEmpty() ||
+					armorItemsNbt.size() > 4) {
+				return false;
+			}
+		}
+		
+		NbtElement handItemsNbtElement = container.get("HandItems");
+		if (handItemsNbtElement != null) {
+			if (!(handItemsNbtElement instanceof NbtList handItemsNbt) ||
+					handItemsNbt.nbte$getHeldType().filter(heldType -> heldType == NbtElement.COMPOUND_TYPE).isEmpty() ||
+					handItemsNbt.size() > 2) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public int getMaxSlots(NbtCompound container) {
 		return 6;
 	}
 	
 	@Override
-	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
+	public Identifier[] getTextures(NbtCompound container) {
+		return TEXTURES;
+	}
+	
+	@Override
+	public ItemStack[] read(NbtCompound container) {
 		ItemStack[] items = new ItemStack[6];
 		
 		NbtList armorItemsNbt = container.nbte$getListOrDefault("ArmorItems", NbtElement.COMPOUND_TYPE);
 		for (int i = 0; i < armorItemsNbt.nbte$size() && i < 4; i++)
-			items[3 - i] = NBTManagers.ITEM.deserialize((NbtCompound) armorItemsNbt.nbte$get(i), true);
+			items[3 - i] = NBTManagers.ITEM.deserializeOrElse((NbtCompound) armorItemsNbt.nbte$get(i), ItemStack.EMPTY);
 		
 		NbtList handItemsNbt = container.nbte$getListOrDefault("HandItems", NbtElement.COMPOUND_TYPE);
 		for (int i = 0; i < handItemsNbt.nbte$size() && i < 2; i++)
-			items[4 + i] = NBTManagers.ITEM.deserialize((NbtCompound) handItemsNbt.nbte$get(i), true);
+			items[4 + i] = NBTManagers.ITEM.deserializeOrElse((NbtCompound) handItemsNbt.nbte$get(i), ItemStack.EMPTY);
 		
 		return items;
 	}
 	
 	@Override
-	public int writeNBT(NbtCompound container, ItemStack[] contents, SourceContainerType source) {
+	public int write(NbtCompound container, ItemStack[] contents) {
 		ItemStack[] actualContents = new ItemStack[6];
 		for (int i = 0; i < 6; i++) {
 			ItemStack item = null;
@@ -52,6 +84,16 @@ public class ArmorHandsContainerIO implements NonItemNBTContainerIO {
 		container.put("HandItems", handItemsNbt);
 		
 		return 6;
+	}
+	
+	@Override
+	public int getNumWritten(NbtCompound container, ItemStack[] contents) {
+		return 6;
+	}
+	
+	@Override
+	public int getWrittenSlotIndex(NbtCompound container, ItemStack[] contents, int slot) {
+		return slot;
 	}
 	
 }
