@@ -203,7 +203,7 @@ public class LocalEntity implements LocalNBT {
 	
 	public CompletableFuture<Optional<EntityReference>> summon(RegistryKey<World> world, Vec3d pos) {
 		return NBTEditorClient.SERVER_CONN
-				.sendRequest(requestId -> new SummonEntityC2SPacket(requestId, world, pos, getId(), nbt), ViewEntityS2CPacket.class)
+				.sendRequest(requestId -> new SummonEntityC2SPacket(requestId, world, pos, getId(), nbt.copy()), ViewEntityS2CPacket.class)
 				.thenApply(optional -> optional.filter(ViewEntityS2CPacket::foundEntity)
 						.map(packet -> {
 							EntityReference ref = new EntityReference(packet.getWorld(), packet.getUUID(),

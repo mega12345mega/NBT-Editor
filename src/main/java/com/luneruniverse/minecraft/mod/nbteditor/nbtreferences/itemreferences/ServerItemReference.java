@@ -44,7 +44,7 @@ public class ServerItemReference implements ItemReference {
 	public void saveItem(ItemStack toSave, Runnable onFinished) {
 		screen.getScreenHandler().getSlot(slot).setStackNoCallbacks(toSave);
 		if (NBTEditorClient.SERVER_CONN.isContainerScreen())
-			MVClientNetworking.send(new SetSlotC2SPacket(slot, toSave));
+			MVClientNetworking.send(new SetSlotC2SPacket(slot, toSave.copy()));
 		onFinished.run();
 	}
 	

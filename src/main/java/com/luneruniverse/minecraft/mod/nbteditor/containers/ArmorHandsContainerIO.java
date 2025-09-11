@@ -18,8 +18,9 @@ public class ArmorHandsContainerIO implements ContainerIO<NbtCompound> {
 		NbtElement armorItemsNbtElement = container.get("ArmorItems");
 		if (armorItemsNbtElement != null) {
 			if (!(armorItemsNbtElement instanceof NbtList armorItemsNbt) ||
-					armorItemsNbt.nbte$getHeldType().filter(heldType -> heldType == NbtElement.COMPOUND_TYPE).isEmpty() ||
-					armorItemsNbt.size() > 4) {
+					armorItemsNbt.size() > 4 ||
+					armorItemsNbt.nbte$getHeldType().filter(
+							heldType -> heldType == 0 || heldType == NbtElement.COMPOUND_TYPE).isEmpty()) {
 				return false;
 			}
 		}
@@ -27,8 +28,9 @@ public class ArmorHandsContainerIO implements ContainerIO<NbtCompound> {
 		NbtElement handItemsNbtElement = container.get("HandItems");
 		if (handItemsNbtElement != null) {
 			if (!(handItemsNbtElement instanceof NbtList handItemsNbt) ||
-					handItemsNbt.nbte$getHeldType().filter(heldType -> heldType == NbtElement.COMPOUND_TYPE).isEmpty() ||
-					handItemsNbt.size() > 2) {
+					handItemsNbt.size() > 2 ||
+					handItemsNbt.nbte$getHeldType().filter(
+							heldType -> heldType == 0 || heldType == NbtElement.COMPOUND_TYPE).isEmpty()) {
 				return false;
 			}
 		}

@@ -29,8 +29,8 @@ public class OrderNbtListContainerIO implements ContainerIO<NbtList> {
 	
 	@Override
 	public boolean isSupported(NbtList container) {
-		return container.size() <= maxSlots &&
-				container.nbte$getHeldType().filter(heldType -> heldType == NbtElement.COMPOUND_TYPE).isPresent();
+		return container.size() <= maxSlots && container.nbte$getHeldType().filter(
+				heldType -> heldType == 0 || heldType == NbtElement.COMPOUND_TYPE).isPresent();
 	}
 	
 	@Override

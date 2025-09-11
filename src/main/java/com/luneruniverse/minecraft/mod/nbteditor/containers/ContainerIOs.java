@@ -75,7 +75,8 @@ public class ContainerIOs {
 	private static final ItemBlockContainerIO DISPENSER_IO = ItemBlockContainerIO.forSlotKeyItems(9);
 	private static final ItemBlockContainerIO HOPPER_IO = ItemBlockContainerIO.forSlotKeyItems(5);
 	private static final ItemBlockContainerIO JUKEBOX_IO = ItemBlockContainerIO.forKeys(BlockEntityType.JUKEBOX, "RecordItem");
-	private static final ItemBlockContainerIO LECTERN_IO = ItemBlockContainerIO.forKeys(BlockEntityType.LECTERN, "Book");
+	private static final ItemBlockContainerIO LECTERN_IO = BlockStateUpdatingContainerIO.forItemBlock(
+			ItemBlockContainerIO.forKeys(BlockEntityType.LECTERN, "Book"), "has_book");
 	private static final Function<EntityType<?>, ItemEntityContainerIO> ITEM_FRAME_IO =
 			entityId -> ItemEntityContainerIO.forKeys(entityId, "Item");
 	private static final ContainerIO<ItemStack> BUNDLE_IO = Version.<ContainerIO<ItemStack>>newSwitch()
@@ -142,6 +143,9 @@ public class ContainerIOs {
 					.range(null, "1.20.4", () -> new ConcatContainerIO<>(
 							new ArmorHandsContainerIO(), new KeysContainerIO(false, "DecorItem"), new DonkeyChestContainerIO(true)))
 					.get());
+	private static final ContainerIO<LocalEntity> VILLAGER_IO = new ConcatContainerIO<>(
+			EQUIPMENT_IO.apply(EntityType.VILLAGER).entity(),
+			ContainerIO.forLocalNBT(new OrderNbtListContainerIO(8).forNbtCompound("Inventory")));
 	private static final ContainerIO<LocalEntity> CHEST_BOAT_IO =
 			ContainerIO.forLocalNBT(new SlotKeyNbtListContainerIO(27).forNbtCompoundItems());
 	
@@ -208,6 +212,7 @@ public class ContainerIOs {
 		registerEntityIO(EntityType.MULE, DONKEY_IO);
 		registerEntityIO(EntityType.LLAMA, LLAMA_IO);
 		registerEntityIO(EntityType.TRADER_LLAMA, LLAMA_IO);
+		registerEntityIO(EntityType.VILLAGER, VILLAGER_IO);
 		MVClientNetworking.PlayNetworkStateEvents.Join.EVENT.register(() -> {
 			for (EntityType<?> entityType : MVRegistry.ENTITY_TYPE) {
 				if (ENTITY_IO.containsKey(entityType))

@@ -16,7 +16,7 @@ public class CursorHistoryScreen extends ClientHandledScreen {
 	private final LockedSlotsInfo lockedSlots;
 	
 	private CursorHistoryScreen(List<ItemStack> items, List<Integer> lockedItems) {
-		super(new ClientScreenHandler(6), TextInst.translatable("nbteditor.container.title")
+		super(6, TextInst.translatable("nbteditor.container.title")
 				.append(TextInst.translatable("nbteditor.get.lost_item.history")));
 		
 		for (int i = 0; i < handler.getInventory().size() && i < items.size(); i++)

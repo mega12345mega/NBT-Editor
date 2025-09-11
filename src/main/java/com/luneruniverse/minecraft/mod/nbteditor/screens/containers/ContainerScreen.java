@@ -41,7 +41,7 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 	private boolean navigationClicked;
 	
 	private ContainerScreen(NBTReference<L> ref) {
-		super(new ClientScreenHandler(3), TextInst.translatable("nbteditor.container.title").append(ref.getLocalNBT().getName()));
+		super(3, TextInst.translatable("nbteditor.container.title").append(ref.getLocalNBT().getName()));
 		
 		this.unsavedTitle = TextInst.copy(title).append("*");
 		
@@ -49,6 +49,8 @@ public class ContainerScreen<L extends LocalNBT> extends ClientHandledScreen {
 		this.localNBT = LocalNBT.copy(ref.getLocalNBT());
 		this.numSlots = ContainerIOs.getMaxSlots(localNBT);
 		this.saved = true;
+		
+		setSlotTextures(ContainerIOs.getTextures(localNBT));
 		
 		ItemStack[] contents = ContainerIOs.read(localNBT);
 		for (int i = 0; i < contents.length; i++)

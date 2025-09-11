@@ -70,7 +70,7 @@ public class EntityReference implements NBTReference<LocalEntity> {
 	public void saveNBT(Identifier id, NbtCompound toSave, Runnable onFinished) {
 		this.entityType = MVRegistry.ENTITY_TYPE.get(id);
 		this.nbt = toSave;
-		MVClientNetworking.send(new SetEntityC2SPacket(world, uuid, id, toSave,
+		MVClientNetworking.send(new SetEntityC2SPacket(world, uuid, id, toSave.copy(),
 				ConfigScreen.isRecreateBlocksAndEntities()));
 		onFinished.run();
 	}

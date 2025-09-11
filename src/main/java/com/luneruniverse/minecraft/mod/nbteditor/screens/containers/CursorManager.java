@@ -72,7 +72,7 @@ public class CursorManager {
 		
 		if (currentRootHasServerCursor) {
 			if (branch == currentRoot)
-				MVClientNetworking.send(new SetCursorC2SPacket(handler.getCursorStack()));
+				MVClientNetworking.send(new SetCursorC2SPacket(handler.getCursorStack().copy()));
 			else if (currentBranch == currentRoot)
 				MVClientNetworking.send(new SetCursorC2SPacket(ItemStack.EMPTY));
 		}
@@ -146,7 +146,7 @@ public class CursorManager {
 		MainUtil.setCursorStackSilently(currentBranch.getScreenHandler(), item);
 		
 		if (currentRootHasServerCursor && currentBranch == currentRoot)
-			MVClientNetworking.send(new SetCursorC2SPacket(item));
+			MVClientNetworking.send(new SetCursorC2SPacket(item.copy()));
 	}
 	
 }

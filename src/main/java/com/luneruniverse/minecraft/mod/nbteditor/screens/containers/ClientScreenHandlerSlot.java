@@ -4,13 +4,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.Identifier;
 
-public class LockableSlot extends Slot {
+public class ClientScreenHandlerSlot extends Slot {
 	
 	private static final Set<Thread> UNLOCKED_THREADS = Collections.synchronizedSet(new HashSet<>());
 	public static void unlockDuring(Runnable callback) {
@@ -22,20 +21,27 @@ public class LockableSlot extends Slot {
 		}
 	}
 	
-	public LockableSlot(Slot slot) {
+	private ClientHandledScreen screen;
+	private Identifier texture;
+	
+	public ClientScreenHandlerSlot(Slot slot) {
 		super(slot.inventory, slot.getIndex(), slot.x, slot.y);
 		this.id = slot.id;
+	}
+	
+	public void setScreen(ClientHandledScreen screen) {
+		this.screen = screen;
+	}
+	
+	public void setTexture(Identifier texture) {
+		this.texture = texture;
 	}
 	
 	private boolean isBlocked() {
 		if (UNLOCKED_THREADS.contains(Thread.currentThread()))
 			return false;
 		
-		if (MainUtil.client.currentScreen instanceof ClientHandledScreen clientHandledScreen) {
-			if (clientHandledScreen.getLockedSlotsInfo().isBlocked(this, false))
-				return true;
-		}
-		return false;
+		return screen.getLockedSlotsInfo().isBlocked(this, false);
 	}
 	
 	@Override
@@ -58,6 +64,11 @@ public class LockableSlot extends Slot {
 		if (isBlocked())
 			return getStack().getCount();
 		return super.getMaxItemCount();
+	}
+	
+	@Override
+	public Identifier getBackgroundSprite() {
+		return texture;
 	}
 	
 }

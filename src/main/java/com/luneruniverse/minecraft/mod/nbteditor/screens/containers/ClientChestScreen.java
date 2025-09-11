@@ -73,7 +73,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 	private ButtonWidget nextPageJump;
 	
 	private ClientChestScreen() {
-		super(new ClientScreenHandler(6), TextInst.translatable("nbteditor.client_chest"));
+		super(6, TextInst.translatable("nbteditor.client_chest"));
 	}
 	private void setPageData(ClientChestPage pageData) {
 		ItemStack[] items = pageData.getItemsOrThrow();

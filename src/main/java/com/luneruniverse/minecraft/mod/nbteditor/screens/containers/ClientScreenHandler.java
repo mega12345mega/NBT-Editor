@@ -12,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.Identifier;
 
 public class ClientScreenHandler extends GenericContainerScreenHandler {
 	
@@ -28,7 +29,16 @@ public class ClientScreenHandler extends GenericContainerScreenHandler {
 			default -> throw new IllegalArgumentException("Invalid row count: " + rows);
 		}, SYNC_ID, MainUtil.client.player.getInventory(), new SimpleInventory(rows * 9), rows);
 		
-		slots.replaceAll(LockableSlot::new);
+		slots.replaceAll(ClientScreenHandlerSlot::new);
+	}
+	
+	public void setScreen(ClientHandledScreen screen) {
+		slots.forEach(slot -> ((ClientScreenHandlerSlot) slot).setScreen(screen));
+	}
+	
+	public void setSlotTextures(Identifier... textures) {
+		for (int i = 0; i < textures.length; i++)
+			((ClientScreenHandlerSlot) slots.get(i)).setTexture(textures[i]);
 	}
 	
 	@Override
