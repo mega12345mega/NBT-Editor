@@ -28,8 +28,15 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				})
 				.run();
 		Version.newSwitch()
-				.range("1.21.0", null, () -> output.add("toggled.EnchantmentMixin"))
-				.range(null, "1.20.6", () -> {})
+				.range("1.20.5", null, () -> {
+					output.add("toggled.BundleItemMixin_1_20_5");
+					output.add("toggled.BundleContentsComponentBuilderMixin");
+				})
+				.range(null, "1.20.4", () -> output.add("toggled.BundleItemMixin_1_20_4"))
+				.run();
+		Version.newSwitch()
+				.range("1.21.2", null, () -> {})
+				.range(null, "1.21.1", () -> output.add("toggled.BundleItemMixin_1_21_1"))
 				.run();
 		Version.newSwitch()
 				.range("1.21.5", null, () -> output.add("toggled.ClickSlotC2SPacketMixin_1_21_5"))
@@ -61,6 +68,10 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				.run();
 		Version.newSwitch()
 				.range("1.21.0", null, () -> output.add("toggled.TooltipMixin"))
+				.range(null, "1.20.6", () -> {})
+				.run();
+		Version.newSwitch()
+				.range("1.21.0", null, () -> output.add("toggled.EnchantmentMixin"))
 				.range(null, "1.20.6", () -> {})
 				.run();
 		Version.newSwitch()
