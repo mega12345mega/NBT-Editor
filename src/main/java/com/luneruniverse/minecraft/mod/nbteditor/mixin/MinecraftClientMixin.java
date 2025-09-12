@@ -8,6 +8,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
@@ -15,6 +17,7 @@ import net.minecraft.client.gui.screen.Overlay;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.SplashOverlay;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.screen.slot.Slot;
 
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
@@ -29,10 +32,13 @@ public class MinecraftClientMixin {
 	
 	@Inject(method = "setScreen", at = @At("HEAD"))
 	private void setScreen(Screen screen, CallbackInfo info) {
-		if (screen == null)
+		if (screen == null) {
 			NBTEditorClient.CURSOR_MANAGER.onNoScreenSet();
-		else if (screen instanceof HandledScreen<?> handledScreen)
+		} else if (screen instanceof HandledScreen<?> handledScreen) {
+			for (Slot slot : handledScreen.getScreenHandler().slots)
+				ServerMixinLink.SLOT_OWNER.put(slot, MainUtil.client.player);
 			NBTEditorClient.CURSOR_MANAGER.onHandledScreenSet(handledScreen);
+		}
 	}
 	
 	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/thread/ReentrantThreadExecutor;<init>(Ljava/lang/String;)V", shift = At.Shift.AFTER))
