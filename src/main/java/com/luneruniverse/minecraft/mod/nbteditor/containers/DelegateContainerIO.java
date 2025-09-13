@@ -39,7 +39,7 @@ public class DelegateContainerIO<I, O> implements ContainerIO<I> {
 	
 	@Override
 	public boolean isSupported(I container) {
-		return get(container, ContainerIO::isSupported);
+		return get(container, (delegate, innerContainer) -> delegate != null && delegate.isSupported(innerContainer));
 	}
 	
 	@Override

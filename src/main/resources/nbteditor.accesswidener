@@ -75,5 +75,7 @@ accessible field net/minecraft/entity/player/PlayerInventory selectedSlot I
 
 accessible field net/minecraft/screen/ScreenHandler trackedCursorSlot Lnet/minecraft/screen/sync/TrackedSlot;
 
+accessible field net/minecraft/item/BoatItem boatEntityType Lnet/minecraft/entity/EntityType;
+
 # Private in older versions
 accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;

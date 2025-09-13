@@ -14,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItemStack;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
@@ -29,6 +30,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.vehicle.ChestBoatEntity;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.BoatItem;
 import net.minecraft.item.BundleItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -146,8 +148,22 @@ public class ContainerIOs {
 	private static final ContainerIO<LocalEntity> VILLAGER_IO = new ConcatContainerIO<>(
 			EQUIPMENT_IO.apply(EntityType.VILLAGER).entity(),
 			ContainerIO.forLocalNBT(new OrderNbtListContainerIO(8).forNbtCompound("Inventory")));
-	private static final ContainerIO<LocalEntity> CHEST_BOAT_IO =
-			ContainerIO.forLocalNBT(new SlotKeyNbtListContainerIO(27).forNbtCompoundItems());
+	private static final ItemEntityContainerIO CHEST_MINECART_IO = ItemEntityContainerIO.forEntityTagIO(
+			new SlotKeyNbtListContainerIO(27).forNbtCompoundItems(), EntityType.CHEST_MINECART);
+	private static final ItemEntityContainerIO HOPPER_MINECART_IO = ItemEntityContainerIO.forEntityTagIO(
+			new SlotKeyNbtListContainerIO(5).forNbtCompoundItems(), EntityType.FURNACE_MINECART);
+	private static final Function<EntityType<?>, ItemEntityContainerIO> CHEST_BOAT_IO =
+			entityType -> Version.<ItemEntityContainerIO>newSwitch()
+					.range("1.19.0", null, () -> ItemEntityContainerIO.forEntityTagIO(
+							new SlotKeyNbtListContainerIO(27).forNbtCompoundItems(), entityType))
+					.range(null, "1.18.2", () -> null)
+					.get();
+	private static final ContainerIO<LocalEntity> ALLAY_IO = Version.<ContainerIO<LocalEntity>>newSwitch()
+			.range("1.19.0", null, () -> new ConcatContainerIO<>(
+					EQUIPMENT_IO.apply(EntityType.ALLAY).entity(),
+					ContainerIO.forLocalNBT(new OrderNbtListContainerIO(1).forNbtCompound("Inventory"))))
+			.range(null, "1.18.2", () -> null)
+			.get();
 	
 	public static void loadClass() {}
 	
@@ -213,6 +229,43 @@ public class ContainerIOs {
 		registerEntityIO(EntityType.LLAMA, LLAMA_IO);
 		registerEntityIO(EntityType.TRADER_LLAMA, LLAMA_IO);
 		registerEntityIO(EntityType.VILLAGER, VILLAGER_IO);
+		Version.newSwitch()
+				.range("1.20.3", null, () -> {
+					registerItemEntityIO(Items.CHEST_MINECART, EntityType.CHEST_MINECART, CHEST_MINECART_IO);
+					registerItemEntityIO(Items.HOPPER_MINECART, EntityType.HOPPER_MINECART, HOPPER_MINECART_IO);
+				})
+				.range(null, "1.20.2", () -> {
+					registerEntityIO(EntityType.CHEST_MINECART, CHEST_MINECART_IO.entity());
+					registerEntityIO(EntityType.HOPPER_MINECART, HOPPER_MINECART_IO.entity());
+				})
+				.run();
+		Map<EntityType<?>, BoatItem> boatItems = new HashMap<>();
+		Version.newSwitch()
+				.range("1.21.2", null, () -> {
+					for (Item item : MVRegistry.ITEM) {
+						if (item instanceof BoatItem boat)
+							boatItems.put(boat.boatEntityType, boat);
+					}
+				})
+				.range("1.20.3", "1.21.1", () -> {
+					EntityType<?> chestBoat = Reflection.getField(EntityType.class, "field_38096", "Lnet/minecraft/class_1299;").get(null);
+					ContainerIO<ItemStack> io = CHEST_BOAT_IO.apply(chestBoat).item();
+					registerItemIO(Items.OAK_CHEST_BOAT, io);
+					registerItemIO(Items.SPRUCE_CHEST_BOAT, io);
+					registerItemIO(Items.BIRCH_CHEST_BOAT, io);
+					registerItemIO(Items.JUNGLE_CHEST_BOAT, io);
+					registerItemIO(Items.ACACIA_CHEST_BOAT, io);
+					registerItemIO(Items.CHERRY_CHEST_BOAT, io);
+					registerItemIO(Items.DARK_OAK_CHEST_BOAT, io);
+					registerItemIO(Items.MANGROVE_CHEST_BOAT, io);
+					registerItemIO(Items.BAMBOO_CHEST_RAFT, io);
+				})
+				.range(null, "1.20.2", () -> {})
+				.run();
+		Version.newSwitch()
+				.range("1.19.0", null, () -> registerEntityIO(EntityType.ALLAY, ALLAY_IO))
+				.range(null, "1.18.2", () -> {})
+				.run();
 		MVClientNetworking.PlayNetworkStateEvents.Join.EVENT.register(() -> {
 			for (EntityType<?> entityType : MVRegistry.ENTITY_TYPE) {
 				if (ENTITY_IO.containsKey(entityType))
@@ -222,8 +275,12 @@ public class ContainerIOs {
 					registerEntityIO(entityType, EQUIPMENT_IO.apply(entityType).entity());
 				Version.newSwitch()
 						.range("1.19.0", null, () -> {
-							if (entity instanceof ChestBoatEntity)
-								registerEntityIO(entityType, CHEST_BOAT_IO);
+							if (entity instanceof ChestBoatEntity) {
+								registerEntityIO(entityType, CHEST_BOAT_IO.apply(entityType).entity());
+								BoatItem item = boatItems.get(entityType);
+								if (item != null)
+									registerItemIO(item, CHEST_BOAT_IO.apply(entityType).item());
+							}
 						})
 						.range(null, "1.18.2", () -> {})
 						.run();
