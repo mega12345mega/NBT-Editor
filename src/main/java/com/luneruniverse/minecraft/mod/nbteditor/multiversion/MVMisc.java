@@ -89,6 +89,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.BoatItem;
 import net.minecraft.item.HangingSignItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -929,6 +930,31 @@ public class MVMisc {
 		return Version.<Integer>newSwitch()
 				.range("1.21.5", null, () -> packet.syncId())
 				.range(null, "1.21.4", () -> InventoryS2CPacket_getSyncId.get().invoke(packet))
+				.get();
+	}
+	
+	private static final Supplier<Class<?>> BoatEntity$Type = Reflection.getOptionalClass("net.minecraft.class_1690$class_1692");
+	private static final Supplier<Reflection.MethodInvoker> BoatEntity$Type_getType =
+			Reflection.getOptionalMethod(BoatEntity$Type, () -> "method_7561", () -> MethodType.methodType(BoatEntity$Type.get(), String.class));
+	private static final Supplier<Reflection.FieldReference> BoatItem_type =
+			Reflection.getOptionalField(BoatItem.class, "field_7902", "Lnet/minecraft/class_1690$class_1692;");
+	public static Item getBoatItem(EntityType<?> entityType, NbtCompound nbt) {
+		return Version.<Item>newSwitch()
+				.range("1.21.2", null, () -> {
+					for (Item item : MVRegistry.ITEM) {
+						if (item instanceof BoatItem boat && entityType == boat.boatEntityType)
+							return item;
+					}
+					throw new IllegalStateException("Unknown boat entity type: " + EntityType.getId(entityType));
+				})
+				.range(null, "1.21.1", () -> {
+					Object type = BoatEntity$Type_getType.get().invoke(null, nbt.nbte$getStringOrDefault("Type"));
+					for (Item item : MVRegistry.ITEM) {
+						if (item instanceof BoatItem boat && type == BoatItem_type.get().get(boat))
+							return item;
+					}
+					throw new IllegalStateException("Unknown boat entity type: " + EntityType.getId(entityType));
+				})
 				.get();
 	}
 	

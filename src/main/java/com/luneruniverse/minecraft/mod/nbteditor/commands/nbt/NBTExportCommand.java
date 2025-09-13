@@ -145,10 +145,7 @@ public class NBTExportCommand extends ClientCommand {
 				return Command.SINGLE_SUCCESS;
 			})).then(literal("item").executes(context -> {
 				NBTReference.getReference(EXPORT_ITEM_FILTER, false, ref -> {
-					LocalNBT localNBT = ref.getLocalNBT();
-					if (localNBT instanceof LocalEntity localEntity)
-						localNBT = stripEntityTags(localEntity, "UUID", "Pos");
-					localNBT.toItem().ifPresentOrElse(MainUtil::getWithMessage,
+					ref.getLocalNBT().toItem(true).ifPresentOrElse(MainUtil::getWithMessage,
 							() -> MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.nbt.export.item.error"), false));
 				});
 				return Command.SINGLE_SUCCESS;

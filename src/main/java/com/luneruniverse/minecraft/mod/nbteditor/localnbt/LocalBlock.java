@@ -187,7 +187,7 @@ public class LocalBlock implements LocalNBT {
 	}
 	
 	@Override
-	public Optional<ItemStack> toItem() {
+	public Optional<ItemStack> toItem(boolean cleanup) {
 		for (Item item : MVRegistry.ITEM) {
 			if (item instanceof BlockItem blockItem && blockItem.getBlock() == block) {
 				ItemStack output = new ItemStack(blockItem);

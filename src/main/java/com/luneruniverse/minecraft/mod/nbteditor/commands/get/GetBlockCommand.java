@@ -45,7 +45,7 @@ public class GetBlockCommand extends ClientCommand {
 			LocalBlock block = new LocalBlock(blockArg.getBlockState().getBlock(), new BlockStateProperties(blockArg.getBlockState()), nbt);
 			
 			if (pos == null) {
-				block.toItem().ifPresentOrElse(MainUtil::getWithMessage,
+				block.toItem(false).ifPresentOrElse(MainUtil::getWithMessage,
 						() -> MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.nbt.export.item.error"), false));
 			} else if (NBTEditorClient.SERVER_CONN.isEditingExpanded())
 				block.place(pos);

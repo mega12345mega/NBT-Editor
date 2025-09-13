@@ -185,7 +185,7 @@ public abstract class LocalEditorScreen<L extends LocalNBT> extends OverlaySuppo
 				saveBtn.setMessage(TextInst.translatable("nbteditor.editor.save"));
 			});
 		} else {
-			localNBT.toItem().ifPresentOrElse(item -> {
+			localNBT.toItem(false).ifPresentOrElse(item -> {
 				savedLocalNBT = LocalNBT.copy(localNBT);
 				GetLostItemCommand.loseItem(item);
 				setSaved(true);

@@ -31,6 +31,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.vehicle.AbstractBoatEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -166,7 +167,7 @@ public class LocalEntity implements LocalNBT {
 	}
 	
 	@Override
-	public Optional<ItemStack> toItem() {
+	public Optional<ItemStack> toItem(boolean cleanup) {
 		ItemStack output = null;
 		for (Item item : MVRegistry.ITEM) {
 			if (item instanceof SpawnEggItem spawnEggItem && MVMisc.getEntityType(new ItemStack(spawnEggItem)) == entityType)
@@ -175,12 +176,61 @@ public class LocalEntity implements LocalNBT {
 		if (output == null) {
 			if (entityType == EntityType.ARMOR_STAND)
 				output = new ItemStack(Items.ARMOR_STAND);
-			else
-				output = new ItemStack(Items.PIG_SPAWN_EGG);
+			else if (entityType == EntityType.ITEM_FRAME)
+				output = new ItemStack(Items.ITEM_FRAME);
+			else if (entityType == EntityType.GLOW_ITEM_FRAME)
+				output = new ItemStack(Items.GLOW_ITEM_FRAME);
+			else if (entityType == EntityType.PAINTING)
+				output = new ItemStack(Items.PAINTING);
+			else {
+				output = Version.<ItemStack>newSwitch()
+						.range("1.20.3", null, () -> {
+							if (entityType == EntityType.COMMAND_BLOCK_MINECART)
+								return new ItemStack(Items.COMMAND_BLOCK_MINECART);
+							if (entityType == EntityType.FURNACE_MINECART)
+								return new ItemStack(Items.FURNACE_MINECART);
+							if (entityType == EntityType.MINECART)
+								return new ItemStack(Items.MINECART);
+							if (entityType == EntityType.CHEST_MINECART)
+								return new ItemStack(Items.CHEST_MINECART);
+							if (entityType == EntityType.HOPPER_MINECART)
+								return new ItemStack(Items.HOPPER_MINECART);
+							if (entityType == EntityType.TNT_MINECART)
+								return new ItemStack(Items.TNT_MINECART);
+							if (getCachedEntity() instanceof AbstractBoatEntity)
+								return new ItemStack(MVMisc.getBoatItem(entityType, nbt));
+							return new ItemStack(Items.PIG_SPAWN_EGG);
+						})
+						.range(null, "1.20.2", () -> new ItemStack(Items.PIG_SPAWN_EGG))
+						.get();
+			}
 		}
 		
 		NbtCompound nbt = this.nbt.copy();
 		nbt.putString("id", getId().toString());
+		
+		if (cleanup) {
+			nbt.remove("Passengers"); // Passengers don't work on spawn eggs
+			nbt.remove("UUID");
+			nbt.remove("Pos");
+			if (entityType == EntityType.ITEM_FRAME || entityType == EntityType.GLOW_ITEM_FRAME ||
+					entityType == EntityType.PAINTING) {
+				nbt.remove("Rotation");
+				Version.newSwitch()
+						.range("1.21.5", null, () -> nbt.remove("block_pos"))
+						.range(null, "1.21.4", () -> {
+							nbt.remove("TileX");
+							nbt.remove("TileY");
+							nbt.remove("TileZ");
+						})
+						.run();
+				if (entityType == EntityType.PAINTING)
+					nbt.remove("facing");
+				else
+					nbt.remove("Facing");
+			}
+		}
+		
 		ItemTagReferences.ENTITY_DATA.set(output, nbt);
 		
 		return Optional.of(output);

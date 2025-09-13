@@ -115,7 +115,7 @@ public class LocalItemStack extends LocalItem {
 	}
 	
 	@Override
-	public Optional<ItemStack> toItem() {
+	public Optional<ItemStack> toItem(boolean cleanup) {
 		return Optional.of(item.copy());
 	}
 	@Override
