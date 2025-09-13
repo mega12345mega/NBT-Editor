@@ -36,8 +36,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundP
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.util.LoadQueue;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.luneruniverse.minecraft.mod.nbteditor.util.PartitionedLock;
 import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
+import com.luneruniverse.minecraft.mod.nbteditor.util.lock.PartitionedReadWriteLock;
 
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.item.ItemStack;
@@ -57,7 +57,7 @@ public class ClientChest {
 	private final Map<String, Integer> nameToPage;
 	private final Map<Integer, String> pageToName;
 	
-	private final PartitionedLock lock;
+	private final PartitionedReadWriteLock lock;
 	private final LoadingCache<Integer, LoadQueue<ClientChestPage>> loadQueues;
 	private final LoadingCache<Integer, SaveQueue<ClientChestPage>> saveQueues;
 	private final Map<Integer, Integer> uncachedProcessers;
@@ -80,12 +80,12 @@ public class ClientChest {
 			pageToName = new HashMap<>();
 		}
 		
-		lock = new PartitionedLock();
+		lock = new PartitionedReadWriteLock();
 		loadQueues = CacheBuilder.newBuilder().weakValues().build(new CacheLoader<>() {
 			@Override
 			public LoadQueue<ClientChestPage> load(Integer page) {
 				return new LoadQueue<>("ClientChest/Loading", level -> {
-					lock.lock(page);
+					lock.read().lock(page);
 					try {
 						return readPageSync(page, PageLoadLevel.values()[level]);
 					} catch (Throwable e) {
@@ -96,7 +96,7 @@ public class ClientChest {
 						ClientChest.this.cache.cacheEmptyPage(page);
 						return new ClientChestPage();
 					} finally {
-						lock.unlock(page);
+						lock.read().unlock(page);
 					}
 				}, true);
 			}
@@ -105,7 +105,7 @@ public class ClientChest {
 			@Override
 			public SaveQueue<ClientChestPage> load(Integer page) {
 				return new SaveQueue<>("ClientChest/Saving", pageData -> {
-					lock.lock(page);
+					lock.write().lock(page);
 					try {
 						writePageSync(page, pageData);
 					} catch (Throwable e) {
@@ -114,7 +114,7 @@ public class ClientChest {
 							throw error;
 						throw new RuntimeException("Error saving client chest page " + (page + 1), e);
 					} finally {
-						lock.unlock(page);
+						lock.write().unlock(page);
 					}
 				}, true);
 			}
@@ -127,14 +127,14 @@ public class ClientChest {
 		
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Thread thread = new Thread(() -> {
-			lock.lockAll();
+			lock.read().lockAll();
 			try {
 				this.cache.transferTo(cache);
 				this.cache = cache;
 				cachePageCounts.remove();
 				future.complete(null);
 			} finally {
-				lock.unlockAll();
+				lock.read().unlockAll();
 			}
 		}, "NBTEditor/Async/ClientChest/SwitchingCache");
 		thread.start();
@@ -182,11 +182,11 @@ public class ClientChest {
 	}
 	
 	public void stop() {
-		lock.stop();
+		lock.write().stop();
 	}
 	
 	public boolean isProcessingPage(int page) {
-		if (lock.isLocked(page) || isUncachedProcessingPage(page))
+		if (lock.read().isLocked(page) || isUncachedProcessingPage(page))
 			return true;
 		
 		LoadQueue<ClientChestPage> loadQueue = loadQueues.getIfPresent(page);
@@ -209,7 +209,7 @@ public class ClientChest {
 		
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Thread thread = new Thread(() -> {
-			lock.lockAll();
+			lock.read().lockAll();
 			try {
 				Exception toThrow = new Exception("Error loading page(s)");
 				for (int i = 0; i < cache.getDefaultLoadedPagesCount(); i++) {
@@ -229,7 +229,7 @@ public class ClientChest {
 				} else
 					future.complete(null);
 			} finally {
-				lock.unlockAll();
+				lock.read().unlockAll();
 			}
 		}, "NBTEditor/Async/ClientChest/Loading");
 		thread.setDaemon(true);
@@ -305,7 +305,7 @@ public class ClientChest {
 		startUncachedProcessingAll();
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Thread thread = new Thread(() -> {
-			lock.lockAll();
+			lock.read().lockAll();
 			try {
 				Exception toThrow = new Exception("Error unloading page(s)");
 				for (File file : CLIENT_CHEST_FOLDER.listFiles()) {
@@ -328,7 +328,7 @@ public class ClientChest {
 				} else
 					future.complete(null);
 			} finally {
-				lock.unlockAll();
+				lock.read().unlockAll();
 				finishUncachedProcessingAll();
 			}
 		}, "NBTEditor/Async/ClientChest/Unloading");
@@ -346,14 +346,14 @@ public class ClientChest {
 		startUncachedProcessing(page);
 		CompletableFuture<ClientChestPage> future = new CompletableFuture<>();
 		Thread thread = new Thread(() -> {
-			lock.lock(page);
+			lock.read().lock(page);
 			try {
 				future.complete(unloadPageSync(page, loadLevel));
 			} catch (Throwable e) {
 				NBTEditor.LOGGER.error("Error unloading client chest page " + (page + 1), e);
 				future.completeExceptionally(e);
 			} finally {
-				lock.unlock(page);
+				lock.read().unlock(page);
 				finishUncachedProcessing(page);
 			}
 		}, "NBTEditor/Async/ClientChest/Unloading/" + page);
@@ -374,7 +374,7 @@ public class ClientChest {
 		startUncachedProcessingAll();
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Thread thread = new Thread(() -> {
-			lock.lockAll();
+			lock.write().lockAll();
 			try {
 				Exception toThrow = new Exception("Error importing page(s)");
 				for (File file : CLIENT_CHEST_FOLDER.listFiles()) {
@@ -397,7 +397,7 @@ public class ClientChest {
 				} else
 					future.complete(null);
 			} finally {
-				lock.unlockAll();
+				lock.write().unlockAll();
 				finishUncachedProcessingAll();
 			}
 		}, "NBTEditor/Async/ClientChest/Importing");
@@ -415,7 +415,7 @@ public class ClientChest {
 		startUncachedProcessing(page);
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Thread thread = new Thread(() -> {
-			lock.lock(page);
+			lock.write().lock(page);
 			try {
 				importPageSync(page, false);
 				future.complete(null);
@@ -423,7 +423,7 @@ public class ClientChest {
 				NBTEditor.LOGGER.error("Error importing client chest page " + (page + 1), e);
 				future.completeExceptionally(e);
 			} finally {
-				lock.unlock(page);
+				lock.write().unlock(page);
 				finishUncachedProcessing(page);
 			}
 		}, "NBTEditor/Async/ClientChest/Importing/" + page);
@@ -438,7 +438,7 @@ public class ClientChest {
 		startUncachedProcessingAll();
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Thread thread = new Thread(() -> {
-			lock.lockAll();
+			lock.write().lockAll();
 			try {
 				Exception toThrow = new Exception("Error updating page(s)");
 				for (File file : CLIENT_CHEST_FOLDER.listFiles()) {
@@ -465,7 +465,7 @@ public class ClientChest {
 				} else
 					future.complete(null);
 			} finally {
-				lock.unlockAll();
+				lock.write().unlockAll();
 				finishUncachedProcessingAll();
 			}
 		}, "NBTEditor/Async/ClientChest/Updating");
@@ -489,14 +489,14 @@ public class ClientChest {
 		startUncachedProcessing(page);
 		CompletableFuture<ClientChestPage> future = new CompletableFuture<>();
 		Thread thread = new Thread(() -> {
-			lock.lock(page);
+			lock.write().lock(page);
 			try {
 				future.complete(updatePageSync(page, defaultDataVersion, false));
 			} catch (Throwable e) {
 				NBTEditor.LOGGER.error("Error updating client chest page " + (page + 1), e);
 				future.completeExceptionally(e);
 			} finally {
-				lock.unlock(page);
+				lock.write().unlock(page);
 				finishUncachedProcessing(page);
 			}
 		}, "NBTEditor/Async/ClientChest/Updating/" + page);
@@ -515,7 +515,7 @@ public class ClientChest {
 		startUncachedProcessing(page);
 		CompletableFuture<Void> future = new CompletableFuture<>();
 		Thread thread = new Thread(() -> {
-			lock.lock(page);
+			lock.write().lock(page);
 			try {
 				discardPageSync(page);
 				future.complete(null);
@@ -523,7 +523,7 @@ public class ClientChest {
 				NBTEditor.LOGGER.error("Error discarding client chest page " + (page + 1), e);
 				future.completeExceptionally(e);
 			} finally {
-				lock.unlock(page);
+				lock.write().unlock(page);
 				finishUncachedProcessing(page);
 			}
 		}, "NBTEditor/Async/ClientChest/Discarding/" + page);

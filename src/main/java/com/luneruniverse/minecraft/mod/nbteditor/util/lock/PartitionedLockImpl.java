@@ -1,11 +1,11 @@
-package com.luneruniverse.minecraft.mod.nbteditor.util;
+package com.luneruniverse.minecraft.mod.nbteditor.util.lock;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class PartitionedLock {
+public class PartitionedLockImpl implements PartitionedLock {
 	
 	private volatile boolean stopped;
 	private final Lock globalLock;
@@ -13,7 +13,7 @@ public class PartitionedLock {
 	private volatile int globallyLocked;
 	private final Map<Integer, Integer> lockedPartitions;
 	
-	public PartitionedLock() {
+	public PartitionedLockImpl() {
 		stopped = false;
 		globalLock = new ReentrantLock(true);
 		locks = new ConcurrentHashMap<>();
@@ -25,6 +25,7 @@ public class PartitionedLock {
 	 * Wait until all locks are unlocked, and cause all currently waiting
 	 * lock requests to never finish, freezing those threads
 	 */
+	@Override
 	public void stop() {
 		stopped = true;
 		
@@ -47,6 +48,7 @@ public class PartitionedLock {
 		}
 	}
 	
+	@Override
 	public void lockAll() {
 		globallyLocked++;
 		globalLock.lock();
@@ -55,6 +57,7 @@ public class PartitionedLock {
 		checkStop(null);
 	}
 	
+	@Override
 	public void unlockAll() {
 		locks.values().forEach(Lock::unlock);
 		locks.clear();
@@ -62,6 +65,7 @@ public class PartitionedLock {
 		globallyLocked--;
 	}
 	
+	@Override
 	public void lock(int partition) {
 		lockedPartitions.compute(partition, (key, value) -> (value == null ? 0 : value) + 1);
 		globalLock.lock();
@@ -78,15 +82,18 @@ public class PartitionedLock {
 		checkStop(partition);
 	}
 	
+	@Override
 	public void unlock(int partition) {
 		locks.remove(partition).unlock();
 		lockedPartitions.compute(partition, (key, value) -> value == 1 ? null : value - 1);
 	}
 	
+	@Override
 	public boolean isAllLocked() {
 		return globallyLocked > 0;
 	}
 	
+	@Override
 	public boolean isLocked(int partition) {
 		return globallyLocked > 0 || lockedPartitions.getOrDefault(partition, 0) > 0;
 	}
