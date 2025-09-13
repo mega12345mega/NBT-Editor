@@ -11,13 +11,10 @@ public class ClassMap<K, V> {
 		map = new HashMap<>();
 	}
 	
-	@SuppressWarnings("unchecked")
 	public Class<? extends K> getActualKey(Class<? extends K> clazz) {
-		Class<?> loopClass = clazz;
-		while (loopClass != null) {
-			if (map.containsKey(loopClass))
-				return (Class<? extends K>) loopClass;
-			loopClass = loopClass.getSuperclass();
+		for (Map.Entry<Class<? extends K>, V> entry : map.entrySet()) {
+			if (entry.getKey().isAssignableFrom(clazz))
+				return entry.getKey();
 		}
 		return clazz;
 	}
