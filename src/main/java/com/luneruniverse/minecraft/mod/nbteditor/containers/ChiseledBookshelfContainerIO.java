@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalBlock;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.TagNames;
 import com.luneruniverse.minecraft.mod.nbteditor.util.BlockStateProperties;
 
@@ -21,7 +22,7 @@ public class ChiseledBookshelfContainerIO extends BlockEntityTagContainerIO {
 		int output = super.writeItem(container, contents);
 		
 		contents = readItem(container);
-		NbtCompound blockStatesTag = container.manager$getNbt().getCompound(TagNames.BLOCK_STATE_TAG);
+		NbtCompound blockStatesTag = MVNbt.getCompound(container.manager$getNbt(), TagNames.BLOCK_STATE_TAG);
 		for (int i = 0; i < 6; i++) {
 			String state = "slot_" + i + "_occupied";
 			if (contents[i] != null && !contents[i].isEmpty())

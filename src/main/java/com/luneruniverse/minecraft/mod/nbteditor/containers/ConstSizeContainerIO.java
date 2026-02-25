@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 
 import net.minecraft.item.ItemStack;
@@ -30,13 +31,13 @@ public class ConstSizeContainerIO implements NBTContainerIO {
 		boolean itemComponent = NBTManagers.COMPONENTS_EXIST && source == SourceContainerType.ITEM;
 		
 		ItemStack[] items = new ItemStack[numItems];
-		NbtList itemsNbt = container.getList(itemComponent ? "minecraft:container" : "Items", NbtElement.COMPOUND_TYPE);
+		NbtList itemsNbt = MVNbt.getList(container, itemComponent ? "minecraft:container" : "Items", NbtElement.COMPOUND_TYPE);
 		for (NbtElement itemNbtElement : itemsNbt) {
 			NbtCompound itemNbt = (NbtCompound) itemNbtElement;
 			int slot = itemNbt.getInt(itemComponent ? "slot" : "Slot");
 			if (slot < 0 || slot >= numItems)
 				continue;
-			items[slot] = NBTManagers.ITEM.deserialize(itemComponent ? itemNbt.getCompound("item") : itemNbt, true);
+			items[slot] = NBTManagers.ITEM.deserialize(itemComponent ? MVNbt.getCompound(itemNbt, "item") : itemNbt, true);
 		}
 		return items;
 	}

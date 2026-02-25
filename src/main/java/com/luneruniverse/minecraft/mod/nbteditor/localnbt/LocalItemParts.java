@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -118,7 +119,7 @@ public class LocalItemParts extends LocalItem {
 			}
 		} else {
 			NbtCompound nbt = getOrCreateNBT();
-			NbtCompound display = nbt.getCompound("display");
+			NbtCompound display = MVNbt.getCompound(nbt, "display");
 			if (name == null)
 				display.remove("Name");
 			else {

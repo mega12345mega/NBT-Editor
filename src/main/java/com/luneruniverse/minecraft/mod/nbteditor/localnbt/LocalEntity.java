@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
@@ -45,7 +46,7 @@ import net.minecraft.world.World;
 public class LocalEntity implements LocalNBT {
 	
 	public static LocalEntity deserialize(NbtCompound nbt, int defaultDataVersion) {
-		NbtCompound tag = nbt.getCompound("tag");
+		NbtCompound tag = MVNbt.getCompound(nbt, "tag");
 		tag.putString("id", nbt.getString("id"));
 		tag = MainUtil.updateDynamic(TypeReferences.ENTITY, tag, nbt.get("DataVersion"), defaultDataVersion);
 		String id = tag.getString("id");

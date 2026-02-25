@@ -4,6 +4,7 @@ import java.lang.invoke.MethodType;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.TagReference;
 import com.mojang.authlib.GameProfile;
@@ -22,7 +23,7 @@ public class GameProfileNBTTagReference implements TagReference<Optional<GamePro
 		if (object.contains("SkullOwner", NbtElement.STRING_TYPE))
 			return Optional.of(new GameProfile(new UUID(0L, 0L), object.getString("SkullOwner")));
 		if (object.contains("SkullOwner", NbtElement.COMPOUND_TYPE))
-			return Optional.ofNullable(NbtHelper_toGameProfile.invoke(null, object.getCompound("SkullOwner")));
+			return Optional.ofNullable(NbtHelper_toGameProfile.invoke(null, MVNbt.getCompound(object, "SkullOwner")));
 		return Optional.empty();
 	}
 	

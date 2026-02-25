@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.TagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.CustomPotionContents;
@@ -26,7 +27,7 @@ public class CustomPotionContentsNBTTagReference implements TagReference<CustomP
 		Integer color = null;
 		if (object.manager$hasNbt()) {
 			NbtCompound nbt = object.manager$getNbt();
-			if (nbt.contains("CustomPotionColor", NbtElement.NUMBER_TYPE))
+			if (MVNbt.containsNumber(nbt, "CustomPotionColor"))
 				color = nbt.getInt("CustomPotionColor");
 		}
 		List<StatusEffectInstance> effects = PotionUtil_getCustomPotionEffects.get().invoke(null, object);

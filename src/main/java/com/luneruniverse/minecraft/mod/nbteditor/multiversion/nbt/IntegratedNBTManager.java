@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt;
 
 import java.util.function.Consumer;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import net.minecraft.nbt.NbtCompound;
 
 /**
@@ -32,7 +33,7 @@ public interface IntegratedNBTManager {
 	}
 	public default void manager$modifySubNbt(String tag, Consumer<NbtCompound> modifier) {
 		NbtCompound nbt = manager$getOrCreateNbt();
-		NbtCompound subNbt = nbt.getCompound(tag);
+		NbtCompound subNbt = MVNbt.getCompound(nbt, tag);
 		modifier.accept(subNbt);
 		nbt.put(tag, subNbt);
 		manager$setNbt(nbt);

@@ -7,6 +7,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtfolder.NBTFolder;
@@ -17,6 +18,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.AbstractNbtList;
+import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtByte;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -75,7 +77,7 @@ public class NBTValue extends List2D.List2DValue {
 			icon = FLOAT;
 		else if (value.getType() == NbtElement.DOUBLE_TYPE)
 			icon = DOUBLE;
-		else if (value.getType() == NbtElement.NUMBER_TYPE)
+		else if (MVNbt.isNumberType(value))
 			icon = NUMBER;
 		else if (value.getType() == NbtElement.STRING_TYPE)
 			icon = STRING;

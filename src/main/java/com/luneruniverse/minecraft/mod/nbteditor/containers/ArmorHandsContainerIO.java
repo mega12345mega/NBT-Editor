@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 
 import net.minecraft.item.ItemStack;
@@ -18,13 +19,13 @@ public class ArmorHandsContainerIO implements NonItemNBTContainerIO {
 	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
 		ItemStack[] items = new ItemStack[6];
 		
-		NbtList armorItemsNbt = container.getList("ArmorItems", NbtElement.COMPOUND_TYPE);
+		NbtList armorItemsNbt = MVNbt.getList(container, "ArmorItems", NbtElement.COMPOUND_TYPE);
 		for (int i = 0; i < armorItemsNbt.size() && i < 4; i++)
-			items[3 - i] = NBTManagers.ITEM.deserialize(armorItemsNbt.getCompound(i), true);
-		
-		NbtList handItemsNbt = container.getList("HandItems", NbtElement.COMPOUND_TYPE);
+			items[3 - i] = NBTManagers.ITEM.deserialize(MVNbt.getCompound(armorItemsNbt, i), true);
+
+		NbtList handItemsNbt = MVNbt.getList(container, "HandItems", NbtElement.COMPOUND_TYPE);
 		for (int i = 0; i < handItemsNbt.size() && i < 2; i++)
-			items[4 + i] = NBTManagers.ITEM.deserialize(handItemsNbt.getCompound(i), true);
+			items[4 + i] = NBTManagers.ITEM.deserialize(MVNbt.getCompound(handItemsNbt, i), true);
 		
 		return items;
 	}

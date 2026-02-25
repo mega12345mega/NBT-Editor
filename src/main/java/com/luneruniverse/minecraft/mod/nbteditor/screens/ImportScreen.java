@@ -14,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
@@ -49,7 +50,7 @@ public class ImportScreen extends OverlaySupportingScreen {
 			if (file.getName().endsWith(".nbt")) {
 				try (FileInputStream in = new FileInputStream(file)) {
 					NbtCompound nbt = MainUtil.readNBT(in);
-					if (defaultDataVersion.isEmpty() && !nbt.contains("DataVersion", NbtElement.NUMBER_TYPE))
+					if (defaultDataVersion.isEmpty() && !MVNbt.containsNumber(nbt, "DataVersion"))
 						MainUtil.client.player.sendMessage(TextUtil.parseTranslatableFormatted("nbteditor.nbt.import.data_version.unknown", file.getName()), false);
 					if (nbt.getInt("DataVersion") > Version.getDataVersion())
 						MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.nbt.import.data_version.new", file.getName()), false);

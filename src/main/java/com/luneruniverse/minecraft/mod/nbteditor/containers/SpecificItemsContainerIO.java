@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import java.util.stream.Stream;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 
 import net.minecraft.item.ItemStack;
@@ -19,7 +20,7 @@ public class SpecificItemsContainerIO implements NonItemNBTContainerIO {
 	private ItemStack readKey(NbtCompound container, String key) {
 		if (!container.contains(key, NbtElement.COMPOUND_TYPE))
 			return null;
-		return NBTManagers.ITEM.deserialize(container.getCompound(key), true);
+		return NBTManagers.ITEM.deserialize(MVNbt.getCompound(container, key), true);
 	}
 	private void writeKey(NbtCompound container, String key, ItemStack item, SourceContainerType source) {
 		if (item == null || item.isEmpty()) {

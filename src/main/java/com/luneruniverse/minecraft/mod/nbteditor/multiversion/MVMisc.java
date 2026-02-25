@@ -92,6 +92,7 @@ import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.potion.Potion;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
@@ -713,15 +714,41 @@ public class MVMisc {
 				.run();
 	}
 	
+	// Pre-1.21.6: BlockEntity.writeNbt(NbtCompound, RegistryWrapper.WrapperLookup)
+	private static final Supplier<Reflection.MethodInvoker> BlockEntity_writeNbt_forCopy =
+			Reflection.getOptionalMethod(BlockEntity.class, "method_45842",
+					MethodType.methodType(void.class, NbtCompound.class, RegistryWrapper.WrapperLookup.class));
+	// Pre-1.21.6: BlockEntity.writeIdToNbt(NbtCompound)
+	private static final Supplier<Reflection.MethodInvoker> BlockEntity_writeIdToNbt_forCopy =
+			Reflection.getOptionalMethod(BlockEntity.class, "method_11000",
+					MethodType.methodType(void.class, NbtCompound.class));
+
 	// From MinecraftClient#addBlockEntityNbt (1.21.3)
 	// Edited to remove x, y, & z
-	@SuppressWarnings("deprecation")
 	public static void addBlockEntityNbtWithoutXYZ(ItemStack item, BlockEntity entity) {
-		NbtCompound blockEntityTag = entity.createComponentlessNbtWithIdentifyingData(DynamicRegistryManagerHolder.get());
+		NbtCompound blockEntityTag = Version.<NbtCompound>newSwitch()
+				.range("1.21.6", null, () -> {
+					// 1.21.6+: createComponentlessNbt() is available (no registries param); add id manually
+					NbtCompound nbt = entity.createComponentlessNbt();
+					Identifier typeId = Registries.BLOCK_ENTITY_TYPE.getId(entity.getType());
+					if (typeId != null) {
+						nbt.putString("id", typeId.toString());
+					}
+					return nbt;
+				})
+				.range(null, "1.21.5", () -> {
+					// Pre-1.21.6: simulate createComponentlessNbtWithIdentifyingData(registries)
+					// via writeNbt (method_45842) + writeIdToNbt (method_11000)
+					NbtCompound nbt = new NbtCompound();
+					BlockEntity_writeNbt_forCopy.get().invoke(entity, nbt, DynamicRegistryManagerHolder.get());
+					BlockEntity_writeIdToNbt_forCopy.get().invoke(entity, nbt);
+					return nbt;
+				})
+				.get();
 		blockEntityTag.remove("x");
 		blockEntityTag.remove("y");
 		blockEntityTag.remove("z");
-		entity.removeFromCopiedStackNbt(blockEntityTag);
+		// removeFromCopiedStackNbt removed in 1.21.6; x/y/z already handled above
 		BlockItem.setBlockEntityData(item, entity.getType(), blockEntityTag);
 		item.applyComponentsFrom(entity.createComponentMap());
 	}

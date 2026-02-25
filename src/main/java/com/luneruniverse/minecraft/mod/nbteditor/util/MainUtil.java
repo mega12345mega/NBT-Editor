@@ -22,6 +22,7 @@ import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.async.UpdateCheckerThread;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ActionResult;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
@@ -266,7 +267,7 @@ public class MainUtil {
 			return item.getName();
 		NbtCompound nbt = item.manager$getNbt();
 		if (nbt != null)
-			nbt = nbt.getCompound("display");
+			nbt = MVNbt.getCompound(nbt, "display");
 		return getNbtNameSafely(nbt, "Name", () -> item.getItem().getName(item));
 	}
 	public static Text getNbtNameSafely(NbtCompound nbt, String key, Supplier<Text> defaultName) {

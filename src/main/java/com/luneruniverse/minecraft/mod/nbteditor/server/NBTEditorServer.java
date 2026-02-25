@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -305,7 +306,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		NBTManagers.ENTITY.setNbt(entity, nbt);
 		
 		Map<UUID, Entity> passengers = entity.getPassengerList().stream().collect(Collectors.toMap(Entity::getUuid, Function.identity()));
-		NbtList passengersNbt = nbt.getList("Passengers", NbtElement.COMPOUND_TYPE);
+		NbtList passengersNbt = MVNbt.getList(nbt, "Passengers", NbtElement.COMPOUND_TYPE);
 		Set<UUID> passengerUUIDs = new HashSet<>();
 		
 		for (NbtElement passengerNbtElement : passengersNbt) {

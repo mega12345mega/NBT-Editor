@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific;
 
 import java.util.Optional;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.TagReference;
 
 import net.minecraft.nbt.NbtCompound;
@@ -14,7 +15,7 @@ public class GameProfileNameNBTTagReference implements TagReference<Optional<Str
 		if (object.contains("SkullOwner", NbtElement.STRING_TYPE))
 			return Optional.of(object.getString("SkullOwner"));
 		if (object.contains("SkullOwner", NbtElement.COMPOUND_TYPE)) {
-			NbtCompound skullOwner = object.getCompound("SkullOwner");
+			NbtCompound skullOwner = MVNbt.getCompound(object, "SkullOwner");
 			if (skullOwner.contains("Name", NbtElement.STRING_TYPE))
 				return Optional.of(skullOwner.getString("Name"));
 			return Optional.empty();

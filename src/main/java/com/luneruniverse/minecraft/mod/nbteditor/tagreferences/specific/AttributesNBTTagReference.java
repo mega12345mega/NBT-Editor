@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.TagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData;
@@ -67,31 +68,31 @@ public class AttributesNBTTagReference implements TagReference<List<AttributeDat
 	
 	@Override
 	public List<AttributeData> get(NbtCompound object) {
-		NbtList attributesNbt = object.getList(layout.getAttributeListTag(), NbtElement.COMPOUND_TYPE);
+		NbtList attributesNbt = MVNbt.getList(object, layout.getAttributeListTag(), NbtElement.COMPOUND_TYPE);
 		List<AttributeData> output = new ArrayList<>();
 		for (NbtElement attributeNbtElement : attributesNbt) {
 			NbtCompound attributeNbt = (NbtCompound) attributeNbtElement;
 			
 			EntityAttribute attribute = MVRegistry.ATTRIBUTE.get(IdentifierInst.of(
-					attributeNbt.getString(layout.getAttributeNameTag())));
+					MVNbt.getString(attributeNbt, layout.getAttributeNameTag())));
 			if (attribute == null)
 				continue;
 			
-			if (!attributeNbt.contains(layout.getAmountTag(), NbtElement.NUMBER_TYPE))
+			if (!MVNbt.containsNumber(attributeNbt, layout.getAmountTag()))
 				continue;
-			double value = attributeNbt.getDouble(layout.getAmountTag());
+			double value = MVNbt.getDouble(attributeNbt, layout.getAmountTag());
 			
 			if (layout.isModifiers()) {
-				if (!attributeNbt.contains("Operation", NbtElement.NUMBER_TYPE))
+				if (!MVNbt.containsNumber(attributeNbt, "Operation"))
 					continue;
-				int operation = attributeNbt.getInt("Operation");
+				int operation = MVNbt.getInt(attributeNbt, "Operation");
 				if (operation < 0 || operation >= Operation.values().length)
 					continue;
 				
 				Slot slot = Slot.ANY;
 				if (attributeNbt.contains("Slot", NbtElement.STRING_TYPE)) {
 					try {
-						slot = Slot.valueOf(attributeNbt.getString("Slot").toUpperCase());
+						slot = Slot.valueOf(MVNbt.getString(attributeNbt, "Slot").toUpperCase());
 					} catch (IllegalArgumentException e) {
 						continue;
 					}

@@ -8,6 +8,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
@@ -108,7 +109,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		}
 		
 		if (NEW_FEATURES)
-			return nbt.getCompound(back ? "back_text" : "front_text");
+			return MVNbt.getCompound(nbt, back ? "back_text" : "front_text");
 		return nbt;
 	}
 	private void setSideNbt(NbtCompound sideNbt) {

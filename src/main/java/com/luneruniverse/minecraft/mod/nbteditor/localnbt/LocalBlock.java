@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
@@ -47,11 +48,11 @@ public class LocalBlock implements LocalNBT {
 		Block block = MVRegistry.BLOCK.get(IdentifierInst.of(id));
 		
 		BlockStateProperties state = new BlockStateProperties(block.getDefaultState());
-		state.setValues(MainUtil.updateDynamic(TypeReferences.BLOCK_STATE, nbt.getCompound("state"), dataVersion, defaultDataVersion));
+		state.setValues(MainUtil.updateDynamic(TypeReferences.BLOCK_STATE, MVNbt.getCompound(nbt, "state"), dataVersion, defaultDataVersion));
 		
 		NbtCompound tag = null;
 		if (nbt.contains("tag", NbtElement.COMPOUND_TYPE)) {
-			tag = nbt.getCompound("tag");
+			tag = MVNbt.getCompound(nbt, "tag");
 			tag.putString("id", nbt.getString("id"));
 			tag = MainUtil.updateDynamic(TypeReferences.BLOCK_ENTITY, tag, dataVersion, defaultDataVersion);
 			tag.remove("id");

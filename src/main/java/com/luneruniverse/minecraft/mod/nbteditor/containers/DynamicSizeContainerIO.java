@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import java.util.Arrays;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.NBTManagers;
 
 import net.minecraft.item.ItemStack;
@@ -26,12 +27,12 @@ public class DynamicSizeContainerIO implements NonItemNBTContainerIO {
 	
 	@Override
 	public boolean isNBTReadable(NbtCompound nbt, SourceContainerType source) {
-		return nbt.getList(key, NbtElement.COMPOUND_TYPE).size() <= maxSize;
+		return MVNbt.getList(nbt, key, NbtElement.COMPOUND_TYPE).size() <= maxSize;
 	}
 	
 	@Override
 	public ItemStack[] readNBT(NbtCompound container, SourceContainerType source) {
-		return container.getList(key, NbtElement.COMPOUND_TYPE).stream().limit(maxSize)
+		return MVNbt.getList(container, key, NbtElement.COMPOUND_TYPE).stream().limit(maxSize)
 				.map(item -> NBTManagers.ITEM.deserialize((NbtCompound) item, true)).toArray(ItemStack[]::new);
 	}
 	

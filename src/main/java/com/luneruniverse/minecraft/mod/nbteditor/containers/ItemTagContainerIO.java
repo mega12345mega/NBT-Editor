@@ -1,6 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.item.ItemStack;
@@ -28,7 +29,7 @@ public class ItemTagContainerIO implements ItemContainerIO {
 		
 		if (tag == null || nbtIO.getDefaultEntityId() == null)
 			return nbt;
-		return nbt.getCompound(tag);
+		return MVNbt.getCompound(nbt, tag);
 	}
 	private void setNBT(ItemStack item, NbtCompound nbt) {
 		String defaultEntityId = nbtIO.getDefaultEntityId();

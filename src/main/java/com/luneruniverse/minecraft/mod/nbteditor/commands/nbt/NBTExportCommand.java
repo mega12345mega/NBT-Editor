@@ -14,6 +14,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
@@ -62,7 +63,7 @@ public class NBTExportCommand extends ClientCommand {
 	private static void stripEntityTags(NbtCompound nbt, String... tags) {
 		for (String tag : tags)
 			nbt.remove(tag);
-		for (NbtElement passenger : nbt.getList("Passengers", NbtElement.COMPOUND_TYPE))
+		for (NbtElement passenger : MVNbt.getList(nbt, "Passengers", NbtElement.COMPOUND_TYPE))
 			stripEntityTags((NbtCompound) passenger, tags);
 	}
 	

@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -144,7 +145,7 @@ public interface TagReference<T, O> {
 				String[] pathParts = path.split("/");
 				NbtCompound nbt = object;
 				for (int i = 0; i < pathParts.length - 1; i++)
-					nbt = nbt.getCompound(pathParts[i]);
+					nbt = MVNbt.getCompound(nbt, pathParts[i]);
 				nbt.remove(pathParts[pathParts.length - 1]);
 			}
 		};

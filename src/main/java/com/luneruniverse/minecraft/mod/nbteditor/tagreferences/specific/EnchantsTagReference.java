@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVNbt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.ComponentTagReference;
@@ -44,7 +45,7 @@ public class EnchantsTagReference implements TagReference<Enchants, ItemStack> {
 							Enchantment enchant = MVRegistry.getEnchantmentRegistry().get(IdentifierInst.of(compound.getString("id")));
 							if (enchant == null)
 								return null;
-							int level = compound.getShort("lvl");
+							int level = MVNbt.getShort(compound, "lvl");
 							if (level < 1)
 								return null;
 							return new Enchants.EnchantWithLevel(enchant, level);
