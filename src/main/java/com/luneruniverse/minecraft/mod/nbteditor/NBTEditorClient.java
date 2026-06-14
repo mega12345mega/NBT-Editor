@@ -29,6 +29,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.CursorManage
 import com.luneruniverse.minecraft.mod.nbteditor.server.NBTEditorServer;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -88,6 +89,8 @@ public class NBTEditorClient implements ClientModInitializer {
 		MVClientNetworking.PlayNetworkStateEvents.Start.EVENT.register(networkHandler -> ClientChestHelper.loadDefaultPages(PageLoadLevel.DYNAMIC_ITEMS));
 		MVClientNetworking.PlayNetworkStateEvents.Stop.EVENT.register(() -> ClientChestHelper.unloadAllPages(PageLoadLevel.NORMAL_ITEMS));
 		
+		ClientTickEvents.START_CLIENT_TICK.register(client -> MixinLink.tickRestoreMousePosition());
+		
 		ItemStack clientChestIcon = new ItemStack(Items.ENDER_CHEST)
 				.nbte$setCustomName(TextInst.translatable("itemGroup.nbteditor.client_chest"));
 		MVEnchantments.addEnchantment(clientChestIcon, MVEnchantments.LOYALTY, 1);
@@ -101,7 +104,7 @@ public class NBTEditorClient implements ClientModInitializer {
 				screen -> screen instanceof ClientChestScreen);
 		NBTEditorAPI.registerInventoryTab(new ItemStack(Items.ENDER_CHEST),
 				() -> {
-					CURSOR_MANAGER.closeRoot();
+					CURSOR_MANAGER.closeRootToDelayedNewScreen();
 					MVClientNetworking.send(new OpenEnderChestC2SPacket());
 				},
 				screen -> (screen instanceof CreativeInventoryScreen || screen instanceof InventoryScreen || screen instanceof ClientChestScreen)

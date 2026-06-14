@@ -35,7 +35,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 	public static void show() {
 		LoadingScreen.show(
 				ClientChestHelper.getPage(PAGE, PageLoadLevel.DYNAMIC_ITEMS),
-				NBTEditorClient.CURSOR_MANAGER::closeRoot,
+				NBTEditorClient.CURSOR_MANAGER::closeRootToNewScreen,
 				(loaded, optional) -> {
 					if (optional.isEmpty()) {
 						NBTEditorClient.CURSOR_MANAGER.closeRoot();
@@ -45,7 +45,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 					ClientChestPage pageData = optional.get();
 					
 					if (!pageData.isInThisVersion()) {
-						NBTEditorClient.CURSOR_MANAGER.closeRoot();
+						NBTEditorClient.CURSOR_MANAGER.closeRootToNewScreen();
 						MainUtil.client.setScreen(new ClientChestDataVersionScreen(pageData.dataVersion()));
 						return;
 					}

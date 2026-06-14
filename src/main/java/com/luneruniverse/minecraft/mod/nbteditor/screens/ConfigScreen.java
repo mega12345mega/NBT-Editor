@@ -218,6 +218,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 	private static boolean enchantGlintFix;
 	private static boolean recreateBlocksAndEntities;
 	private static CreativeTabsPosition creativeTabsPos;
+	private static int noMouseJumpTime;
 	
 	public static void loadSettings() {
 		enchantLevelMax = EnchantLevelMax.NEVER;
@@ -249,6 +250,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		enchantGlintFix = false;
 		recreateBlocksAndEntities = false;
 		creativeTabsPos = CreativeTabsPosition.BOTTOM_LEFT;
+		noMouseJumpTime = 100;
 		
 		try {
 			// Many config options use the old names
@@ -286,6 +288,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 			enchantGlintFix = settings.get("enchantGlintFix").getAsBoolean();
 			recreateBlocksAndEntities = settings.get("recreateBlocksAndEntities").getAsBoolean();
 			creativeTabsPos = CreativeTabsPosition.valueOf(settings.get("creativeTabsPos").getAsString());
+			noMouseJumpTime = settings.get("noMouseJumpTime").getAsInt();
 		} catch (NoSuchFileException | ClassCastException | NullPointerException e) {
 			NBTEditor.LOGGER.info("Missing some settings from settings.json, fixing ...");
 			saveSettings();
@@ -326,6 +329,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 		settings.addProperty("enchantGlintFix", enchantGlintFix);
 		settings.addProperty("recreateBlocksAndEntities", recreateBlocksAndEntities);
 		settings.addProperty("creativeTabsPos", creativeTabsPos.name());
+		settings.addProperty("noMouseJumpTime", noMouseJumpTime);
 		
 		try {
 			Files.write(new File(NBTEditorClient.SETTINGS_FOLDER, "settings.json").toPath(), new Gson().toJson(settings).getBytes());
@@ -422,6 +426,9 @@ public class ConfigScreen extends TickableSupportingScreen {
 	}
 	public static CreativeTabsPosition getCreativeTabsPos() {
 		return creativeTabsPos;
+	}
+	public static int getNoMouseJumpTime() {
+		return noMouseJumpTime;
 	}
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
@@ -540,6 +547,11 @@ public class ConfigScreen extends TickableSupportingScreen {
 				ConfigValueDropdown.forEnum(itemSizeFormat, ItemSizeFormat.HIDDEN, ItemSizeFormat.class)
 				.addValueListener(value -> itemSizeFormat = value.getValidValue()))
 				.setTooltip("nbteditor.config.item_size.desc"));
+		
+		guis.setConfigurable("noMouseJumpTime", new ConfigItem<>(TextInst.translatable("nbteditor.config.no_mouse_jump_time"),
+				ConfigValueSlider.forInt(100, noMouseJumpTime, 100, 0, 500, 10, value -> TextInst.literal(String.format("%.2f", value / 1000.0)))
+				.addValueListener(value -> noMouseJumpTime = value.getValidValue()))
+				.setTooltip("nbteditor.config.no_mouse_jump_time.desc"));
 		
 		guis.setConfigurable("keyTextSize", new ConfigItem<>(TextInst.translatable("nbteditor.config.key_text_size"),
 				ConfigValueSlider.forDouble(100, keyTextSize, 0.5, 0.5, 1, 0.05, value -> TextInst.literal(String.format("%.2f", value)))

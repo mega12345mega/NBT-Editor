@@ -1,9 +1,11 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens.containers;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -137,6 +139,15 @@ public class CursorManager {
 		
 		transferCursorTo(currentRoot);
 		MainUtil.client.player.closeHandledScreen(); // will trigger #onNoScreenSet()
+	}
+	public void closeRootToNewScreen() {
+		MixinLink.restoreMousePosition(0);
+		closeRoot();
+	}
+	public void closeRootToDelayedNewScreen() {
+		if (ConfigScreen.getNoMouseJumpTime() != 0)
+			MixinLink.restoreMousePosition(ConfigScreen.getNoMouseJumpTime());
+		closeRoot();
 	}
 	
 	public void setCursor(ItemStack item) {

@@ -457,6 +457,8 @@
 	"nbteditor.config.creative_tabs_pos.top_left": "Top Left",
 	"nbteditor.config.creative_tabs_pos.top_center": "Top Center",
 	"nbteditor.config.creative_tabs_pos.top_right": "Top Right",
+	"nbteditor.config.no_mouse_jump_time": "No Mouse Jump Time",
+	"nbteditor.config.no_mouse_jump_time.desc": "How long the mouse's position\nshouldn't be reset to the center\nof the screen when opening the\nender chest tab (seconds)",
 	
 	
 	"nbteditor.configurable.list.move": "Move",

@@ -355,4 +355,39 @@ public class MixinLink {
 		}
 	}
 	
+	
+	private static long restoreMousePositionStartTime;
+	private static int restoreMousePositionMaxMillis = -1;
+	private static double restoreMouseX;
+	private static double restoreMouseY;
+	/**
+	 * @param maxMillis 0 for the current tick rather than time-based
+	 */
+	public static void restoreMousePosition(int maxMillis) {
+		if (MainUtil.client.mouse.isCursorLocked())
+			return;
+		
+		restoreMousePositionStartTime = System.currentTimeMillis();
+		restoreMousePositionMaxMillis = maxMillis;
+		restoreMouseX = MainUtil.client.mouse.getX();
+		restoreMouseY = MainUtil.client.mouse.getY();
+	}
+	public static boolean shouldRestoreMousePosition() {
+		boolean output = restoreMousePositionMaxMillis == 0 ||
+				System.currentTimeMillis() < restoreMousePositionStartTime + restoreMousePositionMaxMillis;
+		restoreMousePositionStartTime = 0;
+		restoreMousePositionMaxMillis = -1;
+		return output;
+	}
+	public static double getRestoreMouseX() {
+		return restoreMouseX;
+	}
+	public static double getRestoreMouseY() {
+		return restoreMouseY;
+	}
+	public static void tickRestoreMousePosition() {
+		if (restoreMousePositionMaxMillis == 0)
+			restoreMousePositionMaxMillis = -1;
+	}
+	
 }

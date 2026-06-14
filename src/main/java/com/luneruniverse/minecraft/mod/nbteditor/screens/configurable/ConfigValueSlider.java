@@ -46,6 +46,7 @@ public class ConfigValueSlider<T extends Number> extends SliderWidget implements
 	
 	@Override
 	public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+		firstDrag = false;
 		super.render(matrices, mouseX, mouseY, delta);
 	}
 	
@@ -55,20 +56,31 @@ public class ConfigValueSlider<T extends Number> extends SliderWidget implements
 	private boolean clicked = false;
 	private double mouseClickX = -1;
 	private double mouseClickY = -1;
+	private boolean firstDrag = false;
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		boolean output = super.mouseClicked(mouseX, mouseY, button);
 		if (output) {
 			mouseClickX = mouseX;
 			mouseClickY = mouseY;
+			firstDrag = true;
 		}
 		return clicked = output;
 	}
 	@Override
 	protected void onDrag(double mouseX, double mouseY, double deltaX, double deltaY) {
-		if (clicked && MainUtil.equals(mouseX, mouseClickX + deltaX) && MainUtil.equals(mouseY, mouseClickY + deltaY)) {
-			mouseClickX += deltaX;
-			mouseClickY += deltaY;
+		if (clicked) {
+			if (firstDrag) {
+				// For some reason the first onDrag call has inaccurate deltaX and deltaY values when moving the mouse quickly
+				mouseClickX = mouseX;
+				mouseClickY = mouseY;
+			} else if (MainUtil.equals(mouseX, mouseClickX + deltaX) && MainUtil.equals(mouseY, mouseClickY + deltaY)) {
+				mouseClickX += deltaX;
+				mouseClickY += deltaY;
+			} else {
+				clicked = false;
+				return;
+			}
 			super.onDrag(mouseX, mouseY, deltaX, deltaY);
 		}
 	}
