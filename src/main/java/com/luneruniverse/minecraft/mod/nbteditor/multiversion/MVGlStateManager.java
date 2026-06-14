@@ -60,8 +60,28 @@ public class MVGlStateManager {
 			GlStateManager__colorMask.get().invoke(null, red, green, blue, alpha);
 	}
 	
-	private static final Supplier<Class<?>> GlStateManager$ScissorTestState = Reflection.getOptionalClass("com.mojang.blaze3d.platform.GlStateManager$class_5518");
-	private static final Supplier<Class<?>> GlStateManager$CapabilityTracker = Reflection.getOptionalClass("com.mojang.blaze3d.platform.GlStateManager$class_1018");
+	private static final Supplier<Reflection.MethodInvoker> GlStateManager__enableScissorTest =
+			Reflection.getOptionalMethod(platform_GlStateManager, () -> "_enableScissorTest", () -> MethodType.methodType(void.class));
+	public static void _enableScissorTest() {
+		if (OPEN_GL)
+			GlStateManager._enableScissorTest();
+		else
+			GlStateManager__enableScissorTest.get().invoke(null);
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> GlStateManager__disableScissorTest =
+			Reflection.getOptionalMethod(platform_GlStateManager, () -> "_disableScissorTest", () -> MethodType.methodType(void.class));
+	public static void _disableScissorTest() {
+		if (OPEN_GL)
+			GlStateManager._disableScissorTest();
+		else
+			GlStateManager__disableScissorTest.get().invoke(null);
+	}
+	
+	private static final Supplier<Class<?>> GlStateManager$ScissorTestState =
+			Reflection.getOptionalClass("com.mojang.blaze3d.platform.GlStateManager$class_5518");
+	private static final Supplier<Class<?>> GlStateManager$CapabilityTracker =
+			Reflection.getOptionalClass("com.mojang.blaze3d.platform.GlStateManager$class_1018");
 	private static final Supplier<Reflection.FieldReference> GlStateManager_SCISSOR =
 			Reflection.getOptionalField(platform_GlStateManager, () -> "SCISSOR", () -> "Lcom/mojang/blaze3d/platform/GlStateManager$class_5518;");
 	private static final Supplier<Reflection.FieldReference> GlStateManager$ScissorTestState_capState =

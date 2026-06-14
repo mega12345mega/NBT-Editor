@@ -62,6 +62,12 @@ accessible class com/mojang/blaze3d/opengl/GlStateManager$CapabilityTracker
 accessible field com/mojang/blaze3d/opengl/GlStateManager SCISSOR Lcom/mojang/blaze3d/opengl/GlStateManager$ScissorTestState;
 accessible field com/mojang/blaze3d/opengl/GlStateManager$CapabilityTracker state Z
 
+accessible class net/minecraft/client/gui/DrawContext$ScissorStack
+accessible field net/minecraft/client/gui/DrawContext scissorStack Lnet/minecraft/client/gui/DrawContext$ScissorStack;
+accessible field net/minecraft/client/gui/DrawContext$ScissorStack stack Ljava/util/Deque;
+
+accessible method net/minecraft/client/gui/DrawContext setScissor (Lnet/minecraft/client/gui/ScreenRect;)V
+
 accessible field net/minecraft/client/gui/DrawContext vertexConsumers Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;
 
 accessible field net/minecraft/client/MinecraftClient fontManager Lnet/minecraft/client/font/FontManager;

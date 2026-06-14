@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.lwjgl.opengl.GL20;
-
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 
@@ -130,14 +128,17 @@ public class MVTooltip {
 		float[] translation = MVMatrix4f.getTranslation(matrices);
 		matrices.push();
 		matrices.translate(-translation[0], -translation[1], 0.0);
-		boolean scissor = MVGlStateManager.isScissorEnabled();
+		
+		boolean scissor = MVDrawableHelper.isScissorEnabled();
+		Object scissorState = null;
 		if (scissor)
-			GL20.glDisable(GL20.GL_SCISSOR_TEST);
+			scissorState = MVDrawableHelper.bypassScissor(matrices);
 		
 		MVDrawableHelper.renderTooltip(matrices, lines, mouseX + (int) translation[0], mouseY + (int) translation[1]);
 		
 		if (scissor)
-			GL20.glEnable(GL20.GL_SCISSOR_TEST);
+			MVDrawableHelper.unbypassScissor(matrices, scissorState);
+		
 		matrices.pop();
 	}
 	

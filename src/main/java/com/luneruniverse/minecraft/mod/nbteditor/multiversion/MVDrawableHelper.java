@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
@@ -16,6 +17,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.ShaderProgram;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.RenderLayer;
@@ -276,6 +278,41 @@ public class MVDrawableHelper {
 		Version.newSwitch()
 				.range("1.20.0", null, () -> getDrawContext(matrices).disableScissor())
 				.range(null, "1.19.4", () -> RenderSystem.disableScissor())
+				.run();
+	}
+	public static boolean isScissorEnabled() {
+		return Version.<Boolean>newSwitch()
+				.range("1.21.5", null, () -> RenderSystem.SCISSOR_STATE.isEnabled())
+				.range(null, "1.21.4", () -> MVGlStateManager.isScissorEnabled())
+				.get();
+	}
+	public static Object bypassScissor(MatrixStack matrices) {
+		return Version.newSwitch()
+				.range("1.21.5", null, () -> {
+					DrawContext context = getDrawContext(matrices);
+					Deque<ScreenRect> stack = context.scissorStack.stack;
+					ScreenRect[] scissorState = stack.toArray(ScreenRect[]::new);
+					stack.clear();
+					context.setScissor(null);
+					return scissorState;
+				})
+				.range(null, "1.21.4", () -> {
+					MVGlStateManager._disableScissorTest();
+					return null;
+				})
+				.get();
+	}
+	public static void unbypassScissor(MatrixStack matrices, Object scissorState) {
+		Version.newSwitch()
+				.range("1.21.5", null, () -> {
+					DrawContext context = getDrawContext(matrices);
+					Deque<ScreenRect> stack = context.scissorStack.stack;
+					stack.clear();
+					for (ScreenRect rect : (ScreenRect[]) scissorState)
+						stack.addLast(rect);
+					context.setScissor(stack.peekLast());
+				})
+				.range(null, "1.21.4", () -> MVGlStateManager._enableScissorTest())
 				.run();
 	}
 	
