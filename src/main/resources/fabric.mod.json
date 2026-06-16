@@ -1,73 +1,73 @@
 {
-  "schemaVersion": 1,
-  "id": "nbteditor",
-  "version": "2.0.4.999",
-
-  "name": "NBT Editor",
-  "description": "Lets you edit items, blocks, and entities ingame, store items in a client side chest, open containers in your inventory, and more!",
-  "authors": [
-    "mega12345mega"
-  ],
-  "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/nbt-editor",
-    "issues": "https://github.com/mega12345mega/NBT-Editor/issues",
-    "sources": "https://github.com/mega12345mega/NBT-Editor"
-  },
-
-  "license": "MPL-2.0",
-  "icon": "assets/nbteditor/textures/logo.png",
-
-  "environment": "*",
-  "entrypoints": {
-    "main": [
-      "com.luneruniverse.minecraft.mod.nbteditor.NBTEditor"
-    ],
-    "client": [
-      "com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient"
-    ],
-    "modmenu": [
-      "com.luneruniverse.minecraft.mod.nbteditor.NBTEditorModMenuApi"
-    ]
-  },
-  "mixins": [
-    "nbteditor.mixins.json",
-    "nbteditor_multiversion.mixins.json",
-    "nbteditor_multiversion_commandapi.mixins.json",
-    "nbteditor_multiversion_networkingapi.mixins.json"
-  ],
-  
-  "accessWidener": "nbteditor.accesswidener",
-
-  "depends": {
-    "fabricloader": ">=0.16.0",
-    "fabric": "*",
-    "minecraft": ">=1.17-",
-    "java": ">=16"
-  },
-  "suggests": {
-    "nbt_ac": ">=1.1"
-  },
-  
-  "custom": {
-    "modmenu": {
-      "links": {
-      	"modmenu.discord": "https://discord.gg/PzeYTbEZjn",
-      	"modmenu.wiki": "https://github.com/mega12345mega/NBT-Editor/wiki",
-      	"modmenu.buymeacoffee": "https://buymeacoffee.com/mega12345mega"
-      }
-    },
-    "loom:injected_interfaces": {
-      "net/minecraft/class_4068": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVDrawableParent"],
-      "net/minecraft/class_437": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVScreenParent"],
-      "net/minecraft/class_342": ["com/luneruniverse/minecraft/mod/nbteditor/screens/InjectableTickable"],
-      "net/minecraft/class_364": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVElementParent"],
-      "net/minecraft/class_2945": ["com/luneruniverse/minecraft/mod/nbteditor/misc/ResetableDataTracker"],
-      "net/minecraft/class_2540": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVPacketByteBufParent"],
-      "net/minecraft/class_1799": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/manager/IntegratedNBTManager", "com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVItemStackParent"],
-      "net/minecraft/class_2813": ["com/luneruniverse/minecraft/mod/nbteditor/packets/ClickSlotC2SPacketParent"],
-      "net/minecraft/class_2487": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVNbtCompoundParent"],
-      "net/minecraft/class_2483": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVAbstractNbtListParent"],
-      "net/minecraft/class_2514": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVAbstractNbtNumberParent"]
-    }
-  }
+	"schemaVersion": 1,
+	"id": "nbteditor",
+	"version": "2.0.4.999",
+	
+	"name": "NBT Editor",
+	"description": "Lets you edit items, blocks, and entities ingame, store items in a client side chest, open containers in your inventory, and more!",
+	"authors": [
+		"mega12345mega"
+	],
+	"contact": {
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/nbt-editor",
+		"issues": "https://github.com/mega12345mega/NBT-Editor/issues",
+		"sources": "https://github.com/mega12345mega/NBT-Editor"
+	},
+	
+	"license": "MPL-2.0",
+	"icon": "assets/nbteditor/textures/logo.png",
+	
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.luneruniverse.minecraft.mod.nbteditor.NBTEditor"
+		],
+		"client": [
+			"com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient"
+		],
+		"modmenu": [
+			"com.luneruniverse.minecraft.mod.nbteditor.NBTEditorModMenuApi"
+		]
+	},
+	"mixins": [
+		"nbteditor.mixins.json",
+		"nbteditor_multiversion.mixins.json",
+		"nbteditor_multiversion_commandapi.mixins.json",
+		"nbteditor_multiversion_networkingapi.mixins.json"
+	],
+	
+	"accessWidener": "nbteditor.accesswidener",
+	
+	"depends": {
+		"fabricloader": ">=0.16.0",
+		"fabric": "*",
+		"minecraft": ">=1.17-",
+		"java": ">=16"
+	},
+	"suggests": {
+		"nbt_ac": ">=1.1"
+	},
+	
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/PzeYTbEZjn",
+				"modmenu.wiki": "https://github.com/mega12345mega/NBT-Editor/wiki",
+				"modmenu.buymeacoffee": "https://buymeacoffee.com/mega12345mega"
+			}
+		},
+		"loom:injected_interfaces": {
+			"net/minecraft/class_4068": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVDrawableParent"],
+			"net/minecraft/class_437": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVScreenParent"],
+			"net/minecraft/class_342": ["com/luneruniverse/minecraft/mod/nbteditor/screens/InjectableTickable"],
+			"net/minecraft/class_364": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVElementParent"],
+			"net/minecraft/class_2945": ["com/luneruniverse/minecraft/mod/nbteditor/misc/ResetableDataTracker"],
+			"net/minecraft/class_2540": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVPacketByteBufParent"],
+			"net/minecraft/class_1799": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/manager/IntegratedNBTManager", "com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVItemStackParent"],
+			"net/minecraft/class_2813": ["com/luneruniverse/minecraft/mod/nbteditor/packets/ClickSlotC2SPacketParent"],
+			"net/minecraft/class_2487": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVNbtCompoundParent"],
+			"net/minecraft/class_2483": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVAbstractNbtListParent"],
+			"net/minecraft/class_2514": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVAbstractNbtNumberParent"]
+		}
+	}
 }

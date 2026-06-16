@@ -1,19 +1,19 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.mixin",
-  "compatibilityLevel": "JAVA_16",
-  "mixins": [
-  ],
-  "client": [
-    "CommandManagerMixin",
-    "HelpCommandAccessor",
-    "client.ClientCommandSourceMixin",
-    "client.ClientPlayerEntityMixin",
-    "client.ClientPlayNetworkHandlerMixin",
-    "client.ChatScreenMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.mixin",
+	"compatibilityLevel": "JAVA_16",
+	"mixins": [
+	],
+	"client": [
+		"CommandManagerMixin",
+		"HelpCommandAccessor",
+		"client.ClientCommandSourceMixin",
+		"client.ClientPlayerEntityMixin",
+		"client.ClientPlayNetworkHandlerMixin",
+		"client.ChatScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
 }

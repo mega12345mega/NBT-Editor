@@ -1,42 +1,42 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.luneruniverse.minecraft.mod.nbteditor.mixin",
-  "compatibilityLevel": "JAVA_16",
-  "plugin": "com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled.NBTEditorMixinPlugin",
-  "mixins": [
-    "ServerPlayNetworkHandlerMixin",
-    "ServerPlayerEntityMixin",
-    "ManySlotMixin",
-    "DataTrackerMixin",
-    "ThreadExecutorMixin"
-  ],
-  "client": [
-    "ChatScreenMixin",
-    "ChatScreenAccessor",
-    "ClientConnectionMixin",
-    "ClientPlayNetworkHandlerMixin",
-    "StringNbtWriterAccessor",
-    "CreativeInventoryScreenMixin",
-    "ItemStackMixin",
-    "HandledScreenAccessor",
-    "TextFieldWidgetMixin",
-    "MinecraftClientMixin",
-    "ScreenMixin",
-    "BookScreenMixin",
-    "HandledScreenMixin",
-    "NativeImageMixin",
-    "ScreenshotRecorderMixin",
-    "UtilMixin",
-    "KeyboardMixin",
-    "ChatInputSuggestorMixin",
-    "ClientPlayerEntityMixin",
-    "EnchantmentMixin",
-    "SplashOverlayMixin",
-    "ScreenHandlerMixin",
-    "MouseMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.luneruniverse.minecraft.mod.nbteditor.mixin",
+	"compatibilityLevel": "JAVA_16",
+	"plugin": "com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled.NBTEditorMixinPlugin",
+	"mixins": [
+		"ServerPlayNetworkHandlerMixin",
+		"ServerPlayerEntityMixin",
+		"ManySlotMixin",
+		"DataTrackerMixin",
+		"ThreadExecutorMixin"
+	],
+	"client": [
+		"ChatScreenMixin",
+		"ChatScreenAccessor",
+		"ClientConnectionMixin",
+		"ClientPlayNetworkHandlerMixin",
+		"StringNbtWriterAccessor",
+		"CreativeInventoryScreenMixin",
+		"ItemStackMixin",
+		"HandledScreenAccessor",
+		"TextFieldWidgetMixin",
+		"MinecraftClientMixin",
+		"ScreenMixin",
+		"BookScreenMixin",
+		"HandledScreenMixin",
+		"NativeImageMixin",
+		"ScreenshotRecorderMixin",
+		"UtilMixin",
+		"KeyboardMixin",
+		"ChatInputSuggestorMixin",
+		"ClientPlayerEntityMixin",
+		"EnchantmentMixin",
+		"SplashOverlayMixin",
+		"ScreenHandlerMixin",
+		"MouseMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
 }

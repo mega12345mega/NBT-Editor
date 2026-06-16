@@ -45,13 +45,13 @@ public class NbtFormatter {
 	private static final SimpleCommandExceptionType EXPECTED_KEY = new SimpleCommandExceptionType(TextInst.translatable("argument.nbt.expected.key"));
 	private static final SimpleCommandExceptionType EXPECTED_VALUE = new SimpleCommandExceptionType(TextInst.translatable("argument.nbt.expected.value"));
 	private static final DynamicCommandExceptionType ARRAY_INVALID = new DynamicCommandExceptionType(type -> TextInst.translatable("argument.nbt.array.invalid", type));
-    private static final Pattern DOUBLE_PATTERN_IMPLICIT = Pattern.compile("[-+]?(?:[0-9]+[.]|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?", 2);
-    private static final Pattern DOUBLE_PATTERN = Pattern.compile("[-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?d", 2);
-    private static final Pattern FLOAT_PATTERN = Pattern.compile("[-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?f", 2);
-    private static final Pattern BYTE_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)b", 2);
-    private static final Pattern LONG_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)l", 2);
-    private static final Pattern SHORT_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)s", 2);
-    private static final Pattern INT_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)");
+	private static final Pattern DOUBLE_PATTERN_IMPLICIT = Pattern.compile("[-+]?(?:[0-9]+[.]|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?", 2);
+	private static final Pattern DOUBLE_PATTERN = Pattern.compile("[-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?d", 2);
+	private static final Pattern FLOAT_PATTERN = Pattern.compile("[-+]?(?:[0-9]+[.]?|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?f", 2);
+	private static final Pattern BYTE_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)b", 2);
+	private static final Pattern LONG_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)l", 2);
+	private static final Pattern SHORT_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)s", 2);
+	private static final Pattern INT_PATTERN = Pattern.compile("[-+]?(?:0|[1-9][0-9]*)");
 	private static final Formatting NAME_COLOR = Formatting.AQUA;
 	private static final Formatting STRING_COLOR = Formatting.GREEN;
 	private static final Formatting NUMBER_COLOR = Formatting.GOLD;
@@ -141,14 +141,14 @@ public class NbtFormatter {
 	private EditableText readString(Formatting color) throws CommandSyntaxException {
 		EditableText output = TextInst.literal("");
 		output.append(this.skipWhitespace());
-        if (!this.reader.canRead()) {
-            throw EXPECTED_KEY.createWithContext(this.reader);
-        }
-        String str = this.readString();
-        if (str.isEmpty())
-        	return null;
-        output.append(TextInst.literal(str).formatted(color));
-        return output;
+		if (!this.reader.canRead()) {
+			throw EXPECTED_KEY.createWithContext(this.reader);
+		}
+		String str = this.readString();
+		if (str.isEmpty())
+			return null;
+		output.append(TextInst.literal(str).formatted(color));
+		return output;
 	}
 	
 	private EditableText readQuotedString() throws CommandSyntaxException {

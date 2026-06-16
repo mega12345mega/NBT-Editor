@@ -7,6 +7,6 @@ import net.minecraft.nbt.visitor.StringNbtWriter;
 
 @Mixin(StringNbtWriter.class)
 public interface StringNbtWriterAccessor {
-    @Accessor
-    StringBuilder getResult();
+	@Accessor
+	StringBuilder getResult();
 }

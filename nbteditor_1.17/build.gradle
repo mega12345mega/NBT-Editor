@@ -64,5 +64,5 @@ publishing {
 }
 
 test {
-    exclude '**/*'
+	exclude '**/*'
 }

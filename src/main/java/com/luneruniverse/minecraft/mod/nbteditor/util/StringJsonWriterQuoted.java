@@ -38,34 +38,34 @@ public class StringJsonWriterQuoted extends StringNbtWriter {
 		((StringNbtWriterAccessor) this).getResult().append(escape(MVMisc.value(element)));
 	}
 	
-    @Override
-    public void visitList(NbtList element) {
+	@Override
+	public void visitList(NbtList element) {
 		StringBuilder result = ((StringNbtWriterAccessor) this).getResult();
 		
-        result.append('[');
-        for (int i = 0; i < element.nbte$size(); ++i) {
-            if (i != 0) {
-                result.append(',');
-            }
-            result.append(new StringJsonWriterQuoted().apply(element.get(i)));
-        }
-        result.append(']');
-    }
+		result.append('[');
+		for (int i = 0; i < element.nbte$size(); ++i) {
+			if (i != 0) {
+				result.append(',');
+			}
+			result.append(new StringJsonWriterQuoted().apply(element.get(i)));
+		}
+		result.append(']');
+	}
 	
 	@Override
 	public void visitCompound(NbtCompound compound) {
 		StringBuilder result = ((StringNbtWriterAccessor) this).getResult();
 		
 		result.append('{');
-        ArrayList<String> list = Lists.newArrayList(compound.getKeys());
-        Collections.sort(list);
-        for (String string : list) {
-            if (result.length() != 1) {
-                result.append(',');
-            }
-            result.append(escape(string)).append(':').append(new StringJsonWriterQuoted().apply(compound.get(string)));
-        }
-        result.append('}');
+		ArrayList<String> list = Lists.newArrayList(compound.getKeys());
+		Collections.sort(list);
+		for (String string : list) {
+			if (result.length() != 1) {
+				result.append(',');
+			}
+			result.append(escape(string)).append(':').append(new StringJsonWriterQuoted().apply(compound.get(string)));
+		}
+		result.append('}');
 	}
 	
 	// From NbtString.escape

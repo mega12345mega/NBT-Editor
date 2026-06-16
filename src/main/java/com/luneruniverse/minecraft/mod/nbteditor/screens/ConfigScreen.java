@@ -433,14 +433,14 @@ public class ConfigScreen extends TickableSupportingScreen {
 	
 	private static EditableText getEnchantName(Enchantment enchant, int level) {
 		EditableText output = TextInst.copy(MVEnchantments.getEnchantmentName(enchant));
-        if (level != 1 || enchant.getMaxLevel() != 1 || enchantLevelMax == EnchantLevelMax.ALWAYS) {
-            output.append(" ");
-            if (isEnchantNumberTypeArabic())
-            	output.append("" + level);
-            else
-            	output.append(TextInst.translatable("enchantment.level." + level));
-        }
-        return output;
+		if (level != 1 || enchant.getMaxLevel() != 1 || enchantLevelMax == EnchantLevelMax.ALWAYS) {
+			output.append(" ");
+			if (isEnchantNumberTypeArabic())
+				output.append("" + level);
+			else
+				output.append(TextInst.translatable("enchantment.level." + level));
+		}
+		return output;
 	}
 	public static Text getEnchantNameWithMax(Enchantment enchant, int level, EnchantLevelMax display) {
 		EditableText text = getEnchantName(enchant, level);
