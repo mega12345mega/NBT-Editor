@@ -14,7 +14,7 @@
     "sources": "https://github.com/mega12345mega/NBT-Editor"
   },
 
-  "license": "MIT",
+  "license": "MPL-2.0",
   "icon": "assets/nbteditor/textures/logo.png",
 
   "environment": "*",
