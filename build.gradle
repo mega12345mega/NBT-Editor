@@ -138,7 +138,7 @@ task mergeDevLibs(type: Jar) {
 		include "**/*.class"
 	}
 	
-	archiveFile.set(file("${buildDir}/devlibs/nbteditor-${project.mod_version}-${getGitHash()}-dev.jar"))
+	archiveFile.set(file("${buildDir}/devlibs/nbteditor-${project.mod_version}+${getGitHash()}-yarn.jar"))
 }
 
 task mergeLibs(type: Jar) {
@@ -151,7 +151,7 @@ task mergeLibs(type: Jar) {
 		include "**/*.class"
 	}
 	
-	archiveFile.set(file("${buildDir}/libs/nbteditor-${project.mod_version}-${getGitHash()}.jar"))
+	archiveFile.set(file("${buildDir}/libs/nbteditor-${project.mod_version}+${getGitHash()}.jar"))
 }
 
 build.dependsOn mergeDevLibs, mergeLibs

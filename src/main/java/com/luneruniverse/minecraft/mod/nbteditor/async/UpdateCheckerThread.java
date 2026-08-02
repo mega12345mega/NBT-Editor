@@ -42,7 +42,7 @@ public class UpdateCheckerThread extends Thread {
 	
 	@Override
 	public void run() {
-		if (URL == null)
+		if (URL == null || VERSION.equals("${version}"))
 			return;
 		
 		try {
@@ -67,7 +67,8 @@ public class UpdateCheckerThread extends Thread {
 			else if ((versionDiff = versionCompare(highestVersion, VERSION))[0] > 0) {
 				UPDATE_AVAILABLE = true;
 				NBTEditor.LOGGER.warn("NBT Editor is outdated! (" + highestVersion + " > " + VERSION + ")");
-				if (versionDiff[1] <= ConfigScreen.getCheckUpdates().getLevel()) {
+				if (versionDiff[1] <= ConfigScreen.getCheckUpdates().getLevel() ||
+						VERSION.endsWith("-dev") && ConfigScreen.getCheckUpdates() != ConfigScreen.CheckUpdatesLevel.NONE) {
 					MVMisc.showToast(TextInst.translatable("nbteditor.outdated.title"),
 							TextInst.translatable("nbteditor.outdated.desc"));
 				}
@@ -79,6 +80,14 @@ public class UpdateCheckerThread extends Thread {
 	}
 	
 	private static int[] versionCompare(String a, String b) {
+		boolean aDev = a.endsWith("-dev");
+		if (aDev)
+			a = a.substring(0, a.length() - "-dev".length());
+		
+		boolean bDev = b.endsWith("-dev");
+		if (bDev)
+			b = b.substring(0, b.length() - "-dev".length());
+		
 		int[] aInts = getVersionInts(a);
 		int[] bInts = getVersionInts(b);
 		
@@ -88,7 +97,11 @@ public class UpdateCheckerThread extends Thread {
 				return new int[] {output, i};
 		}
 		
-		return new int[] {Integer.compare(aInts.length, bInts.length), Math.min(aInts.length, bInts.length)};
+		int output = Integer.compare(aInts.length, bInts.length);
+		if (output != 0)
+			return new int[] {output, Math.min(aInts.length, bInts.length)};
+		
+		return new int[] {Boolean.compare(bDev, aDev), aInts.length};
 	}
 	private static int[] getVersionInts(String version) {
 		return Stream.of(version.split("\\.")).mapToInt(Integer::parseInt).toArray();
