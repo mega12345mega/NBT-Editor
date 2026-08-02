@@ -411,7 +411,6 @@
 	"nbteditor.config.item_size.megabyte_compressed": "Megabyte (Komprimováno)",
 	"nbteditor.config.item_size.gigabyte_compressed": "Gigabyte (Komprimováno)",
 	"nbteditor.config.page_keybinds": "Klávesové Zkratky Stránek",
-	"nbteditor.config.page_keybinds.desc": "Zda Page Up zvyšuje číslo stránky (Normální)\nnebo jde na předchozí stránku (Invertováno)",
 	"nbteditor.config.page_keybinds.normal": "Normální",
 	"nbteditor.config.page_keybinds.inverted": "Invertováno",
 	"nbteditor.config.trigger_block_updates": "Aktualizace Bloků",

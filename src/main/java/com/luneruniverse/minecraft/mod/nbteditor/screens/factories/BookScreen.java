@@ -228,8 +228,8 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 		
 		group.addDrawable(gen);
 		
-		EditableText prevKeybind = TextInst.translatable("nbteditor.keybind.page.down");
-		EditableText nextKeybind = TextInst.translatable("nbteditor.keybind.page.up");
+		EditableText prevKeybind = TextInst.translatable("nbteditor.keybind.page.up");
+		EditableText nextKeybind = TextInst.translatable("nbteditor.keybind.page.down");
 		if (ConfigScreen.isInvertedPageKeybinds()) {
 			EditableText temp = prevKeybind;
 			prevKeybind = nextKeybind;
@@ -261,7 +261,7 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 			return true;
 		
 		if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
-			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_DOWN);
+			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_UP);
 			if (ConfigScreen.isInvertedPageKeybinds())
 				prev = !prev;
 			if (prev)

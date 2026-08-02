@@ -282,7 +282,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 					.map(alias -> new Alias(alias.getAsJsonObject().get("original").getAsString(),
 							alias.getAsJsonObject().get("alias").getAsString())).collect(Collectors.toList());
 			itemSizeFormat = ItemSizeFormat.valueOf(settings.get("itemSize").getAsString());
-			invertedPageKeybinds = settings.get("invertedPageKeybinds").getAsBoolean();
+			invertedPageKeybinds = !settings.get("invertedPageKeybinds").getAsBoolean();
 			triggerBlockUpdates = settings.get("triggerBlockUpdates").getAsBoolean();
 			warnIncompatibleProtocol = settings.get("warnIncompatibleProtocol").getAsBoolean();
 			enchantGlintFix = settings.get("enchantGlintFix").getAsBoolean();
@@ -323,7 +323,7 @@ public class ConfigScreen extends TickableSupportingScreen {
 			return obj;
 		}).collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 		settings.addProperty("itemSize", itemSizeFormat.name());
-		settings.addProperty("invertedPageKeybinds", invertedPageKeybinds);
+		settings.addProperty("invertedPageKeybinds", !invertedPageKeybinds);
 		settings.addProperty("triggerBlockUpdates", triggerBlockUpdates);
 		settings.addProperty("warnIncompatibleProtocol", warnIncompatibleProtocol);
 		settings.addProperty("enchantGlintFix", enchantGlintFix);

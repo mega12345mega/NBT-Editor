@@ -141,8 +141,8 @@ public class ClientChestScreen extends ClientHandledScreen {
 		pageField.setTextPredicate(MainUtil.intPredicate(() -> 0, NBTEditorClient.CLIENT_CHEST::getPageCount, true));
 		this.addDrawableChild(pageField);
 		
-		EditableText prevKeybind = TextInst.translatable("nbteditor.keybind.page.down");
-		EditableText nextKeybind = TextInst.translatable("nbteditor.keybind.page.up");
+		EditableText prevKeybind = TextInst.translatable("nbteditor.keybind.page.up");
+		EditableText nextKeybind = TextInst.translatable("nbteditor.keybind.page.down");
 		if (ConfigScreen.isInvertedPageKeybinds()) {
 			EditableText temp = prevKeybind;
 			prevKeybind = nextKeybind;
@@ -233,7 +233,7 @@ public class ClientChestScreen extends ClientHandledScreen {
 			return true;
 		}
 		if (keyCode == GLFW.GLFW_KEY_PAGE_UP || keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
-			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_DOWN);
+			boolean prev = (keyCode == GLFW.GLFW_KEY_PAGE_UP);
 			if (ConfigScreen.isInvertedPageKeybinds())
 				prev = !prev;
 			boolean jump = hasShiftDown();

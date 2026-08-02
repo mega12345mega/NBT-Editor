@@ -349,7 +349,6 @@
 	"nbteditor.config.item_size.megabyte_compressed": "Megaoctet (Compressé)",
 	"nbteditor.config.item_size.gigabyte_compressed": "Gigaoctet (Compressé)",
 	"nbteditor.config.page_keybinds": "Raccourci clavier de page",
-	"nbteditor.config.page_keybinds.desc": "Si Page Haut augmente le numéro de page (Normale)\nou va à la page précédente (Inversé)\ndans the coffre client",
 	"nbteditor.config.page_keybinds.normal": "Normale",
 	"nbteditor.config.page_keybinds.inverted": "Inversée",
 	"nbteditor.config.trigger_block_updates": "Mise à Jour Bloc",

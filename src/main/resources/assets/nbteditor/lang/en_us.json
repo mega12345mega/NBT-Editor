@@ -430,7 +430,7 @@
 	"nbteditor.config.item_size.megabyte_compressed": "Megabyte (Compressed)",
 	"nbteditor.config.item_size.gigabyte_compressed": "Gigabyte (Compressed)",
 	"nbteditor.config.page_keybinds": "Page Keybinds",
-	"nbteditor.config.page_keybinds.desc": "Whether Page Up increases the page number (Normal)\nor goes to the previous page (Inverted)",
+	"nbteditor.config.page_keybinds.desc": "Whether Page Down increases the page\nnumber (Normal) or decreases (Inverted)",
 	"nbteditor.config.page_keybinds.normal": "Normal",
 	"nbteditor.config.page_keybinds.inverted": "Inverted",
 	"nbteditor.config.trigger_block_updates": "Block Updates",

@@ -429,7 +429,6 @@
 	"nbteditor.config.item_size.megabyte_compressed": "MB（压缩后）",
 	"nbteditor.config.item_size.gigabyte_compressed": "GB（压缩后）",
 	"nbteditor.config.page_keybinds": "页面按键绑定",
-	"nbteditor.config.page_keybinds.desc": "在客户端物品栏中使用 PAGE-UP 时\n前往下一页（默认）还是上一页（反转）",
 	"nbteditor.config.page_keybinds.normal": "默认",
 	"nbteditor.config.page_keybinds.inverted": "反转",
 	"nbteditor.config.trigger_block_updates": "方块更新",

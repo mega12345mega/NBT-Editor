@@ -417,7 +417,6 @@
 	"nbteditor.config.item_size.megabyte_compressed": "Megabyte (דחוס)",
 	"nbteditor.config.item_size.gigabyte_compressed": "Gigabyte (דחוס)",
 	"nbteditor.config.page_keybinds": "מקשי עמוד",
-	"nbteditor.config.page_keybinds.desc": "משנה אם המקשים לעבור עמודים\nבתיבת עורך NBT יתחלפו.",
 	"nbteditor.config.page_keybinds.normal": "רגיל",
 	"nbteditor.config.page_keybinds.inverted": "מוחלף",
 	"nbteditor.config.trigger_block_updates": "עדכוני בלוקים",

@@ -428,7 +428,6 @@
 	"nbteditor.config.item_size.megabyte_compressed": "百萬位元組（已壓縮）",
 	"nbteditor.config.item_size.gigabyte_compressed": "十億位元組（已壓縮）",
 	"nbteditor.config.page_keybinds": "頁面按鍵綁定",
-	"nbteditor.config.page_keybinds.desc": "Page Up 是增加頁碼（正常）\n還是跳到上一頁（反轉）",
 	"nbteditor.config.page_keybinds.normal": "正常",
 	"nbteditor.config.page_keybinds.inverted": "反轉",
 	"nbteditor.config.trigger_block_updates": "方塊更新",

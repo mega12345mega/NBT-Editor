@@ -429,7 +429,6 @@
 	"nbteditor.config.item_size.megabyte_compressed": "Megabajty (skompresowany)",
 	"nbteditor.config.item_size.gigabyte_compressed": "Gigabajty (skompresowany)",
 	"nbteditor.config.page_keybinds": "Skróty Klawiszowe Strony",
-	"nbteditor.config.page_keybinds.desc": "Czy Strona w górę ma zwiększać numer strony (Normalny)\nlub przechodzić do poprzedniej strony (Odwrócony)?",
 	"nbteditor.config.page_keybinds.normal": "Normalny",
 	"nbteditor.config.page_keybinds.inverted": "Odwrócony",
 	"nbteditor.config.trigger_block_updates": "Aktualizacje Bloków",

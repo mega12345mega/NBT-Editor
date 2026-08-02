@@ -349,7 +349,6 @@
 	"nbteditor.config.item_size.megabyte_compressed": "Мегабайт (сжатый)",
 	"nbteditor.config.item_size.gigabyte_compressed": "Гигабайт (сжатый)",
 	"nbteditor.config.page_keybinds": "Клавиши переключения страниц",
-	"nbteditor.config.page_keybinds.desc": "Переключение по страницам с помощью Page Up (обычный)\n",
 	"nbteditor.config.page_keybinds.normal": "Нормальный",
 	"nbteditor.config.page_keybinds.inverted": "Инвертированный",
 	"nbteditor.config.trigger_block_updates": "Блокировать обновления",
