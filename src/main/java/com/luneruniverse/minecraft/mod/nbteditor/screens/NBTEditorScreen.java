@@ -70,7 +70,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private NBTValue selectedValue;
 	private boolean json;
 	
-	@SuppressWarnings({ "serial", "deprecation" })
+	@SuppressWarnings("deprecation")
 	public NBTEditorScreen(NBTReference<L> ref) {
 		super(TextInst.of("NBT Editor"), ItemReference.toItemPartsRef(ref));
 		
