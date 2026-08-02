@@ -178,8 +178,7 @@ public class NBTEditorAPI {
 	/**
 	 * Add a preset item<br>
 	 * The item is automatically loaded from {@code assets/nbteditor/presetitems/<name>.nbt}<br>
-	 * The item's NBT is in the format <code>{id: "minecraft:diamond", Count: 64b, tag: {}}</code><br>
-	 * Automatically export an item with {@code /nbt export file}
+	 * The file is in the same format as from {@code /nbt export file}
 	 * @param name The name of the item
 	 * @param reloadable If the item should be re-read every time, allowing for changing it via resource packs
 	 * @return The loaded item, or null if the item couldn't be loaded

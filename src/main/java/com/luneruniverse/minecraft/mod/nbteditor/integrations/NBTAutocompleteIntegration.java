@@ -13,7 +13,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
-import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -35,9 +34,12 @@ public class NBTAutocompleteIntegration extends Integration {
 		return new StringRange(range.getStart() + shift, range.getEnd() + shift);
 	}
 	private static Suggestion shiftSuggestion(Suggestion suggestion, int shift) {
-		Suggestion shiftedSuggestion = new Suggestion(shiftRange(suggestion.getRange(), shift), suggestion.getText(), suggestion.getTooltip());
-		NbtSuggestionManager.subtextMap.put(shiftedSuggestion, NbtSuggestionManager.subtextMap.remove(suggestion));
-		return shiftedSuggestion;
+		return replaceSuggestion(suggestion,
+				new Suggestion(shiftRange(suggestion.getRange(), shift), suggestion.getText(), suggestion.getTooltip()));
+	}
+	private static Suggestion replaceSuggestion(Suggestion oldSuggestion, Suggestion newSuggestion) {
+		NbtSuggestionManager.subtextMap.put(newSuggestion, NbtSuggestionManager.subtextMap.remove(oldSuggestion));
+		return newSuggestion;
 	}
 	
 	private NBTAutocompleteIntegration() {}
@@ -146,11 +148,21 @@ public class NBTAutocompleteIntegration extends Integration {
 					.map(suggestion -> {
 						suggestion = shiftSuggestion(suggestion, -fieldStartFinal);
 						if (firstKeyFinal && components) {
-							if (suggestion.getText().endsWith("=")) {
-								String newText = suggestion.getText().substring(0, suggestion.getText().length() - 1);
-								if (otherTags.contains(newText) || otherTags.contains(MainUtil.addNamespace(newText)))
+							if (!suggestion.getText().equals("!")) {
+								String component = suggestion.getText();
+								boolean extraEquals = component.endsWith("=");
+								if (extraEquals)
+									component = component.substring(0, component.length() - 1);
+								if (otherTags != null &&
+										(otherTags.contains("minecraft:" + component) || otherTags.contains("!minecraft:" + component) ||
+										otherTags.contains(":" + component) || otherTags.contains("!:" + component) ||
+										otherTags.contains(component) || otherTags.contains("!" + component))) {
 									return null;
-								suggestion = new Suggestion(suggestion.getRange(), newText, suggestion.getTooltip());
+								}
+								if (extraEquals) {
+									suggestion = replaceSuggestion(suggestion,
+											new Suggestion(suggestion.getRange(), component, suggestion.getTooltip()));
+								}
 							}
 						}
 						return suggestion;

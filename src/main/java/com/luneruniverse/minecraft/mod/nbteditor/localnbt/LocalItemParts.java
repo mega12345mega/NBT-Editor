@@ -17,6 +17,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -108,20 +109,30 @@ public class LocalItemParts extends LocalItem {
 		if (NBTManagers.COMPONENTS_EXIST) {
 			if (name == null) {
 				if (nbt != null) {
-					nbt.remove("custom_name");
 					nbt.remove("minecraft:custom_name");
+					nbt.remove(":custom_name");
+					nbt.remove("custom_name");
 				}
 			} else {
 				NbtCompound nbt = getOrCreateNBT();
-				nbt.put(nbt.contains("minecraft:custom_name") || !nbt.contains("custom_name") ?
-						"minecraft:custom_name" : "custom_name", TextInst.toMinecraft(name));
+				NbtElement nameNbt = TextInst.toMinecraft(name);
+				
+				if (nbt.contains("minecraft:custom_name"))
+					nbt.put("minecraft:custom_name", nameNbt);
+				else if (nbt.contains(":custom_name"))
+					nbt.put(":custom_name", nameNbt);
+				else if (nbt.contains("custom_name"))
+					nbt.put("custom_name", nameNbt);
+				else
+					nbt.put("minecraft:custom_name", nameNbt);
 			}
 		} else {
 			NbtCompound nbt = getOrCreateNBT();
 			NbtCompound display = nbt.nbte$getCompoundOrDefault("display");
-			if (name == null)
+			
+			if (name == null) {
 				display.remove("Name");
-			else {
+			} else {
 				display.putString("Name", TextInst.toJson(name));
 				nbt.put("display", display);
 			}

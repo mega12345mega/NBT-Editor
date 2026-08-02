@@ -526,11 +526,16 @@ public class MainUtil {
 	}
 	
 	public static String addNamespace(String component) {
-		if (component.contains(":"))
-			return component;
-		if (component.startsWith("!"))
-			return "!minecraft:" + component.substring(1);
-		return "minecraft:" + component;
+		boolean removing = component.startsWith("!");
+		if (removing)
+			component = component.substring(1);
+		
+		if (component.startsWith(":"))
+			component = "minecraft" + component;
+		else if (!component.contains(":"))
+			component = "minecraft:" + component;
+		
+		return (removing ? "!" : "") + component;
 	}
 	
 	public static <T> CompletableFuture<T> mergeFutures(List<CompletableFuture<T>> futures) {
