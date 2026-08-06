@@ -60,10 +60,7 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				.range(null, "1.20.4", () -> {})
 				.run();
 		Version.newSwitch()
-				.range("1.20.5", null, () -> {
-					output.add("toggled.RegistryEntryReferenceMixin");
-					output.add("toggled.Registry1Mixin");
-				})
+				.range("1.20.5", null, () -> output.add("toggled.RegistryEntryReferenceMixin"))
 				.range(null, "1.20.4", () -> {})
 				.run();
 		Version.newSwitch()

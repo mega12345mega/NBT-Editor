@@ -29,6 +29,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DefaultRegistryManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders.MVShader1;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -636,7 +639,7 @@ public class MVMisc {
 	
 	public static void onRegistriesLoad(Runnable callback) {
 		Version.newSwitch()
-				.range("1.20.5", null, () -> DynamicRegistryManagerHolder.onDefaultManagerLoad(callback))
+				.range("1.20.5", null, () -> DefaultRegistryManager.onLoad(callback))
 				.range(null, "1.20.4", callback)
 				.run();
 	}

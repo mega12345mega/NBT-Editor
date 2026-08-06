@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundParent;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.general.TagReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.AttributeData.AttributeModifierData.AttributeModifierId;

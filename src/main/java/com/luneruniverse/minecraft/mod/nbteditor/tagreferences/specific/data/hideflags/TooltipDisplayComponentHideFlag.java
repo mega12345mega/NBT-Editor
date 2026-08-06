@@ -3,8 +3,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.hi
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 
 import net.minecraft.component.ComponentType;
 import net.minecraft.text.Text;

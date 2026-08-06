@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVServerNetworking;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetLecternBlockC2SPacket;

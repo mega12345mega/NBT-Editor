@@ -6,8 +6,8 @@ import java.util.concurrent.CompletableFuture;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;

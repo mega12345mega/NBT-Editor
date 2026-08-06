@@ -3,8 +3,8 @@ package com.luneruniverse.minecraft.mod.nbteditor.packets;
 import java.util.UUID;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistryKeys;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVPacket;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistryKeys;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;

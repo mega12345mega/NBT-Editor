@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry;
 
 import java.lang.invoke.MethodType;
 import java.util.Iterator;
@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVEnchantments;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 
 import net.minecraft.block.Block;
 import net.minecraft.component.ComponentType;

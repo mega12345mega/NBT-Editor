@@ -1,70 +1,41 @@
 package com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled;
 
-import java.util.stream.Stream;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.RegistryCache;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DefaultRegistryEntry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DefaultRegistryManager;
 
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.entry.RegistryEntryOwner;
-import net.minecraft.registry.tag.TagKey;
 
 @Mixin(RegistryEntry.Reference.class)
 public abstract class RegistryEntryReferenceMixin<T> {
 	
+	@Inject(method = "<init>", at = @At("TAIL"))
+	private void init(RegistryEntry.Reference.Type referenceType, RegistryEntryOwner<T> owner, RegistryKey<T> registryKey, T value, CallbackInfo info) {
+		@SuppressWarnings("unchecked")
+		RegistryEntry.Reference<T> source = (RegistryEntry.Reference<T>) (Object) this;
+		
+		if (DefaultRegistryManager.isOnLoadThread() || DefaultRegistryManager.isOwnedByOnlyDefaultManager(owner, registryKey)) {
+			if (!(source instanceof DefaultRegistryEntry))
+				throw new IllegalStateException("Must use DefaultRegistryEntry for default registry entries, not " + getClass().getName());
+		}
+	}
+	
+	@Inject(method = "standAlone", at = @At("HEAD"), cancellable = true)
+	private static <T> void standAlone(RegistryEntryOwner<T> owner, RegistryKey<T> registryKey, CallbackInfoReturnable<RegistryEntry.Reference<T>> info) {
+		if (DefaultRegistryManager.isOnLoadThread())
+			info.setReturnValue(new DefaultRegistryEntry<>(owner, registryKey));
+	}
+	
 	@Shadow
 	public abstract RegistryKey<T> registryKey();
-	
-	@Inject(method = "value", at = @At("HEAD"), cancellable = true)
-	private void value(CallbackInfoReturnable<T> info) {
-		@SuppressWarnings("unchecked")
-		RegistryEntry.Reference<T> source = (RegistryEntry.Reference<T>) (Object) this;
-		
-		if (DynamicRegistryManagerHolder.hasClientManager() && DynamicRegistryManagerHolder.isOwnedByDefaultManager(source)) {
-			RegistryEntry.Reference<T> convertedRef = RegistryCache.convertManagerWithCache(source);
-			if (convertedRef != null)
-				info.setReturnValue(convertedRef.value());
-		}
-	}
-	
-	@Inject(method = "isIn", at = @At("HEAD"), cancellable = true)
-	private void isIn(TagKey<T> tag, CallbackInfoReturnable<Boolean> info) {
-		@SuppressWarnings("unchecked")
-		RegistryEntry.Reference<T> source = (RegistryEntry.Reference<T>) (Object) this;
-		
-		if (DynamicRegistryManagerHolder.hasClientManager() && DynamicRegistryManagerHolder.isOwnedByDefaultManager(source)) {
-			RegistryEntry.Reference<T> convertedRef = RegistryCache.convertManagerWithCache(source);
-			if (convertedRef != null)
-				info.setReturnValue(convertedRef.isIn(tag));
-		}
-	}
-	
-	@Inject(method = "ownerEquals", at = @At("RETURN"), cancellable = true)
-	private void ownerEquals(RegistryEntryOwner<?> owner, CallbackInfoReturnable<Boolean> info) {
-		if (!info.getReturnValueZ()) {
-			if (DynamicRegistryManagerHolder.isOwnedByDefaultManager((RegistryEntry.Reference<?>) (Object) this))
-				info.setReturnValue(true);
-		}
-	}
-	
-	@Inject(method = "streamTags", at = @At("HEAD"), cancellable = true)
-	private void streamTags(CallbackInfoReturnable<Stream<TagKey<T>>> info) {
-		@SuppressWarnings("unchecked")
-		RegistryEntry.Reference<T> source = (RegistryEntry.Reference<T>) (Object) this;
-		
-		if (DynamicRegistryManagerHolder.hasClientManager() && DynamicRegistryManagerHolder.isOwnedByDefaultManager(source)) {
-			RegistryEntry.Reference<T> convertedRef = RegistryCache.convertManagerWithCache(source);
-			if (convertedRef != null)
-				info.setReturnValue(convertedRef.streamTags());
-		}
-	}
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -72,8 +43,7 @@ public abstract class RegistryEntryReferenceMixin<T> {
 			return true;
 		
 		if (obj instanceof RegistryEntry.Reference<?> ref &&
-				(DynamicRegistryManagerHolder.isOwnedByDefaultManager((RegistryEntry.Reference<?>) (Object) this) ||
-						DynamicRegistryManagerHolder.isOwnedByDefaultManager(ref))) {
+				((Object) this instanceof DefaultRegistryEntry || ref instanceof DefaultRegistryEntry)) {
 			return registryKey().getRegistry().equals(ref.registryKey().getRegistry()) &&
 					registryKey().getValue().equals(ref.registryKey().getValue());
 		}

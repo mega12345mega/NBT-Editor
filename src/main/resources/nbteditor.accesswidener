@@ -55,8 +55,6 @@ accessible method net/minecraft/block/entity/BlockEntity writeNbt (Lnet/minecraf
 accessible method net/minecraft/block/entity/BlockEntity writeIdToNbt (Lnet/minecraft/nbt/NbtCompound;)V
 accessible class net/minecraft/block/entity/BlockEntity$Components
 
-accessible field net/minecraft/registry/entry/RegistryEntry$Reference owner Lnet/minecraft/registry/entry/RegistryEntryOwner;
-
 accessible class com/mojang/blaze3d/opengl/GlStateManager$ScissorTestState
 accessible class com/mojang/blaze3d/opengl/GlStateManager$CapabilityTracker
 accessible field com/mojang/blaze3d/opengl/GlStateManager SCISSOR Lcom/mojang/blaze3d/opengl/GlStateManager$ScissorTestState;
@@ -82,6 +80,8 @@ accessible field net/minecraft/entity/player/PlayerInventory selectedSlot I
 accessible field net/minecraft/screen/ScreenHandler trackedCursorSlot Lnet/minecraft/screen/sync/TrackedSlot;
 
 accessible field net/minecraft/item/BoatItem boatEntityType Lnet/minecraft/entity/EntityType;
+
+accessible class net/minecraft/registry/entry/RegistryEntry$Reference$Type
 
 # Private in older versions
 accessible method net/minecraft/text/TextColor getHexCode ()Ljava/lang/String;

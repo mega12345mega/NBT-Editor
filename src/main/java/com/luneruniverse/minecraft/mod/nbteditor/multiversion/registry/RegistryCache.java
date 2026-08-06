@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry;
 
 import java.lang.invoke.MethodType;
 import java.lang.ref.WeakReference;
@@ -12,6 +12,8 @@ import java.util.function.Supplier;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
@@ -32,8 +34,8 @@ public class RegistryCache {
 	/**
 	 * @return May be null
 	 */
-	public static <T> RegistryEntry.Reference<T> convertManagerWithCache(RegistryEntry.Reference<T> ref) {
-		RegistryCache cache = get(DynamicRegistryManagerHolder.getManager());
+	public static <T> RegistryEntry.Reference<T> convertManager(RegistryEntry.Reference<T> ref, DynamicRegistryManager manager) {
+		RegistryCache cache = get(manager);
 		
 		@SuppressWarnings("unchecked")
 		Registry<T> registry = (Registry<T>) cache.getRegistry(ref.registryKey().getRegistry()).orElse(null);

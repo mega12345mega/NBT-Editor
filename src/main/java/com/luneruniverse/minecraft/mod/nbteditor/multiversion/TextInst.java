@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonParseException;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 

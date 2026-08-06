@@ -1,10 +1,10 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.components;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 

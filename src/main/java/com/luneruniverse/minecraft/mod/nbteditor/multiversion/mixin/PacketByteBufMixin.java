@@ -6,11 +6,11 @@ import java.util.function.Supplier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVPacketByteBufParent;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 
 import io.netty.buffer.ByteBuf;

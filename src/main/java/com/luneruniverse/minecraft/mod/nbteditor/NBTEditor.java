@@ -3,9 +3,9 @@ package com.luneruniverse.minecraft.mod.nbteditor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVNetworking;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ContainerScreenS2CPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetEntityC2SPacket;

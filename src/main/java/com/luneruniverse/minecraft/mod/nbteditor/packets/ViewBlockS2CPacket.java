@@ -1,7 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.packets;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistryKeys;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistryKeys;
 import com.luneruniverse.minecraft.mod.nbteditor.util.BlockStateProperties;
 
 import net.minecraft.nbt.NbtCompound;

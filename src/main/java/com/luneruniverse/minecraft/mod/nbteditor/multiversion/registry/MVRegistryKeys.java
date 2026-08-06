@@ -1,4 +1,7 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry;
+
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;

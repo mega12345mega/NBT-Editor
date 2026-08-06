@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import io.netty.buffer.Unpooled;

@@ -7,7 +7,7 @@ import java.util.WeakHashMap;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;

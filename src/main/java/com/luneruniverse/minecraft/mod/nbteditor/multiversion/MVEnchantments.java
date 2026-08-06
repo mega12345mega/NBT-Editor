@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 import java.lang.invoke.MethodType;
 import java.util.function.Supplier;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.Enchants;
 

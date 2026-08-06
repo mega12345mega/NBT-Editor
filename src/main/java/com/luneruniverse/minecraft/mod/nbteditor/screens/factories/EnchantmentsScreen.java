@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigCategory;
