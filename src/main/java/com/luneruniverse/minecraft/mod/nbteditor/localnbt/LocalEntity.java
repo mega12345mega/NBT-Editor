@@ -31,6 +31,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.datafixer.TypeReferences;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.vehicle.AbstractBoatEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -72,6 +73,12 @@ public class LocalEntity implements LocalNBT {
 		
 		cachedEntity = ServerMVMisc.createEntity(entityType, MainUtil.client.world);
 		NBTManagers.ENTITY.setNbt(cachedEntity, nbt);
+		
+		if (cachedEntity instanceof LivingEntity livingEntity) {
+			// Unlike yaw, these are not set properly by readNbt
+			livingEntity.lastHeadYaw = livingEntity.headYaw;
+			livingEntity.lastBodyYaw = livingEntity.bodyYaw;
+		}
 		
 		cachedNbt = nbt.copy();
 		
