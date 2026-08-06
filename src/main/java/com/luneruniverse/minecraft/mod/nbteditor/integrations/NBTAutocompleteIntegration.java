@@ -110,7 +110,12 @@ public class NBTAutocompleteIntegration extends Integration {
 					pathBuilder.append(key);
 				else {
 					String escapedKey = escapeKey(key);
-					pathBuilder.append(key.equals(escapedKey) ? key : escapedKey.substring(0, escapedKey.length() - 1));
+					if (key.equals(escapedKey))
+						pathBuilder.append(key);
+					else if (value == null)
+						pathBuilder.append(escapedKey.substring(0, escapedKey.length() - 1));
+					else
+						pathBuilder.append(escapedKey);
 				}
 			}
 			
