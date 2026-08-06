@@ -16,7 +16,7 @@ public class EquipmentContainerIO implements ContainerIO<NbtCompound> {
 			HELMET_TEXTURE, CHESTPLATE_TEXTURE, LEGGINGS_TEXTURE, BOOTS_TEXTURE,
 			SADDLE_TEXTURE, LLAMA_ARMOR_TEXTURE, SWORD_TEXTURE, SHIELD_TEXTURE};
 	private static final String[] KEYS = new String[] {
-			"head", "chest", "legs", "boots", "saddle", "body", "mainhand", "offhand"};
+			"head", "chest", "legs", "feet", "saddle", "body", "mainhand", "offhand"};
 	
 	private final Identifier[] textures;
 	
