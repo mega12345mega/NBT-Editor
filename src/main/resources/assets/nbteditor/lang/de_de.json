@@ -4,7 +4,7 @@
 	"nbteditor.outdated.desc": "Eine neue Version ist verfügbar!",
 	"nbteditor.incompatible_protocol.title": "Inkompatibles NBT Editor Protokoll",
 	"nbteditor.incompatible_protocol.desc": "Serverseitige Funktionen nicht aktiviert",
-
+	
 	"nbteditor.requires_server": "§cDies erfordert NBT Editor auf dem Server installiert zu haben (und du musst Operator Level 2 haben)!",
 	"nbteditor.nbt_ac.tip": "Lade NBT Autocomplete für Vorschläge herunter",
 	
@@ -13,7 +13,7 @@
 	"nbteditor.cancel": "Abbrechen",
 	"nbteditor.loading": "Laden ...",
 	"nbteditor.hide": "Im Hintergrund laufen lassen",
-
+	
 	"nbteditor.no_ref.unknown": "§cDas was du versuchst zu bearbeiten wurde nicht gefunden!",
 	"nbteditor.no_ref.to_edit": "§cDu musst ein Item halten oder auf einen Block/eine Entity schauen um etwas zu bearbeiten!",
 	"nbteditor.no_ref.to_edit_nbt": "§cDu musst ein Item halten oder auf ein Block-Entity/Entity schauen um etwas zu bearbeiten!",
@@ -593,8 +593,9 @@
 	"nbteditor.credits_14": "§6he_il: §7inon13, RedVortexDev",
 	"nbteditor.credits_15": "§6cs_cz: §7Kulihrasek1101",
 	"nbteditor.credits_16": "§6zh_tw: §7dirtTW, Axolotl1000, GTedd",
-	"nbteditor.credits_17": "§7--------------------",
-
+	"nbteditor.credits_17": "§6de_de: §7DZultra",
+	"nbteditor.credits_18": "§7--------------------",
+	
 	
 	
 	"nbteditor.hdb.search": "Suchen",
