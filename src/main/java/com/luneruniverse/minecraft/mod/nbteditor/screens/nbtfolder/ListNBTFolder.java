@@ -160,7 +160,7 @@ public class ListNBTFolder implements NBTFolder<AbstractNbtList> {
 	}
 	
 	private NbtElement getDefaultValue(AbstractNbtList nbt) {
-		return switch (nbt.nbte$getHeldType().orElse((byte) 0)) {
+		return switch (nbt.nbte$getHeldType().orElseGet(() -> nbt.nbte$get(nbt.nbte$size() - 1).getType())) {
 			case NbtElement.BYTE_TYPE -> NbtByte.ZERO;
 			case NbtElement.SHORT_TYPE -> NbtShort.of((short) 0);
 			case 0, NbtElement.INT_TYPE -> NbtInt.of(0);

@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.server;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -52,7 +53,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 
 public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvents.Start {
 	
@@ -191,29 +192,34 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 			return;
 		
 		Block block = MVRegistry.BLOCK.get(packet.getId());
-		BlockState state = world.getBlockState(packet.getPos());
-		if (state.getBlock() != block) {
+		
+		BlockState oldState = world.getBlockState(packet.getPos());
+		BlockState newState;
+		boolean sameBlock = (oldState.getBlock() == block);
+		
+		if (sameBlock)
+			newState = packet.getState().applyTo(oldState);
+		else
+			newState = packet.getState().applyToSafely(block.getDefaultState());
+		
+		world.setBlockState(packet.getPos(), newState, Block.NOTIFY_LISTENERS | (packet.isTriggerUpdate()
+				? Block.SKIP_BLOCK_ENTITY_REPLACED_CALLBACK : Block.FORCE_STATE_AND_SKIP_CALLBACKS_AND_DROPS));
+		
+		if (sameBlock && packet.isRecreate())
 			world.removeBlockEntity(packet.getPos());
-			world.setBlockState(packet.getPos(),
-					packet.getState().applyToSafely(block.getDefaultState()));
-		} else {
-			if (!new BlockStateProperties(state).equals(packet.getState()))
-				world.setBlockState(packet.getPos(), packet.getState().applyTo(state));
-			if (packet.isRecreate())
-				world.removeBlockEntity(packet.getPos());
-		}
 		
 		BlockEntity blockEntity = world.getBlockEntity(packet.getPos());
-		if (blockEntity == null)
-			return;
-		
-		NBTManagers.BLOCK_ENTITY.setNbt(blockEntity, packet.getNbt());
-		
-		if (packet.isTriggerUpdate()) {
-			blockEntity.markDirty();
-			// Flags arg seems to be unused, and I don't know what it's supposed to be for this
-			world.updateListeners(packet.getPos(), blockEntity.getCachedState(), blockEntity.getCachedState(), 0);
+		if (blockEntity != null) {
+			NBTManagers.BLOCK_ENTITY.setNbt(blockEntity, packet.getNbt());
+			
+			if (packet.isTriggerUpdate())
+				blockEntity.markDirty();
+			else
+				world.markDirty(packet.getPos());
 		}
+		
+		if (packet.isTriggerUpdate())
+			world.updateNeighbors(packet.getPos(), block);
 	}
 	
 	private void onSetEntityPacket(SetEntityC2SPacket packet, ServerPlayerEntity player) {
@@ -242,29 +248,19 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		
 		if (packet.isRecreate() || !entity.getUuid().equals(newUUID) || entity.getType() != entityType) {
 			Entity vehicle = entity.getVehicle();
-			Vec3d pos = entity.getPos();
-			float yaw = entity.getYaw();
-			float bodyYaw = (entity instanceof LivingEntity livingEntity ? livingEntity.bodyYaw : 0);
-			float headYaw = entity.getHeadYaw();
-			float pitch = entity.getPitch();
-			entity.streamPassengersAndSelf().forEach(passengerOrSelf -> {
-				passengerOrSelf.stopRiding();
-				passengerOrSelf.remove(RemovalReason.DISCARDED);
-			});
-			entity = ServerMVMisc.createEntity(entityType, world);
-			entity.setUuid(newUUID);
-			entity.setPosition(pos);
-			entity.setYaw(yaw);
-			entity.setBodyYaw(bodyYaw);
-			entity.setHeadYaw(headYaw);
-			entity.setPitch(pitch);
+			
+			Map<UUID, Entity> originalEntities = new HashMap<>();
+			removeEntityWithPassengers(entity, originalEntities);
+			
+			entity = createEntity(entityType, world, newUUID, entity);
 			world.spawnEntity(entity);
-			readEntityNbtWithPassengers(world, entity, packet.getNbt());
+			readEntityNbtWithPassengers(world, entity, packet.getNbt(), originalEntities);
+			
 			if (vehicle != null)
 				entity.startRiding(vehicle, true);
 		} else {
 			entity.getDataTracker().reset();
-			readEntityNbtWithPassengers(world, entity, packet.getNbt());
+			readEntityNbtWithPassengers(world, entity, packet.getNbt(), new HashMap<>());
 		}
 	}
 	
@@ -287,20 +283,19 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 				packet.getNbt().nbte$putUuid("UUID", uuid);
 		}
 		
-		Entity entity = ServerMVMisc.createEntity(MVRegistry.ENTITY_TYPE.get(packet.getId()), world);
-		entity.setUuid(uuid);
+		Entity entity = createEntity(MVRegistry.ENTITY_TYPE.get(packet.getId()), world, uuid, null);
 		entity.setPosition(packet.getPos());
 		packet.getNbt().put("Pos", Stream.of(packet.getPos().x, packet.getPos().y, packet.getPos().z)
 				.map(NbtDouble::of).collect(NbtList::new, NbtList::add, NbtList::addAll));
 		world.spawnEntity(entity);
-		readEntityNbtWithPassengers(world, entity, packet.getNbt());
+		readEntityNbtWithPassengers(world, entity, packet.getNbt(), null);
 		
 		MVServerNetworking.send(player,
 				new ViewEntityS2CPacket(packet.getRequestId(), entity.getEntityWorld().getRegistryKey(), entity.getUuid(),
 						EntityType.getId(entity.getType()), NBTManagers.ENTITY.getNbt(entity)));
 	}
 	
-	private void readEntityNbtWithPassengers(ServerWorld world, Entity entity, NbtCompound nbt) {
+	private void readEntityNbtWithPassengers(ServerWorld world, Entity entity, NbtCompound nbt, Map<UUID, Entity> originalEntities) {
 		NBTManagers.ENTITY.setNbt(entity, nbt);
 		
 		Map<UUID, Entity> passengers = entity.getPassengerList().stream().collect(Collectors.toMap(Entity::getUuid, Function.identity()));
@@ -325,10 +320,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 				} catch (InvalidIdentifierException e) {}
 			}
 			if (passengerId != null && passenger != null && !EntityType.getId(passenger.getType()).equals(passengerId)) {
-				passenger.streamPassengersAndSelf().forEach(passengerOrSelf -> {
-					passengerOrSelf.stopRiding();
-					passengerOrSelf.remove(RemovalReason.DISCARDED);
-				});
+				removeEntityWithPassengers(passenger, originalEntities);
 				passenger = null;
 			}
 			
@@ -340,22 +332,44 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 					passengerUUID = UUID.randomUUID();
 					passengerNbt.nbte$putUuid("UUID", passengerUUID);
 				}
-				passenger = ServerMVMisc.createEntity(passengerType, world);
-				passenger.setUuid(passengerUUID);
+				passenger = createEntity(passengerType, world, passengerUUID,
+						originalEntities == null ? null : originalEntities.get(passengerUUID));
 				passenger.startRiding(entity, true);
 				world.spawnEntity(passenger);
 			}
 			
-			readEntityNbtWithPassengers(world, passenger, passengerNbt);
+			readEntityNbtWithPassengers(world, passenger, passengerNbt, originalEntities);
 		}
 		
 		passengers.keySet().removeAll(passengerUUIDs);
-		for (Entity passenger : passengers.values()) {
-			passenger.streamPassengersAndSelf().forEach(passengerOrSelf -> {
-				passengerOrSelf.stopRiding();
-				passengerOrSelf.remove(RemovalReason.DISCARDED);
-			});
+		for (Entity passenger : passengers.values())
+			removeEntityWithPassengers(passenger, null);
+	}
+	
+	private void removeEntityWithPassengers(Entity entity, Map<UUID, Entity> originalEntities) {
+		entity.streamPassengersAndSelf().forEach(passengerOrSelf -> {
+			if (originalEntities != null)
+				originalEntities.put(passengerOrSelf.getUuid(), passengerOrSelf);
+			
+			passengerOrSelf.remove(RemovalReason.DISCARDED);
+		});
+	}
+	
+	private Entity createEntity(EntityType<?> type, World world, UUID uuid, Entity originalEntity) {
+		Entity entity = ServerMVMisc.createEntity(type, world);
+		entity.setUuid(uuid);
+		
+		if (originalEntity != null) {
+			entity.setPosition(originalEntity.getPos());
+			entity.setYaw(originalEntity.getYaw());
+			if (originalEntity instanceof LivingEntity originalLivingEntity && entity instanceof LivingEntity) {
+				entity.setBodyYaw(originalLivingEntity.bodyYaw);
+				entity.setHeadYaw(originalLivingEntity.headYaw);
+			}
+			entity.setPitch(originalEntity.getPitch());
 		}
+		
+		return entity;
 	}
 	
 }

@@ -120,11 +120,13 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				
 				clickActionDropdown = ConfigValueDropdown.forEnum(ClickAction.get(clickAction), ClickAction.NONE, ClickAction.class);
 				clickActionDropdown.setWidth(150);
+				clickActionDropdown.addValueListener(value -> updateOk());
 				clickActionField = addElement(TranslatedGroupWidget.forWidget(clickActionDropdown, 0, 0, 0));
 				clickValueField = addWidget(new NamedTextFieldWidget(0, 0, 150, 16))
 						.name(TextInst.translatable("nbteditor.formatted_text.click_event_value"));
 				clickValueField.setMaxLength(Integer.MAX_VALUE);
 				clickValueField.setText(clickValue);
+				clickValueField.setChangedListener(str -> updateOk());
 				
 				hoverActionDropdown = ConfigValueDropdown.forEnum(HoverAction.get(hoverAction), HoverAction.NONE, HoverAction.class);
 				hoverActionDropdown.setWidth(150);

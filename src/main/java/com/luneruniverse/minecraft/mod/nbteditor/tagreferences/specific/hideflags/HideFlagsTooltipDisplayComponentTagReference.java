@@ -1,6 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.hideflags;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
@@ -20,7 +20,7 @@ public class HideFlagsTooltipDisplayComponentTagReference implements TagReferenc
 	@Override
 	public Map<HideFlag, Boolean> get(ItemStack object) {
 		TooltipDisplayComponent display = object.get(DataComponentTypes.TOOLTIP_DISPLAY);
-		Map<HideFlag, Boolean> output = new HashMap<>();
+		Map<HideFlag, Boolean> output = new LinkedHashMap<>();
 		
 		output.put(TooltipHideFlag.INSTANCE, display.hideTooltip());
 		

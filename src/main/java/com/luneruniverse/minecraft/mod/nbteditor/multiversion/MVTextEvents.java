@@ -22,13 +22,14 @@ import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 
 public class MVTextEvents {
 	
 	public static class ClickAction<T> {
 		private static final Function<String, Optional<URI>> parseUri = valueStr -> {
 			try {
-				return Optional.of(new URI(valueStr));
+				return Optional.of(Util.validateUri(valueStr));
 			} catch (URISyntaxException e) {
 				return Optional.empty();
 			}

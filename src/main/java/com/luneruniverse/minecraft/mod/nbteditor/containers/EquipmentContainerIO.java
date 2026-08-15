@@ -50,6 +50,8 @@ public class EquipmentContainerIO implements ContainerIO<NbtCompound> {
 		for (int i = 0; i < 8; i++) {
 			if (container.nbte$contains(KEYS[i], NbtElement.COMPOUND_TYPE))
 				contents[i] = NBTManagers.ITEM.deserializeOrElse(container.getCompoundOrEmpty(KEYS[i]), ItemStack.EMPTY);
+			else
+				contents[i] = ItemStack.EMPTY;
 		}
 		return contents;
 	}

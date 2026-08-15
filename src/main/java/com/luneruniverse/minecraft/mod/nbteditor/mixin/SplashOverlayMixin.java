@@ -16,7 +16,14 @@ public class SplashOverlayMixin {
 	@ModifyVariable(method = "<init>", at = @At("HEAD"), ordinal = 0)
 	private static ResourceReload init_monitor(ResourceReload monitor) {
 		return Version.<ResourceReload>newSwitch()
-				.range("1.20.5", null, () -> new ParallelResourceReload(monitor, DefaultRegistryManager.load()))
+				.range("1.20.5", null, () -> {
+					// F3 + T
+					if (DefaultRegistryManager.get().isDone())
+						return monitor;
+					
+					// First load
+					return new ParallelResourceReload(monitor, DefaultRegistryManager.load());
+				})
 				.range(null, "1.20.4", monitor)
 				.get();
 	}

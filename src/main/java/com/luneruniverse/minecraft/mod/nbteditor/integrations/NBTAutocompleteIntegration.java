@@ -62,8 +62,30 @@ public class NBTAutocompleteIntegration extends Integration {
 			key = key.substring(0, cursor);
 			nextTagAllowed = false;
 		} else {
-			nextTagAllowed = (cursor < value.length());
 			value = value.substring(0, cursor);
+			
+			Character quote = null;
+			boolean escaped = false;
+			int nestLevel = 0;
+			
+			for (char c : value.toCharArray()) {
+				if (escaped)
+					escaped = false;
+				else if (quote != null && c == '\\')
+					escaped = true;
+				else if (quote != null && c == quote)
+					quote = null;
+				else if (quote == null && (c == '"' || c == '\''))
+					quote = c;
+				else if (quote != null)
+					;
+				else if (c == '[' || c == '{')
+					nestLevel++;
+				else if (c == ']' || c == '}')
+					nestLevel--;
+			}
+			
+			nextTagAllowed = (nestLevel > 0);
 		}
 		
 		if (key != null && (key.contains("{") || key.contains("[")))
@@ -148,7 +170,8 @@ public class NBTAutocompleteIntegration extends Integration {
 							!(suggestion.getText().isEmpty()) &&
 							!(valueFinal == null && suggestion.getText().contains(":")) &&
 							!(valueFinal == null && firstKeyFinal && components && suggestion.getText().contains("{")) &&
-							!(!nextTagAllowed && (suggestion.getText().contains(",") || suggestion.getText().contains("}"))) &&
+							!(!nextTagAllowed && (suggestion.getText().contains(",") ||
+									suggestion.getText().contains("}") || suggestion.getText().contains("]"))) &&
 							!(otherTags != null && otherTags.contains(suggestion.getText())))
 					.map(suggestion -> {
 						suggestion = shiftSuggestion(suggestion, -fieldStartFinal);
