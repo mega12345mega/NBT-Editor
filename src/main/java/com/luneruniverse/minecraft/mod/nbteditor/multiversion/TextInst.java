@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonParseException;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -52,12 +53,12 @@ public class TextInst {
 	/**
 	 * <strong>CONSIDER USING {@link TextUtil#fromStringSafely(String, boolean)}</strong>
 	 */
-	public static @Nullable Text fromString(String str, boolean eitherFormat) throws IllegalArgumentException {
+	public static @Nullable Text fromString(String str, boolean allowSpecialNumbers, boolean eitherFormat) throws IllegalArgumentException {
 		return Version.<Text>newSwitch()
 				.range("1.21.5", null, () -> {
 					IllegalArgumentException wrapper;
 					try {
-						return fromSNbt(str);
+						return fromSnbt(str, allowSpecialNumbers);
 					} catch (CommandSyntaxException | InvalidNbtException e) {
 						wrapper = new IllegalArgumentException("Failed to parse text");
 						wrapper.addSuppressed(e);
@@ -84,7 +85,7 @@ public class TextInst {
 					}
 					
 					try {
-						return fromSNbt(str);
+						return fromSnbt(str, allowSpecialNumbers);
 					} catch (CommandSyntaxException | InvalidNbtException e) {
 						wrapper.addSuppressed(e);
 						throw wrapper;
@@ -95,7 +96,7 @@ public class TextInst {
 	public static String toString(Text text) throws IllegalArgumentException {
 		try {
 			return Version.<String>newSwitch()
-					.range("1.21.5", null, () -> toSNbt(text))
+					.range("1.21.5", null, () -> toSnbt(text))
 					.range(null, "1.21.4", () -> toJson(text))
 					.get();
 		} catch (InvalidNbtException | JsonParseException e) {
@@ -129,12 +130,12 @@ public class TextInst {
 	}
 	
 	/**
-	 * <strong>CONSIDER USING {@link TextUtil#fromSNbtSafely(String)}</strong>
+	 * <strong>CONSIDER USING {@link TextUtil#fromSnbtSafely(String)}</strong>
 	 */
-	public static Text fromSNbt(String snbt) throws CommandSyntaxException, InvalidNbtException {
-		return fromNbt(MVMisc.parseNbt(snbt));
+	public static Text fromSnbt(String snbt, boolean allowSpecialNumbers) throws CommandSyntaxException, InvalidNbtException {
+		return fromNbt(MixinLink.parseSnbt(snbt, allowSpecialNumbers));
 	}
-	public static String toSNbt(Text text) throws InvalidNbtException {
+	public static String toSnbt(Text text) throws InvalidNbtException {
 		return toNbt(text).toString();
 	}
 	

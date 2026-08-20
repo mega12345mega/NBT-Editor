@@ -16,6 +16,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
@@ -558,6 +560,15 @@ public class MainUtil {
 	public static void setCursorStackSilently(ScreenHandler handler, ItemStack item) {
 		handler.setCursorStack(item);
 		MVMisc.setPreviousCursorStack(handler, item);
+	}
+	
+	public static Matcher matchAny(String str, Pattern... patterns) {
+		for (Pattern pattern : patterns) {
+			Matcher matcher = pattern.matcher(str);
+			if (matcher.matches())
+				return matcher;
+		}
+		return null;
 	}
 	
 }

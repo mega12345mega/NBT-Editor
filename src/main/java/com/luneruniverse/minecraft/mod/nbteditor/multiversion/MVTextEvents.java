@@ -11,6 +11,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.JsonOps;
 
@@ -18,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
@@ -224,7 +225,7 @@ public class MVTextEvents {
 					.range("1.21.5", null, () -> {
 						NbtElement valueNbt;
 						try {
-							valueNbt = StringNbtReader.fromOps(NbtOps.INSTANCE).read(valueStr);
+							valueNbt = MixinLink.parseSnbt(valueStr, ConfigScreen.isSpecialNumbers());
 						} catch (CommandSyntaxException e) {
 							return Optional.empty();
 						}

@@ -608,7 +608,7 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		@Override
 		protected String onPaste(String text, int pos, int overwrittenLen) {
 			try {
-				Text textValue = pasteFilter(TextUtil.fromStringSafely(text, true));
+				Text textValue = pasteFilter(TextUtil.fromStringSafely(text, true, true));
 				String textValueStr = textValue.getString();
 				int textLen = textValueStr.length();
 				

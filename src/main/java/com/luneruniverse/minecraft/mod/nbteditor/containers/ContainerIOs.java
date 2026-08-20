@@ -28,7 +28,6 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.vehicle.ChestBoatEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.BoatItem;
 import net.minecraft.item.BundleItem;
@@ -151,7 +150,7 @@ public class ContainerIOs {
 	private static final ItemEntityContainerIO CHEST_MINECART_IO = ItemEntityContainerIO.forEntityTagIO(
 			new SlotKeyNbtListContainerIO(27).forNbtCompoundItems(), EntityType.CHEST_MINECART);
 	private static final ItemEntityContainerIO HOPPER_MINECART_IO = ItemEntityContainerIO.forEntityTagIO(
-			new SlotKeyNbtListContainerIO(5).forNbtCompoundItems(), EntityType.FURNACE_MINECART);
+			new SlotKeyNbtListContainerIO(5).forNbtCompoundItems(), EntityType.HOPPER_MINECART);
 	private static final Function<EntityType<?>, ItemEntityContainerIO> CHEST_BOAT_IO =
 			entityType -> Version.<ItemEntityContainerIO>newSwitch()
 					.range("1.19.0", null, () -> ItemEntityContainerIO.forEntityTagIO(
@@ -188,12 +187,15 @@ public class ContainerIOs {
 		registerItemBlockIO((BlockItem) Items.HOPPER, HOPPER_IO);
 		registerItemBlockIO((BlockItem) Items.JUKEBOX, JUKEBOX_IO);
 		registerItemBlockIO((BlockItem) Items.LECTERN, LECTERN_IO);
+		
 		registerItemEntityIO(Items.ITEM_FRAME, EntityType.ITEM_FRAME, ITEM_FRAME_IO);
 		registerItemEntityIO(Items.GLOW_ITEM_FRAME, EntityType.GLOW_ITEM_FRAME, ITEM_FRAME_IO);
+		
 		for (Item item : MVRegistry.ITEM) {
 			if (item instanceof BundleItem bundle)
 				registerItemIO(bundle, BUNDLE_IO);
 		}
+		
 		Version.newSwitch()
 				.range("1.20.0", null, () -> {
 					registerItemBlockIO((BlockItem) Items.CHISELED_BOOKSHELF, CHISELED_BOOKSHELF_IO);
@@ -202,10 +204,12 @@ public class ContainerIOs {
 				})
 				.range(null, "1.19.4", () -> {})
 				.run();
+		
 		Version.newSwitch()
 				.range("1.20.3", null, () -> registerItemBlockIO((BlockItem) Items.DECORATED_POT, DECORATED_POT_IO))
 				.range(null, "1.20.2", () -> {})
 				.run();
+		
 		Version.newSwitch()
 				.range("1.21.0", null, () -> registerItemBlockIO((BlockItem) Items.CRAFTER, CRAFTER_IO))
 				.range(null, "1.20.6", () -> {})
@@ -228,7 +232,9 @@ public class ContainerIOs {
 		registerEntityIO(EntityType.MULE, DONKEY_IO);
 		registerEntityIO(EntityType.LLAMA, LLAMA_IO);
 		registerEntityIO(EntityType.TRADER_LLAMA, LLAMA_IO);
+		
 		registerEntityIO(EntityType.VILLAGER, VILLAGER_IO);
+		
 		Version.newSwitch()
 				.range("1.20.3", null, () -> {
 					registerItemEntityIO(Items.CHEST_MINECART, EntityType.CHEST_MINECART, CHEST_MINECART_IO);
@@ -239,33 +245,45 @@ public class ContainerIOs {
 					registerEntityIO(EntityType.HOPPER_MINECART, HOPPER_MINECART_IO.entity());
 				})
 				.run();
-		Map<EntityType<?>, BoatItem> boatItems = new HashMap<>();
+		
 		Version.newSwitch()
 				.range("1.21.2", null, () -> {
 					for (Item item : MVRegistry.ITEM) {
-						if (item instanceof BoatItem boat)
-							boatItems.put(boat.boatEntityType, boat);
+						if (item instanceof BoatItem boat && MVRegistry.ITEM.getId(item).getPath().contains("_chest_"))
+							registerItemEntityIO(boat, boat.boatEntityType, CHEST_BOAT_IO);
 					}
 				})
 				.range("1.20.3", "1.21.1", () -> {
-					EntityType<?> chestBoat = Reflection.getField(EntityType.class, "field_38096", "Lnet/minecraft/class_1299;").get(null);
-					ContainerIO<ItemStack> io = CHEST_BOAT_IO.apply(chestBoat).item();
-					registerItemIO(Items.OAK_CHEST_BOAT, io);
-					registerItemIO(Items.SPRUCE_CHEST_BOAT, io);
-					registerItemIO(Items.BIRCH_CHEST_BOAT, io);
-					registerItemIO(Items.JUNGLE_CHEST_BOAT, io);
-					registerItemIO(Items.ACACIA_CHEST_BOAT, io);
-					registerItemIO(Items.CHERRY_CHEST_BOAT, io);
-					registerItemIO(Items.DARK_OAK_CHEST_BOAT, io);
-					registerItemIO(Items.MANGROVE_CHEST_BOAT, io);
-					registerItemIO(Items.BAMBOO_CHEST_RAFT, io);
+					EntityType<?> chestBoatEntityType =
+							Reflection.getField(EntityType.class, "field_38096", "Lnet/minecraft/class_1299;").get(null);
+					ItemEntityContainerIO itemEntityIo = CHEST_BOAT_IO.apply(chestBoatEntityType);
+					
+					ContainerIO<ItemStack> itemIo = itemEntityIo.item();
+					registerItemIO(Items.OAK_CHEST_BOAT, itemIo);
+					registerItemIO(Items.SPRUCE_CHEST_BOAT, itemIo);
+					registerItemIO(Items.BIRCH_CHEST_BOAT, itemIo);
+					registerItemIO(Items.JUNGLE_CHEST_BOAT, itemIo);
+					registerItemIO(Items.ACACIA_CHEST_BOAT, itemIo);
+					registerItemIO(Items.CHERRY_CHEST_BOAT, itemIo);
+					registerItemIO(Items.DARK_OAK_CHEST_BOAT, itemIo);
+					registerItemIO(Items.MANGROVE_CHEST_BOAT, itemIo);
+					registerItemIO(Items.BAMBOO_CHEST_RAFT, itemIo);
+					
+					registerEntityIO(chestBoatEntityType, itemEntityIo.entity());
 				})
-				.range(null, "1.20.2", () -> {})
+				.range("1.19.0", "1.20.2", () -> {
+					EntityType<?> chestBoatEntityType =
+							Reflection.getField(EntityType.class, "field_38096", "Lnet/minecraft/class_1299;").get(null);
+					registerEntityIO(chestBoatEntityType, CHEST_BOAT_IO.apply(chestBoatEntityType).entity());
+				})
+				.range(null, "1.18.2", () -> {})
 				.run();
+		
 		Version.newSwitch()
 				.range("1.19.0", null, () -> registerEntityIO(EntityType.ALLAY, ALLAY_IO))
 				.range(null, "1.18.2", () -> {})
 				.run();
+		
 		MVClientNetworking.PlayNetworkStateEvents.Join.EVENT.register(() -> {
 			for (EntityType<?> entityType : MVRegistry.ENTITY_TYPE) {
 				if (ENTITY_IO.containsKey(entityType))
@@ -273,17 +291,6 @@ public class ContainerIOs {
 				Entity entity = ServerMVMisc.createEntity(entityType, MainUtil.client.world);
 				if (entity instanceof MobEntity)
 					registerEntityIO(entityType, EQUIPMENT_IO.apply(entityType).entity());
-				Version.newSwitch()
-						.range("1.19.0", null, () -> {
-							if (entity instanceof ChestBoatEntity) {
-								registerEntityIO(entityType, CHEST_BOAT_IO.apply(entityType).entity());
-								BoatItem item = boatItems.get(entityType);
-								if (item != null)
-									registerItemIO(item, CHEST_BOAT_IO.apply(entityType).item());
-							}
-						})
-						.range(null, "1.18.2", () -> {})
-						.run();
 			}
 		});
 	}

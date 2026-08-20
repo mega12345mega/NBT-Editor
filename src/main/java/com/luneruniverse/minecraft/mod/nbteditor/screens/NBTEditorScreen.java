@@ -36,16 +36,18 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.NamedTextFieldWidget;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.StringInput;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.SuggestingTextFieldWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.snbtformatters.SNBTFormatter;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 
@@ -69,6 +71,7 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private NBTValue upValue;
 	private NBTValue selectedValue;
 	private boolean json;
+	private Text selectedValueText;
 	
 	@SuppressWarnings("deprecation")
 	public NBTEditorScreen(NBTReference<L> ref) {
@@ -199,20 +202,25 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		value = new SuggestingTextFieldWidget(this, 16, 16 + 8 + 32 + (16 + 8) * 2, 288, 16).name(TextInst.translatable("nbteditor.nbt.value"));
 		value.setRenderTextProvider((str, index) -> {
-			return TextUtil.substring(NbtFormatter.FORMATTER.formatSafely(value.getText()).text(), index, index + str.length()).asOrderedText();
+			if (selectedValue == null)
+				return OrderedText.styledForwardsVisitedString(str, Style.EMPTY);
+			return TextUtil.substring(selectedValueText, index, index + str.length()).asOrderedText();
 		});
 		value.setMaxLength(Integer.MAX_VALUE);
 		value.setText("");
 		value.setEditable(false);
 		value.setChangedListener(str -> {
-			if (selectedValue != null) {
-				selectedValue.setUnsafe(!NbtFormatter.FORMATTER.formatSafely(value.getText()).isSuccess());
-				if (selectedValue.isUnsafe())
+			if (selectedValue == null) {
+				selectedValueText = null;
+			} else {
+				SNBTFormatter.Result formatResult = SNBTFormatter.FORMATTER.format(str, ConfigScreen.isSpecialNumbers());
+				selectedValueText = formatResult.snbt();
+				selectedValue.setUnsafe(!formatResult.success());
+				if (!formatResult.success())
 					return;
-				selectedValue.valueChanged(str, nbt -> {
-					currentFolder.setValue(selectedValue.getKey(), nbt);
-					updateName();
-				});
+				selectedValue.setValue(formatResult.nbt());
+				currentFolder.setValue(selectedValue.getKey(), formatResult.nbt());
+				updateName();
 				if (realPath.isEmpty()) {
 					for (List2D.List2DValue element : editor.getElements()) {
 						if (element instanceof NBTValue value)
@@ -231,33 +239,39 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		
 		addDrawableChild(MVMisc.newButton(16 + 288 + 10, 16 + 8 + 32 + (16 + 8) * 2 - 2, 75, 20, TextInst.translatable("nbteditor.nbt.value_expand"), btn -> {
 			if (selectedValue == null) {
-				client.setScreen(new TextAreaScreen(this, currentFolder.getNBT().toString(), NbtFormatter.FORMATTER, false, str -> {
-					try {
-						NbtElement nbt = MixinLink.parseSpecialElement(new StringReader(str));
-						if (realPath.isEmpty()) {
-							if (!(nbt instanceof NbtCompound)) {
-								NbtCompound temp = new NbtCompound();
-								temp.put("value", nbt);
-								nbt = temp;
+				TextAreaScreen textAreaScreen = new TextAreaScreen(this, currentFolder.getNBT().toString(),
+						SNBTFormatter.FORMATTER, ConfigScreen.isSpecialNumbers(), false, str -> {
+							try {
+								NbtElement nbt = MixinLink.parseSnbt(str, ConfigScreen.isSpecialNumbers());
+								if (realPath.isEmpty()) {
+									if (!(nbt instanceof NbtCompound)) {
+										NbtCompound temp = new NbtCompound();
+										temp.put("value", nbt);
+										nbt = temp;
+									}
+									baseFolder.setNBT((NbtCompound) nbt);
+								} else {
+									String lastPathPart = realPath.remove(realPath.size() - 1);
+									genEditor();
+									currentFolder.setValue(lastPathPart, nbt);
+									realPath.add(lastPathPart);
+								}
+							} catch (CommandSyntaxException e) {
+								NBTEditor.LOGGER.error("Error parsing nbt from Expand", e);
 							}
-							baseFolder.setNBT((NbtCompound) nbt);
-						} else {
-							String lastPathPart = realPath.remove(realPath.size() - 1);
-							genEditor();
-							currentFolder.setValue(lastPathPart, nbt);
-							realPath.add(lastPathPart);
-						}
-					} catch (CommandSyntaxException e) {
-						NBTEditor.LOGGER.error("Error parsing nbt from Expand", e);
-					}
-				}).suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
+						});
+				textAreaScreen.suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
 						.map(ac -> ac.getSuggestions(localNBT, realPath, null, str, cursor))
-						.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture())));
-			} else
-				client.setScreen(new TextAreaScreen(this, selectedValue.getValueText(json), NbtFormatter.FORMATTER,
-						false, str -> value.setText(str)).suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
-								.map(ac -> ac.getSuggestions(localNBT, realPath, selectedValue.getKey(), str, cursor))
-								.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture())));
+						.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture()));
+				client.setScreen(textAreaScreen);
+			} else {
+				TextAreaScreen textAreaScreen = new TextAreaScreen(this, selectedValue.getValueText(json),
+						SNBTFormatter.FORMATTER, ConfigScreen.isSpecialNumbers(), false, str -> value.setText(str));
+				textAreaScreen.suggest((str, cursor) -> NBTAutocompleteIntegration.INSTANCE
+						.map(ac -> ac.getSuggestions(localNBT, realPath, selectedValue.getKey(), str, cursor))
+						.orElseGet(() -> new SuggestionsBuilder("", 0).buildFuture()));
+				client.setScreen(textAreaScreen);
+			}
 		}));
 		
 		final int editorY = 16 + 8 + 32 + (16 + 8) * 3;
@@ -494,13 +508,13 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 	private void copy() {
 		if (selectedValue != null) {
 			copiedKey = selectedValue.getKey();
-			copiedValue = currentFolder.getValue(selectedValue.getKey()).copy();
+			copiedValue = selectedValue.getValue().copy();
 		}
 	}
 	private void cut() {
 		if (selectedValue != null) {
 			copiedKey = selectedValue.getKey();
-			copiedValue = currentFolder.getValue(selectedValue.getKey()).copy();
+			copiedValue = selectedValue.getValue().copy();
 			
 			currentFolder.removeKey(selectedValue.getKey());
 			genEditor();
@@ -516,9 +530,9 @@ public class NBTEditorScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 		}
 	}
 	private void rename() {
-		if (selectedValue != null) {
-			String selectedKey = selectedValue.getKey();
-			NbtElement selectedValue = currentFolder.getValue(selectedKey);
+		if (this.selectedValue != null) {
+			String selectedKey = this.selectedValue.getKey();
+			NbtElement selectedValue = this.selectedValue.getValue();
 			
 			getKey(selectedKey, key -> promptForDuplicateKey(key, key2 -> {
 				currentFolder.removeKey(selectedKey);

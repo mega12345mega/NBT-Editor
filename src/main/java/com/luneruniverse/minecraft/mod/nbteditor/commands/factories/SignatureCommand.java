@@ -33,7 +33,7 @@ public class SignatureCommand extends ClientCommand {
 			signature = TextInst.translatable("nbteditor.sign.default");
 		else {
 			try {
-				signature = TextInst.fromString(new String(Files.readAllBytes(SIGNATURE_FILE.toPath())), true);
+				signature = TextInst.fromString(new String(Files.readAllBytes(SIGNATURE_FILE.toPath())), true, true);
 				if (signature == null)
 					throw new NullPointerException("Signature is null");
 			} catch (IOException | IllegalArgumentException | NullPointerException e) {

@@ -13,7 +13,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTValue;
 import com.luneruniverse.minecraft.mod.nbteditor.util.StringJsonWriterQuoted;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.nbt.NbtElement;
@@ -92,7 +91,7 @@ public class StringNBTFolder implements NBTFolder<NbtString> {
 	private <R> R exec(Function<NBTFolder<?>, R> executor, R defaultReturnValue, boolean save) {
 		NbtElement parsedNbt;
 		try {
-			parsedNbt = MixinLink.parseSpecialElement(new StringReader(MVMisc.value(getNBT())));
+			parsedNbt = MixinLink.parseSnbt(MVMisc.value(getNBT()), true);
 		} catch (CommandSyntaxException e) {
 			return defaultReturnValue;
 		}

@@ -166,13 +166,21 @@ public class MixinLink {
 	
 	
 	public static final Set<Thread> specialNumbers = Collections.synchronizedSet(new HashSet<>());
-	public static NbtElement parseSpecialElement(StringReader reader) throws CommandSyntaxException {
+	public static NbtElement parseSnbtWithSpecialNumbers(StringReader reader, boolean allowTrailing) throws CommandSyntaxException {
 		specialNumbers.add(Thread.currentThread());
 		try {
-			return MVMisc.parseNbt(reader);
+			return MVMisc.parseSnbt(reader, allowTrailing);
 		} finally {
 			specialNumbers.remove(Thread.currentThread());
 		}
+	}
+	public static NbtElement parseSnbt(StringReader reader, boolean allowSpecialNumbers, boolean allowTrailing) throws CommandSyntaxException {
+		if (allowSpecialNumbers)
+			return parseSnbtWithSpecialNumbers(reader, allowTrailing);
+		return MVMisc.parseSnbt(reader, allowTrailing);
+	}
+	public static NbtElement parseSnbt(String snbt, boolean allowSpecialNumbers) throws CommandSyntaxException {
+		return parseSnbt(new StringReader(snbt), allowSpecialNumbers, false);
 	}
 	
 	

@@ -196,17 +196,17 @@ public class TextUtil {
 		return output.getPlain();
 	}
 	
-	public static Text fromStringSafely(String str, boolean eitherFormat) {
+	public static Text fromStringSafely(String str, boolean allowSpecialNumbers, boolean eitherFormat) {
 		try {
-			Text output = TextInst.fromString(str, eitherFormat);
+			Text output = TextInst.fromString(str, allowSpecialNumbers, eitherFormat);
 			if (output != null)
 				return output;
 		} catch (IllegalArgumentException e) {}
 		return TextInst.of(str);
 	}
-	public static Text fromSNbtSafely(String snbt) {
+	public static Text fromSnbtSafely(String snbt, boolean allowSpecialNumbers) {
 		try {
-			return TextInst.fromSNbt(snbt);
+			return TextInst.fromSnbt(snbt, allowSpecialNumbers);
 		} catch (CommandSyntaxException | InvalidNbtException e) {}
 		return TextInst.of(snbt);
 	}

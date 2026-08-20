@@ -1,10 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.screens;
 
-import java.util.function.Consumer;
-
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
-import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
@@ -14,8 +11,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtfolder.NBTFolder;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.StringJsonWriterQuoted;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.AbstractNbtList;
@@ -139,15 +134,15 @@ public class NBTValue extends List2D.List2DValue {
 		return isInsideList() && mouseX >= 0 && mouseY >= 0 && mouseX <= 32 && mouseY <= 32;
 	}
 	
-	public void valueChanged(String str, Consumer<NbtElement> onChange) {
-		try {
-			value = MixinLink.parseSpecialElement(new StringReader(str));
-			onChange.accept(value);
-		} catch (CommandSyntaxException e) {}
-	}
-	
 	public String getKey() {
 		return key;
+	}
+	
+	public void setValue(NbtElement value) {
+		this.value = value;
+	}
+	public NbtElement getValue() {
+		return value;
 	}
 	public String getValueText(boolean json) {
 		return json ? new StringJsonWriterQuoted().apply(value) : value.toString();
@@ -163,9 +158,6 @@ public class NBTValue extends List2D.List2DValue {
 		return unsafe;
 	}
 	
-	public void setInvalidComponent(boolean invalidComponent) {
-		this.invalidComponent = invalidComponent;
-	}
 	public void updateInvalidComponent(LocalNBT localNBT, String component) {
 		if (!NBTManagers.COMPONENTS_EXIST)
 			return;

@@ -26,8 +26,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigPath
 import com.luneruniverse.minecraft.mod.nbteditor.screens.factories.LocalFactoryScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtfolder.NBTFolder;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.CreativeTabWidget;
+import com.luneruniverse.minecraft.mod.nbteditor.snbtformatters.SNBTFormatter;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
-import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.datafixers.DSL.TypeReference;
@@ -333,8 +333,8 @@ public class NBTEditorAPI {
 	 * Set the formatter used in the editor screen
 	 * @param formatter The formatter
 	 */
-	public static void setNBTFormatter(NbtFormatter.Impl formatter) {
-		NbtFormatter.FORMATTER = formatter;
+	public static void setSNBTFormatter(SNBTFormatter formatter) {
+		SNBTFormatter.FORMATTER = formatter;
 	}
 	
 	/**

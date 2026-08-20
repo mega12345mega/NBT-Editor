@@ -3,37 +3,47 @@ package com.luneruniverse.minecraft.mod.nbteditor.screens.util;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.ScreenTexts;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.MultiLineTextFieldWidget;
-import com.luneruniverse.minecraft.mod.nbteditor.util.NbtFormatter;
+import com.luneruniverse.minecraft.mod.nbteditor.snbtformatters.SNBTFormatter;
 import com.mojang.brigadier.suggestion.Suggestions;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 
 public class TextAreaScreen extends OverlaySupportingScreen {
 	
+	public static record FormatterResult(Text text, boolean success) {}
+	
 	private final Screen parent;
 	private String text;
-	private final NbtFormatter.Impl formatter;
+	private final Function<String, FormatterResult> formatter;
 	private final boolean newLines;
 	private final Consumer<String> onDone;
 	
 	private MultiLineTextFieldWidget textArea;
 	private BiFunction<String, Integer, CompletableFuture<Suggestions>> suggestions;
 	
-	public TextAreaScreen(Screen parent, String text, NbtFormatter.Impl formatter, boolean newLines, Consumer<String> onDone) {
+	public TextAreaScreen(Screen parent, String text, Function<String, FormatterResult> formatter, boolean newLines, Consumer<String> onDone) {
 		super(TextInst.of("Text Area"));
 		this.parent = parent;
 		this.text = text;
 		this.formatter = formatter;
 		this.newLines = newLines;
 		this.onDone = onDone;
+	}
+	public TextAreaScreen(Screen parent, String text, SNBTFormatter formatter, boolean allowSpecialNumbers, boolean newLines, Consumer<String> onDone) {
+		this(parent, text, str -> {
+			SNBTFormatter.Result result = formatter.format(str, allowSpecialNumbers);
+			return new FormatterResult(result.snbt(), result.success());
+		}, newLines, onDone);
 	}
 	public TextAreaScreen(Screen parent, String text, boolean newLines, Consumer<String> onDone) {
 		this(parent, text, null, newLines, onDone);
@@ -61,8 +71,8 @@ public class TextAreaScreen extends OverlaySupportingScreen {
 		this.addDrawableChild(MVMisc.newButton(done.x + done.getWidth() + 10, 20, done.getWidth(), 20, ScreenTexts.CANCEL, btn -> close()));
 		
 		textArea = addDrawableChild(MultiLineTextFieldWidget.create(textArea, 20, 50, width - 40, height - 70, text, formatter == null ? null : str -> {
-			NbtFormatter.FormatterResult formattedText = formatter.formatSafely(str);
-			done.active = formattedText.isSuccess();
+			FormatterResult formattedText = formatter.apply(str);
+			done.active = formattedText.success();
 			return formattedText.text();
 		}, newLines, newText -> text = newText));
 		if (suggestions != null)

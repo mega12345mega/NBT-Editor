@@ -824,21 +824,25 @@ public class MVMisc {
 				.run();
 	}
 	
+	private static final StringNbtReader<NbtElement> stringNbtReader = Version.<StringNbtReader<NbtElement>>newSwitch()
+			.range("1.21.5", null, () -> StringNbtReader.fromOps(NbtOps.INSTANCE))
+			.range(null, "1.21.4", () -> null)
+			.get();
 	private static final Supplier<Reflection.MethodInvoker> StringNbtReader_parseElement =
 			Reflection.getOptionalMethod(StringNbtReader.class, "method_10723", MethodType.methodType(NbtElement.class));
-	public static NbtElement parseNbt(StringReader snbt) throws CommandSyntaxException {
-		if (Version.<Boolean>newSwitch()
-				.range("1.21.5", null, true)
-				.range(null, "1.21.4", false)
-				.get()) {
-			return StringNbtReader.fromOps(NbtOps.INSTANCE).read(snbt);
-		}
+	/**
+	 * <strong>CONSIDER USING {@link MixinLink#parseSnbt(StringReader, boolean)}</strong>
+	 */
+	public static NbtElement parseSnbt(StringReader reader, boolean allowTrailing) throws CommandSyntaxException {
+		if (stringNbtReader != null)
+			return allowTrailing ? stringNbtReader.readAsArgument(reader) : stringNbtReader.read(reader);
 		
-		return StringNbtReader_parseElement.get().invokeThrowable(CommandSyntaxException.class,
-				Reflection.newInstance(StringNbtReader.class, new Class<?>[] {StringReader.class}, snbt));
-	}
-	public static NbtElement parseNbt(String snbt) throws CommandSyntaxException {
-		return parseNbt(new StringReader(snbt));
+		NbtElement output = StringNbtReader_parseElement.get().invokeThrowable(CommandSyntaxException.class,
+				Reflection.newInstance(StringNbtReader.class, new Class<?>[] {StringReader.class}, reader));
+		reader.skipWhitespace();
+		if (reader.canRead())
+			throw StringNbtReader.TRAILING.createWithContext(reader);
+		return output;
 	}
 	
 	private static final Supplier<Reflection.FieldReference> StringNbtWriter_SIMPLE_NAME =
