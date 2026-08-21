@@ -24,6 +24,7 @@ public class BundleContentsComponentBuilderMixin {
 	}
 	@Redirect(method = "method_57432(Lnet/minecraft/class_1799;)I", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_1792;method_31568()Z"), remap = false)
 	@Group(name = "add", min = 1)
+	@SuppressWarnings("target")
 	private boolean add_canBeNested(Item item) {
 		if (ServerMixinLink.NO_SLOT_RESTRICTIONS_BUNDLES.getOrDefault((BundleContentsComponent.Builder) (Object) this, false))
 			return true;

@@ -22,14 +22,17 @@ import net.minecraft.util.ClickType;
 public class BundleItemMixin_1_20_4 {
 	private static final WeakHashMap<Thread, Boolean> NO_SLOT_RESTRICTIONS_THREADS = new WeakHashMap<>();
 	@Inject(method = "method_31565(Lnet/minecraft/class_1799;Lnet/minecraft/class_1735;Lnet/minecraft/class_5536;Lnet/minecraft/class_1657;)Z", at = @At("HEAD"), remap = false)
+	@SuppressWarnings("target")
 	private void onStackClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
 		NO_SLOT_RESTRICTIONS_THREADS.put(Thread.currentThread(), ServerMixinLink.isNoSlotRestrictions(player, false));
 	}
 	@Inject(method = "method_31566(Lnet/minecraft/class_1799;Lnet/minecraft/class_1799;Lnet/minecraft/class_1735;Lnet/minecraft/class_5536;Lnet/minecraft/class_1657;Lnet/minecraft/class_5630;)Z", at = @At("HEAD"), remap = false)
+	@SuppressWarnings("target")
 	private void onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference, CallbackInfoReturnable<Boolean> info) {
 		NO_SLOT_RESTRICTIONS_THREADS.put(Thread.currentThread(), ServerMixinLink.isNoSlotRestrictions(player, false));
 	}
 	@Redirect(method = "method_31560(Lnet/minecraft/class_1799;Lnet/minecraft/class_1799;)I", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_1792;method_31568()Z"), remap = false)
+	@SuppressWarnings("target")
 	private static boolean addToBundle_canBeNested(Item item) {
 		if (NO_SLOT_RESTRICTIONS_THREADS.getOrDefault(Thread.currentThread(), false))
 			return true;
