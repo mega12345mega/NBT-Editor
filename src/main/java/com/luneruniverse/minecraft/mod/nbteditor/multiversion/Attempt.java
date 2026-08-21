@@ -9,6 +9,13 @@ import com.mojang.serialization.DataResult;
 
 public record Attempt<T>(Optional<T> value, String error) {
 	
+	@SuppressWarnings("serial")
+	public static class FailedException extends IllegalStateException {
+		public FailedException(String message) {
+			super(message);
+		}
+	}
+	
 	private static final Supplier<Reflection.MethodInvoker> DataResult_resultOrPartial =
 			Reflection.getOptionalMethod(DataResult.class, "resultOrPartial", MethodType.methodType(Optional.class));
 	private static final Supplier<Reflection.MethodInvoker> DataResult_error =
@@ -44,15 +51,15 @@ public record Attempt<T>(Optional<T> value, String error) {
 			throw e.apply(error);
 		return value.get();
 	}
-	public T getSuccessOrThrow() throws IllegalStateException {
-		return getSuccessOrThrow(IllegalStateException::new);
+	public T getSuccessOrThrow() throws FailedException {
+		return getSuccessOrThrow(FailedException::new);
 	}
 	
 	public <E extends Throwable> T getAttemptOrThrow(Function<String, E> e) throws E {
 		return value.orElseThrow(() -> e.apply(error));
 	}
-	public T getAttemptOrThrow() throws IllegalStateException {
-		return getAttemptOrThrow(IllegalStateException::new);
+	public T getAttemptOrThrow() throws FailedException {
+		return getAttemptOrThrow(FailedException::new);
 	}
 	
 	public boolean isSuccessful() {

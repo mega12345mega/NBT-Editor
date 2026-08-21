@@ -14,6 +14,7 @@ import com.google.gson.JsonParseException;
 import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.fancytext.FancyText;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
@@ -21,7 +22,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.nbt.InvalidNbtException;
 import net.minecraft.text.StringVisitable.StyledVisitor;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -207,7 +207,7 @@ public class TextUtil {
 	public static Text fromSnbtSafely(String snbt, boolean allowSpecialNumbers) {
 		try {
 			return TextInst.fromSnbt(snbt, allowSpecialNumbers);
-		} catch (CommandSyntaxException | InvalidNbtException e) {}
+		} catch (CommandSyntaxException | Attempt.FailedException e) {}
 		return TextInst.of(snbt);
 	}
 	public static Text fromJsonSafely(String json) {

@@ -8,9 +8,7 @@
 		"PacketByteBufMixin",
 		"BlockEntityMixin",
 		"ItemStackMixin",
-		"NbtCompoundMixin",
-		"AbstractNbtListMixin",
-		"AbstractNbtNumberMixin"
+		"NbtCompoundMixin"
 	],
 	"client": [
 		"ScreenHandlerMixin",

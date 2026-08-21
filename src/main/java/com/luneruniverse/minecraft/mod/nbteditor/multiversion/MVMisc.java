@@ -856,7 +856,7 @@ public class MVMisc {
 	}
 	
 	private static final Supplier<Reflection.FieldReference> ItemEnchantmentsComponent_showInTooltip =
-			Reflection.getOptionalField(ItemEnchantmentsComponent.class, "field_49390", "Z");
+			Reflection.getOptionalField(() -> ItemEnchantmentsComponent.class, () -> "field_49390", () -> "Z");
 	public static Object withEnchantments(Object component, Object2IntOpenHashMap<RegistryEntry<Enchantment>> enchantments) {
 		return Version.<Object>newSwitch()
 				.range("1.21.5", null, () -> new ItemEnchantmentsComponent(enchantments))
@@ -867,7 +867,7 @@ public class MVMisc {
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> AttributeModifiersComponent_showInTooltip =
-			Reflection.getOptionalMethod(AttributeModifiersComponent.class, "comp_2394", MethodType.methodType(boolean.class));
+			Reflection.getOptionalMethod(() -> AttributeModifiersComponent.class, () -> "comp_2394", () -> MethodType.methodType(boolean.class));
 	public static Object withAttributes(Object component, List<AttributeModifiersComponent.Entry> list) {
 		return Version.<Object>newSwitch()
 				.range("1.21.5", null, () -> new AttributeModifiersComponent(list))

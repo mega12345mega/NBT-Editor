@@ -11,7 +11,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRe
 import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.nbt.InvalidNbtException;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtString;
@@ -59,7 +58,7 @@ public class TextInst {
 					IllegalArgumentException wrapper;
 					try {
 						return fromSnbt(str, allowSpecialNumbers);
-					} catch (CommandSyntaxException | InvalidNbtException e) {
+					} catch (CommandSyntaxException | Attempt.FailedException e) {
 						wrapper = new IllegalArgumentException("Failed to parse text");
 						wrapper.addSuppressed(e);
 						if (!eitherFormat)
@@ -86,7 +85,7 @@ public class TextInst {
 					
 					try {
 						return fromSnbt(str, allowSpecialNumbers);
-					} catch (CommandSyntaxException | InvalidNbtException e) {
+					} catch (CommandSyntaxException | Attempt.FailedException e) {
 						wrapper.addSuppressed(e);
 						throw wrapper;
 					}
@@ -99,7 +98,7 @@ public class TextInst {
 					.range("1.21.5", null, () -> toSnbt(text))
 					.range(null, "1.21.4", () -> toJson(text))
 					.get();
-		} catch (InvalidNbtException | JsonParseException e) {
+		} catch (Attempt.FailedException | JsonParseException e) {
 			throw new IllegalArgumentException("Failed to stringify text", e);
 		}
 	}
@@ -114,7 +113,7 @@ public class TextInst {
 						return fromJson(MVMisc.value(mcStr));
 					})
 					.get();
-		} catch (InvalidNbtException | JsonParseException e) {
+		} catch (Attempt.FailedException | JsonParseException e) {
 			throw new IllegalArgumentException("Failed to parse text", e);
 		}
 	}
@@ -124,7 +123,7 @@ public class TextInst {
 					.range("1.21.5", null, () -> toNbt(text))
 					.range(null, "1.21.4", () -> NbtString.of(toJson(text)))
 					.get();
-		} catch (InvalidNbtException | JsonParseException e) {
+		} catch (Attempt.FailedException | JsonParseException e) {
 			throw new IllegalArgumentException("Failed to stringify text", e);
 		}
 	}
@@ -132,10 +131,10 @@ public class TextInst {
 	/**
 	 * <strong>CONSIDER USING {@link TextUtil#fromSnbtSafely(String)}</strong>
 	 */
-	public static Text fromSnbt(String snbt, boolean allowSpecialNumbers) throws CommandSyntaxException, InvalidNbtException {
+	public static Text fromSnbt(String snbt, boolean allowSpecialNumbers) throws CommandSyntaxException, Attempt.FailedException {
 		return fromNbt(MixinLink.parseSnbt(snbt, allowSpecialNumbers));
 	}
-	public static String toSnbt(Text text) throws InvalidNbtException {
+	public static String toSnbt(Text text) throws Attempt.FailedException {
 		return toNbt(text).toString();
 	}
 	
@@ -159,11 +158,11 @@ public class TextInst {
 				.get();
 	}
 	
-	public static Text fromNbt(NbtElement nbt) throws InvalidNbtException {
-		return Attempt.ofResult(TextCodecs.CODEC.parse(NbtOps.INSTANCE, nbt)).getSuccessOrThrow(InvalidNbtException::new);
+	public static Text fromNbt(NbtElement nbt) throws Attempt.FailedException {
+		return Attempt.ofResult(TextCodecs.CODEC.parse(NbtOps.INSTANCE, nbt)).getSuccessOrThrow();
 	}
-	public static NbtElement toNbt(Text text) throws InvalidNbtException {
-		return Attempt.ofResult(TextCodecs.CODEC.encodeStart(NbtOps.INSTANCE, text)).getSuccessOrThrow(InvalidNbtException::new);
+	public static NbtElement toNbt(Text text) throws Attempt.FailedException {
+		return Attempt.ofResult(TextCodecs.CODEC.encodeStart(NbtOps.INSTANCE, text)).getSuccessOrThrow();
 	}
 	
 }
