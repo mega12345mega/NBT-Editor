@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.server;
 
 import java.lang.invoke.MethodType;
 import java.util.Collection;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
@@ -16,6 +17,7 @@ import net.minecraft.entity.vehicle.VehicleInventory;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Property;
 import net.minecraft.world.World;
 
@@ -79,6 +81,15 @@ public class ServerMVMisc {
 		return Version.<Collection<T>>newSwitch()
 				.range("1.21.2", null, () -> property.getValues())
 				.range(null, "1.21.1", () -> Property_getValues.get().invoke(property))
+				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> ServerWorld_getEntity =
+			Reflection.getOptionalMethod(ServerWorld.class, "method_14190", MethodType.methodType(Entity.class, UUID.class));
+	public static Entity getEntity(ServerWorld world, UUID uuid) {
+		return Version.<Entity>newSwitch()
+				.range("1.21.5", null, () -> world.getEntity(uuid))
+				.range(null, "1.21.4", () -> ServerWorld_getEntity.get().invoke(world, uuid))
 				.get();
 	}
 	

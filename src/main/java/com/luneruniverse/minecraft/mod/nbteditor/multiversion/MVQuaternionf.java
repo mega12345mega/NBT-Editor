@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -108,7 +109,7 @@ public class MVQuaternionf {
 			Reflection.getOptionalMethod(Quaternionf_class, "method_23695", MethodType.methodType(Quaternionf_class));
 	public MVQuaternionf copy() {
 		return new MVQuaternionf(Version.<Object>newSwitch()
-				.range("1.19.3", null, () -> Reflection.newInstance(Quaternionf_class, new Class<?>[] {Quaternionfc_class}, value))
+				.range("1.19.3", null, () -> new Quaternionf((Quaternionfc) value))
 				.range(null, "1.19.2", () -> Quaternionf_copy.get().invoke(value))
 				.get());
 	}
@@ -117,8 +118,8 @@ public class MVQuaternionf {
 			Reflection.getOptionalMethod(MatrixStack.class, "method_22907", MethodType.methodType(void.class, Quaternionf_class));
 	public void applyToMatrixStack(MatrixStack matrices) {
 		Version.newSwitch()
-				.range("1.19.3", null, () -> matrices.multiply((Quaternionf) value))
-				.range(null, "1.19.2", () -> MatrixStack_multiply.get().invoke(matrices, value))
+				.range("1.21.5", null, () -> matrices.multiply((Quaternionfc) value))
+				.range(null, "1.21.4", () -> MatrixStack_multiply.get().invoke(matrices, value))
 				.run();
 	}
 	

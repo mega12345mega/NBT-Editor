@@ -170,7 +170,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		
 		ServerWorld world = player.getServer().getWorld(packet.getWorld());
 		if (world != null) {
-			Entity entity = world.getEntity(packet.getUUID());
+			Entity entity = ServerMVMisc.getEntity(world, packet.getUUID());
 			if (entity != null && !(entity instanceof PlayerEntity)) {
 				MVServerNetworking.send(player,
 						new ViewEntityS2CPacket(packet.getRequestId(),
@@ -230,14 +230,14 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		if (world == null)
 			return;
 		
-		Entity entity = world.getEntity(packet.getUUID());
+		Entity entity = ServerMVMisc.getEntity(world, packet.getUUID());
 		if (entity == null)
 			return;
 		
 		UUID newUUID = packet.getUUID();
 		if (packet.getNbt().nbte$containsUuid("UUID")) {
 			newUUID = packet.getNbt().nbte$getUuid("UUID").get();
-			if (!packet.getUUID().equals(newUUID) && world.getEntity(newUUID) != null) {
+			if (!packet.getUUID().equals(newUUID) && ServerMVMisc.getEntity(world, newUUID) != null) {
 				newUUID = packet.getUUID();
 				packet.getNbt().nbte$putUuid("UUID", newUUID);
 			}
@@ -277,7 +277,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		UUID uuid = UUID.randomUUID();
 		if (packet.getNbt().nbte$containsUuid("UUID")) {
 			UUID nbtUUID = packet.getNbt().nbte$getUuid("UUID").get();
-			if (world.getEntity(nbtUUID) == null)
+			if (ServerMVMisc.getEntity(world, nbtUUID) == null)
 				uuid = nbtUUID;
 			else
 				packet.getNbt().nbte$putUuid("UUID", uuid);
@@ -328,7 +328,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 				if (passengerId == null)
 					continue;
 				EntityType<?> passengerType = MVRegistry.ENTITY_TYPE.get(passengerId);
-				if (world.getEntity(passengerUUID) != null) {
+				if (ServerMVMisc.getEntity(world, passengerUUID) != null) {
 					passengerUUID = UUID.randomUUID();
 					passengerNbt.nbte$putUuid("UUID", passengerUUID);
 				}

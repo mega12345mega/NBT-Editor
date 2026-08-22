@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Quaternionfc;
 import org.joml.Vector3f;
 
@@ -44,7 +45,7 @@ public class MVMatrix4f {
 				})
 				.range(null, "1.19.2", () -> {
 					FloatBuffer buffer = FloatBuffer.allocate(16);
-					Matrix4f_writeColumnMajor.get().invoke(matrix, buffer); // matrix.writeColumnMajor(buffer)
+					Matrix4f_writeColumnMajor.get().invoke(matrix, buffer);
 					float[] output = new float[3];
 					buffer.get(12, output);
 					return output;
@@ -140,7 +141,7 @@ public class MVMatrix4f {
 			Reflection.getOptionalMethod(Matrix4f_class, "method_22673", MethodType.methodType(Matrix4f_class));
 	public MVMatrix4f copy() {
 		return new MVMatrix4f(Version.<Object>newSwitch()
-				.range("1.19.3", null, () -> Reflection.newInstance(Matrix4f_class, new Class<?>[] {Matrix4fc_class}, value)) // new Matrix4f((Matrix4f) matrix)
+				.range("1.19.3", null, () -> new Matrix4f((Matrix4fc) value))
 				.range(null, "1.19.2", () -> Matrix4f_copy.get().invoke(value))
 				.get());
 	}
@@ -149,8 +150,8 @@ public class MVMatrix4f {
 			Reflection.getOptionalMethod(MatrixStack.class, "method_34425", MethodType.methodType(void.class, Matrix4f_class));
 	public void applyToPositionMatrix(MatrixStack matrices) {
 		Version.newSwitch()
-				.range("1.19.3", null, () -> matrices.multiplyPositionMatrix((Matrix4f) value))
-				.range(null, "1.19.2", () -> MatrixStack_multiplyPositionMatrix.get().invoke(matrices, value))
+				.range("1.21.5", null, () -> matrices.multiplyPositionMatrix((Matrix4fc) value))
+				.range(null, "1.21.4", () -> MatrixStack_multiplyPositionMatrix.get().invoke(matrices, value))
 				.run();
 	}
 	

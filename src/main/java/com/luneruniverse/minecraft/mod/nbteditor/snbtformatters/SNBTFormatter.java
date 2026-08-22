@@ -25,8 +25,8 @@ public abstract class SNBTFormatter {
 	}
 	
 	public static SNBTFormatter FORMATTER = Version.<SNBTFormatter>newSwitch()
-			.range("1.21.5", null, NormalSNBTFormatter2::new)
-			.range(null, "1.21.4", NormalSNBTFormatter1::new)
+			.range("1.21.5", null, () -> new NormalSNBTFormatter2())
+			.range(null, "1.21.4", () -> new NormalSNBTFormatter1())
 			.get();
 	
 	public static final Formatting NUMBER_COLOR = Formatting.GOLD;
