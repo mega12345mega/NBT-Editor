@@ -11,7 +11,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.suggestion.Suggestion;
@@ -55,7 +55,7 @@ public class NBTAutocompleteIntegration extends Integration {
 		if (key == null && value == null)
 			throw new IllegalArgumentException("Both key and value can't be null at the same time!");
 		
-		boolean components = NBTManagers.COMPONENTS_EXIST && type.equals("item");
+		boolean components = SubjectIOs.COMPONENTS_EXIST && type.equals("item");
 		
 		boolean nextTagAllowed;
 		if (value == null) {

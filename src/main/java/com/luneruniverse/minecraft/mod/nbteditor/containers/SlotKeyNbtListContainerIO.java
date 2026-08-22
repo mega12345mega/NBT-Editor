@@ -1,7 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundParent;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -57,7 +57,7 @@ public class SlotKeyNbtListContainerIO implements ContainerIO<NbtList> {
 		ItemStack[] contents = new ItemStack[numSlots];
 		for (NbtElement itemNbtElement : container.nbte$iterable()) {
 			NbtCompound itemNbt = (NbtCompound) itemNbtElement;
-			contents[itemNbt.nbte$getIntOrDefault("Slot")] = NBTManagers.ITEM.deserializeOrElse(itemNbt, ItemStack.EMPTY);
+			contents[itemNbt.nbte$getIntOrDefault("Slot")] = SubjectIOs.ITEM.deserializeOrElse(itemNbt, ItemStack.EMPTY);
 		}
 		return contents;
 	}

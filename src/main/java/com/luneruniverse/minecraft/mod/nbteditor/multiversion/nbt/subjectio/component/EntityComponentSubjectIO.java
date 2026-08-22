@@ -1,13 +1,13 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.components;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.component;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIO;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 
-public class ComponentEntityNBTManager implements NBTManager<Entity> {
+public class EntityComponentSubjectIO implements SubjectIO<Entity> {
 	
 	@Override
 	public Attempt<NbtCompound> trySerialize(Entity subject) {

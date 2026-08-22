@@ -1,11 +1,11 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.components;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.component;
 
 import java.util.Map;
 import java.util.Optional;
 
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.DeserializableNBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.DeserializableSubjectIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
@@ -18,7 +18,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 
-public class ComponentItemNBTManager implements DeserializableNBTManager<ItemStack> {
+public class ItemComponentSubjectIO implements DeserializableSubjectIO<ItemStack> {
 	
 	@Override
 	public Attempt<NbtCompound> trySerialize(ItemStack subject) {

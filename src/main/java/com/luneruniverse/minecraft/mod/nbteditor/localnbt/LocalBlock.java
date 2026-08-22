@@ -13,7 +13,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
@@ -88,7 +88,7 @@ public class LocalBlock implements LocalNBT {
 		cachedBlockEntity = entityProvider.createBlockEntity(new BlockPos(0, 1000, 0), state.applyTo(block.getDefaultState()));
 		cachedBlockEntity.setWorld(MainUtil.client.world);
 		if (nbt != null)
-			NBTManagers.BLOCK_ENTITY.setNbt(cachedBlockEntity, nbt);
+			SubjectIOs.BLOCK_ENTITY.setNbt(cachedBlockEntity, nbt);
 		
 		cachedState = state.copy();
 		cachedNbt = nbt.copy();
@@ -192,11 +192,11 @@ public class LocalBlock implements LocalNBT {
 			if (item instanceof BlockItem blockItem && blockItem.getBlock() == block) {
 				ItemStack output = new ItemStack(blockItem);
 				if (nbt != null) {
-					if (NBTManagers.COMPONENTS_EXIST) {
+					if (SubjectIOs.COMPONENTS_EXIST) {
 						if (block instanceof BlockEntityProvider provider) {
 							BlockEntity entity = provider.createBlockEntity(new BlockPos(0, 1000, 0), state.applyTo(block.getDefaultState()));
 							entity.setWorld(MainUtil.client.world);
-							NBTManagers.BLOCK_ENTITY.setNbt(entity, nbt);
+							SubjectIOs.BLOCK_ENTITY.setNbt(entity, nbt);
 							MVMisc.addBlockEntityNbtWithoutXYZ(output, entity);
 						}
 					} else {

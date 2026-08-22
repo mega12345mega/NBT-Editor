@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio;
 
 import java.util.function.Consumer;
 
@@ -7,7 +7,7 @@ import net.minecraft.nbt.NbtCompound;
 /**
  * Convenience interface to avoid <code>NBTManagers.ITEM.getNbt(item)</code>
  */
-public interface IntegratedNBTManager {
+public interface IntegratedSubjectIO {
 	public default NbtCompound nbte$serialize(boolean requireSuccess) {
 		throw new RuntimeException("Missing implementation for IntegratedNBTManager#nbte$serialize");
 	}

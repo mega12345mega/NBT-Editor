@@ -12,7 +12,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
@@ -60,7 +60,7 @@ public class BookCommand extends ClientCommand {
 			convertedPages.add(page.getString());
 		}
 		ItemTagReferences.WRITABLE_BOOK_PAGES.set(item, convertedPages);
-		if (NBTManagers.COMPONENTS_EXIST)
+		if (SubjectIOs.COMPONENTS_EXIST)
 			item.remove(MVComponentType.WRITTEN_BOOK_CONTENT);
 		if (formatted) {
 			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.book.convert.formatting_saved"), false);

@@ -1,15 +1,15 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.nbt;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.nbt;
 
 import java.lang.invoke.MethodType;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.DeserializableNBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.DeserializableSubjectIO;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 
-public class NBTItemNBTManager implements DeserializableNBTManager<ItemStack> {
+public class ItemNBTSubjectIO implements DeserializableSubjectIO<ItemStack> {
 	
 	private static final Reflection.MethodInvoker ItemStack_writeNbt =
 			Reflection.getMethod(ItemStack.class, "method_7953", MethodType.methodType(NbtCompound.class, NbtCompound.class));

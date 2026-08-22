@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import java.util.Arrays;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -45,7 +45,7 @@ public class OrderNbtListContainerIO implements ContainerIO<NbtList> {
 	
 	@Override
 	public ItemStack[] read(NbtList container) {
-		return container.nbte$stream().map(itemNbt -> NBTManagers.ITEM.deserializeOrElse(
+		return container.nbte$stream().map(itemNbt -> SubjectIOs.ITEM.deserializeOrElse(
 				(NbtCompound) itemNbt, ItemStack.EMPTY)).toArray(ItemStack[]::new);
 	}
 	

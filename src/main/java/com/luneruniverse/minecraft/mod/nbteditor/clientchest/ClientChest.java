@@ -33,7 +33,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundParent;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.util.LoadQueue;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
@@ -632,7 +632,7 @@ public class ClientChest {
 				dynamicItems.add(i, itemNbt, false);
 				empty = false;
 			} else {
-				items[i] = MVMisc.withDefaultRegistryManager(() -> NBTManagers.ITEM.deserialize(itemNbt, true));
+				items[i] = MVMisc.withDefaultRegistryManager(() -> SubjectIOs.ITEM.deserialize(itemNbt, true));
 				if (empty && items[i] != null && !items[i].isEmpty())
 					empty = false;
 			}
@@ -787,7 +787,7 @@ public class ClientChest {
 				empty = false;
 			} else {
 				final NbtCompound finalItemNbt = itemNbt;
-				items[i] = MVMisc.withDefaultRegistryManager(() -> NBTManagers.ITEM.deserialize(finalItemNbt, true));
+				items[i] = MVMisc.withDefaultRegistryManager(() -> SubjectIOs.ITEM.deserialize(finalItemNbt, true));
 				if (empty && items[i] != null && !items[i].isEmpty())
 					empty = false;
 			}

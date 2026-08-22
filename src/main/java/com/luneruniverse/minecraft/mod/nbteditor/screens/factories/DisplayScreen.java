@@ -10,7 +10,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVComponentType;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
@@ -64,7 +64,7 @@ public class DisplayScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			addSelectableChild(lore);
 			addDrawableChild(MVMisc.newButton(16, height - 16 - 20, 100, 20, TextInst.translatable("nbteditor.hide_flags"),
 					btn -> closeSafely(() -> client.setScreen(new HideFlagsScreen((ItemReference) ref)))));
-			if (NBTManagers.COMPONENTS_EXIST) {
+			if (SubjectIOs.COMPONENTS_EXIST) {
 				addDrawableChild(MVMisc.newButton(124, height - 16 - 20, 150, 20,
 						TextInst.translatable("nbteditor.display.name_type." + (itemNameType ? "item" : "custom")), btn -> {
 							itemNameType = !itemNameType;

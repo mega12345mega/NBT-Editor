@@ -18,7 +18,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
@@ -67,7 +67,7 @@ public class NBTExportCommand extends ClientCommand {
 	}
 	
 	private static String getItemArgs(ItemStack item) {
-		return MVRegistry.ITEM.getId(item.getItem()).toString() + NBTManagers.ITEM.getNbtString(item) + " " + item.getCount();
+		return MVRegistry.ITEM.getId(item.getItem()).toString() + SubjectIOs.ITEM.getNbtString(item) + " " + item.getCount();
 	}
 	private static String getBlockArgs(LocalBlock block) {
 		return block.getId().toString() + block.getState().toString() + (block.getNBT() == null ? "" : block.getNBT().toString());

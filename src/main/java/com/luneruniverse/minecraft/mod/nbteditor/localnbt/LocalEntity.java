@@ -15,7 +15,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVQuaternionf;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.EntityReference;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
@@ -72,7 +72,7 @@ public class LocalEntity implements LocalNBT {
 			return cachedEntity;
 		
 		cachedEntity = ServerMVMisc.createEntity(entityType, MainUtil.client.world);
-		NBTManagers.ENTITY.setNbt(cachedEntity, nbt);
+		SubjectIOs.ENTITY.setNbt(cachedEntity, nbt);
 		
 		if (cachedEntity instanceof LivingEntity livingEntity) {
 			// Unlike yaw, these are not set properly by readNbt

@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVServerNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.GetBlockC2SPacket;
@@ -161,7 +161,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 				new ViewBlockS2CPacket(requestId, blockEntity.getWorld().getRegistryKey(), blockEntity.getPos(),
 						MVRegistry.BLOCK.getId(blockEntity.getCachedState().getBlock()),
 						new BlockStateProperties(blockEntity.getCachedState()),
-						NBTManagers.BLOCK_ENTITY.getNbt(blockEntity)));
+						SubjectIOs.BLOCK_ENTITY.getNbt(blockEntity)));
 	}
 	
 	private void onGetEntityPacket(GetEntityC2SPacket packet, ServerPlayerEntity player) {
@@ -175,7 +175,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 				MVServerNetworking.send(player,
 						new ViewEntityS2CPacket(packet.getRequestId(),
 								entity.getEntityWorld().getRegistryKey(), entity.getUuid(),
-								EntityType.getId(entity.getType()), NBTManagers.ENTITY.getNbt(entity)));
+								EntityType.getId(entity.getType()), SubjectIOs.ENTITY.getNbt(entity)));
 				return;
 			}
 		}
@@ -210,7 +210,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		
 		BlockEntity blockEntity = world.getBlockEntity(packet.getPos());
 		if (blockEntity != null) {
-			NBTManagers.BLOCK_ENTITY.setNbt(blockEntity, packet.getNbt());
+			SubjectIOs.BLOCK_ENTITY.setNbt(blockEntity, packet.getNbt());
 			
 			if (packet.isTriggerUpdate())
 				blockEntity.markDirty();
@@ -292,11 +292,11 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		
 		MVServerNetworking.send(player,
 				new ViewEntityS2CPacket(packet.getRequestId(), entity.getEntityWorld().getRegistryKey(), entity.getUuid(),
-						EntityType.getId(entity.getType()), NBTManagers.ENTITY.getNbt(entity)));
+						EntityType.getId(entity.getType()), SubjectIOs.ENTITY.getNbt(entity)));
 	}
 	
 	private void readEntityNbtWithPassengers(ServerWorld world, Entity entity, NbtCompound nbt, Map<UUID, Entity> originalEntities) {
-		NBTManagers.ENTITY.setNbt(entity, nbt);
+		SubjectIOs.ENTITY.setNbt(entity, nbt);
 		
 		Map<UUID, Entity> passengers = entity.getPassengerList().stream().collect(Collectors.toMap(Entity::getUuid, Function.identity()));
 		NbtList passengersNbt = nbt.nbte$getPartialListOrDefault("Passengers", NbtElement.COMPOUND_TYPE);

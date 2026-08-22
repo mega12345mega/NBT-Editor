@@ -1,6 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -49,7 +49,7 @@ public class EquipmentContainerIO implements ContainerIO<NbtCompound> {
 		ItemStack[] contents = new ItemStack[8];
 		for (int i = 0; i < 8; i++) {
 			if (container.nbte$contains(KEYS[i], NbtElement.COMPOUND_TYPE))
-				contents[i] = NBTManagers.ITEM.deserializeOrElse(container.getCompoundOrEmpty(KEYS[i]), ItemStack.EMPTY);
+				contents[i] = SubjectIOs.ITEM.deserializeOrElse(container.getCompoundOrEmpty(KEYS[i]), ItemStack.EMPTY);
 			else
 				contents[i] = ItemStack.EMPTY;
 		}

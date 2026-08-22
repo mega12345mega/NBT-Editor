@@ -6,7 +6,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundParent;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtfolder.NBTFolder;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -159,7 +159,7 @@ public class NBTValue extends List2D.List2DValue {
 	}
 	
 	public void updateInvalidComponent(LocalNBT localNBT, String component) {
-		if (!NBTManagers.COMPONENTS_EXIST)
+		if (!SubjectIOs.COMPONENTS_EXIST)
 			return;
 		if (localNBT instanceof LocalItem localItem) {
 			NbtCompound nbtOutput = localItem.getReadableItem().nbte$getNbt();

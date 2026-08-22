@@ -12,7 +12,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
@@ -87,7 +87,7 @@ public class SignboardScreen<L extends LocalNBT> extends LocalEditorScreen<L> {
 			textureName = woodType + "_planks";
 		texture = IdentifierInst.of("minecraft", "textures/block/" + textureName + ".png");
 		
-		if (NBTManagers.COMPONENTS_EXIST) {
+		if (SubjectIOs.COMPONENTS_EXIST) {
 			if (localNBT instanceof LocalItem localItem) {
 				NbtCompound nbt = ItemTagReferences.BLOCK_ENTITY_DATA.get(localItem.getEditableItem());
 				nbt.putString("id",

@@ -63,7 +63,7 @@
 			"net/minecraft/class_364": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVElementParent"],
 			"net/minecraft/class_2945": ["com/luneruniverse/minecraft/mod/nbteditor/misc/ResetableDataTracker"],
 			"net/minecraft/class_2540": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/MVPacketByteBufParent"],
-			"net/minecraft/class_1799": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/manager/IntegratedNBTManager", "com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVItemStackParent"],
+			"net/minecraft/class_1799": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/subjectio/IntegratedSubjectIO", "com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVItemStackParent"],
 			"net/minecraft/class_2813": ["com/luneruniverse/minecraft/mod/nbteditor/packets/ClickSlotC2SPacketParent"],
 			"net/minecraft/class_2487": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVNbtCompoundParent"],
 			"net/minecraft/class_2483": ["com/luneruniverse/minecraft/mod/nbteditor/multiversion/nbt/MVAbstractNbtListParent"],

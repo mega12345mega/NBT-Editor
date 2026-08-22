@@ -2,7 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion;
 
 import java.util.function.Supplier;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifiersComponent;
@@ -80,7 +80,7 @@ public class MVComponentType<T> {
 	private final Object component;
 	
 	public MVComponentType(Supplier<Object> component) {
-		this.component = (NBTManagers.COMPONENTS_EXIST ? component.get() : null);
+		this.component = (SubjectIOs.COMPONENTS_EXIST ? component.get() : null);
 	}
 	public MVComponentType(Supplier<Object> component, String minVersion, String maxVersion) {
 		this.component = Version.<Object>newSwitch()

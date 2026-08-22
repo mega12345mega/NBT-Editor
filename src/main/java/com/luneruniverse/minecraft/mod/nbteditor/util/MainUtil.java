@@ -31,7 +31,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders.MVShader;
 import com.mojang.datafixers.DSL.TypeReference;
@@ -256,7 +256,7 @@ public class MainUtil {
 	
 	
 	public static Text getBaseItemNameSafely(ItemStack item) {
-		if (NBTManagers.COMPONENTS_EXIST) {
+		if (SubjectIOs.COMPONENTS_EXIST) {
 			Text name = item.get(MVComponentType.ITEM_NAME);
 			if (name != null)
 				return name;
@@ -264,7 +264,7 @@ public class MainUtil {
 		return MVMisc.getName(item.getItem());
 	}
 	public static Text getCustomItemNameSafely(ItemStack item) {
-		if (NBTManagers.COMPONENTS_EXIST)
+		if (SubjectIOs.COMPONENTS_EXIST)
 			return item.getName();
 		NbtCompound nbt = item.nbte$getNbt();
 		if (nbt != null)
@@ -327,7 +327,7 @@ public class MainUtil {
 	
 	
 	public static ItemStack copyAirable(ItemStack item) {
-		if (NBTManagers.COMPONENTS_EXIST) {
+		if (SubjectIOs.COMPONENTS_EXIST) {
 			ItemStack output = item.copyComponentsToNewStack(item.getItem(), item.getCount());
 			output.setBobbingAnimationTime(item.getBobbingAnimationTime());
 			return output;
@@ -342,13 +342,13 @@ public class MainUtil {
 	
 	
 	public static ItemStack setType(Item type, ItemStack item, int count) {
-		if (NBTManagers.COMPONENTS_EXIST)
+		if (SubjectIOs.COMPONENTS_EXIST)
 			return item.copyComponentsToNewStack(type, count);
 		
 		NbtCompound fullData = item.nbte$serialize(true);
 		fullData.putString("id", MVRegistry.ITEM.getId(type).toString());
 		fullData.putInt("Count", count);
-		return NBTManagers.ITEM.deserialize(fullData, true);
+		return SubjectIOs.ITEM.deserialize(fullData, true);
 	}
 	public static ItemStack setType(Item type, ItemStack item) {
 		return setType(type, item, item.getCount());
@@ -520,7 +520,7 @@ public class MainUtil {
 	}
 	
 	public static NbtCompound fillId(NbtCompound nbt, String id) {
-		if (!NBTManagers.COMPONENTS_EXIST)
+		if (!SubjectIOs.COMPONENTS_EXIST)
 			return nbt;
 		if (!nbt.nbte$contains("id", NbtElement.STRING_TYPE))
 			nbt.putString("id", id);

@@ -1,4 +1,4 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.nbt;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.nbt;
 
 import java.lang.invoke.MethodType;
 import java.util.function.Supplier;
@@ -6,13 +6,13 @@ import java.util.function.Supplier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIO;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 
-public class NBTBlockEntityNBTManager implements NBTManager<BlockEntity> {
+public class BlockEntityNBTSubjectIO implements SubjectIO<BlockEntity> {
 	
 	private static final Supplier<Reflection.MethodInvoker> BlockEntity_writeNbt =
 			Reflection.getOptionalMethod(BlockEntity.class, "method_11007", MethodType.methodType(NbtCompound.class, NbtCompound.class));

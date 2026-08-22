@@ -8,7 +8,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
@@ -106,7 +106,7 @@ public class LocalItemParts extends LocalItem {
 	}
 	@Override
 	public void setName(Text name) {
-		if (NBTManagers.COMPONENTS_EXIST) {
+		if (SubjectIOs.COMPONENTS_EXIST) {
 			if (name == null) {
 				if (nbt != null) {
 					nbt.remove("minecraft:custom_name");
@@ -197,7 +197,7 @@ public class LocalItemParts extends LocalItem {
 	public NbtCompound serialize() {
 		NbtCompound output = new NbtCompound();
 		output.putString("id", getId().toString());
-		output.put(NBTManagers.COMPONENTS_EXIST ? "components" : "tag", nbt);
+		output.put(SubjectIOs.COMPONENTS_EXIST ? "components" : "tag", nbt);
 		output.putInt("count", count);
 		output.putString("type", "item");
 		return output;

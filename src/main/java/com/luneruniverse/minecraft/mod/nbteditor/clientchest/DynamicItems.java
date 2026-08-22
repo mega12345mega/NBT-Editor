@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -26,13 +26,13 @@ public class DynamicItems {
 		items.put(slot, Map.entry(nbt, successfullyLoaded));
 	}
 	public ItemStack tryAdd(int slot, ItemStack item) {
-		if (!NBTManagers.COMPONENTS_EXIST)
+		if (!SubjectIOs.COMPONENTS_EXIST)
 			return item;
 		if (item.isEmpty())
 			return ItemStack.EMPTY;
 		
-		NbtCompound nbt = NBTManagers.ITEM.serialize(item, true);
-		Attempt<ItemStack> defaultRegistryItem = MVMisc.withDefaultRegistryManager(() -> NBTManagers.ITEM.tryDeserialize(nbt));
+		NbtCompound nbt = SubjectIOs.ITEM.serialize(item, true);
+		Attempt<ItemStack> defaultRegistryItem = MVMisc.withDefaultRegistryManager(() -> SubjectIOs.ITEM.tryDeserialize(nbt));
 		
 		if (defaultRegistryItem.isSuccessful())
 			return defaultRegistryItem.getSuccessOrThrow();
@@ -50,7 +50,7 @@ public class DynamicItems {
 			throw new IllegalArgumentException("Not a dynamic slot: " + slot);
 		NbtCompound nbt = item.getKey();
 		
-		Attempt<ItemStack> attempt = NBTManagers.ITEM.tryDeserialize(nbt);
+		Attempt<ItemStack> attempt = SubjectIOs.ITEM.tryDeserialize(nbt);
 		items.put(slot, Map.entry(nbt, attempt.isSuccessful()));
 		return attempt.value().orElse(ItemStack.EMPTY);
 	}

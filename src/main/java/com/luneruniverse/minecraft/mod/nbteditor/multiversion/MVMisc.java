@@ -28,7 +28,7 @@ import org.joml.Vector2ic;
 import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.ClientCommandRegistrationCallback;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DefaultRegistryManager;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
@@ -549,7 +549,7 @@ public class MVMisc {
 	}
 	
 	public static BookScreen.Contents getBookContents(List<Text> pages) {
-		if (NBTManagers.COMPONENTS_EXIST)
+		if (SubjectIOs.COMPONENTS_EXIST)
 			return new BookScreen.Contents(pages);
 		
 		return (BookScreen.Contents) Proxy.newProxyInstance(MVMisc.class.getClassLoader(),
@@ -654,12 +654,12 @@ public class MVMisc {
 	}
 	
 	public static <T> T withDefaultRegistryManager(Supplier<T> callback) {
-		if (NBTManagers.COMPONENTS_EXIST)
+		if (SubjectIOs.COMPONENTS_EXIST)
 			return DynamicRegistryManagerHolder.withDefaultManager(callback);
 		return callback.get();
 	}
 	public static void withDefaultRegistryManager(Runnable callback) {
-		if (NBTManagers.COMPONENTS_EXIST)
+		if (SubjectIOs.COMPONENTS_EXIST)
 			DynamicRegistryManagerHolder.withDefaultManager(callback);
 		else
 			callback.run();

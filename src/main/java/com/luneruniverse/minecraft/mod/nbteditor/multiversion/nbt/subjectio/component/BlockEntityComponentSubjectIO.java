@@ -1,9 +1,9 @@
-package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.components;
+package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.component;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManager;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -15,7 +15,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.RegistryWrapper;
 
-public class ComponentBlockEntityNBTManager implements NBTManager<BlockEntity> {
+public class BlockEntityComponentSubjectIO implements SubjectIO<BlockEntity> {
 	
 	private static final Codec<ComponentMap> BlockEntity_Components_CODEC = Version.<Codec<ComponentMap>>newSwitch()
 			.range("1.21.5", null, () -> BlockEntity.Components.CODEC.encoder())

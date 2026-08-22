@@ -1,6 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.manager.NBTManagers;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -54,11 +54,11 @@ public class ArmorHandsContainerIO implements ContainerIO<NbtCompound> {
 		
 		NbtList armorItemsNbt = container.nbte$getListOrDefault("ArmorItems", NbtElement.COMPOUND_TYPE);
 		for (int i = 0; i < armorItemsNbt.nbte$size() && i < 4; i++)
-			items[3 - i] = NBTManagers.ITEM.deserializeOrElse((NbtCompound) armorItemsNbt.nbte$get(i), ItemStack.EMPTY);
+			items[3 - i] = SubjectIOs.ITEM.deserializeOrElse((NbtCompound) armorItemsNbt.nbte$get(i), ItemStack.EMPTY);
 		
 		NbtList handItemsNbt = container.nbte$getListOrDefault("HandItems", NbtElement.COMPOUND_TYPE);
 		for (int i = 0; i < handItemsNbt.nbte$size() && i < 2; i++)
-			items[4 + i] = NBTManagers.ITEM.deserializeOrElse((NbtCompound) handItemsNbt.nbte$get(i), ItemStack.EMPTY);
+			items[4 + i] = SubjectIOs.ITEM.deserializeOrElse((NbtCompound) handItemsNbt.nbte$get(i), ItemStack.EMPTY);
 		
 		return items;
 	}
