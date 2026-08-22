@@ -87,7 +87,7 @@ public interface TagReference<T, O> {
 		return mapValue(
 				nbtList -> {
 					List<C> list = new ArrayList<>();
-					for (NbtElement elementNbt : nbtList.nbte$iterable()) {
+					for (NbtElement elementNbt : nbtList) {
 						C elementValue = getter.apply(elementNbt);
 						if (elementValue != null)
 							list.add(elementValue);

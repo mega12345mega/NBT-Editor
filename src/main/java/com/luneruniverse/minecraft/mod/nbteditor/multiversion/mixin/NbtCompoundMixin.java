@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundParent;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.elementio.MVL;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -222,7 +223,7 @@ public class NbtCompoundMixin implements MVNbtCompoundParent {
 			return ((NbtCompound) (Object) this).getList(key).filter(list -> list.stream().allMatch(element -> element.getType() == type));
 		if (nbte$contains(key, NbtElement.LIST_TYPE)) {
 			NbtList list = nbte$getListOrDefault(key);
-			if (list.isEmpty() || list.nbte$getHeldType().get() == type)
+			if (list.isEmpty() || MVL.getHeldType(list).get() == type)
 				return Optional.of(list);
 		}
 		return Optional.empty();

@@ -25,9 +25,9 @@ public class StringJsonWriterQuoted extends StringNbtWriter {
 	
 	@Override
 	public void visitByte(NbtByte element) {
-		if (element.nbte$byteValue() == 0)
+		if (element.byteValue() == 0)
 			((StringNbtWriterAccessor) this).getResult().append(false);
-		else if (element.nbte$byteValue() == 1)
+		else if (element.byteValue() == 1)
 			((StringNbtWriterAccessor) this).getResult().append(true);
 		else
 			super.visitByte(element);
@@ -43,7 +43,7 @@ public class StringJsonWriterQuoted extends StringNbtWriter {
 		StringBuilder result = ((StringNbtWriterAccessor) this).getResult();
 		
 		result.append('[');
-		for (int i = 0; i < element.nbte$size(); ++i) {
+		for (int i = 0; i < element.size(); ++i) {
 			if (i != 0) {
 				result.append(',');
 			}

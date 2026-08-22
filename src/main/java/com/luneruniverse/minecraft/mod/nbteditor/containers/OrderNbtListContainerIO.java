@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import java.util.Arrays;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.elementio.MVL;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 
 import net.minecraft.item.ItemStack;
@@ -29,7 +30,7 @@ public class OrderNbtListContainerIO implements ContainerIO<NbtList> {
 	
 	@Override
 	public boolean isSupported(NbtList container) {
-		return container.size() <= maxSlots && container.nbte$getHeldType().filter(
+		return container.size() <= maxSlots && MVL.getHeldType(container).filter(
 				heldType -> heldType == 0 || heldType == NbtElement.COMPOUND_TYPE).isPresent();
 	}
 	
@@ -45,7 +46,7 @@ public class OrderNbtListContainerIO implements ContainerIO<NbtList> {
 	
 	@Override
 	public ItemStack[] read(NbtList container) {
-		return container.nbte$stream().map(itemNbt -> SubjectIOs.ITEM.deserializeOrElse(
+		return container.stream().map(itemNbt -> SubjectIOs.ITEM.deserializeOrElse(
 				(NbtCompound) itemNbt, ItemStack.EMPTY)).toArray(ItemStack[]::new);
 	}
 	

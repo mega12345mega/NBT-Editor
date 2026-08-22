@@ -1,5 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.elementio.MVL;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 
 import net.minecraft.item.ItemStack;
@@ -19,7 +20,7 @@ public class ArmorHandsContainerIO implements ContainerIO<NbtCompound> {
 		if (armorItemsNbtElement != null) {
 			if (!(armorItemsNbtElement instanceof NbtList armorItemsNbt) ||
 					armorItemsNbt.size() > 4 ||
-					armorItemsNbt.nbte$getHeldType().filter(
+					MVL.getHeldType(armorItemsNbt).filter(
 							heldType -> heldType == 0 || heldType == NbtElement.COMPOUND_TYPE).isEmpty()) {
 				return false;
 			}
@@ -29,7 +30,7 @@ public class ArmorHandsContainerIO implements ContainerIO<NbtCompound> {
 		if (handItemsNbtElement != null) {
 			if (!(handItemsNbtElement instanceof NbtList handItemsNbt) ||
 					handItemsNbt.size() > 2 ||
-					handItemsNbt.nbte$getHeldType().filter(
+					MVL.getHeldType(handItemsNbt).filter(
 							heldType -> heldType == 0 || heldType == NbtElement.COMPOUND_TYPE).isEmpty()) {
 				return false;
 			}
@@ -53,12 +54,12 @@ public class ArmorHandsContainerIO implements ContainerIO<NbtCompound> {
 		ItemStack[] items = new ItemStack[6];
 		
 		NbtList armorItemsNbt = container.nbte$getListOrDefault("ArmorItems", NbtElement.COMPOUND_TYPE);
-		for (int i = 0; i < armorItemsNbt.nbte$size() && i < 4; i++)
-			items[3 - i] = SubjectIOs.ITEM.deserializeOrElse((NbtCompound) armorItemsNbt.nbte$get(i), ItemStack.EMPTY);
+		for (int i = 0; i < armorItemsNbt.size() && i < 4; i++)
+			items[3 - i] = SubjectIOs.ITEM.deserializeOrElse((NbtCompound) armorItemsNbt.get(i), ItemStack.EMPTY);
 		
 		NbtList handItemsNbt = container.nbte$getListOrDefault("HandItems", NbtElement.COMPOUND_TYPE);
-		for (int i = 0; i < handItemsNbt.nbte$size() && i < 2; i++)
-			items[4 + i] = SubjectIOs.ITEM.deserializeOrElse((NbtCompound) handItemsNbt.nbte$get(i), ItemStack.EMPTY);
+		for (int i = 0; i < handItemsNbt.size() && i < 2; i++)
+			items[4 + i] = SubjectIOs.ITEM.deserializeOrElse((NbtCompound) handItemsNbt.get(i), ItemStack.EMPTY);
 		
 		return items;
 	}

@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundParent;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.elementio.MVL;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.elementio.MVN;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTEditorScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.NBTValue;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -52,8 +54,8 @@ public class ListNBTFolder implements NBTFolder<AbstractNbtList> {
 	@Override
 	public List<NBTValue> getEntries(NBTEditorScreen<?> screen) {
 		AbstractNbtList nbt = getNBT();
-		return IntStream.range(0, nbt.nbte$size())
-				.mapToObj(i -> new NBTValue(screen, i + "", nbt.nbte$get(i), nbt)).collect(Collectors.toList());
+		return IntStream.range(0, MVL.size(nbt))
+				.mapToObj(i -> new NBTValue(screen, i + "", MVL.get(nbt, i), nbt)).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -66,9 +68,9 @@ public class ListNBTFolder implements NBTFolder<AbstractNbtList> {
 		AbstractNbtList nbt = getNBT();
 		try {
 			int i = Integer.parseInt(key);
-			if (i < 0 || i >= nbt.nbte$size())
+			if (i < 0 || i >= MVL.size(nbt))
 				return null;
-			return nbt.nbte$get(i);
+			return MVL.get(nbt, i);
 		} catch (NumberFormatException e) {
 			return null;
 		}
@@ -78,7 +80,7 @@ public class ListNBTFolder implements NBTFolder<AbstractNbtList> {
 	public void setValue(String key, NbtElement value) {
 		AbstractNbtList nbt = getNBT();
 		int i = Integer.parseInt(key);
-		if (nbt.nbte$size() == 1 && i == 0 && nbt instanceof NbtList list) {
+		if (MVL.size(nbt) == 1 && i == 0 && nbt instanceof NbtList list) {
 			if (MVNbtCompoundParent.NBT_CODE_REFACTORED) {
 				list.setElement(0, value);
 			} else {
@@ -89,7 +91,7 @@ public class ListNBTFolder implements NBTFolder<AbstractNbtList> {
 		} else {
 			NbtElement convertedValue = convertToType(nbt, value);
 			if (convertedValue != null) {
-				nbt.nbte$set(i, convertedValue);
+				MVL.set(nbt, i, convertedValue);
 				setNBT(nbt);
 			}
 		}
@@ -98,7 +100,7 @@ public class ListNBTFolder implements NBTFolder<AbstractNbtList> {
 	@Override
 	public void addKey(String key) {
 		AbstractNbtList nbt = getNBT();
-		nbt.nbte$add(Integer.parseInt(key), getDefaultValue(nbt));
+		MVL.add(nbt, Integer.parseInt(key), getDefaultValue(nbt));
 		setNBT(nbt);
 	}
 	
@@ -107,8 +109,8 @@ public class ListNBTFolder implements NBTFolder<AbstractNbtList> {
 		AbstractNbtList nbt = getNBT();
 		try {
 			int i = Integer.parseInt(key);
-			if (i >= 0 && i < nbt.nbte$size()) {
-				nbt.nbte$remove(i);
+			if (i >= 0 && i < MVL.size(nbt)) {
+				MVL.remove(nbt, i);
 				setNBT(nbt);
 			}
 		} catch (NumberFormatException e) {}
@@ -116,14 +118,14 @@ public class ListNBTFolder implements NBTFolder<AbstractNbtList> {
 	
 	@Override
 	public Optional<String> getNextKey(Optional<String> pastingKey) {
-		return Optional.of(getNBT().nbte$size() + "");
+		return Optional.of(MVL.size(getNBT()) + "");
 	}
 	
 	private NbtElement convertToType(AbstractNbtList nbt, NbtElement value) {
 		if (MVNbtCompoundParent.NBT_CODE_REFACTORED)
 			return value;
 		
-		int heldType = nbt.nbte$getHeldType().get();
+		int heldType = MVL.getHeldType(nbt).get();
 		
 		if (heldType == 0 || heldType == value.getType())
 			return value;
@@ -143,15 +145,15 @@ public class ListNBTFolder implements NBTFolder<AbstractNbtList> {
 		
 		if (value instanceof AbstractNbtNumber num) {
 			return switch (heldType) {
-				case NbtElement.BYTE_TYPE -> NbtByte.of(num.nbte$byteValue());
-				case NbtElement.SHORT_TYPE -> NbtShort.of(num.nbte$shortValue());
-				case NbtElement.INT_TYPE -> NbtInt.of(num.nbte$intValue());
-				case NbtElement.LONG_TYPE -> NbtLong.of(num.nbte$longValue());
-				case NbtElement.FLOAT_TYPE -> NbtFloat.of(num.nbte$floatValue());
-				case NbtElement.DOUBLE_TYPE -> NbtDouble.of(num.nbte$doubleValue());
-				case NbtElement.BYTE_ARRAY_TYPE -> new NbtByteArray(new byte[] {num.nbte$byteValue()});
-				case NbtElement.INT_ARRAY_TYPE -> new NbtIntArray(new int[] {num.nbte$intValue()});
-				case NbtElement.LONG_ARRAY_TYPE -> new NbtLongArray(new long[] {num.nbte$longValue()});
+				case NbtElement.BYTE_TYPE -> NbtByte.of(MVN.byteValue(num));
+				case NbtElement.SHORT_TYPE -> NbtShort.of(MVN.shortValue(num));
+				case NbtElement.INT_TYPE -> NbtInt.of(MVN.intValue(num));
+				case NbtElement.LONG_TYPE -> NbtLong.of(MVN.longValue(num));
+				case NbtElement.FLOAT_TYPE -> NbtFloat.of(MVN.floatValue(num));
+				case NbtElement.DOUBLE_TYPE -> NbtDouble.of(MVN.doubleValue(num));
+				case NbtElement.BYTE_ARRAY_TYPE -> new NbtByteArray(new byte[] {MVN.byteValue(num)});
+				case NbtElement.INT_ARRAY_TYPE -> new NbtIntArray(new int[] {MVN.intValue(num)});
+				case NbtElement.LONG_ARRAY_TYPE -> new NbtLongArray(new long[] {MVN.longValue(num)});
 				default -> null;
 			};
 		}
@@ -160,7 +162,8 @@ public class ListNBTFolder implements NBTFolder<AbstractNbtList> {
 	}
 	
 	private NbtElement getDefaultValue(AbstractNbtList nbt) {
-		return switch (nbt.nbte$getHeldType().orElseGet(() -> nbt.nbte$get(nbt.nbte$size() - 1).getType())) {
+		Optional<Byte> heldType = MVL.getHeldType(nbt);
+		return switch (heldType.orElseGet(() -> MVL.get(nbt, MVL.size(nbt) - 1).getType())) {
 			case NbtElement.BYTE_TYPE -> NbtByte.ZERO;
 			case NbtElement.SHORT_TYPE -> NbtShort.of((short) 0);
 			case 0, NbtElement.INT_TYPE -> NbtInt.of(0);
@@ -173,13 +176,13 @@ public class ListNBTFolder implements NBTFolder<AbstractNbtList> {
 			case NbtElement.LIST_TYPE -> new NbtList();
 			case NbtElement.COMPOUND_TYPE -> new NbtCompound();
 			case NbtElement.STRING_TYPE -> NbtString.of("");
-			default -> throw new IllegalArgumentException("Unknown NBT type: " + nbt.nbte$getHeldType().get());
+			default -> throw new IllegalArgumentException("Unknown NBT type: " + heldType.get());
 		};
 	}
 	
 	@Override
 	public Predicate<String> getKeyValidator(boolean renaming) {
-		return MainUtil.intPredicate(() -> 0, () -> getNBT().nbte$size() + (renaming ? -1 : 0), false);
+		return MainUtil.intPredicate(() -> 0, () -> MVL.size(getNBT()) + (renaming ? -1 : 0), false);
 	}
 	
 	@Override

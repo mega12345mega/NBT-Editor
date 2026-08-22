@@ -31,6 +31,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.elementio.MVN;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders.MVShader;
@@ -501,7 +502,7 @@ public class MainUtil {
 	public static <T extends NbtElement> T updateDynamic(TypeReference typeRef, T nbt, NbtElement dataVersionTag, int defaultOldVersion) {
 		int dataVersion = defaultOldVersion;
 		if (dataVersionTag != null && dataVersionTag instanceof AbstractNbtNumber num)
-			dataVersion = num.nbte$intValue();
+			dataVersion = MVN.intValue(num);
 		else if (dataVersion == -1)
 			return nbt;
 		return update(typeRef, nbt, dataVersion);

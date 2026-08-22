@@ -28,7 +28,7 @@ public class SlotKeyNbtListContainerIO implements ContainerIO<NbtList> {
 	
 	@Override
 	public boolean isSupported(NbtList container) {
-		for (NbtElement itemNbtElement : container.nbte$iterable()) {
+		for (NbtElement itemNbtElement : container) {
 			if (itemNbtElement instanceof NbtCompound itemNbt) {
 				if (!itemNbt.nbte$contains("Slot", MVNbtCompoundParent.NUMBER_TYPE))
 					return false;
@@ -55,7 +55,7 @@ public class SlotKeyNbtListContainerIO implements ContainerIO<NbtList> {
 	@Override
 	public ItemStack[] read(NbtList container) {
 		ItemStack[] contents = new ItemStack[numSlots];
-		for (NbtElement itemNbtElement : container.nbte$iterable()) {
+		for (NbtElement itemNbtElement : container) {
 			NbtCompound itemNbt = (NbtCompound) itemNbtElement;
 			contents[itemNbt.nbte$getIntOrDefault("Slot")] = SubjectIOs.ITEM.deserializeOrElse(itemNbt, ItemStack.EMPTY);
 		}

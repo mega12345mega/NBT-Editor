@@ -302,7 +302,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		NbtList passengersNbt = nbt.nbte$getPartialListOrDefault("Passengers", NbtElement.COMPOUND_TYPE);
 		Set<UUID> passengerUUIDs = new HashSet<>();
 		
-		for (NbtElement passengerNbtElement : passengersNbt.nbte$iterable()) {
+		for (NbtElement passengerNbtElement : passengersNbt) {
 			NbtCompound passengerNbt = (NbtCompound) passengerNbtElement;
 			UUID passengerUUID = passengerNbt.nbte$getUuid("UUID").orElse(null);
 			if (passengerUUID == null || !passengerUUIDs.add(passengerUUID)) {

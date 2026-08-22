@@ -5,6 +5,8 @@ import java.lang.reflect.Array;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.elementio.MVL;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.elementio.MVN;
 
 import net.minecraft.nbt.AbstractNbtList;
 import net.minecraft.nbt.AbstractNbtNumber;
@@ -30,9 +32,10 @@ public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 			if (!(element instanceof AbstractNbtList list))
 				return Array.newInstance(target.componentType(), 0);
 			
-			Object output = Array.newInstance(target.componentType(), list.nbte$size());
-			for (int i = 0; i < list.nbte$size(); i++)
-				Array.set(output, i, deserialize(list.nbte$get(i), target.componentType()));
+			int size = MVL.size(list);
+			Object output = Array.newInstance(target.componentType(), size);
+			for (int i = 0; i < size; i++)
+				Array.set(output, i, deserialize(MVL.get(list, i), target.componentType()));
 			return output;
 		}
 		
@@ -46,21 +49,21 @@ public class NBTTagReference<T> implements TagReference<T, NbtCompound> {
 		Class<?> primitiveTarget = (target.isPrimitive() ? target : MethodType.methodType(target).unwrap().returnType());
 		if (primitiveTarget.isPrimitive()) {
 			if (primitiveTarget == boolean.class)
-				return (element instanceof AbstractNbtNumber num ? num.nbte$byteValue() != 0 : false);
+				return (element instanceof AbstractNbtNumber num ? MVN.byteValue(num) != 0 : false);
 			if (primitiveTarget == byte.class)
-				return (element instanceof AbstractNbtNumber num ? num.nbte$byteValue() : (byte) 0);
+				return (element instanceof AbstractNbtNumber num ? MVN.byteValue(num) : (byte) 0);
 			if (primitiveTarget == short.class)
-				return (element instanceof AbstractNbtNumber num ? num.nbte$shortValue() : (short) 0);
+				return (element instanceof AbstractNbtNumber num ? MVN.shortValue(num) : (short) 0);
 			if (primitiveTarget == char.class)
-				return (element instanceof AbstractNbtNumber num ? (char) num.nbte$shortValue() : (char) 0);
+				return (element instanceof AbstractNbtNumber num ? (char) MVN.shortValue(num) : (char) 0);
 			if (primitiveTarget == int.class)
-				return (element instanceof AbstractNbtNumber num ? num.nbte$intValue() : (int) 0);
+				return (element instanceof AbstractNbtNumber num ? MVN.intValue(num) : (int) 0);
 			if (primitiveTarget == long.class)
-				return (element instanceof AbstractNbtNumber num ? num.nbte$longValue() : (long) 0);
+				return (element instanceof AbstractNbtNumber num ? MVN.longValue(num) : (long) 0);
 			if (primitiveTarget == float.class)
-				return (element instanceof AbstractNbtNumber num ? num.nbte$floatValue() : (float) 0);
+				return (element instanceof AbstractNbtNumber num ? MVN.floatValue(num) : (float) 0);
 			if (primitiveTarget == double.class)
-				return (element instanceof AbstractNbtNumber num ? num.nbte$doubleValue() : (double) 0);
+				return (element instanceof AbstractNbtNumber num ? MVN.doubleValue(num) : (double) 0);
 			throw new IllegalArgumentException("Unknown primitive type " + primitiveTarget.getName());
 		}
 		

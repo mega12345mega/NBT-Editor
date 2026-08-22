@@ -70,7 +70,7 @@ public class AttributesNBTTagReference implements TagReference<List<AttributeDat
 	public List<AttributeData> get(NbtCompound object) {
 		NbtList attributesNbt = object.nbte$getListOrDefault(layout.getAttributeListTag(), NbtElement.COMPOUND_TYPE);
 		List<AttributeData> output = new ArrayList<>();
-		for (NbtElement attributeNbtElement : attributesNbt.nbte$iterable()) {
+		for (NbtElement attributeNbtElement : attributesNbt) {
 			NbtCompound attributeNbt = (NbtCompound) attributeNbtElement;
 			
 			EntityAttribute attribute = attributeNbt.nbte$getString(layout.getAttributeNameTag())

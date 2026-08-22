@@ -6,6 +6,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundParent;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.elementio.MVL;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.nbtfolder.NBTFolder;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.widgets.List2D;
@@ -83,7 +84,7 @@ public class NBTValue extends List2D.List2DValue {
 		int color = -1;
 		String tooltip = null;
 		if (unsafe && selected || parentList != null &&
-				!MVNbtCompoundParent.NBT_CODE_REFACTORED && parentList.nbte$getHeldType().get() != value.getType()) {
+				!MVNbtCompoundParent.NBT_CODE_REFACTORED && MVL.getHeldType(parentList).get() != value.getType()) {
 			color = 0xFFFFAA33;
 			tooltip = "nbteditor.nbt.marker.unsafe";
 		} else if (invalidComponent) {

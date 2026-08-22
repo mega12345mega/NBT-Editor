@@ -624,7 +624,7 @@ public class ClientChest {
 		DynamicItems dynamicItems = new DynamicItems();
 		boolean empty = true;
 		int i = -1;
-		for (NbtElement itemElementNbt : itemsNbt.nbte$iterable()) {
+		for (NbtElement itemElementNbt : itemsNbt) {
 			i++;
 			NbtCompound itemNbt = (NbtCompound) itemElementNbt;
 			if (itemNbt.nbte$contains("dynamic", NbtElement.BYTE_TYPE) && itemNbt.nbte$getBooleanOrDefault("dynamic")) {
@@ -772,7 +772,7 @@ public class ClientChest {
 		DynamicItems dynamicItems = new DynamicItems();
 		boolean empty = true;
 		int i = -1;
-		for (NbtElement itemElementNbt : itemsNbt.nbte$iterable()) {
+		for (NbtElement itemElementNbt : itemsNbt) {
 			i++;
 			NbtCompound itemNbt = (NbtCompound) itemElementNbt;
 			boolean dynamic = (itemNbt.nbte$contains("dynamic", NbtElement.BYTE_TYPE) &&

@@ -62,7 +62,7 @@ public class NBTExportCommand extends ClientCommand {
 	private static void stripEntityTags(NbtCompound nbt, String... tags) {
 		for (String tag : tags)
 			nbt.remove(tag);
-		for (NbtElement passenger : nbt.nbte$getPartialListOrDefault("Passengers", NbtElement.COMPOUND_TYPE).nbte$iterable())
+		for (NbtElement passenger : nbt.nbte$getPartialListOrDefault("Passengers", NbtElement.COMPOUND_TYPE))
 			stripEntityTags((NbtCompound) passenger, tags);
 	}
 	
