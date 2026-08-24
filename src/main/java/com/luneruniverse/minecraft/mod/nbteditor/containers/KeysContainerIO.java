@@ -1,22 +1,22 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.util.Identifier;
 
 public class KeysContainerIO implements ContainerIO<NbtCompound> {
 	
 	private final boolean removeWhenEmpty;
 	private final String[] keys;
-	private final Identifier[] textures;
+	private final SlotTexture[] textures;
 	
 	public KeysContainerIO(boolean removeWhenEmpty, String... keys) {
 		this.removeWhenEmpty = removeWhenEmpty;
 		this.keys = keys;
-		this.textures = new Identifier[keys.length];
+		this.textures = new SlotTexture[keys.length];
 	}
 	
 	@Override
@@ -35,7 +35,7 @@ public class KeysContainerIO implements ContainerIO<NbtCompound> {
 	}
 	
 	@Override
-	public Identifier[] getTextures(NbtCompound container) {
+	public SlotTexture[] getTextures(NbtCompound container) {
 		return textures;
 	}
 	

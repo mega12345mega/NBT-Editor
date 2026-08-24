@@ -2,17 +2,18 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.elementio.MVL;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Identifier;
 
 public class ArmorHandsContainerIO implements ContainerIO<NbtCompound> {
 	
-	private static final Identifier[] TEXTURES = new Identifier[] {
-			HELMET_TEXTURE, CHESTPLATE_TEXTURE, LEGGINGS_TEXTURE, BOOTS_TEXTURE, SWORD_TEXTURE, SHIELD_TEXTURE};
+	private static final SlotTexture[] TEXTURES = new SlotTexture[] {
+			SlotTexture.HELMET, SlotTexture.CHESTPLATE, SlotTexture.LEGGINGS, SlotTexture.BOOTS,
+			SlotTexture.SWORD, SlotTexture.SHIELD};
 	
 	@Override
 	public boolean isSupported(NbtCompound container) {
@@ -45,7 +46,7 @@ public class ArmorHandsContainerIO implements ContainerIO<NbtCompound> {
 	}
 	
 	@Override
-	public Identifier[] getTextures(NbtCompound container) {
+	public SlotTexture[] getTextures(NbtCompound container) {
 		return TEXTURES;
 	}
 	

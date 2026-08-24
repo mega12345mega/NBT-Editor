@@ -4,21 +4,21 @@ import java.util.Arrays;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.elementio.MVL;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Identifier;
 
 public class OrderNbtListContainerIO implements ContainerIO<NbtList> {
 	
 	private final int maxSlots;
-	private final Identifier[] textures;
+	private final SlotTexture[] textures;
 	
 	public OrderNbtListContainerIO(int maxSlots) {
 		this.maxSlots = maxSlots;
-		this.textures = new Identifier[maxSlots];
+		this.textures = new SlotTexture[maxSlots];
 	}
 	
 	public ContainerIO<NbtCompound> forNbtCompound(String key) {
@@ -40,7 +40,7 @@ public class OrderNbtListContainerIO implements ContainerIO<NbtList> {
 	}
 	
 	@Override
-	public Identifier[] getTextures(NbtList container) {
+	public SlotTexture[] getTextures(NbtList container) {
 		return textures;
 	}
 	

@@ -22,7 +22,7 @@ public class ClientScreenHandlerSlot extends Slot {
 	}
 	
 	private ClientHandledScreen screen;
-	private Identifier texture;
+	private SlotTexture texture;
 	
 	public ClientScreenHandlerSlot(Slot slot) {
 		super(slot.inventory, slot.getIndex(), slot.x, slot.y);
@@ -33,8 +33,11 @@ public class ClientScreenHandlerSlot extends Slot {
 		this.screen = screen;
 	}
 	
-	public void setTexture(Identifier texture) {
+	public void setTexture(SlotTexture texture) {
 		this.texture = texture;
+	}
+	public SlotTexture getTexture() {
+		return texture;
 	}
 	
 	private boolean isBlocked() {
@@ -66,9 +69,11 @@ public class ClientScreenHandlerSlot extends Slot {
 		return super.getMaxItemCount();
 	}
 	
+	// 1.21.4+
+	// See ClientHandledScreen#drawBackground
 	@Override
 	public Identifier getBackgroundSprite() {
-		return texture;
+		return texture == null ? null : texture.texture();
 	}
 	
 }

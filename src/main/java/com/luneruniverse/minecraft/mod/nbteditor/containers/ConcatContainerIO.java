@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
+
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 
 public class ConcatContainerIO<T> implements ContainerIO<T> {
 	
@@ -34,11 +35,11 @@ public class ConcatContainerIO<T> implements ContainerIO<T> {
 	}
 	
 	@Override
-	public Identifier[] getTextures(T container) {
-		List<Identifier> textures = new ArrayList<>();
+	public SlotTexture[] getTextures(T container) {
+		List<SlotTexture> textures = new ArrayList<>();
 		for (ContainerIO<T> io : ios)
 			textures.addAll(Arrays.asList(io.getTextures(container)));
-		return textures.toArray(Identifier[]::new);
+		return textures.toArray(SlotTexture[]::new);
 	}
 	
 	@Override

@@ -84,7 +84,7 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 		handler.disableSyncing();
 	}
 	
-	protected void setSlotTextures(Identifier... textures) {
+	protected void setSlotTextures(SlotTexture... textures) {
 		((ClientScreenHandler) handler).setSlotTextures(textures);
 	}
 	
@@ -101,6 +101,21 @@ public class ClientHandledScreen extends GenericContainerScreen implements OldEv
 	protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
 		MVDrawableHelper.drawTexture(matrices, TEXTURE, x, y, 0, 0, backgroundWidth, handler.getRows() * 18 + 17);
 		MVDrawableHelper.drawTexture(matrices, TEXTURE, x, y + handler.getRows() * 18 + 17, 0, 126, backgroundWidth, 96);
+		
+		// 1.21.3-
+		// See ClientScreenHandlerSlot#getBackgroundSprite
+		if (!SlotTexture.SIMPLIFIED) {
+			for (Slot slot : handler.slots) {
+				if (slot.getStack().isEmpty() && slot instanceof ClientScreenHandlerSlot clientSlot) {
+					SlotTexture texture = clientSlot.getTexture();
+					if (texture != null) {
+						MVDrawableHelper.drawTexture(matrices, texture.texture(),
+								x + slot.x, y + slot.y, texture.u(), texture.v(),
+								16, 16, texture.textureWidth(), texture.textureHeight());
+					}
+				}
+			}
+		}
 		
 		if (showLogo())
 			MainUtil.renderLogo(matrices);

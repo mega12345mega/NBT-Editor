@@ -1,10 +1,10 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
 
 public class DonkeyChestContainerIO implements ContainerIO<NbtCompound> {
 	
@@ -15,12 +15,12 @@ public class DonkeyChestContainerIO implements ContainerIO<NbtCompound> {
 	
 	private final boolean llama;
 	private final ContainerIO<NbtCompound> delegate;
-	private final Identifier[] textures;
+	private final SlotTexture[] textures;
 	
 	public DonkeyChestContainerIO(boolean llama) {
 		this.llama = llama;
 		this.delegate = new SlotKeyNbtListContainerIO(ITEMS_SHIFTED ? 17 : 15).forNbtCompoundItems();
-		this.textures = new Identifier[15];
+		this.textures = new SlotTexture[15];
 	}
 	
 	@Override
@@ -34,7 +34,7 @@ public class DonkeyChestContainerIO implements ContainerIO<NbtCompound> {
 	}
 	
 	@Override
-	public Identifier[] getTextures(NbtCompound container) {
+	public SlotTexture[] getTextures(NbtCompound container) {
 		return textures;
 	}
 	

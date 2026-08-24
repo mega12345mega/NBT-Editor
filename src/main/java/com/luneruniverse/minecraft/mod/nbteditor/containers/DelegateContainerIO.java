@@ -4,8 +4,9 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
+
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 
 public class DelegateContainerIO<I, O> implements ContainerIO<I> {
 	
@@ -48,7 +49,7 @@ public class DelegateContainerIO<I, O> implements ContainerIO<I> {
 	}
 	
 	@Override
-	public Identifier[] getTextures(I container) {
+	public SlotTexture[] getTextures(I container) {
 		return get(container, ContainerIO::getTextures);
 	}
 	

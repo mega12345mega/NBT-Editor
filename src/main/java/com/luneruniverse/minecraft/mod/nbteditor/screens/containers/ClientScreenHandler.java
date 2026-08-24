@@ -12,7 +12,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Identifier;
 
 public class ClientScreenHandler extends GenericContainerScreenHandler {
 	
@@ -36,7 +35,7 @@ public class ClientScreenHandler extends GenericContainerScreenHandler {
 		slots.forEach(slot -> ((ClientScreenHandlerSlot) slot).setScreen(screen));
 	}
 	
-	public void setSlotTextures(Identifier... textures) {
+	public void setSlotTextures(SlotTexture... textures) {
 		for (int i = 0; i < textures.length; i++)
 			((ClientScreenHandlerSlot) slots.get(i)).setTexture(textures[i]);
 	}

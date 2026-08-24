@@ -2,21 +2,21 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundParent;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Identifier;
 
 public class SlotKeyNbtListContainerIO implements ContainerIO<NbtList> {
 	
 	private final int numSlots;
-	private final Identifier[] textures;
+	private final SlotTexture[] textures;
 	
 	public SlotKeyNbtListContainerIO(int numSlots) {
 		this.numSlots = numSlots;
-		this.textures = new Identifier[numSlots];
+		this.textures = new SlotTexture[numSlots];
 	}
 	
 	public ContainerIO<NbtCompound> forNbtCompound(String key) {
@@ -48,7 +48,7 @@ public class SlotKeyNbtListContainerIO implements ContainerIO<NbtList> {
 	}
 	
 	@Override
-	public Identifier[] getTextures(NbtList container) {
+	public SlotTexture[] getTextures(NbtList container) {
 		return textures;
 	}
 	

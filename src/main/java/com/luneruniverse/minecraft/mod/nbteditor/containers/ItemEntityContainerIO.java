@@ -2,11 +2,11 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
 
 public record ItemEntityContainerIO(ContainerIO<ItemStack> item, ContainerIO<LocalEntity> entity) {
 	
@@ -38,7 +38,7 @@ public record ItemEntityContainerIO(ContainerIO<ItemStack> item, ContainerIO<Loc
 		return forKeys(EntityType.getId(entityId).toString(), keys);
 	}
 	
-	public ItemEntityContainerIO withTextures(Identifier... textures) {
+	public ItemEntityContainerIO withTextures(SlotTexture... textures) {
 		return new ItemEntityContainerIO(item.withTextures(textures), entity.withTextures(textures));
 	}
 	

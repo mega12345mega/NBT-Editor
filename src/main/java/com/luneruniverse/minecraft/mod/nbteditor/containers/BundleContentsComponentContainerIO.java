@@ -2,19 +2,20 @@ package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import java.util.Arrays;
 
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
+
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 
 public class BundleContentsComponentContainerIO implements ContainerIO<ItemStack> {
 	
 	private final int maxSlots;
-	private final Identifier[] textures;
+	private final SlotTexture[] textures;
 	
 	public BundleContentsComponentContainerIO(int maxSlots) {
 		this.maxSlots = maxSlots;
-		this.textures = new Identifier[maxSlots];
+		this.textures = new SlotTexture[maxSlots];
 	}
 	
 	@Override
@@ -29,7 +30,7 @@ public class BundleContentsComponentContainerIO implements ContainerIO<ItemStack
 	}
 	
 	@Override
-	public Identifier[] getTextures(ItemStack container) {
+	public SlotTexture[] getTextures(ItemStack container) {
 		return textures;
 	}
 	

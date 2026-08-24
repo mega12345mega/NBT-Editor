@@ -1,24 +1,24 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.util.Identifier;
 
 public class EquipmentContainerIO implements ContainerIO<NbtCompound> {
 	
-	private static final Identifier[] HORSE_ARMOR_TEXTURES = new Identifier[] {
-			HELMET_TEXTURE, CHESTPLATE_TEXTURE, LEGGINGS_TEXTURE, BOOTS_TEXTURE,
-			SADDLE_TEXTURE, HORSE_ARMOR_TEXTURE, SWORD_TEXTURE, SHIELD_TEXTURE};
-	private static final Identifier[] LLAMA_ARMOR_TEXTURES = new Identifier[] {
-			HELMET_TEXTURE, CHESTPLATE_TEXTURE, LEGGINGS_TEXTURE, BOOTS_TEXTURE,
-			SADDLE_TEXTURE, LLAMA_ARMOR_TEXTURE, SWORD_TEXTURE, SHIELD_TEXTURE};
+	private static final SlotTexture[] HORSE_ARMOR_TEXTURES = new SlotTexture[] {
+			SlotTexture.HELMET, SlotTexture.CHESTPLATE, SlotTexture.LEGGINGS, SlotTexture.BOOTS,
+			SlotTexture.SADDLE, SlotTexture.HORSE_ARMOR, SlotTexture.SWORD, SlotTexture.SHIELD};
+	private static final SlotTexture[] LLAMA_ARMOR_TEXTURES = new SlotTexture[] {
+			SlotTexture.HELMET, SlotTexture.CHESTPLATE, SlotTexture.LEGGINGS, SlotTexture.BOOTS,
+			SlotTexture.SADDLE, SlotTexture.LLAMA_ARMOR, SlotTexture.SWORD, SlotTexture.SHIELD};
 	private static final String[] KEYS = new String[] {
 			"head", "chest", "legs", "feet", "saddle", "body", "mainhand", "offhand"};
 	
-	private final Identifier[] textures;
+	private final SlotTexture[] textures;
 	
 	public EquipmentContainerIO(boolean llama) {
 		textures = (llama ? LLAMA_ARMOR_TEXTURES : HORSE_ARMOR_TEXTURES);
@@ -40,7 +40,7 @@ public class EquipmentContainerIO implements ContainerIO<NbtCompound> {
 	}
 	
 	@Override
-	public Identifier[] getTextures(NbtCompound container) {
+	public SlotTexture[] getTextures(NbtCompound container) {
 		return textures;
 	}
 	

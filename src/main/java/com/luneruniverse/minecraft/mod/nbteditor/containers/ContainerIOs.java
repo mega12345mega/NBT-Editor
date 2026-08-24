@@ -18,6 +18,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -36,7 +37,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
 
 public class ContainerIOs {
 	
@@ -70,8 +70,7 @@ public class ContainerIOs {
 	private static final ItemBlockContainerIO CHEST_IO = ItemBlockContainerIO.forSlotKeyItems(27);
 	private static final ItemBlockContainerIO FURNACE_IO = ItemBlockContainerIO.forSlotKeyItems(3);
 	private static final ItemBlockContainerIO BREWING_STAND_IO = ItemBlockContainerIO.forSlotKeyItems(5)
-			.withTextures(ContainerIO.POTION_TEXTURE, ContainerIO.POTION_TEXTURE, ContainerIO.POTION_TEXTURE,
-					null, ContainerIO.BREWING_FUEL_TEXTURE);
+			.withTextures(SlotTexture.POTION, SlotTexture.POTION, SlotTexture.POTION, null, SlotTexture.BREWING_FUEL);
 	private static final ItemBlockContainerIO CAMPFIRE_IO = ItemBlockContainerIO.forSlotKeyItems(4);
 	private static final ItemBlockContainerIO DISPENSER_IO = ItemBlockContainerIO.forSlotKeyItems(9);
 	private static final ItemBlockContainerIO HOPPER_IO = ItemBlockContainerIO.forSlotKeyItems(5);
@@ -118,31 +117,48 @@ public class ContainerIOs {
 			Version.<ContainerIO<NbtCompound>>newSwitch()
 					.range("1.21.5", null, () -> new EquipmentContainerIO(false).forNbtCompoundEquipment())
 					.range("1.20.5", "1.21.4", () -> new ConcatContainerIO<>(
-							new ArmorHandsContainerIO(), new KeysContainerIO(false, "SaddleItem", "body_armor_item")))
+							new ArmorHandsContainerIO(),
+							new KeysContainerIO(false, "SaddleItem", "body_armor_item")
+									.withTextures(SlotTexture.SADDLE, SlotTexture.HORSE_ARMOR)))
 					.range(null, "1.20.4", () -> new ConcatContainerIO<>(
-							new ArmorHandsContainerIO(), new KeysContainerIO(false, "SaddleItem", "ArmorItem")))
+							new ArmorHandsContainerIO(),
+							new KeysContainerIO(false, "SaddleItem", "ArmorItem")
+									.withTextures(SlotTexture.SADDLE, SlotTexture.HORSE_ARMOR)))
 					.get());
 	private static final ContainerIO<LocalEntity> BASIC_HORSE_IO = ContainerIO.forLocalNBT(
 			Version.<ContainerIO<NbtCompound>>newSwitch()
 					.range("1.21.5", null, () -> new EquipmentContainerIO(false).forNbtCompoundEquipment())
 					.range(null, "1.21.4", () -> new ConcatContainerIO<>(
-							new ArmorHandsContainerIO(), new KeysContainerIO(false, "SaddleItem")))
+							new ArmorHandsContainerIO(),
+							new KeysContainerIO(false, "SaddleItem")
+									.withTextures(SlotTexture.SADDLE)))
 					.get());
 	private static final ContainerIO<LocalEntity> DONKEY_IO = ContainerIO.forLocalNBT(
 			Version.<ContainerIO<NbtCompound>>newSwitch()
 					.range("1.21.5", null, () -> new ConcatContainerIO<>(
-							new EquipmentContainerIO(false).forNbtCompoundEquipment(), new DonkeyChestContainerIO(false)))
+							new EquipmentContainerIO(false).forNbtCompoundEquipment(),
+							new DonkeyChestContainerIO(false)))
 					.range(null, "1.21.4", () -> new ConcatContainerIO<>(
-							new ArmorHandsContainerIO(), new KeysContainerIO(false, "SaddleItem"), new DonkeyChestContainerIO(false)))
+							new ArmorHandsContainerIO(),
+							new KeysContainerIO(false, "SaddleItem")
+									.withTextures(SlotTexture.SADDLE),
+							new DonkeyChestContainerIO(false)))
 					.get());
 	private static final ContainerIO<LocalEntity> LLAMA_IO = ContainerIO.forLocalNBT(
 			Version.<ContainerIO<NbtCompound>>newSwitch()
 					.range("1.21.5", null, () -> new ConcatContainerIO<>(
-							new EquipmentContainerIO(true).forNbtCompoundEquipment(), new DonkeyChestContainerIO(true)))
+							new EquipmentContainerIO(true).forNbtCompoundEquipment(),
+							new DonkeyChestContainerIO(true)))
 					.range("1.20.5", "1.21.4", () -> new ConcatContainerIO<>(
-							new ArmorHandsContainerIO(), new KeysContainerIO(false, "body_armor_item"), new DonkeyChestContainerIO(true)))
+							new ArmorHandsContainerIO(),
+							new KeysContainerIO(false, "body_armor_item")
+									.withTextures(SlotTexture.LLAMA_ARMOR),
+							new DonkeyChestContainerIO(true)))
 					.range(null, "1.20.4", () -> new ConcatContainerIO<>(
-							new ArmorHandsContainerIO(), new KeysContainerIO(false, "DecorItem"), new DonkeyChestContainerIO(true)))
+							new ArmorHandsContainerIO(),
+							new KeysContainerIO(false, "DecorItem")
+									.withTextures(SlotTexture.LLAMA_ARMOR),
+							new DonkeyChestContainerIO(true)))
 					.get());
 	private static final ContainerIO<LocalEntity> VILLAGER_IO = new ConcatContainerIO<>(
 			EQUIPMENT_IO.apply(EntityType.VILLAGER).entity(),
@@ -357,7 +373,7 @@ public class ContainerIOs {
 		return exec(container, ContainerIO::getMaxSlots);
 	}
 	
-	public static Identifier[] getTextures(LocalNBT container) {
+	public static SlotTexture[] getTextures(LocalNBT container) {
 		return exec(container, ContainerIO::getTextures);
 	}
 	
