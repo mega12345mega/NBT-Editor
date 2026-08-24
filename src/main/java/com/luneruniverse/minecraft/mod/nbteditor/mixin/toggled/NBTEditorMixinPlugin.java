@@ -46,6 +46,10 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				.range("1.21.5", null, () -> output.add("toggled.PlayStateFactories1Mixin"))
 				.range(null, "1.21.4", () -> {})
 				.run();
+		Version.newSwitch()
+				.range("1.21.5", null, () -> {})
+				.range(null, "1.21.4", () -> output.add("toggled.WorldChunkMixin"))
+				.run();
 		
 		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER)
 			return;

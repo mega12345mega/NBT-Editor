@@ -202,7 +202,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		else
 			newState = packet.getState().applyToSafely(block.getDefaultState());
 		
-		world.setBlockState(packet.getPos(), newState, Block.NOTIFY_LISTENERS | (packet.isTriggerUpdate()
+		ServerMixinLink.setBlockState(world, packet.getPos(), newState, Block.NOTIFY_LISTENERS | (packet.isTriggerUpdate()
 				? Block.SKIP_BLOCK_ENTITY_REPLACED_CALLBACK : Block.FORCE_STATE_AND_SKIP_CALLBACKS_AND_DROPS));
 		
 		if (sameBlock && packet.isRecreate())

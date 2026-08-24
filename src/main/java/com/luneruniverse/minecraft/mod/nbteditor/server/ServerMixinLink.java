@@ -2,6 +2,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.server;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -11,11 +12,14 @@ import com.luneruniverse.minecraft.mod.nbteditor.NBTEditorClient;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.component.type.BundleContentsComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.BlockPos;
 
 public class ServerMixinLink {
 	
@@ -61,6 +65,29 @@ public class ServerMixinLink {
 	}
 	public static boolean isInstanceOfClientPlayNetworkHandlerSafely(PacketListener listener) {
 		return ClientPlayNetworkHandler != null && ClientPlayNetworkHandler.isInstance(listener);
+	}
+	
+	
+	// Only used in 1.21.4-
+	private static volatile int SHOULD_CHECK_SET_BLOCK_STATE_FLAGS = 0;
+	private static final Map<Thread, Integer> SET_BLOCK_STATE_FLAGS = Collections.synchronizedMap(new WeakHashMap<>());
+	public static void setBlockState(ServerWorld world, BlockPos pos, BlockState state, int flags) {
+		SHOULD_CHECK_SET_BLOCK_STATE_FLAGS++;
+		try {
+			try {
+				SET_BLOCK_STATE_FLAGS.put(Thread.currentThread(), flags);
+				world.setBlockState(pos, state, flags);
+			} finally {
+				SET_BLOCK_STATE_FLAGS.remove(Thread.currentThread());
+			}
+		} finally {
+			SHOULD_CHECK_SET_BLOCK_STATE_FLAGS--;
+		}
+	}
+	public static boolean doesSetBlockStateHaveFlag(int flag) {
+		if (SHOULD_CHECK_SET_BLOCK_STATE_FLAGS == 0)
+			return false;
+		return (SET_BLOCK_STATE_FLAGS.getOrDefault(Thread.currentThread(), 0) & flag) != 0;
 	}
 	
 }
