@@ -56,7 +56,7 @@ public class DonkeyChestContainerIO implements ContainerIO<NbtCompound> {
 			shiftedContents = new ItemStack[17];
 			shiftedContents[0] = ItemStack.EMPTY;
 			shiftedContents[1] = ItemStack.EMPTY;
-			System.arraycopy(contents, 0, shiftedContents, 2, contents.length);
+			System.arraycopy(contents, 0, shiftedContents, 2, Math.min(15, contents.length));
 		}
 		delegate.write(container, shiftedContents);
 		
