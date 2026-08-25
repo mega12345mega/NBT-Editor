@@ -142,7 +142,7 @@ public class FancyText {
 			if (changes.getColor() != null) {
 				Formatting formatting = Formatting.byName(changes.getColor().getName());
 				if (formatting == null)
-					output.append("&" + changes.getColor().getHexCode());
+					output.append("&" + changes.getColor().getHexCode() + ";");
 				else
 					output.append("&" + formatting.getCode());
 			}
