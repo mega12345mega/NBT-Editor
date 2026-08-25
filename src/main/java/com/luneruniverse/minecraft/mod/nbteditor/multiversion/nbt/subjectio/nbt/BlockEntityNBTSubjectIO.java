@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.BlockEntitySharedSubjectIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIO;
 import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMixinLink;
 
@@ -51,7 +52,7 @@ public class BlockEntityNBTSubjectIO implements SubjectIO<BlockEntity> {
 			Reflection.getMethod(BlockEntity.class, "method_11014", MethodType.methodType(void.class, NbtCompound.class));
 	@Override
 	public void setNbt(BlockEntity subject, NbtCompound nbt) {
-		BlockEntity_readNbt.invoke(subject, nbt);
+		BlockEntity_readNbt.invoke(subject, BlockEntitySharedSubjectIO.stripInvalidCustomName(nbt));
 	}
 	
 }

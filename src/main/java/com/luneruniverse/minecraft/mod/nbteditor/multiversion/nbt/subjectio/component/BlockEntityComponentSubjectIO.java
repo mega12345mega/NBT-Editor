@@ -3,6 +3,7 @@ package com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.com
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.BlockEntitySharedSubjectIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIO;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.DynamicRegistryManagerHolder;
 import com.mojang.serialization.Codec;
@@ -52,7 +53,7 @@ public class BlockEntityComponentSubjectIO implements SubjectIO<BlockEntity> {
 	}
 	@Override
 	public void setNbt(BlockEntity subject, NbtCompound nbt) {
-		subject.read(nbt, DynamicRegistryManagerHolder.get());
+		subject.read(BlockEntitySharedSubjectIO.stripInvalidCustomName(nbt), DynamicRegistryManagerHolder.get());
 	}
 	
 }
