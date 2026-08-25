@@ -38,9 +38,9 @@ public class ComponentsHideFlag extends HideFlag {
 	@SuppressWarnings("unchecked")
 	private static HideFlag register(String name, ComponentType<?> component,
 			Predicate<Object> getShowInTooltip, BiFunction<Object, Boolean, Object> setShowInTooltip) {
-		return register(name, component, item -> getShowInTooltip.test(item.get(component)),
+		return register(name, component, item -> getShowInTooltip.test(item.nbte$get(component)),
 				(item, showInTooltip) -> {
-					Object value = item.get(component);
+					Object value = item.nbte$get(component);
 					if (value == null)
 						return;
 					item.set((ComponentType<Object>) component, setShowInTooltip.apply(value, showInTooltip));

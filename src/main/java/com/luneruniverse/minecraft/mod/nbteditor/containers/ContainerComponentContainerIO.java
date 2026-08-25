@@ -20,7 +20,7 @@ public class ContainerComponentContainerIO implements ContainerIO<ItemStack> {
 	
 	@Override
 	public boolean isSupported(ItemStack container) {
-		ContainerComponent component = container.get(DataComponentTypes.CONTAINER);
+		ContainerComponent component = container.nbte$get(DataComponentTypes.CONTAINER);
 		return component == null || component.stream().count() <= numSlots;
 	}
 	
@@ -36,7 +36,7 @@ public class ContainerComponentContainerIO implements ContainerIO<ItemStack> {
 	
 	@Override
 	public ItemStack[] read(ItemStack container) {
-		return container.get(DataComponentTypes.CONTAINER).stream().toArray(ItemStack[]::new);
+		return container.nbte$get(DataComponentTypes.CONTAINER).stream().toArray(ItemStack[]::new);
 	}
 	
 	@Override

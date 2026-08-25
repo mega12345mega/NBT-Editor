@@ -36,10 +36,10 @@ public class MaxStackSizeCommand extends ClientCommand {
 			if (item.getComponentChanges().get(DataComponentTypes.MAX_STACK_SIZE) == null) {
 				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.max_stack_size.already_removed"), false);
 			} else if (item.contains(DataComponentTypes.MAX_DAMAGE) &&
-					item.getDefaultComponents().getOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1) > 1) {
+					item.getDefaultComponents().nbte$getOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1) > 1) {
 				MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.max_stack_size.invalid_state"), false);
 			} else {
-				int size = item.getDefaultComponents().get(DataComponentTypes.MAX_STACK_SIZE);
+				int size = item.getDefaultComponents().nbte$get(DataComponentTypes.MAX_STACK_SIZE);
 				if (item.getCount() > size)
 					item.setCount(size);
 				item.set(DataComponentTypes.MAX_STACK_SIZE, size);

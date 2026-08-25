@@ -19,7 +19,7 @@ public class HideFlagsTooltipDisplayComponentTagReference implements TagReferenc
 	
 	@Override
 	public Map<HideFlag, Boolean> get(ItemStack object) {
-		TooltipDisplayComponent display = object.get(DataComponentTypes.TOOLTIP_DISPLAY);
+		TooltipDisplayComponent display = object.nbte$get(DataComponentTypes.TOOLTIP_DISPLAY);
 		Map<HideFlag, Boolean> output = new LinkedHashMap<>();
 		
 		output.put(TooltipHideFlag.INSTANCE, display.hideTooltip());
@@ -35,7 +35,7 @@ public class HideFlagsTooltipDisplayComponentTagReference implements TagReferenc
 		if (value.isEmpty())
 			return;
 		
-		TooltipDisplayComponent display = object.get(DataComponentTypes.TOOLTIP_DISPLAY);
+		TooltipDisplayComponent display = object.nbte$get(DataComponentTypes.TOOLTIP_DISPLAY);
 		boolean hideTooltip = display.hideTooltip();
 		LinkedHashSet<ComponentType<?>> hiddenComponents = new LinkedHashSet<>(MVMisc.hiddenComponents(display));
 		

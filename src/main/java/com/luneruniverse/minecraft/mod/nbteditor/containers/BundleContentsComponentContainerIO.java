@@ -20,7 +20,7 @@ public class BundleContentsComponentContainerIO implements ContainerIO<ItemStack
 	
 	@Override
 	public boolean isSupported(ItemStack container) {
-		BundleContentsComponent component = container.get(DataComponentTypes.BUNDLE_CONTENTS);
+		BundleContentsComponent component = container.nbte$get(DataComponentTypes.BUNDLE_CONTENTS);
 		return component == null || component.size() <= maxSlots;
 	}
 	
@@ -36,7 +36,7 @@ public class BundleContentsComponentContainerIO implements ContainerIO<ItemStack
 	
 	@Override
 	public ItemStack[] read(ItemStack container) {
-		BundleContentsComponent component = container.get(DataComponentTypes.BUNDLE_CONTENTS);
+		BundleContentsComponent component = container.nbte$get(DataComponentTypes.BUNDLE_CONTENTS);
 		if (component == null)
 			return new ItemStack[0];
 		return component.stream().toArray(ItemStack[]::new);

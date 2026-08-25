@@ -20,6 +20,13 @@ public class MVMixinPlugin extends BasicMixinPlugin {
 				.range("1.20.5", null, () -> output.add("toggled.ItemStackMixin"))
 				.range(null, "1.20.4", () -> {})
 				.run();
+		Version.newSwitch()
+				.range("1.20.5", null, () -> {
+					output.add("toggled.ComponentHolderMixin");
+					output.add("toggled.ComponentMapMixin");
+				})
+				.range(null, "1.20.4", () -> {})
+				.run();
 		
 		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER)
 			return;

@@ -42,7 +42,7 @@ public class ItemComponentSubjectIO implements DeserializableSubjectIO<ItemStack
 				DynamicRegistryManagerHolder.get().getOps(NbtOps.INSTANCE), nbt.copy());
 		return new Attempt<>(
 				result.resultOrPartial().map(Pair::getFirst).map(item -> {
-					if (item.contains(DataComponentTypes.MAX_DAMAGE) && item.getOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1) > 1)
+					if (item.contains(DataComponentTypes.MAX_DAMAGE) && item.nbte$getOrDefault(DataComponentTypes.MAX_STACK_SIZE, 1) > 1)
 						item.remove(DataComponentTypes.MAX_DAMAGE);
 					return item;
 				}),
@@ -70,7 +70,7 @@ public class ItemComponentSubjectIO implements DeserializableSubjectIO<ItemStack
 		Optional<? extends Integer> maxStackSize = components.get(DataComponentTypes.MAX_STACK_SIZE);
 		if (maxDamage != null && maxDamage.isPresent() &&
 				(maxStackSize == null ?
-						subject.getDefaultComponents().get(DataComponentTypes.MAX_STACK_SIZE) > 1 :
+						subject.getDefaultComponents().nbte$get(DataComponentTypes.MAX_STACK_SIZE) > 1 :
 						maxStackSize.isPresent() && maxStackSize.get() > 1)) {
 			components = components.withRemovedIf(component -> component == DataComponentTypes.MAX_DAMAGE);
 		}

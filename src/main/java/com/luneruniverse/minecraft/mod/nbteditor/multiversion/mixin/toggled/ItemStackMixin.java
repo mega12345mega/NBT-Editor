@@ -20,12 +20,12 @@ public class ItemStackMixin implements MVItemStackParent {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T get(MVComponentType<T> type) {
-		return ((ItemStack) (Object) this).get((ComponentType<T>) type.getInternalValue());
+		return ((ItemStack) (Object) this).nbte$get((ComponentType<T>) type.getInternalValue());
 	}
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getOrDefault(MVComponentType<T> type, T fallback) {
-		return ((ItemStack) (Object) this).getOrDefault((ComponentType<T>) type.getInternalValue(), fallback);
+		return ((ItemStack) (Object) this).nbte$getOrDefault((ComponentType<T>) type.getInternalValue(), fallback);
 	}
 	@SuppressWarnings("unchecked")
 	@Override
