@@ -2,8 +2,6 @@ package com.luneruniverse.minecraft.mod.nbteditor.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +15,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Attempt;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.click.MVClickActions;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.util.FancyConfirmScreen;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -39,14 +37,9 @@ public class TextUtil {
 			
 			if (str.startsWith("[LINK] ")) {
 				String url = str.substring("[LINK] ".length());
-				URI uri;
-				try {
-					uri = new URI(url);
-				} catch (URISyntaxException e) {
-					throw new IllegalArgumentException("Invalid link: " + url, e);
-				}
 				line = TextInst.literal(url)
-						.styled(style -> style.withClickEvent(MVTextEvents.ClickAction.OPEN_URL.newEvent(uri))
+						.styled(style -> style.withClickEvent(MVClickActions.OPEN_URL.newEventWithParse(url)
+								.orElseThrow(() -> new IllegalArgumentException("Invalid link: " + url)))
 						.withUnderline(true).withItalic(true).withColor(Formatting.GOLD));
 			}
 			if (str.startsWith("[FORMAT] ")) {
@@ -149,7 +142,7 @@ public class TextUtil {
 	
 	public static Text attachFileTextOptions(EditableText link, File file) {
 		return link.append(" ").append(TextInst.translatable("nbteditor.file_options.show").styled(style ->
-				style.withClickEvent(MVTextEvents.ClickAction.OPEN_FILE.newEvent(
+				style.withClickEvent(MVClickActions.OPEN_FILE.newEvent(
 						file.getAbsoluteFile().getParentFile().getAbsolutePath()))))
 				.append(" ").append(TextInst.translatable("nbteditor.file_options.delete").styled(style ->
 				MixinLink.withRunClickEvent(style, () -> MainUtil.client.setScreen(

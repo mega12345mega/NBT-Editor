@@ -11,9 +11,9 @@ import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.click.MVClickActions;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.LocalEditorScreen;
@@ -160,15 +160,14 @@ public class BookScreen extends LocalEditorScreen<LocalItem> {
 		if (style.getClickEvent() == null)
 			return style;
 		return MixinLink.withRunClickEvent(style, () -> {
-			MVTextEvents.ClickAction<?> clickAction = MVTextEvents.ClickAction.getAction(style.getClickEvent());
 			net.minecraft.client.gui.screen.ingame.BookScreen preview = getOverlay();
 			setOverlay(new AlertWidget(
 					() -> setOverlayScreen(preview, 500),
 					TextInst.translatable("nbteditor.book.preview.click.title"),
 					TextInst.of(""),
-					TextInst.translatable("nbteditor.book.preview.click.action", clickAction.getName()),
+					TextInst.translatable("nbteditor.book.preview.click.action", MVClickActions.getAction(style.getClickEvent()).getName()),
 					TextInst.of(""),
-					TextInst.translatable("nbteditor.book.preview.click.value", clickAction.getStringifiedValue(style.getClickEvent()))),
+					TextInst.translatable("nbteditor.book.preview.click.value", MVClickActions.getStringifiedValue(style.getClickEvent()))),
 					500);
 		});
 	}

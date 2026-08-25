@@ -29,11 +29,11 @@ import com.luneruniverse.minecraft.mod.nbteditor.misc.MixinLink;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.DataVersionStatus;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundParent;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.click.MVClickActions;
 import com.luneruniverse.minecraft.mod.nbteditor.util.LoadQueue;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.SaveQueue;
@@ -841,7 +841,7 @@ public class ClientChest {
 	}
 	public static Text attachShowFolder(EditableText text) {
 		return text.append(" ").append(TextInst.translatable("nbteditor.file_options.show").styled(
-				style -> style.withClickEvent(MVTextEvents.ClickAction.OPEN_FILE.newEvent(CLIENT_CHEST_FOLDER.getAbsolutePath()))));
+				style -> style.withClickEvent(MVClickActions.OPEN_FILE.newEvent(CLIENT_CHEST_FOLDER.getAbsolutePath()))));
 	}
 	
 }

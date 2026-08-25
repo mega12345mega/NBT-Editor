@@ -15,9 +15,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.EditableText;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTooltip;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.click.MVClickAction;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.click.MVClickActions;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.hover.MVHoverAction;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.hover.MVHoverActions;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.OverlaySupportingScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.configurable.ConfigValueDropdown;
@@ -43,24 +46,24 @@ public class FormattedTextFieldWidget extends GroupWidget {
 		private static class EventEditorWidget extends GroupWidget implements InitializableOverlay<Screen> {
 			public enum ClickAction {
 				NONE(null),
-				OPEN_URL(MVTextEvents.ClickAction.OPEN_URL),
-				RUN_COMMAND(MVTextEvents.ClickAction.RUN_COMMAND),
-				SUGGEST_COMMAND(MVTextEvents.ClickAction.SUGGEST_COMMAND),
-				CHANGE_PAGE(MVTextEvents.ClickAction.CHANGE_PAGE),
-				COPY_TO_CLIPBOARD(MVTextEvents.ClickAction.COPY_TO_CLIPBOARD);
+				OPEN_URL(MVClickActions.OPEN_URL),
+				RUN_COMMAND(MVClickActions.RUN_COMMAND),
+				SUGGEST_COMMAND(MVClickActions.SUGGEST_COMMAND),
+				CHANGE_PAGE(MVClickActions.CHANGE_PAGE),
+				COPY_TO_CLIPBOARD(MVClickActions.COPY_TO_CLIPBOARD);
 				
-				public static ClickAction get(MVTextEvents.ClickAction<?> value) {
+				public static ClickAction get(MVClickAction<?, ?> value) {
 					for (ClickAction action : values()) {
 						if (action.value == value)
 							return action;
 					}
-					if (value == MVTextEvents.ClickAction.OPEN_FILE)
+					if (value == MVClickActions.OPEN_FILE)
 						return NONE;
 					throw new IllegalArgumentException("Invalid ClickAction: " + value);
 				}
 				
-				public final MVTextEvents.ClickAction<?> value;
-				private ClickAction(MVTextEvents.ClickAction<?> value) {
+				public final MVClickAction<?, ?> value;
+				private ClickAction(MVClickAction<?, ?> value) {
 					this.value = value;
 				}
 				
@@ -73,11 +76,11 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			}
 			public enum HoverAction {
 				NONE(null),
-				SHOW_TEXT(MVTextEvents.HoverAction.SHOW_TEXT),
-				SHOW_ITEM(MVTextEvents.HoverAction.SHOW_ITEM),
-				SHOW_ENTITY(MVTextEvents.HoverAction.SHOW_ENTITY);
+				SHOW_TEXT(MVHoverActions.SHOW_TEXT),
+				SHOW_ITEM(MVHoverActions.SHOW_ITEM),
+				SHOW_ENTITY(MVHoverActions.SHOW_ENTITY);
 				
-				public static HoverAction get(MVTextEvents.HoverAction<?> value) {
+				public static HoverAction get(MVHoverAction<?, ?> value) {
 					for (HoverAction action : values()) {
 						if (action.value == value)
 							return action;
@@ -85,8 +88,8 @@ public class FormattedTextFieldWidget extends GroupWidget {
 					throw new IllegalArgumentException("Invalid HoverAction: " + value);
 				}
 				
-				public final MVTextEvents.HoverAction<?> value;
-				private HoverAction(MVTextEvents.HoverAction<?> value) {
+				public final MVHoverAction<?, ?> value;
+				private HoverAction(MVHoverAction<?, ?> value) {
 					this.value = value;
 				}
 				
@@ -113,10 +116,10 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			private final ButtonWidget cancel;
 			
 			public EventEditorWidget(ClickEvent clickEvent, HoverEvent hoverEvent, EventPairCallback onDone) {
-				MVTextEvents.ClickAction<?> clickAction = (clickEvent == null ? null : MVTextEvents.ClickAction.getAction(clickEvent));
-				String clickValue = (clickEvent == null ? "" : clickAction.getStringifiedValue(clickEvent));
-				MVTextEvents.HoverAction<?> hoverAction = (hoverEvent == null ? null : MVTextEvents.HoverAction.getAction(hoverEvent));
-				String hoverValue = (hoverEvent == null ? "" : hoverAction.getStringifiedValue(hoverEvent));
+				MVClickAction<?, ?> clickAction = (clickEvent == null ? null : MVClickActions.getAction(clickEvent));
+				String clickValue = (clickEvent == null ? "" : MVClickActions.getStringifiedValue(clickEvent));
+				MVHoverAction<?, ?> hoverAction = (hoverEvent == null ? null : MVHoverActions.getAction(hoverEvent));
+				String hoverValue = (hoverEvent == null ? "" : MVHoverActions.getStringifiedValue(hoverEvent));
 				
 				clickActionDropdown = ConfigValueDropdown.forEnum(ClickAction.get(clickAction), ClickAction.NONE, ClickAction.class);
 				clickActionDropdown.setWidth(150);
@@ -141,9 +144,9 @@ public class FormattedTextFieldWidget extends GroupWidget {
 				ok = addWidget(MVMisc.newButton(0, 0, 150, 20, TextInst.translatable("nbteditor.ok"), btn -> {
 					onDone.onEventChange(
 							clickActionDropdown.getValidValue() == ClickAction.NONE ? null :
-								clickActionDropdown.getValidValue().value.newEventParse(clickValueField.getText()).get(),
+								clickActionDropdown.getValidValue().value.newEventWithParse(clickValueField.getText()).get(),
 							hoverActionDropdown.getValidValue() == HoverAction.NONE ? null :
-								hoverActionDropdown.getValidValue().value.newEventParse(hoverValueField.getText()).get());
+								hoverActionDropdown.getValidValue().value.newEventWithParse(hoverValueField.getText()).get());
 					OverlaySupportingScreen.setOverlayStatic(null);
 				}));
 				cancel = addWidget(MVMisc.newButton(0, 0, 150, 20, TextInst.translatable("nbteditor.cancel"), btn -> {
@@ -176,9 +179,9 @@ public class FormattedTextFieldWidget extends GroupWidget {
 			
 			private void updateOk() {
 				ok.active = (clickActionDropdown.getValidValue() == ClickAction.NONE ||
-						clickActionDropdown.getValidValue().value.newEventParse(clickValueField.getText()).isPresent()) &&
+						clickActionDropdown.getValidValue().value.newEventWithParse(clickValueField.getText()).isPresent()) &&
 						(hoverActionDropdown.getValidValue() == HoverAction.NONE ||
-						hoverActionDropdown.getValidValue().value.newEventParse(hoverValueField.getText()).isPresent());
+						hoverActionDropdown.getValidValue().value.newEventWithParse(hoverValueField.getText()).isPresent());
 			}
 			
 			@Override

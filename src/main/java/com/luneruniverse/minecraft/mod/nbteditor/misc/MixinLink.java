@@ -26,8 +26,8 @@ import com.luneruniverse.minecraft.mod.nbteditor.mixin.ChatScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.mixin.HandledScreenAccessor;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.click.MVClickActions;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.ClientHandledScreen;
@@ -70,7 +70,7 @@ public class MixinLink {
 	public static Style withRunClickEvent(Style style, Runnable onClick) {
 		String id = "\0nbteditor_runnable@" + new Random().nextLong(); // \0 is not valid in file paths on most OSs
 		events.put(id, onClick);
-		return style.withClickEvent(MVTextEvents.ClickAction.OPEN_FILE.newEvent(id));
+		return style.withClickEvent(MVClickActions.OPEN_FILE.newEvent(id));
 	}
 	public static boolean tryRunClickEvent(String id) {
 		Runnable onClick = events.get(id);

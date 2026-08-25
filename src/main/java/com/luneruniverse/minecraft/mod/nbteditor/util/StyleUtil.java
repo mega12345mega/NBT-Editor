@@ -84,9 +84,9 @@ public class StyleUtil {
 			output = output.withObfuscated(style.obfuscated);
 		if (style.bold != null && !style.bold.equals(base.bold))
 			output = output.withBold(style.bold);
-		if (style.getClickEvent() != null && !style.getClickEvent().equals(base.getClickEvent()))
+		if (style.getClickEvent() != null && !((Object) style.getClickEvent()).equals(base.getClickEvent()))
 			output = output.withClickEvent(style.getClickEvent());
-		if (style.getHoverEvent() != null && !style.getHoverEvent().equals(base.getHoverEvent()))
+		if (style.getHoverEvent() != null && !((Object) style.getHoverEvent()).equals(base.getHoverEvent()))
 			output = output.withHoverEvent(style.getHoverEvent());
 		if (style.getInsertion() != null && !style.getInsertion().equals(base.getInsertion()))
 			output = output.withInsertion(style.getInsertion());

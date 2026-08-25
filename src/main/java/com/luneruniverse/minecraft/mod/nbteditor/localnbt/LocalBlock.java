@@ -10,11 +10,11 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVGlStateManager;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.hover.MVHoverActions;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.BlockReference;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
 import com.luneruniverse.minecraft.mod.nbteditor.util.BlockStateProperties;
@@ -231,7 +231,7 @@ public class LocalBlock implements LocalNBT {
 			tooltip = TextInst.literal("").append(customName).append("\n").append(tooltip);
 		final Text finalTooltip = tooltip;
 		return TextInst.bracketed(getName()).styled(
-				style -> style.withHoverEvent(MVTextEvents.HoverAction.SHOW_TEXT.newEvent(finalTooltip)));
+				style -> style.withHoverEvent(MVHoverActions.SHOW_TEXT.newEvent(finalTooltip)));
 	}
 	
 	public BlockReference place(BlockPos pos) {

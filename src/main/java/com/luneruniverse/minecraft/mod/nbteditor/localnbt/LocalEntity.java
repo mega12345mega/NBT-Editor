@@ -12,11 +12,11 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVDrawableHelper;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMatrix4f;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVQuaternionf;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.hover.MVHoverActions;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.EntityReference;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SummonEntityC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.ViewEntityS2CPacket;
@@ -254,7 +254,7 @@ public class LocalEntity implements LocalNBT {
 	public Text toHoverableText() {
 		UUID uuid = nbt.nbte$getUuid("UUID").orElseGet(() -> new UUID(0, 0));
 		return TextInst.bracketed(getName()).styled(
-				style -> style.withHoverEvent(MVTextEvents.HoverAction.SHOW_ENTITY.newEvent(new HoverEvent.EntityContent(
+				style -> style.withHoverEvent(MVHoverActions.SHOW_ENTITY.newEvent(new HoverEvent.EntityContent(
 						entityType, uuid, MainUtil.getNbtNameSafely(nbt, "CustomName", () -> null)))));
 	}
 	

@@ -14,12 +14,12 @@ import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalEntity;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalItem;
 import com.luneruniverse.minecraft.mod.nbteditor.localnbt.LocalNBT;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVMisc;
-import com.luneruniverse.minecraft.mod.nbteditor.multiversion.MVTextEvents;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.commands.FabricClientCommandSource;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.registry.MVRegistry;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.click.MVClickActions;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReference;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.NBTReferenceFilter;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.ItemTagReferences;
@@ -107,7 +107,7 @@ public class NBTExportCommand extends ClientCommand {
 			MVMisc.writeCompressedNbt(nbt, output);
 			MainUtil.client.player.sendMessage(TextUtil.attachFileTextOptions(TextInst.translatable("nbteditor.nbt.export.file.success",
 					TextInst.literal(output.getName()).formatted(Formatting.UNDERLINE).styled(style ->
-					style.withClickEvent(MVTextEvents.ClickAction.OPEN_FILE.newEvent(output.getAbsolutePath())))), output), false);
+					style.withClickEvent(MVClickActions.OPEN_FILE.newEvent(output.getAbsolutePath())))), output), false);
 		} catch (Exception e) {
 			NBTEditor.LOGGER.error("Error while exporting item", e);
 			MainUtil.client.player.sendMessage(TextInst.translatable("nbteditor.nbt.export.file.error", e.getMessage()), false);
