@@ -216,6 +216,8 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 				blockEntity.markDirty();
 			else
 				world.markDirty(packet.getPos());
+			
+			world.getChunkManager().markForUpdate(packet.getPos());
 		}
 		
 		if (packet.isTriggerUpdate())
