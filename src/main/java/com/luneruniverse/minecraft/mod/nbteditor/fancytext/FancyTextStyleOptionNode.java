@@ -6,6 +6,7 @@ import java.util.stream.StreamSupport;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.IdentifierInst;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.TextInst;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.click.MVClickActions;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.textevents.hover.MVHoverActions;
 import com.luneruniverse.minecraft.mod.nbteditor.nbtreferences.itemreferences.ItemReference;
@@ -30,7 +31,10 @@ public record FancyTextStyleOptionNode(StyleOption option, String value, List<Fa
 			case SHOW_ITEM -> {
 				ItemStack item;
 				try {
-					item = MainUtil.client.player.getInventory().getStack(Integer.parseInt(value));
+					int slot = Integer.parseInt(value);
+					if (slot < 0)
+						throw new NumberFormatException();
+					item = MainUtil.client.player.getInventory().getStack(slot);
 				} catch (NumberFormatException e) {
 					try {
 						item = ItemReference.getHeldItem().getItem();
@@ -38,6 +42,8 @@ public record FancyTextStyleOptionNode(StyleOption option, String value, List<Fa
 						item = ItemStack.EMPTY;
 					}
 				}
+				if (item.isEmpty() && SubjectIOs.COMPONENTS_EXIST)
+					yield style;
 				yield style.withHoverEvent(MVHoverActions.SHOW_ITEM.newEvent(item));
 			}
 			case SHOW_ENTITY -> {
