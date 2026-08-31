@@ -834,8 +834,10 @@ public class MVMisc {
 	 * <strong>CONSIDER USING {@link MixinLink#parseSnbt(StringReader, boolean)}</strong>
 	 */
 	public static NbtElement parseSnbt(StringReader reader, boolean allowTrailing) throws CommandSyntaxException {
-		if (stringNbtReader != null)
-			return allowTrailing ? stringNbtReader.readAsArgument(reader) : stringNbtReader.read(reader);
+		if (stringNbtReader != null) {
+			// .copy() as SnbtParsing caches empty NbtCompound and NbtList instances
+			return (allowTrailing ? stringNbtReader.readAsArgument(reader) : stringNbtReader.read(reader)).copy();
+		}
 		
 		NbtElement output = StringNbtReader_parseElement.get().invokeThrowable(CommandSyntaxException.class,
 				Reflection.newInstance(StringNbtReader.class, new Class<?>[] {StringReader.class}, reader));
