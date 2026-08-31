@@ -6,6 +6,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.networking.MVClientNetworking;
 import com.luneruniverse.minecraft.mod.nbteditor.packets.SetCursorC2SPacket;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.ConfigScreen;
+import com.luneruniverse.minecraft.mod.nbteditor.server.ServerMainUtil;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
@@ -69,8 +70,8 @@ public class CursorManager {
 		ScreenHandler handler = branch.getScreenHandler();
 		ScreenHandler currentHandler = currentBranch.getScreenHandler();
 		
-		MainUtil.setCursorStackSilently(handler, currentHandler.getCursorStack());
-		MainUtil.setCursorStackSilently(currentHandler, ItemStack.EMPTY);
+		ServerMainUtil.setCursorStackSilently(handler, currentHandler.getCursorStack());
+		ServerMainUtil.setCursorStackSilently(currentHandler, ItemStack.EMPTY);
 		
 		if (currentRootHasServerCursor) {
 			if (branch == currentRoot)
@@ -131,7 +132,7 @@ public class CursorManager {
 					}
 					cursor = ItemStack.EMPTY;
 				}
-				MainUtil.setCursorStackSilently(currentRoot.getScreenHandler(), cursor);
+				ServerMainUtil.setCursorStackSilently(currentRoot.getScreenHandler(), cursor);
 			}
 			MainUtil.client.player.closeScreen(); // will trigger #onNoScreenSet()
 			return;
@@ -154,7 +155,7 @@ public class CursorManager {
 		if (currentRoot == null)
 			throw new IllegalStateException("There is no root to set the cursor of");
 		
-		MainUtil.setCursorStackSilently(currentBranch.getScreenHandler(), item);
+		ServerMainUtil.setCursorStackSilently(currentBranch.getScreenHandler(), item);
 		
 		if (currentRootHasServerCursor && currentBranch == currentRoot)
 			MVClientNetworking.send(new SetCursorC2SPacket(item.copy()));

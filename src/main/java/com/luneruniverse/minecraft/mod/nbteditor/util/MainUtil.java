@@ -54,7 +54,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
@@ -556,11 +555,6 @@ public class MainUtil {
 		int cursor = (scrollToEnd ? text.length() : 0);
 		widget.setSelectionStart(cursor);
 		widget.setSelectionEnd(cursor);
-	}
-	
-	public static void setCursorStackSilently(ScreenHandler handler, ItemStack item) {
-		handler.setCursorStack(item);
-		MVMisc.setPreviousCursorStack(handler, item);
 	}
 	
 	public static Matcher matchAny(String str, Pattern... patterns) {

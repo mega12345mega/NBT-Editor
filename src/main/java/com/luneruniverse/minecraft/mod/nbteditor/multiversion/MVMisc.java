@@ -116,7 +116,6 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.resource.featuretoggle.FeatureSet;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
@@ -886,15 +885,6 @@ public class MVMisc {
 				.range("1.21.5", null, () -> MainUtil.client.player.isInCreativeMode())
 				.range(null, "1.21.4", () -> ClientPlayerInteractionManager_hasCreativeInventory.get().invoke(MainUtil.client.interactionManager))
 				.get();
-	}
-	
-	private static final Supplier<Reflection.MethodInvoker> ScreenHandler_setPreviousCursorStack =
-			Reflection.getOptionalMethod(ScreenHandler.class, "method_34250", MethodType.methodType(void.class, ItemStack.class));
-	public static void setPreviousCursorStack(ScreenHandler handler, ItemStack item) {
-		Version.newSwitch()
-				.range("1.21.5", null, () -> handler.trackedCursorSlot.setReceivedStack(item))
-				.range(null, "1.21.4", () -> ScreenHandler_setPreviousCursorStack.get().invoke(handler, item))
-				.run();
 	}
 	
 	private static final Supplier<Reflection.MethodInvoker> ClickSlotC2SPacket_getActionType =

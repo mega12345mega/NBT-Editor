@@ -14,8 +14,10 @@ import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.StorageMinecartEntity;
 import net.minecraft.entity.vehicle.VehicleInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Property;
@@ -91,6 +93,15 @@ public class ServerMVMisc {
 				.range("1.21.5", null, () -> world.getEntity(uuid))
 				.range(null, "1.21.4", () -> ServerWorld_getEntity.get().invoke(world, uuid))
 				.get();
+	}
+	
+	private static final Supplier<Reflection.MethodInvoker> ScreenHandler_setPreviousCursorStack =
+			Reflection.getOptionalMethod(ScreenHandler.class, "method_34250", MethodType.methodType(void.class, ItemStack.class));
+	public static void setPreviousCursorStack(ScreenHandler handler, ItemStack item) {
+		Version.newSwitch()
+				.range("1.21.5", null, () -> handler.trackedCursorSlot.setReceivedStack(item))
+				.range(null, "1.21.4", () -> ScreenHandler_setPreviousCursorStack.get().invoke(handler, item))
+				.run();
 	}
 	
 }

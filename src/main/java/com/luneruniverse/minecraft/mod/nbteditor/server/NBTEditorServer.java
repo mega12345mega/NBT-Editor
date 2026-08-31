@@ -100,7 +100,7 @@ public class NBTEditorServer implements MVServerNetworking.PlayNetworkStateEvent
 		if (!ServerMVMisc.hasPermissionLevel(player, 2))
 			return;
 		
-		MainUtil.setCursorStackSilently(player.currentScreenHandler, packet.getItem());
+		ServerMainUtil.setCursorStackSilently(player.currentScreenHandler, packet.getItem());
 	}
 	
 	private void onSetSlotPacket(SetSlotC2SPacket packet, ServerPlayerEntity player) {
