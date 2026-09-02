@@ -109,10 +109,20 @@ public class ContainerIOs {
 			(item, entity) -> get(entity),
 			item -> new LocalEntity(MVMisc.getEntityType(item), ItemTagReferences.ENTITY_DATA.get(item)),
 			(item, entity) -> ItemTagReferences.ENTITY_DATA.set(item, MainUtil.fillId(entity.getNBT(), entity.getId().toString())));
-	private static final Function<EntityType<?>, ItemEntityContainerIO> EQUIPMENT_IO =
+	private static final Function<EntityType<?>, ItemEntityContainerIO> ARMOR_STAND_IO =
 			entityId -> ItemEntityContainerIO.forEntityTagIO(Version.<ContainerIO<NbtCompound>>newSwitch()
 					.range("1.21.5", null, () -> new EquipmentContainerIO(false).forNbtCompoundEquipment())
 					.range(null, "1.21.4", () -> new ArmorHandsContainerIO())
+					.get(),
+					entityId);
+	private static final Function<EntityType<?>, ItemEntityContainerIO> EQUIPMENT_IO =
+			entityId -> ItemEntityContainerIO.forEntityTagIO(Version.<ContainerIO<NbtCompound>>newSwitch()
+					.range("1.21.5", null, () -> new EquipmentContainerIO(false).forNbtCompoundEquipment())
+					.range("1.20.5", "1.21.4", () -> new ConcatContainerIO<>(
+							new ArmorHandsContainerIO(),
+							new KeysContainerIO(false, "body_armor_item")
+									.withTextures(SlotTexture.HORSE_ARMOR)))
+					.range(null, "1.20.4", () -> new ArmorHandsContainerIO())
 					.get(),
 					entityId);
 	private static final ContainerIO<LocalEntity> HORSE_IO = ContainerIO.forLocalNBT(
@@ -233,7 +243,7 @@ public class ContainerIOs {
 				.range(null, "1.20.6", () -> {})
 				.run();
 		
-		registerItemEntityIO(Items.ARMOR_STAND, EntityType.ARMOR_STAND, EQUIPMENT_IO);
+		registerItemEntityIO(Items.ARMOR_STAND, EntityType.ARMOR_STAND, ARMOR_STAND_IO);
 		for (Item item : MVRegistry.ITEM) {
 			if (item instanceof SpawnEggItem spawnEgg)
 				registerItemIO(spawnEgg, SPAWN_EGG_IO);

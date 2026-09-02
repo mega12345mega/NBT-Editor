@@ -1,5 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.containers;
 
+import java.util.Arrays;
+
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.MVNbtCompoundParent;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.nbt.subjectio.SubjectIOs;
 import com.luneruniverse.minecraft.mod.nbteditor.screens.containers.SlotTexture;
@@ -55,6 +57,7 @@ public class SlotKeyNbtListContainerIO implements ContainerIO<NbtList> {
 	@Override
 	public ItemStack[] read(NbtList container) {
 		ItemStack[] contents = new ItemStack[numSlots];
+		Arrays.fill(contents, ItemStack.EMPTY);
 		for (NbtElement itemNbtElement : container) {
 			NbtCompound itemNbt = (NbtCompound) itemNbtElement;
 			contents[itemNbt.nbte$getIntOrDefault("Slot")] = SubjectIOs.ITEM.deserializeOrElse(itemNbt, ItemStack.EMPTY);

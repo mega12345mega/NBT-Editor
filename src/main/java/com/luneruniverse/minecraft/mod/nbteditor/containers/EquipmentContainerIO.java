@@ -11,12 +11,12 @@ public class EquipmentContainerIO implements ContainerIO<NbtCompound> {
 	
 	private static final SlotTexture[] HORSE_ARMOR_TEXTURES = new SlotTexture[] {
 			SlotTexture.HELMET, SlotTexture.CHESTPLATE, SlotTexture.LEGGINGS, SlotTexture.BOOTS,
-			SlotTexture.SADDLE, SlotTexture.HORSE_ARMOR, SlotTexture.SWORD, SlotTexture.SHIELD};
+			SlotTexture.SWORD, SlotTexture.SHIELD, SlotTexture.SADDLE, SlotTexture.HORSE_ARMOR};
 	private static final SlotTexture[] LLAMA_ARMOR_TEXTURES = new SlotTexture[] {
 			SlotTexture.HELMET, SlotTexture.CHESTPLATE, SlotTexture.LEGGINGS, SlotTexture.BOOTS,
-			SlotTexture.SADDLE, SlotTexture.LLAMA_ARMOR, SlotTexture.SWORD, SlotTexture.SHIELD};
+			SlotTexture.SWORD, SlotTexture.SHIELD, SlotTexture.SADDLE, SlotTexture.LLAMA_ARMOR};
 	private static final String[] KEYS = new String[] {
-			"head", "chest", "legs", "feet", "saddle", "body", "mainhand", "offhand"};
+			"head", "chest", "legs", "feet", "mainhand", "offhand", "saddle", "body"};
 	
 	private final SlotTexture[] textures;
 	
