@@ -69,12 +69,14 @@ public class ContainerIOs {
 	
 	private static final ItemBlockContainerIO CHEST_IO = ItemBlockContainerIO.forSlotKeyItems(27);
 	private static final ItemBlockContainerIO FURNACE_IO = ItemBlockContainerIO.forSlotKeyItems(3);
-	private static final ItemBlockContainerIO BREWING_STAND_IO = ItemBlockContainerIO.forSlotKeyItems(5)
+	private static final ItemBlockContainerIO BREWING_STAND_IO = BlockStateUpdatingContainerIO.forItemBlock(
+			ItemBlockContainerIO.forSlotKeyItems(5), "has_bottle_0", "has_bottle_1", "has_bottle_2")
 			.withTextures(SlotTexture.POTION, SlotTexture.POTION, SlotTexture.POTION, null, SlotTexture.BREWING_FUEL);
 	private static final ItemBlockContainerIO CAMPFIRE_IO = ItemBlockContainerIO.forSlotKeyItems(4);
 	private static final ItemBlockContainerIO DISPENSER_IO = ItemBlockContainerIO.forSlotKeyItems(9);
 	private static final ItemBlockContainerIO HOPPER_IO = ItemBlockContainerIO.forSlotKeyItems(5);
-	private static final ItemBlockContainerIO JUKEBOX_IO = ItemBlockContainerIO.forKeys(BlockEntityType.JUKEBOX, "RecordItem");
+	private static final ItemBlockContainerIO JUKEBOX_IO = BlockStateUpdatingContainerIO.forItemBlock(
+			ItemBlockContainerIO.forKeys(BlockEntityType.JUKEBOX, "RecordItem"), "has_record");
 	private static final ItemBlockContainerIO LECTERN_IO = BlockStateUpdatingContainerIO.forItemBlock(
 			ItemBlockContainerIO.forKeys(BlockEntityType.LECTERN, "Book"), "has_book");
 	private static final Function<EntityType<?>, ItemEntityContainerIO> ITEM_FRAME_IO =
