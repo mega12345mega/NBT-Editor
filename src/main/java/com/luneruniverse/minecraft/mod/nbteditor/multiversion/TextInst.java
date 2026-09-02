@@ -12,7 +12,6 @@ import com.luneruniverse.minecraft.mod.nbteditor.util.TextUtil;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -159,10 +158,10 @@ public class TextInst {
 	}
 	
 	public static Text fromNbt(NbtElement nbt) throws Attempt.FailedException {
-		return Attempt.ofResult(TextCodecs.CODEC.parse(NbtOps.INSTANCE, nbt)).getSuccessOrThrow();
+		return Attempt.ofResult(TextCodecs.CODEC.parse(MVMisc.registryNbtOps(), nbt)).getSuccessOrThrow();
 	}
 	public static NbtElement toNbt(Text text) throws Attempt.FailedException {
-		return Attempt.ofResult(TextCodecs.CODEC.encodeStart(NbtOps.INSTANCE, text)).getSuccessOrThrow();
+		return Attempt.ofResult(TextCodecs.CODEC.encodeStart(MVMisc.registryNbtOps(), text)).getSuccessOrThrow();
 	}
 	
 }

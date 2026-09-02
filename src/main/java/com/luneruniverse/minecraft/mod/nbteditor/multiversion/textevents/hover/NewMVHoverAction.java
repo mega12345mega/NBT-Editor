@@ -11,7 +11,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 
@@ -47,7 +46,7 @@ public class NewMVHoverAction<E extends HoverEvent, V> implements MVHoverAction<
 	}
 	@Override
 	public String getStringifiedValue(E event) {
-		NbtCompound nbt = (NbtCompound) MVMisc.result(HoverEvent.CODEC.encodeStart(NbtOps.INSTANCE, event)).orElseThrow();
+		NbtCompound nbt = (NbtCompound) MVMisc.result(HoverEvent.CODEC.encodeStart(MVMisc.registryNbtOps(), event)).orElseThrow();
 		if (this == SHOW_TEXT)
 			return nbt.get("value").toString();
 		nbt.remove("action");
@@ -77,7 +76,7 @@ public class NewMVHoverAction<E extends HoverEvent, V> implements MVHoverAction<
 		else
 			return Optional.empty();
 		
-		return MVMisc.result(HoverEvent.CODEC.parse(NbtOps.INSTANCE, nbt)).map(event -> (E) event);
+		return MVMisc.result(HoverEvent.CODEC.parse(MVMisc.registryNbtOps(), nbt)).map(event -> (E) event);
 	}
 	
 }

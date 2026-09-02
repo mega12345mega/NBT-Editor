@@ -57,7 +57,7 @@ public class OldMVHoverAction<V> implements MVHoverAction<HoverEvent, V> {
 		return (V) value;
 	}
 	private static final Supplier<Reflection.MethodInvoker> HoverEvent_toJson =
-			Reflection.getOptionalMethod(HoverEvent.Action.class, "method_27665", MethodType.methodType(JsonObject.class));
+			Reflection.getOptionalMethod(HoverEvent.class, "method_27665", MethodType.methodType(JsonObject.class));
 	@Override
 	public String getStringifiedValue(HoverEvent event) {
 		JsonObject json = Version.<JsonObject>newSwitch()
@@ -91,7 +91,13 @@ public class OldMVHoverAction<V> implements MVHoverAction<HoverEvent, V> {
 		
 		return Version.<Optional<HoverEvent>>newSwitch()
 				.range("1.20.3", "1.21.4", () -> MVMisc.result(HoverEvent.CODEC.parse(JsonOps.INSTANCE, json)))
-				.range(null, "1.20.2", () -> Optional.ofNullable(HoverEvent_fromJson.get().invoke(null, json)))
+				.range(null, "1.20.2", () -> {
+					try {
+						return Optional.ofNullable(HoverEvent_fromJson.get().invoke(null, json));
+					} catch (RuntimeException e) {
+						return Optional.empty();
+					}
+				})
 				.get();
 	}
 	

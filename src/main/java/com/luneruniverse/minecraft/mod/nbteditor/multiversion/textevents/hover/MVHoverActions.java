@@ -44,14 +44,17 @@ public class MVHoverActions {
 			Reflection.getOptionalMethod(HoverEvent.class, "method_10892", MethodType.methodType(HoverEvent.Action.class));
 	@SuppressWarnings("unchecked")
 	public static <E extends HoverEvent> MVHoverAction<? extends E, ?> getAction(E event) {
-		return (MVHoverAction<? extends E, ?>) switch (Version.<HoverEvent.Action>newSwitch()
+		HoverEvent.Action action = Version.<HoverEvent.Action>newSwitch()
 				.range("1.21.5", null, () -> event.getAction())
 				.range(null, "1.21.4", () -> HoverEvent_getAction.get().invoke(event))
-				.get()) {
-			case SHOW_TEXT -> SHOW_TEXT;
-			case SHOW_ITEM -> SHOW_ITEM;
-			case SHOW_ENTITY -> SHOW_ENTITY;
-		};
+				.get();
+		if (action == HoverEvent.Action.SHOW_TEXT)
+			return (MVHoverAction<? extends E, ?>) SHOW_TEXT;
+		if (action == HoverEvent.Action.SHOW_ITEM)
+			return (MVHoverAction<? extends E, ?>) SHOW_ITEM;
+		if (action == HoverEvent.Action.SHOW_ENTITY)
+			return (MVHoverAction<? extends E, ?>) SHOW_ENTITY;
+		throw new IllegalArgumentException("Unknown HoverEvent$Action: " + action.name());
 	}
 	
 	@SuppressWarnings("unchecked")

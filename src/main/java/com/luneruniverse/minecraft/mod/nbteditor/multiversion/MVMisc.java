@@ -40,6 +40,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockState;
@@ -955,6 +956,16 @@ public class MVMisc {
 					throw new IllegalStateException("Unknown boat entity type: " + EntityType.getId(entityType));
 				})
 				.get();
+	}
+	
+	public static <T> DynamicOps<T> registryOps(DynamicOps<T> ops) {
+		return Version.<DynamicOps<T>>newSwitch()
+				.range("1.20.5", null, () -> DynamicRegistryManagerHolder.get().getOps(ops))
+				.range(null, "1.20.4", () -> ops)
+				.get();
+	}
+	public static DynamicOps<NbtElement> registryNbtOps() {
+		return registryOps(NbtOps.INSTANCE);
 	}
 	
 }
