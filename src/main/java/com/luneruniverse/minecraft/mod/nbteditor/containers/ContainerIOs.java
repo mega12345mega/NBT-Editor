@@ -111,8 +111,8 @@ public class ContainerIOs {
 			(item, entity) -> ItemTagReferences.ENTITY_DATA.set(item, MainUtil.fillId(entity.getNBT(), entity.getId().toString())));
 	private static final Function<EntityType<?>, ItemEntityContainerIO> EQUIPMENT_IO =
 			entityId -> ItemEntityContainerIO.forEntityTagIO(Version.<ContainerIO<NbtCompound>>newSwitch()
-					.range("1.20.5", null, () -> new EquipmentContainerIO(false).forNbtCompoundEquipment())
-					.range(null, "1.20.4", () -> new ArmorHandsContainerIO())
+					.range("1.21.5", null, () -> new EquipmentContainerIO(false).forNbtCompoundEquipment())
+					.range(null, "1.21.4", () -> new ArmorHandsContainerIO())
 					.get(),
 					entityId);
 	private static final ContainerIO<LocalEntity> HORSE_IO = ContainerIO.forLocalNBT(
@@ -123,7 +123,7 @@ public class ContainerIOs {
 							new KeysContainerIO(false, "SaddleItem", "body_armor_item")
 									.withTextures(SlotTexture.SADDLE, SlotTexture.HORSE_ARMOR)))
 					.range(null, "1.20.4", () -> new ConcatContainerIO<>(
-							new ArmorHandsContainerIO(),
+							new OldHorseArmorHandsContainerIO(7),
 							new KeysContainerIO(false, "SaddleItem", "ArmorItem")
 									.withTextures(SlotTexture.SADDLE, SlotTexture.HORSE_ARMOR)))
 					.get());
