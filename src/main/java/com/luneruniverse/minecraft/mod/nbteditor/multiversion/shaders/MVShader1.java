@@ -1,8 +1,6 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders;
 
 import java.lang.invoke.MethodType;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
@@ -44,8 +42,6 @@ public class MVShader1 extends MVShader {
 				paramsBuilder.build(builder.isAffectsOutline()));
 	}
 	
-	public static final List<MVShader1> SHADERS = new ArrayList<>();
-	
 	private final String shaderName;
 	private final MVVertexFormat vertexFormat;
 	private ShaderProgram shaderProgram;
@@ -62,8 +58,6 @@ public class MVShader1 extends MVShader {
 				(Supplier<ShaderProgram>) () -> shaderProgram);
 		
 		layer = createLayer(builder, renderPhaseShaderProgram);
-		
-		SHADERS.add(this);
 	}
 	
 	public void setShaderProgram(ShaderProgram shaderProgram) {

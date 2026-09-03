@@ -1,8 +1,5 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -13,8 +10,7 @@ import net.minecraft.client.render.RenderLayer.MultiPhaseParameters;
 
 public class MVShader3 extends MVShader {
 	
-	public static final List<RenderPipeline> RENDER_PIPELINES = new ArrayList<>();
-	
+	private final RenderPipeline pipeline;
 	private final RenderLayer layer;
 	
 	public MVShader3(MVShader.Builder builder) {
@@ -29,15 +25,17 @@ public class MVShader3 extends MVShader {
 		if (builder.isTranslucentBlendFunc())
 			pipelineBuilder.withBlend(BlendFunction.TRANSLUCENT);
 		
-		RenderPipeline pipeline = RenderPipelines.register(pipelineBuilder.build());
+		pipeline = RenderPipelines.register(pipelineBuilder.build());
 		
 		layer = RenderLayer.of(
 				builder.getLayerName(),
 				builder.getExpectedBufferSize(),
 				pipeline,
 				MultiPhaseParameters.builder().build(builder.isAffectsOutline()));
-		
-		RENDER_PIPELINES.add(pipeline);
+	}
+	
+	public RenderPipeline getPipeline() {
+		return pipeline;
 	}
 	
 	@Override

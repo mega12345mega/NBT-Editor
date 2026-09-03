@@ -2,12 +2,15 @@ package com.luneruniverse.minecraft.mod.nbteditor.mixin.toggled;
 
 import java.io.IOException;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Array;
+import java.util.stream.Stream;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders.MVShader2;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
@@ -26,11 +29,11 @@ public class GameRendererMixin_1_21_2 {
 			Reflection.getMethod(ShaderLoader.class, "method_62944", MethodType.methodType(void.class, ResourceFactory.class, ShaderProgramKey.arrayType()));
 	@Inject(method = "preloadPrograms", at = @At("HEAD"))
 	private void preloadPrograms(ResourceFactory factory, CallbackInfo info) {
-		LifecycledResourceManager manager = new LifecycledResourceManagerImpl(ResourceType.CLIENT_RESOURCES,
-				MainUtil.client.getResourcePackManager().createResourcePacks());
-		try {
-			ShaderLoader_preload.invokeThrowable(Exception.class, MainUtil.client.getShaderLoader(),
-					manager, MVShader2.SHADER_PROGRAM_KEYS.toArray(Object[]::new));
+		try (LifecycledResourceManager manager = new LifecycledResourceManagerImpl(ResourceType.CLIENT_RESOURCES,
+				MainUtil.client.getResourcePackManager().createResourcePacks())) {
+			ShaderLoader_preload.invokeThrowable(Exception.class, MainUtil.client.getShaderLoader(), manager,
+					Stream.of(Shaders.SHADERS).map(shader -> ((MVShader2) shader).getShaderProgramKey())
+							.toArray(length -> (Object[]) Array.newInstance(ShaderProgramKey, length)));
 		} catch (IOException | ShaderLoader.LoadException e) {
 			throw new RuntimeException("Could not preload shaders for loading UI", e);
 		} catch (Exception e) {
@@ -38,8 +41,6 @@ public class GameRendererMixin_1_21_2 {
 				throw runtime;
 			// Impossible
 			throw new RuntimeException("Error invoking method", e);
-		} finally {
-			manager.close();
 		}
 	}
 }

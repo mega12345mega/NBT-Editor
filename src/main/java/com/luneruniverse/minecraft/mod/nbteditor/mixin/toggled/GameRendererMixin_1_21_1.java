@@ -9,7 +9,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
+import com.luneruniverse.minecraft.mod.nbteditor.misc.Shaders;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
+import com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders.MVShader;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders.MVShader1;
 import com.luneruniverse.minecraft.mod.nbteditor.util.MainUtil;
 import com.mojang.datafixers.util.Pair;
@@ -38,7 +40,8 @@ public class GameRendererMixin_1_21_1 {
 	}
 	private void loadPrograms(List<Pair<ShaderProgram, Consumer<ShaderProgram>>> fragShaders) {
 		try {
-			for (MVShader1 shader : MVShader1.SHADERS) {
+			for (MVShader mvShader : Shaders.SHADERS) {
+				MVShader1 shader = (MVShader1) mvShader;
 				fragShaders.add(Pair.of(
 						Reflection.newInstanceThrowable(IOException.class, ShaderProgram.class,
 								new Class<?>[] {ResourceFactory.class, String.class, Reflection.getClass("net.minecraft.class_293")},

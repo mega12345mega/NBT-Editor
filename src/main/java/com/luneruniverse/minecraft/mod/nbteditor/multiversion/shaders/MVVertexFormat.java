@@ -1,7 +1,7 @@
 package com.luneruniverse.minecraft.mod.nbteditor.multiversion.shaders;
 
 import java.lang.invoke.MethodType;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableMap;
@@ -9,6 +9,29 @@ import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Reflection;
 import com.luneruniverse.minecraft.mod.nbteditor.multiversion.Version;
 
 public class MVVertexFormat {
+	
+	public static class Builder {
+		
+		private final LinkedHashMap<String, MVVertexFormatElement> elements;
+		
+		public Builder() {
+			elements = new LinkedHashMap<>();
+		}
+		
+		public Builder addElement(String name, MVVertexFormatElement element) {
+			elements.put(name, element);
+			return this;
+		}
+		
+		public MVVertexFormat build() {
+			return of(elements);
+		}
+		
+	}
+	
+	public static Builder builder() {
+		return new Builder();
+	}
 	
 	private static final Supplier<Class<?>> net_minecraft_VertexFormat = Reflection.getOptionalClass("net.minecraft.class_293");
 	private static final Supplier<Class<?>> VertexFormat$Builder = Reflection.getOptionalClass("net.minecraft.class_293$class_9803");
@@ -19,7 +42,7 @@ public class MVVertexFormat {
 			Reflection.getOptionalMethod(VertexFormat$Builder, () -> "method_60842", () -> MethodType.methodType(VertexFormat$Builder.get(), String.class, VertexFormatElement.get()));
 	private static final Supplier<Reflection.MethodInvoker> VertexFormat$Builder_build =
 			Reflection.getOptionalMethod(VertexFormat$Builder, () -> "method_60840", () -> MethodType.methodType(net_minecraft_VertexFormat.get()));
-	public static MVVertexFormat of(Map<String, MVVertexFormatElement> elements) {
+	public static MVVertexFormat of(LinkedHashMap<String, MVVertexFormatElement> elements) {
 		return new MVVertexFormat(Version.<Object>newSwitch()
 				.range("1.21.5", null, () -> MVVertexFormat_of.of(elements))
 				.range("1.21.0", "1.21.4", () -> {
