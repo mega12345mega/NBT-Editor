@@ -61,7 +61,8 @@ public class OldMVHoverAction<V> implements MVHoverAction<HoverEvent, V> {
 	@Override
 	public String getStringifiedValue(HoverEvent event) {
 		JsonObject json = Version.<JsonObject>newSwitch()
-				.range("1.20.3", "1.21.4", () -> MVMisc.result(HoverEvent.CODEC.encodeStart(JsonOps.INSTANCE, event)).orElseThrow().getAsJsonObject())
+				.range("1.20.3", "1.21.4", () -> MVMisc.result(HoverEvent.CODEC.encodeStart(
+						MVMisc.registryOps(JsonOps.INSTANCE), event)).orElseThrow().getAsJsonObject())
 				.range(null, "1.20.2", () -> HoverEvent_toJson.get().invoke(event))
 				.get();
 		
@@ -90,7 +91,7 @@ public class OldMVHoverAction<V> implements MVHoverAction<HoverEvent, V> {
 		json.add("contents", valueJson);
 		
 		return Version.<Optional<HoverEvent>>newSwitch()
-				.range("1.20.3", "1.21.4", () -> MVMisc.result(HoverEvent.CODEC.parse(JsonOps.INSTANCE, json)))
+				.range("1.20.3", "1.21.4", () -> MVMisc.result(HoverEvent.CODEC.parse(MVMisc.registryOps(JsonOps.INSTANCE), json)))
 				.range(null, "1.20.2", () -> {
 					try {
 						return Optional.ofNullable(HoverEvent_fromJson.get().invoke(null, json));
