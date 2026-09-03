@@ -17,8 +17,10 @@ public class NormalSNBTFormatter1 extends SNBTFormatter {
 	
 	private static final Pattern INT_PATTERN = Pattern.compile(
 			"(?<number>[-+]?(?:0|[1-9][0-9]*))(?<suffix>[bsl])?", Pattern.CASE_INSENSITIVE);
-	private static final Pattern FLOAT_PATTERN = Pattern.compile(
-			"(?<number>[-+]?(?:[0-9]+\\.?|[0-9]*\\.[0-9]+)(?:e[-+]?[0-9]+)?)(?<suffix>[fd])?", Pattern.CASE_INSENSITIVE);
+	private static final Pattern IMPLICIT_FLOAT_PATTERN = Pattern.compile(
+			"(?<number>[-+]?(?:[0-9]+\\.|[0-9]*\\.[0-9]+)(?:e[-+]?[0-9]+)?)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern EXPLICIT_FLOAT_PATTERN = Pattern.compile(
+			"(?<number>[-+]?(?:[0-9]+\\.?|[0-9]*\\.[0-9]+)(?:e[-+]?[0-9]+)?)(?<suffix>[fd])", Pattern.CASE_INSENSITIVE);
 	
 	@Override
 	public Result format(String snbt, boolean allowSpecialNumbers) {
@@ -102,10 +104,10 @@ public class NormalSNBTFormatter1 extends SNBTFormatter {
 		
 		String snbt = reader.readUnquotedString();
 		
-		Matcher numberMatcher = MainUtil.matchAny(snbt, INT_PATTERN, FLOAT_PATTERN);
+		Matcher numberMatcher = MainUtil.matchAny(snbt, INT_PATTERN, IMPLICIT_FLOAT_PATTERN, EXPLICIT_FLOAT_PATTERN);
 		if (numberMatcher != null) {
 			String number = numberMatcher.group("number");
-			String suffix = numberMatcher.group("suffix");
+			String suffix = (numberMatcher.pattern() == IMPLICIT_FLOAT_PATTERN ? null : numberMatcher.group("suffix"));
 			
 			text.append(TextInst.literal(number).formatted(NUMBER_COLOR));
 			if (suffix != null)
