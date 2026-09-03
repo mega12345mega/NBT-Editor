@@ -109,6 +109,29 @@ public class NormalSNBTFormatter1 extends SNBTFormatter {
 			String number = numberMatcher.group("number");
 			String suffix = (numberMatcher.pattern() == IMPLICIT_FLOAT_PATTERN ? null : numberMatcher.group("suffix"));
 			
+			try {
+				if (suffix == null) {
+					if (numberMatcher.pattern() == INT_PATTERN)
+						Integer.parseInt(number);
+					else if (numberMatcher.pattern() == IMPLICIT_FLOAT_PATTERN)
+						Double.parseDouble(number);
+					else
+						throw new IllegalArgumentException("Unknown pattern: " + numberMatcher.pattern().pattern()); // Impossible
+				} else {
+					switch (suffix) {
+						case "b" -> Byte.parseByte(number);
+						case "s" -> Short.parseShort(number);
+						case "l" -> Long.parseLong(number);
+						case "f" -> Float.parseFloat(number);
+						case "d" -> Double.parseDouble(number);
+						default -> throw new IllegalArgumentException("Unknown suffix: " + suffix); // Impossible
+					}
+				}
+			} catch (NumberFormatException e) {
+				text.append(TextInst.literal(snbt).formatted(STRING_COLOR));
+				return;
+			}
+			
 			text.append(TextInst.literal(number).formatted(NUMBER_COLOR));
 			if (suffix != null)
 				text.append(TextInst.literal(suffix).formatted(TYPE_SUFFIX_COLOR));
