@@ -70,12 +70,19 @@ public class ScreenMixin {
 		int screenWidth = MainUtil.client.currentScreen.width;
 		int screenHeight = MainUtil.client.currentScreen.height;
 		
+		int originalY = y;
+		
 		x += 12;
 		y -= 12;
 		if (x + width > screenWidth)
 			x -= 28 + width;
 		if (y + height + 6 > screenHeight)
 			y = screenHeight - height - 6;
+		
+		if (Version.newSwitch().range("1.19", "1.19", true).getOptionally().isPresent()) {
+			if (originalY - height - 8 < 0)
+				y = originalY + 8;
+		}
 		
 		MixinLink.renderTooltipFromComponents(matrices, x, y, width, height, screenWidth, screenHeight);
 	}
