@@ -9,7 +9,7 @@ import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.hid
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.hideflags.HideFlag;
 import com.luneruniverse.minecraft.mod.nbteditor.tagreferences.specific.data.hideflags.TooltipHideFlag;
 
-import net.minecraft.component.Component;
+import net.minecraft.component.ComponentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Unit;
 
@@ -21,10 +21,9 @@ public class HideFlagsComponentsTagReference implements TagReference<Map<HideFla
 		
 		output.put(TooltipHideFlag.INSTANCE, object.contains(MVComponentType.HIDE_TOOLTIP_1_20_5_1_21_4));
 		
-		for (Component<?> component : object.getComponents()) {
-			HideFlag flag = ComponentsHideFlag.FLAGS.get(component.type());
-			if (flag != null)
-				output.put(flag, !((ComponentsHideFlag) flag).getShowInTooltip(object));
+		for (Map.Entry<ComponentType<?>, HideFlag> flag : ComponentsHideFlag.FLAGS.entrySet()) {
+			if (flag.getValue() == ComponentsHideFlag.MISC || object.nbte$get(flag.getKey()) != null)
+				output.put(flag.getValue(), !((ComponentsHideFlag) flag.getValue()).getShowInTooltip(object));
 		}
 		
 		return output;

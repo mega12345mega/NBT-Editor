@@ -36,7 +36,10 @@ public class ContainerComponentContainerIO implements ContainerIO<ItemStack> {
 	
 	@Override
 	public ItemStack[] read(ItemStack container) {
-		return container.nbte$get(DataComponentTypes.CONTAINER).stream().toArray(ItemStack[]::new);
+		ContainerComponent component = container.nbte$get(DataComponentTypes.CONTAINER);
+		if (component == null)
+			return new ItemStack[0];
+		return component.stream().toArray(ItemStack[]::new);
 	}
 	
 	@Override

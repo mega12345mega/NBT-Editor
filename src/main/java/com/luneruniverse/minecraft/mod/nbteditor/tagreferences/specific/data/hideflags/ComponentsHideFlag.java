@@ -75,7 +75,7 @@ public class ComponentsHideFlag extends HideFlag {
 			DataComponentTypes.CAN_PLACE_ON, BlockPredicatesChecker.class, "method_57324", "method_58402");
 	public static final HideFlag MISC = register("misc",
 			(ComponentType<?>) MVComponentType.HIDE_ADDITIONAL_TOOLTIP_1_20_5_1_21_4.getInternalValue(),
-			item -> item.contains(MVComponentType.HIDE_ADDITIONAL_TOOLTIP_1_20_5_1_21_4),
+			item -> !item.contains(MVComponentType.HIDE_ADDITIONAL_TOOLTIP_1_20_5_1_21_4),
 			(item, showInTooltip) -> {
 				if (showInTooltip)
 					item.remove(MVComponentType.HIDE_ADDITIONAL_TOOLTIP_1_20_5_1_21_4);

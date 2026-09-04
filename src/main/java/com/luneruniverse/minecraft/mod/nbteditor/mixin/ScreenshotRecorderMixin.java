@@ -19,18 +19,11 @@ import net.minecraft.text.Text;
 public class ScreenshotRecorderMixin {
 	@ModifyVariable(method = "saveScreenshot(Ljava/io/File;Ljava/lang/String;Lnet/minecraft/client/gl/Framebuffer;Ljava/util/function/Consumer;)V", at = @At("HEAD"), ordinal = 0)
 	@Group(name = "saveScreenshot", min = 1)
-	private static Consumer<Text> saveScreenshot3(Consumer<Text> receiver) {
-		return saveScreenshotImpl(receiver);
-	}
-	
-	@ModifyVariable(method = "method_1662(Ljava/io/File;Ljava/lang/String;Lnet/minecraft/class_276;Ljava/util/function/Consumer;)V", at = @At("HEAD"), ordinal = 0, remap = false)
-	@Group(name = "saveScreenshot", min = 1)
-	@SuppressWarnings("target")
 	private static Consumer<Text> saveScreenshot2(Consumer<Text> receiver) {
 		return saveScreenshotImpl(receiver);
 	}
 	
-	@ModifyVariable(method = "method_1662(Ljava/io/File;Ljava/lang/String;IILnet/minecraft/class_276;Ljava/util/function/Consumer;)V", at = @At("HEAD"), ordinal = 0, remap = false)
+	@ModifyVariable(method = "method_22690(Ljava/io/File;Ljava/lang/String;IILnet/minecraft/class_276;Ljava/util/function/Consumer;)V", at = @At("HEAD"), ordinal = 0, remap = false)
 	@Group(name = "saveScreenshot", min = 1)
 	@SuppressWarnings("target")
 	private static Consumer<Text> saveScreenshot1(Consumer<Text> receiver) {
