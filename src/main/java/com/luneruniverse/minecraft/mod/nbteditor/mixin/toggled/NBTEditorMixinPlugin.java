@@ -28,15 +28,19 @@ public class NBTEditorMixinPlugin extends BasicMixinPlugin {
 				})
 				.run();
 		Version.newSwitch()
-				.range("1.20.5", null, () -> {
+				.range("1.21.2", null, () -> {
 					output.add("toggled.BundleItemMixin_1_20_5");
-					output.add("toggled.BundleContentsComponentBuilderMixin");
+					output.add("toggled.BundleContentsComponentBuilderMixin_1_21_2");
 				})
-				.range(null, "1.20.4", () -> output.add("toggled.BundleItemMixin_1_20_4"))
-				.run();
-		Version.newSwitch()
-				.range("1.21.2", null, () -> {})
-				.range(null, "1.21.1", () -> output.add("toggled.BundleItemMixin_1_21_1"))
+				.range("1.20.5", "1.21.1", () -> {
+					output.add("toggled.BundleItemMixin_1_20_5");
+					output.add("toggled.BundleItemMixin_1_21_1");
+					output.add("toggled.BundleContentsComponentBuilderMixin_1_20_5");
+				})
+				.range(null, "1.20.4", () -> {
+					output.add("toggled.BundleItemMixin_1_20_4");
+					output.add("toggled.BundleItemMixin_1_21_1");
+				})
 				.run();
 		Version.newSwitch()
 				.range("1.21.5", null, () -> output.add("toggled.ClickSlotC2SPacketMixin_1_21_5"))
