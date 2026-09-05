@@ -89,9 +89,9 @@ public class ComponentsHideFlag extends HideFlag {
 	public static final HideFlag STORED_ENCHANTMENTS = registerFieldGetter("stored_enchantments",
 			DataComponentTypes.STORED_ENCHANTMENTS, ItemEnchantmentsComponent.class, "field_49390", "method_58449");
 	public static final HideFlag TRIM = Version.<HideFlag>newSwitch()
-			.range("1.21.0", null, () -> registerMethodGetter("trim",
+			.range("1.21.2", "1.21.4", () -> registerMethodGetter("trim",
 					DataComponentTypes.TRIM, ArmorTrim.class, "comp_3181", "method_58421"))
-			.range("1.20.5", "1.20.6", () -> registerFieldGetter("trim",
+			.range("1.20.5", "1.21.1", () -> registerFieldGetter("trim",
 					DataComponentTypes.TRIM, ArmorTrim.class, "field_49279", "method_58421"))
 			.get();
 	
